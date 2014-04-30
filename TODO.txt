@@ -1,0 +1,6 @@
+Internal TODO list:
+
+Split the authentication parts of the code into its own module.  This includes
+the sql files.
+
+Move the sql files so that they are better attached to their functionality.

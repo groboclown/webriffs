@@ -7,6 +7,18 @@ use Tonic;
 
 class Resource extends Tonic\Resource
 {
+    /**
+     * Validate that the given variable is a non-null number.
+     */
+    protected function validateId($id, $name) {
+        if ($id == null || !is_int($id)) {
+            // TODO include the id name in the error
+            throw new Tonic\NotAcceptableException;
+        }
+        return $id;
+    }
+
+
     protected function getDB() {
         if ($this->container['dataStore']) {
             return $this->container['dataStore'];
@@ -41,25 +53,32 @@ class Resource extends Tonic\Resource
     function secure($role) {
         $db = getDB();
 
-        $auth = isAuthorized($db);
-        if (!$auth) {
+        $auth = getUserIdentity($db);
+        if (! isUserAuthSecureForRole($auth, $role) {
             throw new Tonic\UnauthorizedException;
         }
-        foreach (array_keys($auth['attributes']) as $key) {
-            if (startsWith($key, 'role_') && $auth['attributes'][$key] == $role) {
-                return true;
-            }
-        }
-        throw new Tonic\UnauthorizedException;
+        return true;
     }
 
 
-    function filmAuth($db, $filmVersionId, $roleSet) {
-        $auth = isAuthorized($db, true);
-        if (!$auth) {
+    function isUserAuthSecureForRole($userAuth, $role) {
+        if (!$userAuth) {
+            return false;
+        }
+        foreach (array_keys($userAuth['attributes']) as $key) {
+            if (startsWith($key, 'role_') && $userAuth['attributes'][$key] == $role) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    function filmAuth($db, $userAuth, $filmVersionId, $roleSet) {
+        if (!$userAuth) {
             throw new Tonic\UnauthorizedException;
         }
-        $userid = $auth['user_id'];
+        $userid = $userAuth['user_id'];
 
         $args = array($filmVersionId, $userid);
         $query = 'SELECT COUNT(*) FROM FILM_AUTH WHERE Film_Version_id = ? AND User_Id = ? AND Role IN ('

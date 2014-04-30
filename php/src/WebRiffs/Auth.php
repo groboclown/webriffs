@@ -17,7 +17,7 @@ class AuthorizationLogin extends Resource {
      */
     public function login() {
         $db = getDB();
-        $auth = isAuthorized($db);
+        $auth = getUserIdentity($db);
         if ($auth) {
             authLogoutById($db, $auth['user_login_id']);
         }
@@ -75,7 +75,7 @@ class AuthorizationLogout extends Resource {
      */
     public function logout() {
         $db = getDB();
-        $auth = isAuthorized($db);
+        $auth = getUserIdentity($db);
         if (!$auth) {
             throw new Tonic\UnauthorizedException;
         }
@@ -90,7 +90,7 @@ class AuthorizationLogout extends Resource {
  * Return false if not authorized, otherwise an array with user_id, username,
  * and login_time.
  */
-function isAuthorized($db, $includeAttributes) {
+function getUserIdentity($db, $includeAttributes) {
     $authchallenge = $_COOKIE['authchallenge'];
 
     if (!$authchallenge) {
