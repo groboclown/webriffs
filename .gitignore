@@ -12,4 +12,10 @@ client/packages/
 # Include when developing application packages.
 client/pubspec.lock
 
+# Generated files
+build/exports
+
+# Local setting files
 local-settings.sh
+.idea/
+webriffs.iml

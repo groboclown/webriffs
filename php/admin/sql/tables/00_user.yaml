@@ -30,7 +30,7 @@ databaseChangeLog:
                             nullable: false
                     - column:
                         name: Authentication_Code
-                        type: char(2048)
+                        type: varchar(2048)
                         constraints:
                             nullable: false
                     - column:

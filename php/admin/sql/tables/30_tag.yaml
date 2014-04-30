@@ -20,6 +20,7 @@ databaseChangeLog:
                             nullable: false
                     - column:
                         name: Author_User_Id
+                        type: int
                         constraints:
                             nullable: false
                             foreignKeyName: User_Id_Key

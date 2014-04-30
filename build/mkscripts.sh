@@ -6,10 +6,23 @@ if [ ! -d "$LIQUIBASE_HOME" ]; then
   exit 1
 fi
 
+ARG=updateSQL
+if [ "$1" = "-run" ]; then
+  ARG=update
+fi
+
+source ../local-settings.sh
+LIQUIBASE_ARGS="--driver=com.mysql.jdbc.Driver --classpath=$MYSQL_JDBC_JAR --url=jdbc:mysql://$TEST_MYSQL_HOST/$TEST_MYSQL_DBNAME --username=$TEST_MYSQL_USER --password=$TEST_MYSQL_PASSWD"
+
 test -d exports/sql || mkdir -p exports/sql
 
 for i in ../php/admin/sql/tables/*.yaml; do
   name=$(basename "$i" .yaml)
-  "$LIQUIBASE_HOME/liquibase" --changeLogFile "$i" updateSQL > exports/sql/$name.sql || exit 1
+  echo "$name"
+  if [ "$1" = '-run' ]; then
+   "$LIQUIBASE_HOME/liquibase" $LIQUIBASE_ARGS --changeLogFile "$i" $ARG || exit 1
+  else
+   "$LIQUIBASE_HOME/liquibase" $LIQUIBASE_ARGS --changeLogFile "$i" $ARG > exports/sql/$name.sql || exit 1
+  fi
 done
 
