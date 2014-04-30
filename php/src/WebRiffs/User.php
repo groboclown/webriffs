@@ -4,22 +4,43 @@ namespace WebRiffs;
 
 use Tonic;
 
+
+/**
+ * @uri /user
+ */
+class UserCollection extends Tonic\Resource {
+    /**
+     * @method GET
+     */
+    public function list() {
+        // FIXME
+    }
+
+
+    /**
+     * @method POST
+     */
+    public function create() {
+        // FIXME
+    }
+}
+
+
 /**
  * High-level user queries.  Does not allow for exposure of secret information.
  *
- * @uri /user/:user
+ * @uri /user/:userid
  */
 class User extends Tonic\Resource {
     /**
-     * @method get
-     * @provides application/json
-     * @json
+     * @method GET
      */
-    public function details($user) {
+    public function display() {
+        $userid = $this->userid;
         $db = getDB();
         $stmt = $db->('SELECT User_Id, Username, Last_Access FROM USER WHERE Username = ?');
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
-        $stmt->execute(array($user));
+        $stmt->execute(array($userid));
 
         $userRow = fetchSingleRow($stmt);
 
@@ -43,5 +64,27 @@ class User extends Tonic\Resource {
         }
 
         return new Tonic\Response(200, $ret);
+    }
+
+
+    /**
+     * @method POST
+     */
+    public function update() {
+        // FIXME ensure this is that user or an admin
+
+        // FIXME update the data
+    }
+
+
+    /**
+     * @method DELETE
+     */
+    public function remove() {
+        // FIXME ensure this is that user or an admin
+
+        // FIXME delete the data
+
+        return new Tonic\Response(Tonic\Response::NOCONTENT);
     }
 }

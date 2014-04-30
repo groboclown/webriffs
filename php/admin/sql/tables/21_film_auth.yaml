@@ -14,11 +14,11 @@ databaseChangeLog:
                             primaryKey: true
                             primaryKeyName: Film_Auth_Id_Key
                     - column:
-                        name: Film_Id
+                        name: Film_Version_Id
                         type: int
                         constraints:
                             nullable: false
-                            foreignKeyName: Film_Id_Key
+                            foreignKeyName: Film_Version_Id_Key
                     - column:
                         name: User_Id
                         type: int

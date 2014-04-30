@@ -5,15 +5,14 @@ namespace WebRiffs;
 use Tonic;
 
 
+// FIXME include validation of input parameters
+
 /**
  * @uri /auth/login
  */
 class AuthorizationLogin extends Resource {
     /**
      * @method POST
-     * @accepts application/json
-     * @provides application/json
-     * @json
      * @return Tonic\Response
      */
     public function login() {
@@ -72,16 +71,13 @@ class AuthorizationLogin extends Resource {
 class AuthorizationLogout extends Resource {
     /**
      * @method POST
-     * @accepts application/json
-     * @provides application/json
-     * @json
      * @return Tonic\Response
      */
     public function logout() {
         $db = getDB();
         $auth = isAuthorized($db);
         if (!$auth) {
-            throw Tonic\UnauthorizedException;
+            throw new Tonic\UnauthorizedException;
         }
         authLogoutById(getDB(), $auth['user_login_id']);
     }
@@ -94,7 +90,7 @@ class AuthorizationLogout extends Resource {
  * Return false if not authorized, otherwise an array with user_id, username,
  * and login_time.
  */
-function isAuthorized($db) {
+function isAuthorized($db, $includeAttributes) {
     $authchallenge = $_COOKIE['authchallenge'];
 
     if (!$authchallenge) {
@@ -127,11 +123,13 @@ function isAuthorized($db) {
         'attributes' => array();
     );
 
-    $stmt = $db->('SELECT Attribute_Name, Attribute_Value FROM USER_ATTRIBUTE WHERE User_Id = ?');
-    $stmt->setFetchMode(PDO::FETCH_ASSOC);
-    $stmt->execute(array($ret['user_login_id']);
-    while ($row = $stmt->fetch()) {
-        $ret['attributes'][$row['Attribute_Name']] = $row['Attribute_Value'];
+    if ($includeAttributes) {
+        $stmt = $db->('SELECT Attribute_Name, Attribute_Value FROM USER_ATTRIBUTE WHERE User_Id = ?');
+        $stmt->setFetchMode(PDO::FETCH_ASSOC);
+        $stmt->execute(array($ret['user_login_id']);
+        while ($row = $stmt->fetch()) {
+            $ret['attributes'][$row['Attribute_Name']] = $row['Attribute_Value'];
+        }
     }
 
     return $ret;

@@ -1,7 +1,5 @@
 <?php
 
-// load the
-
 // load autoloader (delete as appropriate)
 require_once '../../lib/Tonic/Autoloader.php';
 require_once '../../lib/Pimple/Container.php';
@@ -27,14 +25,14 @@ $container['db_config'] =& $siteConfig['db_config'];
 
 $request = new Tonic\Request();
 
-#echo $request; die;
 
 try {
+    // decode JSON data received from HTTP request
+    if ($request->contentType == 'application/json') {
+        $request->data = json_decode($request->data);
+    }
 
     $resource = $app->getResource($request);
-
-    #echo $resource; die;
-
     $response = $resource->exec();
 
 } catch (Tonic\NotFoundException $e) {
@@ -50,8 +48,17 @@ try {
 
 } catch (Tonic\Exception $e) {
     $response = new Tonic\Response($e->getCode(), $e->getMessage());
+} catch (Exception $e) {
+    # FIXME Production level code should not report the full error message,
+    # but instead log it and give a generic error to the user.
+    $response = new Tonic\Response(500, $e->getMessage());
 }
 
 #echo $response;
+
+// encode output after exception handling
+//if ($response->contentType == 'application/json') {
+$response->body = json_encode($response->body);
+//}
 
 $response->output();
