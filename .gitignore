@@ -18,4 +18,4 @@ build/exports
 # Local setting files
 local-settings.sh
 .idea/
-webriffs.iml
+*.iml
