@@ -1,37 +1,35 @@
+# The access which the user has rights to.
+
+
 databaseChangeLog:
     - changeSet:
         id: 1
         author: Groboclown
         changes:
             - createTable:
-                tableName: USER
+                tableName: USER_ACCESS
                 columns:
                     - column:
-                        name: User_Id
+                        name: User_Access_Id
                         type: int
                         autoIncrement: true
                         constraints:
                             primaryKey: true
-                            primaryKeyName: User_Id_Key
+                            primaryKeyName: User_Access_Id_Key
                     - column:
-                        name: Username
-                        type: nvarchar(64)
-                        constraints:
-                            nullable: false
-                    - column:
-                        name: Contact
-                        type: nvarchar(2048)
-                        constraints:
-                            nullable: false
-                    - column:
-                        name: Ga_User_Id
+                        name: User_Id
                         type: int
                         constraints:
                             nullable: false
-                            foreignKeyName: Ga_User_Id_Key
+                            foreignKeyName: User_Id_Key
                     - column:
-                        name: Is_Site_Admin
-                        type: tinyint
+                        name: Access
+                        type: varchar(64)
+                        constraints:
+                            nullable: false
+                    - column
+                        name: Privilege_Level
+                        type: int
                         constraints:
                             nullable: false
                     - column:
@@ -42,3 +40,6 @@ databaseChangeLog:
                     - column:
                         name: Last_Updated_On
                         type: timestamp
+
+
+

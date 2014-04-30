@@ -1,37 +1,47 @@
+# Keeps a record of each active login session.  This maintains all the information
+# necessary to validate a user request.
+
+
 databaseChangeLog:
     - changeSet:
         id: 1
         author: Groboclown
         changes:
             - createTable:
-                tableName: USER
+                tableName: GA_SESSION
                 columns:
                     - column:
-                        name: User_Id
+                        name: Ga_Session_Id
                         type: int
                         autoIncrement: true
                         constraints:
                             primaryKey: true
-                            primaryKeyName: User_Id_Key
+                            primaryKeyName: Ga_Session_Id_Key
                     - column:
-                        name: Username
+                        name: Ga_User_Source_Id
+                        type: int
+                        constraints:
+                            nullable: false
+                            foreignKeyName: Ga_User_Source_Id_Key
+                    - column:
+                        name: User_Agent
                         type: nvarchar(64)
                         constraints:
                             nullable: false
                     - column:
-                        name: Contact
+                        name: Remote_Address
+                        type: nvarchar(2048)
+                    - column:
+                        name: Forwarded_For
+                        type: nvarchar(2048)
+                    - column:
+                        name: Authorization_Challenge
                         type: nvarchar(2048)
                         constraints:
                             nullable: false
                     - column:
-                        name: Ga_User_Id
-                        type: int
-                        constraints:
-                            nullable: false
-                            foreignKeyName: Ga_User_Id_Key
-                    - column:
-                        name: Is_Site_Admin
-                        type: tinyint
+                        name: Expires_On
+                        type: datetime
                         constraints:
                             nullable: false
                     - column:

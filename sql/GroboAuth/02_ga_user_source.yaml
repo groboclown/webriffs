@@ -1,28 +1,26 @@
+# Defines a String definition for the different sources for authentication.
+# This allows for a single application to have users login through facebook,
+# Google, or use local authentication.
+
+# The "username" field contains the contact information in the source.  For
+# local authentication, this should be the email address (and is used as such
+# for the password request handling).
+
 databaseChangeLog:
     - changeSet:
         id: 1
         author: Groboclown
         changes:
             - createTable:
-                tableName: USER
+                tableName: GA_USER_SOURCE
                 columns:
                     - column:
-                        name: User_Id
+                        name: Ga_User_Source_Id
                         type: int
                         autoIncrement: true
                         constraints:
                             primaryKey: true
-                            primaryKeyName: User_Id_Key
-                    - column:
-                        name: Username
-                        type: nvarchar(64)
-                        constraints:
-                            nullable: false
-                    - column:
-                        name: Contact
-                        type: nvarchar(2048)
-                        constraints:
-                            nullable: false
+                            primaryKeyName: Ga_User_Source_Id_Key
                     - column:
                         name: Ga_User_Id
                         type: int
@@ -30,8 +28,19 @@ databaseChangeLog:
                             nullable: false
                             foreignKeyName: Ga_User_Id_Key
                     - column:
-                        name: Is_Site_Admin
-                        type: tinyint
+                        name: Ga_Source_Id
+                        type: int
+                        constraints:
+                            nullable: false
+                            foreignKeyName: Ga_Source_Id_Key
+                    - column:
+                        name: Username
+                        type: nvarchar(2046)
+                        constraints:
+                            nullable: false
+                    - column:
+                        name: Authentication_Code
+                        type: nvarchar(2046)
                         constraints:
                             nullable: false
                     - column:

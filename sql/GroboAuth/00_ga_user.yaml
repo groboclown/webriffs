@@ -9,15 +9,15 @@ databaseChangeLog:
         author: Groboclown
         changes:
             - createTable:
-                tableName: AUTHORIZED_USER
+                tableName: GA_USER
                 columns:
                     - column:
-                        name: Authorized_User_Id
+                        name: Ga_User_Id
                         type: int
                         autoIncrement: true
                         constraints:
                             primaryKey: true
-                            primaryKeyName: Authorized_User_Id_Key
+                            primaryKeyName: Ga_User_Id_Key
                     - column:
                         name: Created_On
                         type: timestamp

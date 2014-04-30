@@ -1,36 +1,29 @@
+# Records each of a user's login attempts.  This allows for monitoring for
+# brute force attacks, and investigation into possible user activities.
+
 databaseChangeLog:
     - changeSet:
         id: 1
         author: Groboclown
         changes:
             - createTable:
-                tableName: USER
+                tableName: GA_LOGIN_ATTEMPT
                 columns:
                     - column:
-                        name: User_Id
+                        name: Ga_Login_Attempt_Id
                         type: int
                         autoIncrement: true
                         constraints:
                             primaryKey: true
                             primaryKeyName: User_Id_Key
                     - column:
-                        name: Username
-                        type: nvarchar(64)
-                        constraints:
-                            nullable: false
-                    - column:
-                        name: Contact
-                        type: nvarchar(2048)
-                        constraints:
-                            nullable: false
-                    - column:
-                        name: Ga_User_Id
+                        name: Ga_User_Source_Id
                         type: int
                         constraints:
                             nullable: false
-                            foreignKeyName: Ga_User_Id_Key
+                            foreignKeyName: Ga_User_Source_Id_Key
                     - column:
-                        name: Is_Site_Admin
+                        name: Was_Successful
                         type: tinyint
                         constraints:
                             nullable: false
@@ -42,3 +35,5 @@ databaseChangeLog:
                     - column:
                         name: Last_Updated_On
                         type: timestamp
+
+
