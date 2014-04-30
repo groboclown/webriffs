@@ -1,0 +1,40 @@
+databaseChangeLog:
+    - changeSet:
+        id: 1
+        author: Groboclown
+        changes:
+            - createTable:
+                tableName: FILM_VERSION
+                columns:
+                    - column:
+                        name: Film_Version_Id
+                        type: int
+                        autoIncrement: true
+                        constraints:
+                            primaryKey: true
+                            primaryKeyName: Film_Version_Id_Key
+                    - column:
+                        name: Film_Id
+                        type: int
+                        constraints:
+                            nullable: false
+                            foreignKeyName: Film_Id_Key
+                    - column:
+                        name: Author_User_Id
+                        type: int
+                        constraints:
+                            nullable: false
+                            foreignKeyName: User_Id_Key
+                    - column:
+                        name: Name
+                        type: nvarchar(255)
+                        constraints:
+                            nullable: false
+                    - column:
+                        name: Created_On
+                        type: timestamp
+                        constraints:
+                            nullable: false
+                    - column:
+                        name: Last_Updated_On
+                        type: timestamp

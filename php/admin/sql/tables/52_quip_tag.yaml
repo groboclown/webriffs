@@ -1,0 +1,41 @@
+databaseChangeLog:
+    - changeSet:
+        id: 1
+        author: Groboclown
+        changes:
+            - createTable:
+                tableName: QUIP_TAG
+                columns:
+                    - column:
+                        name: Quip_Tag_Id
+                        type: int
+                        autoIncrement: true
+                        constraints:
+                            primaryKey: true
+                            primaryKeyName: Quip_Tag_Id_Key
+                    - column:
+                        name: Quip_Version_Id
+                        type: int
+                        constraints:
+                            nullable: false
+                            foreignKeyName: Quip_Version_Id_Key
+                    - column:
+                        name: Tag_Id
+                        type: int
+                        constraints:
+                            nullable: false
+                            foreignKeyName: Tag_Id_Key
+                    - column:
+                        name: Author_User_Id
+                        type: int
+                        constraints:
+                            nullable: false
+                            foreignKeyName: User_Id_Key
+                    - column:
+                        name: Created_On
+                        type: timestamp
+                        constraints:
+                            nullable: false
+                    - column:
+                        name: Last_Updated_On
+                        type: timestamp

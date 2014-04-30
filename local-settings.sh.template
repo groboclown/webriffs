@@ -1,0 +1,8 @@
+# Copy this file to "local-settings.sh" and change the contents to meet your
+# needs.
+
+
+TEST_MYSQL_HOST=localhost
+TEST_MYSQL_USER=root
+TEST_MYSQL_PASSWD=root
+TEST_MYSQL_DBNAME=webriff_test
