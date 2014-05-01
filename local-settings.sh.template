@@ -1,7 +1,6 @@
 # Copy this file to "local-settings.sh" and change the contents to meet your
 # needs.
 
-
 TEST_MYSQL_HOST=localhost
 TEST_MYSQL_USER=root
 TEST_MYSQL_PASSWD=root
@@ -10,3 +9,5 @@ TEST_MYSQL_DBNAME=webriff_test
 MYSQL_JDBC_JAR=/path/to/mysql-connector-java-5.1.30-bin.jar
 
 DEPLOYMENT_DIR=/path/to/deployment/dir
+
+LIQUIBASE_HOME=/path/to/liquibase
