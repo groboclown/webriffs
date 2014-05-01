@@ -13,9 +13,13 @@ client/packages/
 client/pubspec.lock
 
 # Generated files
-build/exports
+build/exports/
+build/deployed/
 
 # Local setting files
 local-settings.sh
+php/conf/*.php
+
+# Project files
 .idea/
 *.iml

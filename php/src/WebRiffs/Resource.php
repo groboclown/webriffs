@@ -50,7 +50,7 @@ class Resource extends Tonic\Resource
     }
 
 
-    function secure($role) {
+    function secure(string $role, int $minLevel) {
         $db = getDB();
 
         $auth = getUserIdentity($db);

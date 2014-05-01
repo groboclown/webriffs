@@ -16,7 +16,8 @@ LIQUIBASE_ARGS="--driver=com.mysql.jdbc.Driver --classpath=$MYSQL_JDBC_JAR --url
 
 test -d exports/sql || mkdir -p exports/sql
 
-for i in ../php/admin/sql/tables/*.yaml; do
+# Make sure ordering is correct
+for i in ../sql/GroboAuth/*.yaml ../sql/WebRiffs/*.yaml; do
   name=$(basename "$i" .yaml)
   echo "$name"
   if [ "$1" = '-run' ]; then

@@ -36,22 +36,28 @@ try {
     $response = $resource->exec();
 
 } catch (Tonic\NotFoundException $e) {
-    $response = new Tonic\Response(404, $e->getMessage());
+    $response = new Tonic\Response(404, array('message' => $e->getMessage()));
 
 } catch (Tonic\UnauthorizedException $e) {
-    $response = new Tonic\Response(401, $e->getMessage());
+    $response = new Tonic\Response(401, array('message' => $e->getMessage()));
     $response->wwwAuthenticate = 'Basic realm="WebRiffs"';
 
 } catch (Tonic\MethodNotAllowedException $e) {
-    $response = new Tonic\Response($e->getCode(), $e->getMessage());
+    $response = new Tonic\Response($e->getCode(), array('message' => $e->getMessage()));
     $response->allow = implode(', ', $resource->allowedMethods());
 
+} catch (Base\ValidationException $e) {
+    $response = new Tonic\Response($e->getCode(), array(
+        'message' => $e->getMessage(),
+        'problems' => $e->problems));
+
 } catch (Tonic\Exception $e) {
-    $response = new Tonic\Response($e->getCode(), $e->getMessage());
+    $response = new Tonic\Response($e->getCode(), array('message' => $e->getMessage()));
+
 } catch (Exception $e) {
     # FIXME Production level code should not report the full error message,
     # but instead log it and give a generic error to the user.
-    $response = new Tonic\Response(500, $e->getMessage());
+    $response = new Tonic\Response(500, array('message' => $e->getMessage()));
 }
 
 #echo $response;
