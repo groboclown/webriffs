@@ -1,0 +1,52 @@
+# Keeps a record of each active login session.  This maintains all the information
+# necessary to validate a user request.
+
+table:
+    tableName: GA_SESSION
+    columns:
+        - column:
+            name: Ga_Session_Id
+            type: int
+            autoIncrement: true
+            constraint:
+                type: primary key
+                name: Ga_Session_Id_Key
+        - column:
+            name: Ga_User_Source_Id
+            type: int
+            constraint:
+                type: not null
+            constraint:
+                type: foreign key
+                name: Ga_Session__Ga_User_Source_Id_FK
+                table: GA_USER_SOURCE
+                column: Ga_User_Source_Id
+        - column:
+            name: User_Agent
+            type: nvarchar(64)
+            constraint:
+                type: not null
+        - column:
+            name: Remote_Address
+            type: nvarchar(2048)
+        - column:
+            name: Forwarded_For
+            type: nvarchar(2048)
+        - column:
+            name: Authorization_Challenge
+            type: nvarchar(2048)
+            constraint:
+                type: not null
+        - column:
+            name: Expires_On
+            type: datetime
+            constraint:
+                type: not null
+        - column:
+            name: Created_On
+            type: timestamp
+            constraint:
+                type: not null
+        - column:
+            name: Last_Updated_On
+            type: timestamp

@@ -1,0 +1,48 @@
+table:
+    tableName: QUIP_TAG
+    columns:
+        - column:
+            name: Quip_Tag_Id
+            type: int
+            autoIncrement: true
+            constraint:
+                type: primary key
+                name: Quip_Tag_Id_Key
+        - column:
+            name: Quip_Version_Id
+            type: int
+            constraint:
+                type: not null
+            constraint:
+                type: foreign key
+                name: Quip_Tag__Quip_Version_Id_FK
+                table: QUIP_VERSION
+                column: Quip_Version_Id
+        - column:
+            name: Tag_Id
+            type: int
+            constraint:
+                type: not null
+            constraint:
+                type: foreign key
+                name: Quip_Tag__Tag_Id_FK
+                table: TAG
+                column: Tag_Id
+        - column:
+            name: Author_User_Id
+            type: int
+            constraint:
+                type: not null
+            constraint:
+                type: foreign key
+                name: Quip_Tag__User_Id_FK
+                table: USER
+                column: User_Id
+        - column:
+            name: Created_On
+            type: timestamp
+            constraint:
+                type: not null
+        - column:
+            name: Last_Updated_On
+            type: timestamp

@@ -1,0 +1,40 @@
+# The access which the user has rights to.
+
+table:
+    tableName: USER_ACCESS
+    columns:
+        - column:
+            name: User_Access_Id
+            type: int
+            autoIncrement: true
+            constraint:
+                type: primary key
+                name: User_Access_Id_Key
+        - column:
+            name: User_Id
+            type: int
+            constraint:
+                type: not null
+            constraint:
+                type: foreign key
+                name: User_Access__User_Id_FK
+                table: USER
+                column: User_Id
+        - column:
+            name: Access
+            type: varchar(64)
+            constraint:
+                type: not null
+        - column:
+            name: Privilege_Level
+            type: int
+            constraint:
+                type: not null
+        - column:
+            name: Created_On
+            type: timestamp
+            constraint:
+                type: not null
+        - column:
+            name: Last_Updated_On
+            type: timestamp

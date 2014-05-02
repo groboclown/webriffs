@@ -15,6 +15,7 @@ client/pubspec.lock
 # Generated files
 build/exports/
 build/deployed/
+*.pyc
 
 # Local setting files
 local-settings.sh

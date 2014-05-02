@@ -1,0 +1,35 @@
+# Repository of all the tags known by the system.
+
+table:
+    tableName: TAG
+    columns:
+        - column:
+            name: Tag_Id
+            type: int
+            autoIncrement: true
+            constraint:
+                type: primary key
+                name: Tag_Id_Key
+        - column:
+            name: Name
+            type: nvarchar(64)
+            constraint:
+                type: not null
+        - column:
+            name: Author_User_Id
+            type: int
+            constraint:
+                type: not null
+            constraint:
+                type: foreign key
+                name: User_Id_Key
+                table: USER
+                column: User_Id
+        - column:
+            name: Created_On
+            type: timestamp
+            constraint:
+                type: not null
+        - column:
+            name: Last_Updated_On
+            type: timestamp

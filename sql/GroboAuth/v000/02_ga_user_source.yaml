@@ -1,0 +1,56 @@
+# Defines a String definition for the different sources for authentication.
+# This allows for a single application to have users login through facebook,
+# Google, or use local authentication.
+
+# The "username" field contains the contact information in the source.  For
+# local authentication, this should be the email address (and is used as such
+# for the password request handling).
+
+table:
+    tableName: GA_USER_SOURCE
+    columns:
+        - column:
+            name: Ga_User_Source_Id
+            type: int
+            autoIncrement: true
+            constraint:
+                type: primary key
+                name: Ga_User_Source_Id_Key
+        - column:
+            name: Ga_User_Id
+            type: int
+            constraint:
+                type: not null
+            constraint:
+                type: foreign key
+                name: Ga_User_Source__Ga_User_Id_FK
+                table: GA_USER
+                column: Ga_User_Id
+        - column:
+            name: Ga_Source_Id
+            type: int
+            constraint:
+                type: not null
+            constraint:
+                type: foreign key
+                name: Ga_User_Source__Ga_Source_Id_FK
+                table: GA_SOURCE
+                column: Ga_Source_Id
+        - column:
+            name: Username
+            type: nvarchar(2046)
+            constraint:
+                type: not null
+        - column:
+            name: Authentication_Code
+            type: nvarchar(2046)
+            constraint:
+                type: not null
+        - column:
+            name: Created_On
+            type: timestamp
+            constraint:
+                type: not null
+        - column:
+            name: Last_Updated_On
+            type: timestamp

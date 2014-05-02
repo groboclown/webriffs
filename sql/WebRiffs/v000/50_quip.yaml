@@ -1,0 +1,32 @@
+# A single quip, which may be versioned.  This essentially allows for following
+# the trail of edits on a single quip.
+
+
+table:
+    tableName: QUIP
+    columns:
+        - column:
+            name: Quip_Id
+            type: int
+            autoIncrement: true
+            constraint:
+                type: primary key
+                name: Quip_Id_Key
+        - column:
+            name: Film_Id
+            type: int
+            constraint:
+                type: not null
+            constraint:
+                type: foreign key
+                name: Quip__Film_Id_FK
+                table: FILM
+                column: Film_Id
+        - column:
+            name: Created_On
+            type: timestamp
+            constraint:
+                type: not null
+        - column:
+            name: Last_Updated_On
+            type: timestamp

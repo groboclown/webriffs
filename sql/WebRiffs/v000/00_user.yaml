@@ -1,0 +1,45 @@
+# The user registration table.  It depends upon the GroboAuth schema.
+
+table:
+    tableName: USER
+    columns:
+        - column:
+            name: User_Id
+            type: int
+            autoIncrement: true
+            constraint:
+                type: primary key
+                name: User_Id_Key
+        - column:
+            name: Username
+            type: nvarchar(64)
+            constraint:
+                type: not null
+        - column:
+            name: Contact
+            type: nvarchar(2048)
+            constraint:
+                type: not null
+        - column:
+            name: Ga_User_Id
+            type: int
+            constraint:
+                type: not null
+            constraint:
+                type: foreign key
+                name: User__Ga_User_Id_FK
+                table: GA_USER
+                column: Ga_User_Id
+        - column:
+            name: Is_Site_Admin
+            type: tinyint
+            constraint:
+                type: not null
+        - column:
+            name: Created_On
+            type: timestamp
+            constraint:
+                type: not null
+        - column:
+            name: Last_Updated_On
+            type: timestamp

@@ -1,0 +1,28 @@
+# Defines a String definition for the different sources for authentication.
+# This allows for a single application to have users login through facebook,
+# Google, or use local authentication.  Note that the database doesn't store
+# the vital keys; those are kept on the file system in the configuration.
+
+table:
+    tableName: GA_SOURCE
+    columns:
+        - column:
+            name: Ga_Source_Id
+            type: int
+            autoIncrement: true
+            constraint:
+                type: primary key
+                name: Ga_Source_Id_Key
+        - column:
+            name: Source_Name
+            type: nvarchar(255)
+            constraint:
+                type: not null
+        - column:
+            name: Created_On
+            type: timestamp
+            constraint:
+                type: not null
+        - column:
+            name: Last_Updated_On
+            type: timestamp
