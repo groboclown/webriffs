@@ -41,6 +41,9 @@ table:
             type: nvarchar(2046)
             constraint:
                 type: not null
+            constraint:
+                type: php validation
+                script: $Username == $Username.trim()
         - column:
             name: Authentication_Code
             type: nvarchar(2046)
