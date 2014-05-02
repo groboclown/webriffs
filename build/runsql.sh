@@ -9,4 +9,7 @@ fi
 
 source ../local-settings.sh
 
-echo "FIXME"
+for i in exports/sql/*/*.sql; do
+    echo "$i"
+    mysql --user=${TEST_MYSQL_USER} --password=${TEST_MYSQL_PASSWD} ${TEST_MYSQL_DBNAME} < "$i"
+done

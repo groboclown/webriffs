@@ -9,3 +9,5 @@ TEST_MYSQL_DBNAME=webriff_test
 MYSQL_JDBC_JAR=/path/to/mysql-connector-java-5.1.30-bin.jar
 
 DEPLOYMENT_DIR=/path/to/deployment/dir
+
+DART_HOME=/path/to/dart
