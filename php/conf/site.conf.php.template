@@ -24,7 +24,7 @@ $siteConfig = array(
     /**
      * Database Configuration
      */
-    'db_config' = array(
+    'db_config' => array(
         // Uses the PDO format (http://???)
         'dsn' => 'mysql:host=localhost;dbname=webriffs',
         'username' => 'root',

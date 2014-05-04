@@ -45,11 +45,17 @@ table:
                 name: Quip_Version__User_Id_FK
                 table: USER
                 column: User_Id
+
+        # As each kind of media is created, use a new column.  When multiple
+        # media kinds are in place, switch these to be NULL (rather than
+        # NOT NULL), so that a NULL value will indicate that that kind of media
+        # isn't available.
         - column:
-            name: Text
+            name: Text_Value
             type: nvarchar(2048)
             constraint:
                 type: not null
+
         - column:
             name: Timestamp_Millis
             type: int

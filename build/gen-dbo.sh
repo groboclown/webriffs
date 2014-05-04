@@ -13,6 +13,6 @@ for d in ../sql/GroboAuth ../sql/WebRiffs; do
     outd=exports/dbo/$dd
     test -d ${outd} || mkdir -p ${outd}
 
-    python3 ../sql-migration/src/genPhpDboLayer.py DboBase\\DboParent ${dd} $d ${outd}
+    python3 ../sql-migration/src/genPhpDboLayer.py Base\\DboParent ${dd} $d ${outd}
 done
 
