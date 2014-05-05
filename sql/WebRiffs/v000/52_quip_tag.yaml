@@ -18,6 +18,7 @@ table:
                 name: Quip_Tag__Quip_Version_Id_FK
                 table: QUIP_VERSION
                 column: Quip_Version_Id
+                relationship: owner
         - column:
             name: Tag_Id
             type: int

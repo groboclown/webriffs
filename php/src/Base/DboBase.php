@@ -28,4 +28,8 @@ class DboParent {
         }
         return true;
     }
+
+    protected function insertFailed($table, $data) {
+        throw new ValidationException(array($table => 'fails to meet constraints'));
+    }
 }

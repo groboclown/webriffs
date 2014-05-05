@@ -22,6 +22,7 @@ table:
                 name: User_Attribute__User_Id_FK
                 table: USER
                 column: User_Id
+                relationship: owner
         - column:
             name: Attribute_Name
             type: nvarchar(64)

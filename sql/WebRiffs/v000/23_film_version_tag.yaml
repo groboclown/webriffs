@@ -20,6 +20,7 @@ table:
                 name: Film_Version_Tag__Film_Version_Id_FK
                 table: FILM_VERSION
                 column: Film_Version_Id
+                relationship: owner
         - column:
             name: Tag_Id
             type: int

@@ -21,6 +21,7 @@ table:
                 name: Ga_Session__Ga_User_Source_Id_FK
                 table: GA_USER_SOURCE
                 column: Ga_User_Source_Id
+                relationship: owner
         - column:
             name: User_Agent
             type: nvarchar(64)

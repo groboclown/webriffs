@@ -25,6 +25,7 @@ table:
                 name: Film_Version__Film_Id_FK
                 table: FILM
                 column: Film_Id
+                relationship: owner
         - column:
             name: Parent_Film_Version_Id
             type: int

@@ -26,6 +26,7 @@ table:
                 name: Ga_User_Source__Ga_User_Id_FK
                 table: GA_USER
                 column: Ga_User_Id
+                relationship: owner
         - column:
             name: Ga_Source_Id
             type: int

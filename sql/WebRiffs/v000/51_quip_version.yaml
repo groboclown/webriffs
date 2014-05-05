@@ -24,6 +24,7 @@ table:
                 name: Quip_Version__Quip_Id_FK
                 table: QUIP
                 column: Quip_Id
+                relationship: owner
         - column:
             name: Parent_Quip_Version_Id
             type: int
