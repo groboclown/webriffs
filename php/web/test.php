@@ -61,10 +61,18 @@ try{
 
     $data = $gauser->create($db, array());
     $user1 = $data['Ga_User_Id'];
-    echo "<br>Created user ".user1."\n";
+    echo "<br>Created user ".$user1."\n";
 
     $data = $gauser->readAll($db);
-    echo "<br>Read ".$data;
+    echo "<br>Read all user:<ol>";
+    foreach ($data as $row) {
+        echo "<li><ol>\n";
+        foreach ($row as $col => $value) {
+            echo "<li>".$col.":".$row[$col]."</li>\n";
+        }
+        echo "</ol></li>\n";
+    }
+    echo "</ol>";
 
     $data = $gauser->create($db, array());
     echo "<br>Created:<ol>";
@@ -75,7 +83,7 @@ try{
     echo "</ol>\n";
 
     $data = $gauser->readAll($db);
-    echo "<br>Read:<ol>";
+    echo "<br>Read all user:<ol>";
     foreach ($data as $row) {
         echo "<li><ol>\n";
         foreach ($row as $col => $value) {
@@ -116,7 +124,7 @@ try{
 
     $data = $wr_filmVersion->create($db, array(
         'Film_Id' => $wrFilm1,
-        'Parent_Film_Version_Id' => nil,
+        'Parent_Film_Version_Id' => NULL,
         'Parent_Transparent' => 0,
         'Author_User_Id' => $wrUser1,
         'Name' => 'v1'
@@ -133,9 +141,13 @@ try{
     echo "<br>Created film version tag ".$wrFilmVersionTag1."\n";
     
     $data = $wr_filmVersion->read($db, $wrFilmVersion1);
-    echo "Film Version data<ol>\n";
-    foreach ($row as $col => $value) {
-        echo "<li>".$col.":".$row[$col]."</li>\n";
+    echo "<br>Film Version data<ol>\n";
+    if (! $data) {
+        print_r($wr_filmVersion->errors);
+        print_r($db->errorInfo());
+    }
+    foreach ($data as $col => $value) {
+        echo "<li>".$col.":".$data[$col]."</li>\n";
     }
     echo "</ol>\n";
     
