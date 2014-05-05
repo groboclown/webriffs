@@ -8,30 +8,34 @@ table:
             name: Ga_Login_Attempt_Id
             type: int
             autoIncrement: true
-            constraint:
-                type: primary key
-                name: User_Id_Key
+            constraints:
+                - constraint:
+                    type: primary key
+                    name: User_Id_Key
         - column:
             name: Ga_User_Source_Id
             type: int
-            constraint:
-                type: not null
-            constraint:
-                type: foreign key
-                name: Ga_Login_Attempt__Ga_User_Source_Id_FK
-                table: GA_USER_SOURCE
-                column: Ga_User_Source_Id
-                relationship: owner
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    name: Ga_Login_Attempt__Ga_User_Source_Id_FK
+                    table: GA_USER_SOURCE
+                    column: Ga_User_Source_Id
+                    relationship: owner
         - column:
             name: Was_Successful
             type: tinyint
-            constraint:
-                type: not null
+            constraints:
+                - constraint:
+                    type: not null
         - column:
             name: Created_On
             type: timestamp
-            constraint:
-                type: not null
+            constraints:
+                - constraint:
+                    type: not null
         - column:
             name: Last_Updated_On
             type: timestamp

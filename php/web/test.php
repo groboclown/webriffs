@@ -18,6 +18,13 @@ try{
     require_once '../src/Base/ValidationException.php';
     require_once '../dbo/GroboAuth/GaUser.php';
     require_once '../dbo/WebRiffs/QuipTag.php';
+    require_once '../dbo/WebRiffs/User.php';
+    require_once '../dbo/WebRiffs/Film.php';
+    require_once '../dbo/WebRiffs/FilmVersion.php';
+    require_once '../dbo/WebRiffs/FilmVersionTag.php';
+    require_once '../dbo/WebRiffs/Quip.php';
+    require_once '../dbo/WebRiffs/QuipVersion.php';
+    require_once '../dbo/WebRiffs/Tag.php';
 
     #use GroboAuth;
 
@@ -37,7 +44,7 @@ try{
     echo "<br>User count should be 0, found " . $mc;
 
     $data = $gauser->create($db, array());
-    $user1 = $data['User_Id'];
+    $user1 = $data['Ga_User_Id'];
     echo "<br>Created user ".user1."\n";
 
     $data = $gauser->readAll($db);
@@ -48,7 +55,7 @@ try{
     foreach ($data as $col => $value) {
         echo "<li>".$col.":".$data[$col]."</li>\n";
     }
-    $user2 = $data['User_Id'];
+    $user2 = $data['Ga_User_Id'];
     echo "</ol>\n";
 
     $data = $gauser->readAll($db);
@@ -65,14 +72,65 @@ try{
     $mc = $gauser->countRows($db);
     echo "<br>User count should be 2, found " . $mc . "\n";
 
-    // Bad input
-    $quiptag = new WebRiffs\QuipTag;
+    $wr_user = new WebRiffs\User;
+    $wr_film = new WebRiffs\Film;
+    $wr_filmVersion = new WebRiffs\FilmVersion;
+    $wr_quip = new WebRiffs\Quip;
+    $wr_quipVersion = new WebRiffs\QuipVersion;
+    $wr_quipTag = new WebRiffs\QuipTag;
+    $wr_tag = new WebRiffs\Tag;
+    $wr_filmTag = new WebRiffs\FilmVersionTag;
 
-    $quiptag->create($db, array(
-        'Quip_Version_Id' => 10,
-        'Tag_Id' => 11,
-        'Author_User_Id' => $user1,
+    $data = $wr_user->create($db, array(
+        'Username' => 'user a',
+        'Contact' => 'eat@joes',
+        'Ga_User_Id' => $user1,
+        'Is_Site_Admin' => 0
     ));
+    $wrUser1 = $data['User_Id'];
+    echo "<br>Created wr user ".$wrUser1."\n";
+
+    $data = $wr_film->create($db, array(
+        'Name' => 'F For Fake',
+        'Release_Year' => 1921,
+        'Imdb_Url' => '/films/F_For_Fake',
+        'Wikipedia_Url' => '/films/F_For_Fake',
+    ));
+    $wrFilm1 = $data['Film_Id'];
+    echo "<br>Created wr film ".$wrFilm1."\n";
+
+    $data = $wr_tag->create($db, array(
+        'Name' => 'orson wells',
+        'Author_User_Id' => $wrUser1
+    ));
+    $wrTag1 = $data['Tag_Id'];
+    echo "<br>Created tag ".$wrTag1."\n";
+
+    $data = $wr_filmVersion->create($db, array(
+        'Film_Id' => $wrFilm1,
+        'Parent_Film_Version_Id' => nil,
+        'Parent_Transparent' => 0,
+        'Author_User_Id' => $wrUser2,
+        'Name' => 'v1'
+    ));
+    $wrFilmVersion1 = $data['Film_Version_Id'];
+    echo "<br>Created tag ".$wrFilmVersion1."\n";
+
+    $data = $wr_filmTag->create($db, array(
+        'Film_Version_Id' => $wrFilmVersion1,
+        'Tag_Id' => $wrTag1,
+        'Author_User_Id' => $wrUser1
+    ));
+    $wrFilmVersionTag1 = $data['Film_Version_Tag_Id'];
+    echo "<br>Created film version tag ".$wrFilmVersionTag1."\n";
+
+
+    // Bad input
+    //$wr_quipTag->create($db, array(
+    //    'Quip_Version_Id' => 10,
+    //    'Tag_Id' => 11,
+    //    'Author_User_Id' => $user1,
+    //));
 
 
 } catch (Exception $e) {

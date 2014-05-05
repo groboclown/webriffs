@@ -5,19 +5,22 @@ table:
             name: Film_Id
             type: int
             autoIncrement: true
-            constraint:
-                type: primary key
-                name: Film_Id_Key
+            constraints:
+                - constraint:
+                    type: primary key
+                    name: Film_Id_Key
         - column:
             name: Name
             type: nvarchar(200)
-            constraint:
-                type: not null
+            constraints:
+                - constraint:
+                    type: not null
         - column:
             name: Release_Year
             type: int
-            constraint:
-                type: not null
+            constraints:
+                - constraint:
+                    type: not null
         - column:
             name: Imdb_Url
             type: nvarchar(2048)
@@ -27,8 +30,9 @@ table:
         - column:
             name: Created_On
             type: timestamp
-            constraint:
-                type: not null
+            constraints:
+                - constraint:
+                    type: not null
         - column:
             name: Last_Updated_On
             type: timestamp

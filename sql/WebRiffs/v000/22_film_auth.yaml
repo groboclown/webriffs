@@ -10,36 +10,41 @@ table:
             name: Film_Auth_Id
             type: int
             autoIncrement: true
-            constraint:
-                type: primary key
-                name: Film_Auth_Id_Key
+            constraints:
+                - constraint:
+                    type: primary key
+                    name: Film_Auth_Id_Key
         - column:
             name: Film_Version_Id
             type: int
-            constraint:
-                type: not null
-            constraint:
-                type: foreign key
-                name: Film_Auth__Film_Version_Id_FK
-                table: FILM_VERSION
-                column: Film_Version_Id
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    name: Film_Auth__Film_Version_Id_FK
+                    table: FILM_VERSION
+                    column: Film_Version_Id
         - column:
             # Roles are stored as an integer, but their meaning is in the
             # App itself.
             name: Role
             type: int
-            constraint:
-                type: not null
+            constraints:
+                - constraint:
+                    type: not null
         - column:
             name: Minimum_Privilege
             type: int
-            constraint:
-                type: not null
+            constraints:
+                - constraint:
+                    type: not null
         - column:
             name: Created_On
             type: timestamp
-            constraint:
-                type: not null
+            constraints:
+                - constraint:
+                    type: not null
         - column:
             name: Last_Updated_On
             type: timestamp

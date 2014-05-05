@@ -11,41 +11,44 @@ table:
             name: Quip_Version_Id
             type: int
             autoIncrement: true
-            constraint:
-                type: primary key
-                name: Quip_Version_Id_Key
+            constraints:
+                - constraint:
+                    type: primary key
+                    name: Quip_Version_Id_Key
         - column:
             name: Quip_Id
             type: int
-            constraint:
-                type: not null
-            constraint:
-                type: foreign key
-                name: Quip_Version__Quip_Id_FK
-                table: QUIP
-                column: Quip_Id
-                relationship: owner
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Quip_Id_FK
+                    table: QUIP
+                    column: Quip_Id
+                    relationship: owner
         - column:
             name: Parent_Quip_Version_Id
             type: int
-            constraint:
-                # Null parent means that this is a new version
-                type: null
-            constraint:
-                type: foreign key
-                name: Quip_Version__Quip_Version_Id_FK
-                table: QUIP_VERSION
-                column: Quip_Version_Id
+            constraints:
+                - constraint:
+                    type: nullable
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Quip_Version_Id_FK
+                    table: QUIP_VERSION
+                    column: Quip_Version_Id
         - column:
             name: Author_User_Id
             type: int
-            constraint:
-                type: not null
-            constraint:
-                type: foreign key
-                name: Quip_Version__User_Id_FK
-                table: USER
-                column: User_Id
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__User_Id_FK
+                    table: USER
+                    column: User_Id
 
         # As each kind of media is created, use a new column.  When multiple
         # media kinds are in place, switch these to be NULL (rather than
@@ -54,24 +57,28 @@ table:
         - column:
             name: Text_Value
             type: nvarchar(2048)
-            constraint:
-                type: not null
+            constraints:
+                - constraint:
+                    type: not null
 
         - column:
             name: Timestamp_Millis
             type: int
-            constraint:
-                type: not null
+            constraints:
+                - constraint:
+                    type: not null
         - column:
             name: Active
             type: tinyint
-            constraint:
-                type: not null
+            constraints:
+                - constraint:
+                    type: not null
         - column:
             name: Created_On
             type: timestamp
-            constraint:
-                type: not null
+            constraints:
+                - constraint:
+                    type: not null
         - column:
             name: Last_Updated_On
             type: timestamp

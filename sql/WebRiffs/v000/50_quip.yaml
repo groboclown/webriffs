@@ -9,24 +9,27 @@ table:
             name: Quip_Id
             type: int
             autoIncrement: true
-            constraint:
-                type: primary key
-                name: Quip_Id_Key
+            constraints:
+                - constraint:
+                    type: primary key
+                    name: Quip_Id_Key
         - column:
             name: Film_Id
             type: int
-            constraint:
-                type: not null
-            constraint:
-                type: foreign key
-                name: Quip__Film_Id_FK
-                table: FILM
-                column: Film_Id
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    name: Quip__Film_Id_FK
+                    table: FILM
+                    column: Film_Id
         - column:
             name: Created_On
             type: timestamp
-            constraint:
-                type: not null
+            constraints:
+                - constraint:
+                    type: not null
         - column:
             name: Last_Updated_On
             type: timestamp

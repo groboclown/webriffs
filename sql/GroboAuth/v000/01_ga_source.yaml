@@ -10,19 +10,22 @@ table:
             name: Ga_Source_Id
             type: int
             autoIncrement: true
-            constraint:
-                type: primary key
-                name: Ga_Source_Id_Key
+            constraints:
+                - constraint:
+                    type: primary key
+                    name: Ga_Source_Id_Key
         - column:
             name: Source_Name
             type: nvarchar(255)
-            constraint:
-                type: not null
+            constraints:
+                - constraint:
+                    type: not null
         - column:
             name: Created_On
             type: timestamp
-            constraint:
-                type: not null
+            constraints:
+                - constraint:
+                    type: not null
         - column:
             name: Last_Updated_On
             type: timestamp

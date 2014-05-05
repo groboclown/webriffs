@@ -9,33 +9,37 @@ table:
             name: User_Attribute_Id
             type: int
             autoIncrement: true
-            constraint:
-                type: primary key
-                name: User_Attribute_Id_Key
+            constraints:
+                - constraint:
+                    type: primary key
+                    name: User_Attribute_Id_Key
         - column:
             name: User_Id
             type: int
-            constraint:
-                type: not null
-            constraint:
-                type: foreign key
-                name: User_Attribute__User_Id_FK
-                table: USER
-                column: User_Id
-                relationship: owner
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    name: User_Attribute__User_Id_FK
+                    table: USER
+                    column: User_Id
+                    relationship: owner
         - column:
             name: Attribute_Name
             type: nvarchar(64)
-            constraint:
-                type: not null
+            constraints:
+                - constraint:
+                    type: not null
         - column:
             name: Attribute_Value
             type: nvarchar(2048)
         - column:
             name: Created_On
             type: timestamp
-            constraint:
-                type: not null
+            constraints:
+                - constraint:
+                    type: not null
         - column:
             name: Last_Updated_On
             type: timestamp

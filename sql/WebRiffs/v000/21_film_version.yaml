@@ -12,56 +12,63 @@ table:
             name: Film_Version_Id
             type: int
             autoIncrement: true
-            constraint:
-                type: primary key
-                name: Film_Version_Id_Key
+            constraints:
+                - constraint:
+                    type: primary key
+                    name: Film_Version_Id_Key
         - column:
             name: Film_Id
             type: int
-            constraint:
-                type: not null
-            constraint:
-                type: foreign key
-                name: Film_Version__Film_Id_FK
-                table: FILM
-                column: Film_Id
-                relationship: owner
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    name: Film_Version__Film_Id_FK
+                    table: FILM
+                    column: Film_Id
+                    relationship: owner
         - column:
             name: Parent_Film_Version_Id
             type: int
-            constraint:
-                # Null means there is no parent
-                type: null
-            constraint:
-                type: foreign key
-                name: Film_Version__Film_Version_Id_FK
-                table: FILM_VERSION
-                column: Film_Version_Id
+            constraints:
+                - constraint:
+                    # Null means there is no parent
+                    type: nullable
+                - constraint:
+                    type: foreign key
+                    name: Film_Version__Film_Version_Id_FK
+                    table: FILM_VERSION
+                    column: Film_Version_Id
         - column:
             name: Parent_Transparent
             type: tinyint
-            constraint:
-                type: not null
+            constraints:
+                - constraint:
+                    type: not null
         - column:
             name: Author_User_Id
             type: int
-            constraint:
-                type: not null
-            constraint:
-                type: foreign key
-                name: Film_Version__User_Id_FK
-                table: USER
-                column: User_Id
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    name: Film_Version__User_Id_FK
+                    table: USER
+                    column: User_Id
         - column:
             name: Name
             type: nvarchar(255)
-            constraint:
-                type: not null
+            constraints:
+                - constraint:
+                    type: not null
         - column:
             name: Created_On
             type: timestamp
-            constraint:
-                type: not null
+            constraints:
+                - constraint:
+                    type: not null
         - column:
             name: Last_Updated_On
             type: timestamp
