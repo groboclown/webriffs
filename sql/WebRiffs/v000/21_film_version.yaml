@@ -35,8 +35,10 @@ table:
                 - constraint:
                     # Null means there is no parent
                     type: nullable
+                # Don't make this a real foreign key, as it can cause all
+                # kinds of unexpected trouble
                 - constraint:
-                    type: foreign key
+                    type: fake foreign key
                     name: Film_Version__Film_Version_Id_FK
                     table: FILM_VERSION
                     column: Film_Version_Id

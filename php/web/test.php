@@ -34,10 +34,26 @@ try{
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     $gauser = new GroboAuth\GaUser;
+    $wr_user = new WebRiffs\User;
+    $wr_film = new WebRiffs\Film;
+    $wr_filmVersion = new WebRiffs\FilmVersion;
+    $wr_quip = new WebRiffs\Quip;
+    $wr_quipVersion = new WebRiffs\QuipVersion;
+    $wr_quipTag = new WebRiffs\QuipTag;
+    $wr_tag = new WebRiffs\Tag;
+    $wr_filmTag = new WebRiffs\FilmVersionTag;
 
     echo '<br>User row count: ' . $gauser->countRows($db);
 
     # No explicit DB layer for this, nor should there be
+    $db->prepare('DELETE FROM QUIP_FILM_VERSION')->execute();
+    $db->prepare('DELETE FROM QUIP_TAG')->execute();
+    $db->prepare('DELETE FROM QUIP')->execute();
+    $db->prepare('DELETE FROM FILM_VERSION_TAG')->execute();
+    $db->prepare('DELETE FROM TAG')->execute();
+    $db->prepare('DELETE FROM FILM_VERSION')->execute();
+    $db->prepare('DELETE FROM FILM')->execute();
+    $db->prepare('DELETE FROM USER')->execute();
     $db->prepare('DELETE FROM GA_USER')->execute();
 
     $mc = $gauser->countRows($db);
@@ -72,14 +88,6 @@ try{
     $mc = $gauser->countRows($db);
     echo "<br>User count should be 2, found " . $mc . "\n";
 
-    $wr_user = new WebRiffs\User;
-    $wr_film = new WebRiffs\Film;
-    $wr_filmVersion = new WebRiffs\FilmVersion;
-    $wr_quip = new WebRiffs\Quip;
-    $wr_quipVersion = new WebRiffs\QuipVersion;
-    $wr_quipTag = new WebRiffs\QuipTag;
-    $wr_tag = new WebRiffs\Tag;
-    $wr_filmTag = new WebRiffs\FilmVersionTag;
 
     $data = $wr_user->create($db, array(
         'Username' => 'user a',
@@ -110,11 +118,11 @@ try{
         'Film_Id' => $wrFilm1,
         'Parent_Film_Version_Id' => nil,
         'Parent_Transparent' => 0,
-        'Author_User_Id' => $wrUser2,
+        'Author_User_Id' => $wrUser1,
         'Name' => 'v1'
     ));
     $wrFilmVersion1 = $data['Film_Version_Id'];
-    echo "<br>Created tag ".$wrFilmVersion1."\n";
+    echo "<br>Created film version ".$wrFilmVersion1."\n";
 
     $data = $wr_filmTag->create($db, array(
         'Film_Version_Id' => $wrFilmVersion1,
@@ -123,7 +131,14 @@ try{
     ));
     $wrFilmVersionTag1 = $data['Film_Version_Tag_Id'];
     echo "<br>Created film version tag ".$wrFilmVersionTag1."\n";
-
+    
+    $data = $wr_filmVersion->read($db, $wrFilmVersion1);
+    echo "Film Version data<ol>\n";
+    foreach ($row as $col => $value) {
+        echo "<li>".$col.":".$row[$col]."</li>\n";
+    }
+    echo "</ol>\n";
+    
 
     // Bad input
     //$wr_quipTag->create($db, array(
