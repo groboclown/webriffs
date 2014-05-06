@@ -1,5 +1,7 @@
 <?php
 
+header('Content-Type: text/json');
+
 // load autoloader (delete as appropriate)
 require_once '../../lib/Tonic/Autoloader.php';
 require_once '../../lib/Pimple/Container.php';

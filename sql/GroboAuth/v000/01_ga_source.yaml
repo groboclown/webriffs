@@ -20,6 +20,9 @@ table:
             constraints:
                 - constraint:
                     type: not null
+                - constraint:
+                    type: unique index
+                    name: Source_Name_IDX
         - column:
             name: Created_On
             type: timestamp

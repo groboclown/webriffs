@@ -17,6 +17,9 @@ table:
             constraints:
                 - constraint:
                     type: not null
+                - constraint:
+                    type: unique index
+                    name: Username__IDX
         - column:
             name: Contact
             type: nvarchar(2048)

@@ -64,3 +64,10 @@ table:
         - column:
             name: Last_Updated_On
             type: timestamp
+    constraints:
+        - constraint:
+            type: read
+            columns: Username, Ga_Source_Id
+        - constraint:
+            type: read
+            columns: Ga_User_Id, Ga_Source_Id

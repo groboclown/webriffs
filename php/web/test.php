@@ -25,25 +25,24 @@ try{
     require_once '../dbo/WebRiffs/Quip.php';
     require_once '../dbo/WebRiffs/QuipVersion.php';
     require_once '../dbo/WebRiffs/Tag.php';
-
-    #use GroboAuth;
+    require_once '../src/GroboAuth/DataAccess.php';
 
     $db = new PDO($siteConfig['db_config']['dsn'],
         $siteConfig['db_config']['username'],
         $siteConfig['db_config']['password']);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    $gauser = new GroboAuth\GaUser;
-    $wr_user = new WebRiffs\User;
-    $wr_film = new WebRiffs\Film;
-    $wr_filmVersion = new WebRiffs\FilmVersion;
-    $wr_quip = new WebRiffs\Quip;
-    $wr_quipVersion = new WebRiffs\QuipVersion;
-    $wr_quipTag = new WebRiffs\QuipTag;
-    $wr_tag = new WebRiffs\Tag;
-    $wr_filmTag = new WebRiffs\FilmVersionTag;
+    $gauser =& GroboAuth\GaUser::$INSTANCE;
+    $wr_user =& WebRiffs\User::$INSTANCE;
+    $wr_film =& WebRiffs\Film::$INSTANCE;
+    $wr_filmVersion =& WebRiffs\FilmVersion::$INSTANCE;
+    $wr_quip =& WebRiffs\Quip::$INSTANCE;
+    $wr_quipVersion =& WebRiffs\QuipVersion::$INSTANCE;
+    $wr_quipTag =& WebRiffs\QuipTag::$INSTANCE;
+    $wr_tag =& WebRiffs\Tag::$INSTANCE;
+    $wr_filmTag =& WebRiffs\FilmVersionTag::$INSTANCE;
 
-    echo '<br>User row count: ' . $gauser->countRows($db);
+    echo '<br>User row count: ' . $gauser->countAll($db);
 
     # No explicit DB layer for this, nor should there be
     $db->prepare('DELETE FROM QUIP_FILM_VERSION')->execute();
@@ -56,12 +55,15 @@ try{
     $db->prepare('DELETE FROM USER')->execute();
     $db->prepare('DELETE FROM GA_USER')->execute();
 
-    $mc = $gauser->countRows($db);
+    $mc = $gauser->countAll($db);
     echo "<br>User count should be 0, found " . $mc;
 
     $data = $gauser->create($db, array());
     $user1 = $data['Ga_User_Id'];
     echo "<br>Created user ".$user1."\n";
+    
+    $user3 = GroboAuth\DataAccess::createUser($db);
+    echo "<br>Created user (v2) ".$user3."\n";
 
     $data = $gauser->readAll($db);
     echo "<br>Read all user:<ol>";
@@ -93,7 +95,7 @@ try{
     }
     echo "</ol>";
 
-    $mc = $gauser->countRows($db);
+    $mc = $gauser->countAll($db);
     echo "<br>User count should be 2, found " . $mc . "\n";
 
 

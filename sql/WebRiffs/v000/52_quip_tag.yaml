@@ -32,6 +32,7 @@ table:
                     name: Quip_Tag__Tag_Id_FK
                     table: TAG
                     column: Tag_Id
+                    pull: always
         - column:
             name: Author_User_Id
             type: int

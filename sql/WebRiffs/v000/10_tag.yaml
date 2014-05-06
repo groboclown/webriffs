@@ -28,6 +28,7 @@ table:
                     name: User_Id_Key
                     table: USER
                     column: User_Id
+                    pull: lazy
         - column:
             name: Created_On
             type: timestamp

@@ -49,6 +49,7 @@ table:
                     name: Quip_Version__User_Id_FK
                     table: USER
                     column: User_Id
+                    pull: lazy
 
         # As each kind of media is created, use a new column.  When multiple
         # media kinds are in place, switch these to be NULL (rather than
