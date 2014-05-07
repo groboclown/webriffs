@@ -32,6 +32,7 @@ try{
         $siteConfig['db_config']['password']);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+    // FIXME switch these to use the DataAccess instead.
     $gauser =& GroboAuth\GaUser::$INSTANCE;
     $wr_user =& WebRiffs\User::$INSTANCE;
     $wr_film =& WebRiffs\Film::$INSTANCE;
@@ -44,7 +45,8 @@ try{
 
     echo '<br>User row count: ' . $gauser->countAll($db);
 
-    # No explicit DB layer for this, nor should there be
+    # No explicit DB layer for this, nor should there be.  This is for testing
+    # only.
     $db->prepare('DELETE FROM QUIP_FILM_VERSION')->execute();
     $db->prepare('DELETE FROM QUIP_TAG')->execute();
     $db->prepare('DELETE FROM QUIP')->execute();

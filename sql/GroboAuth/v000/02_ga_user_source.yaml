@@ -29,6 +29,8 @@ table:
                     table: GA_USER
                     column: Ga_User_Id
                     relationship: owner
+                - constraint:
+                    type: no update
         - column:
             name: Ga_Source_Id
             type: int
@@ -40,6 +42,8 @@ table:
                     name: Ga_User_Source__Ga_Source_Id_FK
                     table: GA_SOURCE
                     column: Ga_Source_Id
+                - constraint:
+                    type: no update
         - column:
             name: Username
             type: nvarchar(2046)

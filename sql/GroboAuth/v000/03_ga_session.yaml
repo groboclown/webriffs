@@ -24,32 +24,42 @@ table:
                     table: GA_USER_SOURCE
                     column: Ga_User_Source_Id
                     relationship: owner
+                - constraint:
+                    type: no update
         - column:
             name: User_Agent
             type: nvarchar(64)
             constraints:
                 - constraint:
                     type: not null
+                - constraint:
+                    type: no update
         - column:
             name: Remote_Address
             type: nvarchar(2048)
+            constraints:
+                - constraint:
+                    type: no update
         - column:
             name: Forwarded_For
             type: nvarchar(2048)
+            constraints:
+                - constraint:
+                    type: no update
         - column:
             name: Authorization_Challenge
             type: nvarchar(2048)
             constraints:
                 - constraint:
                     type: not null
+                - constraint:
+                    type: no update
         - column:
             name: Expires_On
             type: timestamp
             constraints:
                 - constraint:
                     type: not null
-                - constraint:
-                    type: no update
                 - constraint:
                     type: constant query
                     value: Expires_On > NOW()

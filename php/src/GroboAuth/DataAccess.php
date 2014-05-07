@@ -206,8 +206,23 @@ class DataAccess {
     }
     
     
-    public static function handlePasswordRequest($db, $passwordRequestId) {
+    public static function handlePasswordRequest($db, $passwordRequestId,
+            $newAuthenticationCode) {
         // FIXME
+    }
+    
+    
+    public static function recordLoginAttempt($db, $userSourceId,
+            $wasSuccessful) {
+        // FIXME
+    }
+    
+    
+    public static function getLoginAttemptsFor($db, $userSourceId,
+            $mostRecentCount = -1) {
+        // FIXME
+        // limited paging support.  Pull in all the attempts (-1), or the
+        // N most recent attempts, which means sorting in reverse order.
     }
     
     
