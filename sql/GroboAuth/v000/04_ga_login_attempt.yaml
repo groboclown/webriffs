@@ -10,8 +10,10 @@ table:
             autoIncrement: true
             constraints:
                 - constraint:
+                    type: not null
+                - constraint:
                     type: primary key
-                    name: User_Id_Key
+                    name: Ga_Login_Attempt_Id_Key
         - column:
             name: Ga_User_Source_Id
             type: int

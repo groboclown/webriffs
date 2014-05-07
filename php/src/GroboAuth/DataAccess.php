@@ -212,6 +212,12 @@ class DataAccess {
     }
     
     
+    public static function getPasswordChangeRequests($db, $userSourceId,
+            $start, $end) {
+        // FIXME
+    }
+    
+    
     public static function recordLoginAttempt($db, $userSourceId,
             $wasSuccessful) {
         // FIXME
@@ -223,7 +229,42 @@ class DataAccess {
         // FIXME
         // limited paging support.  Pull in all the attempts (-1), or the
         // N most recent attempts, which means sorting in reverse order.
+        // This allows checking if the M most recent attempts were invalid,
+        // forcing a temporary login ban.
     }
+    
+    
+    public static function countSessions($db, $userSourceId) {
+        // FIXME
+    }
+    
+    
+    public static function getSessions($db, $userSourceId, $start, $end) {
+        // FIXME
+    }
+    
+    
+    public static function expireSession($db, $sessionId) {
+        // FIXME
+    }
+    
+    
+    public static function renewSession($db, $sessionId) {
+        // FIXME
+    }
+    
+    
+    public static function createSession($db, $userSourceId, $userAgent,
+            $remoteAddress, $forwardedFor, $authorizationChallenge,
+            $expirationInMinutes) {
+        // FIXME
+    }
+    
+    
+    
+    
+    
+    
     
     
     

@@ -10,6 +10,8 @@ table:
             autoIncrement: true
             constraints:
                 - constraint:
+                    type: not null
+                - constraint:
                     type: primary key
                     name: Ga_Session_Id_Key
         - column:

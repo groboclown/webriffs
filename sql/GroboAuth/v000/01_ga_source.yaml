@@ -12,6 +12,8 @@ table:
             autoIncrement: true
             constraints:
                 - constraint:
+                    type: not null
+                - constraint:
                     type: primary key
                     name: Ga_Source_Id_Key
         - column:
