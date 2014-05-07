@@ -186,6 +186,9 @@ class DataAccess {
     }
     
     
+    /**
+     * Administration function to see all the active password requests.
+     */
     public static function getAllActivePasswordRequests($db) {
         // FIXME
     }

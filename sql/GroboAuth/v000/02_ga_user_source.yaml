@@ -61,13 +61,30 @@ table:
             constraints:
                 - constraint:
                     type: not null
+                - constraint:
+                    type: no update
+                - constraint:
+                    type: initial value
+                    value: NOW()
+                    syntax: native
+                    platforms: mysql
         - column:
             name: Last_Updated_On
             type: timestamp
+            constraints:
+                - constraint:
+                    type: nullable
+                - constraint:
+                    type: constant update
+                    value: NOW()
+                    syntax: native
+                    platforms: mysql
+                - constraint:
+                    type: initial value
+                    value: "NULL"
+                    syntax: native
+                    platforms: mysql
     constraints:
-        - constraint:
-            type: read
-            columns: Username, Ga_Source_Id
         - constraint:
             type: read
             columns: Ga_User_Id, Ga_Source_Id
