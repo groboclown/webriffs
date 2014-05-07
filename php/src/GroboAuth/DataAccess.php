@@ -163,6 +163,7 @@ class DataAccess {
         if (! $secretKey) {
             $secretKey = createSecretKey();
         }
+        # FIXME the expires_on is now handled by the db layer
         $expUnix = time() + ($expirationMinutes * 60);
         $expStr = date('YYYY-MM-DD HH:MM:SS', $expUnix);
         
