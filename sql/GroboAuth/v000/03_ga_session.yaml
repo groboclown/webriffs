@@ -64,15 +64,17 @@ table:
                     type: not null
                 - constraint:
                     type: constant query
-                    value: Expires_On > NOW()
-                    syntax: native
-                    platforms: mysql
+                    dialects:
+                        - dialect:
+                            platforms: mysql
+                            sql: Expires_on > NOW()
                 - constraint:
                     type: initial value
-                    value: TIMESTAMPADD(MINUTE, {Minutes_From_Now}, NOW())
+                    dialects:
+                        - dialect:
+                            platforms: mysql
+                            sql: TIMESTAMPADD(MINUTE, {Minutes_From_Now}, NOW())
                     argument: Minutes_From_Now
-                    syntax: native
-                    platforms: mysql
         - column:
             name: Created_On
             type: timestamp
@@ -83,9 +85,10 @@ table:
                     type: no update
                 - constraint:
                     type: initial value
-                    value: NOW()
-                    syntax: native
-                    platforms: mysql
+                    dialects:
+                        - dialect:
+                            platforms: mysql
+                            sql: NOW()
         - column:
             name: Last_Updated_On
             type: timestamp
@@ -94,11 +97,10 @@ table:
                     type: nullable
                 - constraint:
                     type: constant update
-                    value: NOW()
-                    syntax: native
-                    platforms: mysql
+                    dialects:
+                        - dialect:
+                            platforms: mysql
+                            sql: NOW()
                 - constraint:
                     type: initial value
                     value: "NULL"
-                    syntax: native
-                    platforms: mysql
