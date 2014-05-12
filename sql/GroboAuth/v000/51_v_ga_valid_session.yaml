@@ -1,23 +1,25 @@
-# Records the requests to reset a password.  The request has a secret key
-# to help ensure the actual reset is valid.
+# Keeps a record of each active login session.  This maintains all the information
+# necessary to validate a user request.
+
 view:
-    viewName: V_GA_PASSWORD_REQUEST
-    query: "
-        SELECT
-                pr.Ga_Password_Request_Id
-                , pr.Ga_User_Source_Id
+    viewName: V_GA_VALID_SESSION
+    query: "SELECT
+                s.Ga_Session_Id
+                , s.Ga_User_Source_Id
                 , us.Ga_User_Id
                 , us.Ga_Source_Id
-                , pr.Secret_Key
-                , pr.Expires_On < NOW() as Is_Expired
-                , pr.Expires_On
-        FROM GA_PASSWORD_REQUEST pr
+                , s.User_Agent
+                , s.Remote_Address
+                , s.Forwarded_For
+                , s.Authorization_Challenge
+        FROM GA_SESSION s
             INNER JOIN GA_USER_SOURCE us
-                ON pr.Ga_User_Source_Id = us.Ga_User_Source_Id
+                ON s.Ga_User_Source_Id = us.Ga_User_Source_Id
+        WHERE s.Expires_On > NOW()
         "
     columns:
         - column:
-            name: Ga_Password_Request_Id
+            name: Ga_Session_Id
             type: int
             constraints:
                 - constraint:
@@ -34,6 +36,8 @@ view:
                     type: foreign key
                     table: GA_USER_SOURCE
                     column: Ga_User_Source_Id
+                - constraint:
+                    type: no update
         - column:
             name: Ga_User_Id
             type: int
@@ -55,23 +59,24 @@ view:
                     table: GA_SOURCE
                     column: Ga_Source_Id
         - column:
-            name: Secret_Key
-            type: nvarchar(2046)
-        - column:
-            name: Was_Request_Handled
-            type: tinyint
+            name: User_Agent
+            type: nvarchar(64)
             constraints:
                 - constraint:
                     type: not null
         - column:
-            name: Is_Expired
-            type: tinyint
-            constraints:
-                - constraint:
-                    type: not null
+            name: Remote_Address
+            type: nvarchar(2048)
         - column:
-            name: Expires_On
-            type: timestamp
+            name: Forwarded_For
+            type: nvarchar(2048)
+        - column:
+            name: Authorization_Challenge
+            type: nvarchar(2048)
             constraints:
                 - constraint:
                     type: not null
+    constraints:
+        - constraint:
+            type: fake index
+            columns: User_Agent, Remote_Address, Forwarded_For, Authorization_Challenge

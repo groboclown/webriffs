@@ -29,7 +29,7 @@ class DataAccess {
                     'unknown' => 'there was an unknown problem during user creation'
                 ));
         }
-        return intval($data['Ga_User_Id']);
+        return intval($data);
     }
     
     
@@ -326,7 +326,8 @@ class DataAccess {
      */
     public static function getPasswordChangeRequests($db, $userSourceId,
             $start, $end) {
-        $data = GaPasswordRequest::$INSTANCE->readBy_Ga_User_Source_Id($db, "Expires_On DESC", $start, $end);
+        $data = GaPasswordRequest::$INSTANCE->readBy_Ga_User_Source_Id($db,
+            "Expires_On DESC", $start, $end);
         if (! $data) {
             // FIXME
             return false;
@@ -335,9 +336,12 @@ class DataAccess {
     }
     
     
-    public static function recordLoginAttempt($db, $userSourceId,
-            $wasSuccessful) {
-        $data = GaLoginAttempt::$INSTANCE->create($db, $userSourceId, $wasSuccessful ? 1 : 0);
+    // FIXME include the user agent, remote address, forwarded for information
+    public static function recordLoginAttempt($db, $userSourceId, $User_Agent,
+            $Remote_Address, $Forwarded_For, $wasSuccessful) {
+        // FIXME
+        $data = GaLoginAttempt::$INSTANCE->create($db, $userSourceId,
+            $wasSuccessful ? 1 : 0);
         if (! $data) {
             // FIXME
             return false;
@@ -347,7 +351,7 @@ class DataAccess {
     
     
     public static function getLoginAttemptsFor($db, $userSourceId,
-            $mostRecentCount = -1) {
+            $timeLimitMinutes = -1) {
         // FIXME
         // limited paging support.  Pull in all the attempts (-1), or the
         // N most recent attempts, which means sorting in reverse order.
@@ -358,8 +362,58 @@ class DataAccess {
     }
     
     
-    public static function countSessions($db, $userSourceId) {
+    /**
+     * Renews the current session for the user with the given authentication
+     * credentials, and returns the user + source + session information.
+     * This will also query the login attempts for the user, to see if the user
+     * account is locked out (lock out logic is performed by the application,
+     * as well as banning offences).
+     *
+     * If the session is expired, then false is returned.
+     */
+    public static function getUserForSession($db, $userAgent, $remoteAddress,
+            $forwardedFor, $authorizationChallenge, $sessionRenewalMinutes,
+            $loginAttemptsMinutes) {
+        $data = VGaValidSession::$INSTANCE->
+            readBy_User_Agent_x_Remote_Address_x_Forwarded_For_x_Authorization_Challenge(
+                $db, $userAgent, $remoteAddress, $forwardedFor,
+                $authorizationChallenge);
+        DataAccess::checkError(VGaValidSession::$INSTANCE,
+            new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem finding the user session'
+            )));
+        if (! $data || sizeof($data) < 0) {
+            return false;
+        }
+        if (sizeof($data) > 1) {
+            // invalid setup.  Expire those sessions, and report as not logged in.
+            foreach ($data as $row) {
+                DataAccess::expireSession($db, $row['Ga_Session_Id']);
+            }
+            return false;
+        }
+        $sessionId = intval($data[0]['Ga_Session_Id']);
+        $userSourceId = intval($data[0]['Ga_User_Source_Id']);
+        DataAccess::renewSession($db, $sessionId, $sessionRenewalMinutes);
+        $loginAttempts = DataAccess::getLoginAttemptsFor($db, $userSourceId,
+            $loginAttemptsMinutes);
+        if (! $loginAttempts) {
+            $loginAttempts = array();
+        }
+        $ret = @array(
+            'Ga_Session_Id'
         // FIXME
+        );
+    }
+    
+    
+    
+    public static function logoutSession($db, $authorizationChallenge) {
+        
+    }
+    
+    
+    public static function countSessions($db, $userSourceId) {
     }
     
     
@@ -373,7 +427,7 @@ class DataAccess {
     }
     
     
-    public static function renewSession($db, $sessionId) {
+    public static function renewSession($db, $sessionId, $sessionRenewalMinutes) {
         // FIXME
     }
     
@@ -497,6 +551,14 @@ class DataAccess {
                     $stack['file'].' @ '.$stack['line'].']';
             }
             error_log($backtrace);
+            
+            // TODO make the error messages language agnostic.
+            
+            // can have special logic for the $errorSource->errnos
+            // error codes, to have friendlier messages.
+            
+            // 1062: already in use.
+            
             throw $exception;
         }
     }

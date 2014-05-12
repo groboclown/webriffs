@@ -168,6 +168,20 @@ class Request
 
     private function getData($options)
     {
+/* Groboclown
+   Check to see if this code bypasses the magic quotes problem.  If not,
+   it will need to be stripped of the escapes.
+   
+function get_post_var($var)
+{
+	$val = $_POST[$var];
+	if (get_magic_quotes_gpc())
+		$val = stripslashes($val);
+	return $val;
+}   
+*/
+    
+    
         if ($this->getOption($options, 'contentLength') > 0) {
             return file_get_contents('php://input');
         } elseif (isset($options['data'])) {

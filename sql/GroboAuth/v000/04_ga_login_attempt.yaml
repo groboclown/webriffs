@@ -29,6 +29,26 @@ table:
                 - constraint:
                     type: no update
         - column:
+            name: User_Agent
+            type: nvarchar(64)
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: no update
+        - column:
+            name: Remote_Address
+            type: nvarchar(2048)
+            constraints:
+                - constraint:
+                    type: no update
+        - column:
+            name: Forwarded_For
+            type: nvarchar(2048)
+            constraints:
+                - constraint:
+                    type: no update
+        - column:
             name: Was_Successful
             type: tinyint
             constraints:

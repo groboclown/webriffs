@@ -2,21 +2,32 @@
 
 namespace GroboAuth;
 
-use Tonic;
+require_once(__DIR__.'/DataAccess.php');
 
 /**
- * The json API for authentication.
- *
- * @uri /auth/login
+ * The API for authentication.  This references IDs and other data
+ * that are within the GroboAuth API.  It is up to the caller to
+ * convert from the local username to the GroboAuth IDs.
  */
-class AuthorizationLogin extends Resource {
+class BasicAuthentication {
+
+    public function create($db, $Ga_User_Source_Id, $User_Agent, $Remote_Address, $Forwarded_For, $Authorization_Challenge, $Minutes_From_Now) {
+
+
+
     /**
-     * @method POST
-     * @return Tonic\Response
+     * @returns the session ID for the authenticated user, or
+     *    false if the user was not authenticated.  If the
+     *    user is banned or otherwise
      */
-    public function login() {
+    public function login($db, $userId, $sourceId, $authenticationCode,
+            $userAgent, $remoteAddress, $forwardedFor, $timeoutMinutes) {
         $db = getDB();
         $auth = getUserIdentity($db);
+        
+        // If the user is already logged in, log them out.
+        
+        
         if ($auth) {
             authLogoutById($db, $auth['user_login_id']);
         }
