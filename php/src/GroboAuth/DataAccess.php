@@ -18,17 +18,46 @@ class DataAccess {
      * @returns the id
      */
     public static function createUser($db) {
-        // FIXME figure out how to reference GA_USER instead
-        $gauser =& GaUser::$INSTANCE;
-        $data = $gauser->create($db, array());
-        if (! $data) {
-            // FIXME Log the error data
+        try {
+            $data = GaUser::$INSTANCE->create($db);
+            DataAccess::checkError(GaUser::$INSTANCE, new Base\ValidationException(array(
+                    'unknown' => 'there was an unknown problem during user creation'
+                )));
+        } catch (Exception $e) {
+            error_log(print_r($e, true));
             throw new Base\ValidationException(array(
-                'unknown' => 'there was an unknown problem during user creation'
-            ));
+                    'unknown' => 'there was an unknown problem during user creation'
+                ));
         }
         return intval($data['Ga_User_Id']);
     }
+    
+    
+    /**
+     * Removes the user and its dependent columns from the GA* tables.
+     * Any other foreign keys on this user must be removed first.
+     */
+    public static function removeUser($db, $id) {
+        $userSources = GaUserSource::$INSTANCE->readBy_Ga_User_Id($db, $id);
+        DataAccess::checkError(GaUserSource::$INSTANCE, new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem accessing the user'
+            )));
+        foreach ($userSources as $usData) {
+            $usId = intval($usData["Ga_User_Source_Id"]);
+            DataAccess::removeUserSource($db, $usId);
+        }
+        $count = GaUser::$INSTANCE->remove($db, $id);
+        DataAccess::checkError(GaUserSource::$INSTANCE, new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem removing the user'
+            )));
+        if ($count <= 0) {
+            error_log("Did not remove any rows for ga_user ".$id);
+            throw new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem removing the user'
+            ));
+        }
+    }
+    
 
     /**
      * Administration function to create a new authentication source.  This
@@ -40,21 +69,17 @@ class DataAccess {
      * @returns the id
      */
     public static function createSource($db, $sourceName) {
-        $gasource =& GaSource::$INSTANCE;
         try {
-            $data = $gasource->create($db, array('Source_Name' => $sourceName));
+            $data = GaSource::$INSTANCE->create($db, $sourceName);
+            DataAccess::checkError(GaSource::$INSTANCE, new Base\ValidationException(array(
+                    'unknown' => 'there was an unknown problem creating the source (already exists?)'
+                )));
+            return intval($data['Ga_Source_Id']);
         } catch (Exception $e) {
             throw new Base\ValidationException(array(
                 'sourceName' => 'already exists'
             ));
         }
-        if (! $data) {
-            // FIXME Log the error data
-            throw new Base\ValidationException(array(
-                'unknown' => 'there was an unknown problem during user creation'
-            ));
-        }
-        return intval($data['Ga_Source_Id']);
     }
 
 
@@ -84,36 +109,19 @@ class DataAccess {
      */
     public static function setUserSource($db, $userId, $sourceId, $username,
             $authenticationCode) {
-        $gausersource =& GaUserSource::$INSTANCE;
-        $data = $gausersource->readAny($db,
-            'SELECT Ga_User_Source_Id,Ga_User_Id,Ga_Source_Id,Username,' .
-            'Authentication_Code FROM GA_USER_SOURCE WHERE Ga_User_Id = ? '.
-            'AND Ga_Source_Id = ?',
-            array($userId, $sourceId));
+        $data = GaUserSource::$INSTANCE->readBy_Ga_User_Id_x_Ga_Source_Id($db, $userId, $sourceId);
+
         if (! $data || sizeof($data) <= 0) {
             // create
-            $data = $gausersource->create($db, array(
-                'Ga_User_Id' => $userId,
-                'Ga_Source_Id' => $sourceId,
-                'Username' => $username,
-                'Authentication_Code' => $authenticationCode
-            ));
+            $data = GaUserSource::$INSTANCE->create($db, $userId, $sourceId, $username, $authenticationCode);
         } else {
             // update
-            $data = $gausersource->update($db, array(
-                'Ga_User_Source_Id' => $data['Ga_User_Source_Id'],
-                'Ga_User_Id' => $userId,
-                'Ga_Source_Id' => $sourceId,
-                'Username' => $username,
-                'Authentication_Code' => $authenticationCode
-            ));
+            $data = GaUserSource::$INSTANCE->update($db, $data[0]['Ga_User_Source_Id'], $username,
+                $authenticationCode);
         }
-        if (! $data) {
-            // FIXME Log the error data
-            throw new Base\ValidationException(array(
-                'unknown' => 'there was an unknown problem during user source creation'
-            ));
-        }
+        DataAccess::checkError(GaUserSource::$INSTANCE, new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem changing the user access'
+            )));
         return intval($data['Ga_User_Source_Id']);
     }
     
@@ -123,104 +131,218 @@ class DataAccess {
      * 'Authentication_Code', or false if no such record exists.
      */
     public static function getUserSource($db, $userId, $sourceId) {
-        $gausersource =& GaUserSource::$INSTANCE;
-        
-        $data = $gausersource->readByGa_User_Id_x_Ga_Source_Id(
+        $data = GaUserSource::$INSTANCE->readBy_Ga_User_Id_x_Ga_Source_Id(
             $db, $userId, $sourceId);
-        if (! $data || sizeof($data) <= 0) {
+        DataAccess::checkError(GaUserSource::$INSTANCE, new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem changing the user access'
+            )));
+        if (sizeof($data) <= 0) {
             return false;
         }
+        
         return array(
-            'Ga_User_Id' => $data['Ga_User_Id'],
-            'Ga_Source_Id' => $data['Ga_Source_Id'],
-            'Ga_User_Source_Id' => $data[0]['Ga_User_Source_Id'],
+            'Ga_User_Id' => intval($data[0]['Ga_User_Id']),
+            'Ga_Source_Id' => intval($data[0]['Ga_Source_Id']),
+            'Ga_User_Source_Id' => intval($data[0]['Ga_User_Source_Id']),
             'Username' => $data[0]['Username'],
             'Authentication_Code' => $data[0]['Authentication_Code']
         );
     }
+
     
-    
-    public static function getUserSourceForUsername($db, $username, $sourceId) {
-        $gausersource =& GaUserSource::$INSTANCE;
-        
-        $data = $gausersource->readByUsername_x_Ga_Source_Id(
-            $db, $username, $sourceId);
-        if (! $data || sizeof($data) <= 0) {
-            return false;
+    /**
+     * Removes the source references for this user id.
+     */
+    public static function removeUserSource($db, $id) {
+        $sessions = GaSession::$INSTANCE->readBy_Ga_User_Source_Id($db, $id);
+        foreach ($sessions as $sessionData) {
+            $sessionId = intval($sessionData["Ga_Session_Id"]);
+            GaSession::$INSTANCE->remove($db, $sessionId);
         }
-        return array(
-            'Ga_User_Id' => $data['Ga_User_Id'],
-            'Ga_Source_Id' => $data['Ga_Source_Id'],
-            'Ga_User_Source_Id' => $data['Ga_User_Source_Id'],
-            'Username' => $data['Username'],
-            'Authentication_Code' => $data['Authentication_Code']
-        );
+        $pwrequests = GaPasswordRequest::$INSTANCE->readBy_Ga_User_Source_Id($db, $id);
+        foreach ($pwrequests as $pwData) {
+            $pwrId = intval($pwData["Ga_Password_Request_Id"]);
+            GaPasswordRequest::$INSTANCE->remove($db, $pwrId);
+        }
+        $las = GaLoginAttempt::$INSTANCE->readBy_Ga_User_Source_Id($db, $id);
+        foreach ($las as $laData) {
+            $laId = intval($laData["Ga_Login_Attempt_Id"]);
+            GaLoginAttempt::$INSTANCE->remove($db, $laId);
+        }
+        GaUserSource::$INSTANCE->remove($db, $id);
     }
     
     
-    public static function createPasswordRequest($db, $userSourceId,
-            $expirationMinutes, $secretKey = NULL) {
-        if (! $secretKey) {
+    /**
+     * For administration purposes.
+     */
+    public static function countUserSources($db) {
+        $data = GaUserSource::$INSTANCE->countAll($db);
+        if ($data === false) {
+            // FIXME
+            return false;
+        }
+        return $data;
+    }
+    
+    
+    /**
+     * For administration purposes.
+     */
+    public static function getUserSources($db, $start, $end) {
+        $data = GaUserSource::$INSTANCE->readAll($db, false, $start, $end);
+        if (! $data || sizeof($data)) {
+            // FIXME
+            return false;
+        }
+        return $data;
+    }
+    
+    
+    /**
+     * Creates an entry in the database for a request for a new
+     * password (not handled).  This does not return the
+     * actual expiration time.
+     *
+     * TODO pending password requests should prevent normal log ins?
+     */
+    public static function createPasswordRequest($db, $userSourceId, $expirationMinutes) {
+        $secretKey = createSecretKey();
+        // ensure the secret key is not already used.
+        while (hasPasswordSecretKey($db, $secretKey)) {
             $secretKey = createSecretKey();
         }
-        # FIXME the expires_on is now handled by the db layer
-        $expUnix = time() + ($expirationMinutes * 60);
-        $expStr = date('YYYY-MM-DD HH:MM:SS', $expUnix);
         
         $gapasswordrequest =& GaPasswordRequest::$INSTANCE;
         
-        $data = $gapasswordrequest->create($db, array(
-            'Ga_User_Source_Id' => $userSourceId,
-            'Secret_Key' => $secretKey,
-            'Was_Request_Handled' => 0,
-            'Expires_On' => $expStr
-        ));
+        $data = $gapasswordrequest->create($db, $userSourceId, $secretKey, 0, $expirationMinutes);
         if (! $data || sizeof($data) <= 0) {
+            // FIXME
             return false;
         }
         return array(
             'Ga_Login_Attempt_Id' => $data['Ga_Login_Attempt_Id'],
             'Ga_User_Source_Id' => $userSourceId,
-            'Secret_Key' => $secretKey,
-            'Expires_On' => $expStr
+            'Secret_Key' => $secretKey
         );
     }
+    
+    
+    private static function hasPasswordSecretKey($db, $secretKey) {
+        $c = GaPasswordRequest::$INSTANCE->countBy_Secret_Key($db, $secretKey);
+        if ($c === false) {
+            // FIXME log error
+            return false;
+        }
+        return $c > 0;
+    }
+    
+    
+    public static function getUserSourceForPasswordRequestSecretKey($db, $secretKey) {
+        $data = GaPasswordRequest::$INSTANCE->readBy_Secret_Key($db, $secretKey);
+        if (! $data) {
+            // FIXME
+            return false;
+        }
+        if (sizeof($data) != 1) {
+            // either there was no data (no request), or
+            // there was a data integrity error
+            return false;
+        }
+        return intval($data[0]['Ga_User_Source_Id']);
+    }
+    
     
     
     /**
      * Administration function to see all the active password requests.
      */
     public static function getAllActivePasswordRequests($db) {
-        // FIXME
+        $data = VGaPasswordRequest::$INSTANCE->readAll($db);
+        if (! $data || sizeof($data) <= 0) {
+            // FIXME
+            return false;
+        }
+        return $data;
     }
     
     
+    /**
+     * Administration function to see all the active password requests for
+     * a given source.
+     */
     public static function getActivePasswordRequestsForSource($db, $sourceId) {
-        // FIXME
+        $data = VGaPasswordRequest::$INSTANCE->readBy_Ga_Source_Id($db, $sourceId);
+        if (! $data || sizeof($data) <= 0) {
+             // FIXME
+           return false;
+        }
+        return $data;
     }
     
     
-    public static function getActivePasswordRequestForUserSource(
-            $db, $userSourceId) {
-        // FIXME
+    /**
+     *
+     */
+    public static function getActivePasswordRequestsForUserSource($db, $userSourceId) {
+        $data = VGaPasswordRequest::$INSTANCE->readBy_Ga_User_Source_Id($db, $userSourceId);
+        if (! $data || sizeof($data) <= 0) {
+            // FIXME
+            return false;
+        }
+        return $data;
     }
     
     
-    public static function handlePasswordRequest($db, $passwordRequestId,
-            $newAuthenticationCode) {
-        // FIXME
+    /**
+     * When one password request for a user-source is completed, ALL
+     * the password requests are marked as handled.
+     */
+    public static function handlePasswordRequest($db, $userSourceId, $secretKey) {
+        // TODO Should be handled in 2 queries.
+        $data = getActivePasswordRequestsForUserSource($db, $userSourceId);
+        if (! $data) {
+            // FIXME
+            return false;
+        }
+        $direct = false;
+        foreach ($data as $row) {
+            if ($row['Secret_Key'] == $secretKey) {
+                // directly handled
+                GaPasswordRequest::$INSTANCE->update($db, $row['Ga_Password_Request_Id'], 1);
+                $direct = true;
+            } else {
+                // indirectly handled
+                GaPasswordRequest::$INSTANCE->update($db, $row['Ga_Password_Request_Id'], 2);
+            }
+        }
+        return ($direct ? 1 : 2);
     }
     
     
+    /**
+     * Returns all the password change requests for a user, including whether
+     * it was handled or not, ordered by most recent first.
+     */
     public static function getPasswordChangeRequests($db, $userSourceId,
             $start, $end) {
-        // FIXME
+        $data = GaPasswordRequest::$INSTANCE->readBy_Ga_User_Source_Id($db, "Expires_On DESC", $start, $end);
+        if (! $data) {
+            // FIXME
+            return false;
+        }
+        return $data;
     }
     
     
     public static function recordLoginAttempt($db, $userSourceId,
             $wasSuccessful) {
-        // FIXME
+        $data = GaLoginAttempt::$INSTANCE->create($db, $userSourceId, $wasSuccessful ? 1 : 0);
+        if (! $data) {
+            // FIXME
+            return false;
+        }
+        return true;
     }
     
     
@@ -231,6 +353,8 @@ class DataAccess {
         // N most recent attempts, which means sorting in reverse order.
         // This allows checking if the M most recent attempts were invalid,
         // forcing a temporary login ban.
+        
+        
     }
     
     
@@ -331,7 +455,7 @@ class DataAccess {
      */
     public static function hashPassword($password, $iterations,
             $portable = FALSE) {
-        $t_hasher = new PasswordHash($iterations, $portable);
+        $t_hasher = new \PasswordHash($iterations, $portable);
         $hash = $t_hasher->HashPassword($password);
         return $hash;
     }
@@ -347,7 +471,7 @@ class DataAccess {
      */
     public static function checkPassword($passwordToCheck, $hash, $iterations,
             $portable = FALSE) {
-        $t_hasher = new PasswordHash($iterations, $portable);
+        $t_hasher = new \PasswordHash($iterations, $portable);
         $check = $t_hasher->CheckPassword($passwordToCheck, $hash);
         return $check;
     }
@@ -360,5 +484,20 @@ class DataAccess {
     public static function createSecretKey($len = 64) {
         $ret = base64_encode(openssl_random_pseudo_bytes($len));
         return $ret;
+    }
+    
+    
+    private static function checkError($errorSource, $exception) {
+        if (sizeof($errorSource->errors) > 0) {
+            $backtrace = 'Database access error (['.
+                implode('], [', $errorSource->errors).']):';
+            foreach (debug_backtrace() as $stack) {
+                $backtrace .= '\n    '.$stack['function'].'('.
+                    implode(', ', $stack['args']).') ['.
+                    $stack['file'].' @ '.$stack['line'].']';
+            }
+            error_log($backtrace);
+            throw $exception;
+        }
     }
 }

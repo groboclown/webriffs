@@ -12,12 +12,17 @@
 <?php
 try{
     require_once '../conf/site.conf.php';
+    require_once '../lib/phpass/PasswordHash.php';
     #require_once '../src/Base/all_base.php';
     require_once '../lib/Tonic/Exception.php';
     require_once '../src/Base/DboBase.php';
     require_once '../src/Base/ValidationException.php';
     require_once '../dbo/GroboAuth/GaUser.php';
-    require_once '../dbo/WebRiffs/QuipTag.php';
+    require_once '../dbo/GroboAuth/GaSource.php';
+    require_once '../dbo/GroboAuth/GaUserSource.php';
+    require_once '../dbo/GroboAuth/GaLoginAttempt.php';
+    require_once '../dbo/GroboAuth/GaPasswordRequest.php';
+    require_once '../dbo/GroboAuth/GaSession.php';
     require_once '../dbo/WebRiffs/User.php';
     require_once '../dbo/WebRiffs/Film.php';
     require_once '../dbo/WebRiffs/FilmVersion.php';
@@ -25,15 +30,75 @@ try{
     require_once '../dbo/WebRiffs/Quip.php';
     require_once '../dbo/WebRiffs/QuipVersion.php';
     require_once '../dbo/WebRiffs/Tag.php';
+    require_once '../dbo/WebRiffs/QuipTag.php';
     require_once '../src/GroboAuth/DataAccess.php';
 
     $db = new PDO($siteConfig['db_config']['dsn'],
         $siteConfig['db_config']['username'],
         $siteConfig['db_config']['password']);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    // Only for testing purposes
+    $db->prepare('DELETE FROM GA_SESSION')->execute();
+    $db->prepare('DELETE FROM GA_LOGIN_ATTEMPT')->execute();
+    $db->prepare('DELETE FROM GA_PASSWORD_REQUEST')->execute();
+    $db->prepare('DELETE FROM GA_USER_SOURCE')->execute();
+    $db->prepare('DELETE FROM GA_USER')->execute();
+    $db->prepare('DELETE FROM GA_SOURCE')->execute();
+    
+    $sources = array();
+    $sources[] = GroboAuth\DataAccess::createSource($db, "Source1");
+    $sources[] = GroboAuth\DataAccess::createSource($db, "Source2");
+    
+    $users = array();
+    $userSources = array();
+    for ($i = 0; $i < 10; $i++) {
+        $id = GroboAuth\DataAccess::createUser($db);
+        $users[] = $id;
+        echo "\n<br>Setting user source for ".$id;
+        $userSources[] = GroboAuth\DataAccess::setUserSource($db, $id, $sources[0], "User0_".$i, '1234');
+        $userSources[] = GroboAuth\DataAccess::setUserSource($db, $id, $sources[1], "User1_".$i, '4321');
+    }
+    $deletedUser = $users[9];
+    GroboAuth\DataAccess::removeUser($db, $users[9]);
+    unset($users[9]);
+    unset($userSources[19]);
+    unset($userSources[18]);
+    
+    // update password
+    $userSources[] = GroboAuth\DataAccess::setUserSource($db, $users[2], $sources[0], "User0_2", '12234');
+    
+    echo "\n<br>User Source count: ".GroboAuth\DataAccess::countUserSources($db);
+    
+    $data = GroboAuth\DataAccess::getUserSource($db, $deletedUser);
+    echo "\n<br>Found deleted user source? ";
+    if (! $data) { echo "no"; } else {
+        print_r($data);
+    }
+    $data = GroboAuth\DataAccess::getUserSource($db, $users[2], $sources[0]);
+    echo "\n<br>Found existing user source? ";
+    if (! $data) { echo "no"; } else {
+        print_r($data);
+    }
+    echo "\n<br>User authentication code: ".$data['Authentication_Code'];
+    $hashedPassword = GroboAuth\DataAccess::hashPassword($data['Authentication_Code'], 10);
+    echo "\n<br>Encoded password: ".$hashedPassword;
+    echo "\n<br>Valid password? ".(GroboAuth\DataAccess::checkPassword($data['Authentication_Code'], $hashedPassword, 10));
+    echo "\n<br>Invalid password? ".(GroboAuth\DataAccess::checkPassword("invalid", $hashedPassword, 10));
+    
+    
+    // Test error conditions
+    try {
+        echo "\n<br>Removing a user with a bad user id";
+        GroboAuth\DataAccess::removeUser($db, -3);
+        echo "\n<br>Did not throw an exception";
+    } catch (Base\ValidationException $e) {
+        echo "\n<br>Caught the error: " . print_r($e, true);
+    }
+    
+    
 
     // FIXME switch these to use the DataAccess instead.
-    $gauser =& GroboAuth\GaUser::$INSTANCE;
     $wr_user =& WebRiffs\User::$INSTANCE;
     $wr_film =& WebRiffs\Film::$INSTANCE;
     $wr_filmVersion =& WebRiffs\FilmVersion::$INSTANCE;
@@ -42,8 +107,6 @@ try{
     $wr_quipTag =& WebRiffs\QuipTag::$INSTANCE;
     $wr_tag =& WebRiffs\Tag::$INSTANCE;
     $wr_filmTag =& WebRiffs\FilmVersionTag::$INSTANCE;
-
-    echo '<br>User row count: ' . $gauser->countAll($db);
 
     # No explicit DB layer for this, nor should there be.  This is for testing
     # only.
@@ -55,51 +118,6 @@ try{
     $db->prepare('DELETE FROM FILM_VERSION')->execute();
     $db->prepare('DELETE FROM FILM')->execute();
     $db->prepare('DELETE FROM USER')->execute();
-    $db->prepare('DELETE FROM GA_USER')->execute();
-
-    $mc = $gauser->countAll($db);
-    echo "<br>User count should be 0, found " . $mc;
-
-    $data = $gauser->create($db, array());
-    $user1 = $data['Ga_User_Id'];
-    echo "<br>Created user ".$user1."\n";
-    
-    $user3 = GroboAuth\DataAccess::createUser($db);
-    echo "<br>Created user (v2) ".$user3."\n";
-
-    $data = $gauser->readAll($db);
-    echo "<br>Read all user:<ol>";
-    foreach ($data as $row) {
-        echo "<li><ol>\n";
-        foreach ($row as $col => $value) {
-            echo "<li>".$col.":".$row[$col]."</li>\n";
-        }
-        echo "</ol></li>\n";
-    }
-    echo "</ol>";
-
-    $data = $gauser->create($db, array());
-    echo "<br>Created:<ol>";
-    foreach ($data as $col => $value) {
-        echo "<li>".$col.":".$data[$col]."</li>\n";
-    }
-    $user2 = $data['Ga_User_Id'];
-    echo "</ol>\n";
-
-    $data = $gauser->readAll($db);
-    echo "<br>Read all user:<ol>";
-    foreach ($data as $row) {
-        echo "<li><ol>\n";
-        foreach ($row as $col => $value) {
-            echo "<li>".$col.":".$row[$col]."</li>\n";
-        }
-        echo "</ol></li>\n";
-    }
-    echo "</ol>";
-
-    $mc = $gauser->countAll($db);
-    echo "<br>User count should be 2, found " . $mc . "\n";
-
 
     $data = $wr_user->create($db, array(
         'Username' => 'user a',

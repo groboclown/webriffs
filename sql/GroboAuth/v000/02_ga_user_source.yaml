@@ -94,4 +94,5 @@ table:
     constraints:
         - constraint:
             type: unique index
+            name: Ga_User_Source__Ga_User_Id__Ga_Source_Id_IDX
             columns: Ga_User_Id, Ga_Source_Id
