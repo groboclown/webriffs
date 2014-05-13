@@ -1,7 +1,9 @@
 # Don’t commit the following directories created by pub.
 client/build/
 client/packages/
+client/web/packages
 client/web/packages/
+client/web/css/packages
 client/web/css/packages/
 
 # Or the files created by dart2js.

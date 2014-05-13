@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html ng-app>
+<head>
+    <title>Create a New User - WebRiffs</title>
+    <link rel="stylesheet" href="css/site.css">
+    <script src="packages/web_components/platform.js"></script>
+    <script src="packages/web_components/dart_support.js"></script>
+</head>
+<body ng-cloak>
+
+<div class="header">
+    <div class="title">WebRiffs</div>
+    <div class="page">Create a New User</div>
+</div>
+<div class="main">
+    <div class="field">
+        <span class="name">Username:</span>
+        <span class="input-value">
+            <input type="text" ng-model="username">
+        </span>
+    </div>
+    <div class="field">
+        <span class="name">E-Mail:</span>
+        <span class="input-value">
+            <input type="text" ng-model="email">
+        </span>
+    </div>
+    <div class="field">
+        <span class="name">Password:</span>
+        <span class="input-value">
+            <input type="password" ng-model="password">
+        </span>
+    </div>
+    <div class="field">
+        <span class="name">Reenter Password:</span>
+        <span class="input-value">
+            <input type="password_again" ng-model="password_again">
+        </span>
+    </div>
+</div>
+<div class="footer"></div>
+
+
+<script type="application/dart" src="main.dart"></script>
+<script type="text/javascript" src="packages/browser/dart.js"></script>
+
+</body>
+</html>
