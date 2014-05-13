@@ -21,6 +21,7 @@ $app = new Tonic\Application($tonicConfig);
 
 $container = new Pimple\Container();
 $container['db_config'] =& $siteConfig['db_config'];
+$container['sources'] =& $siteConfig['sources'];
 
 
 #echo $app; die;

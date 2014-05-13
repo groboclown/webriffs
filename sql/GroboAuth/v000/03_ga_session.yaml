@@ -88,6 +88,13 @@ table:
                             platforms: mysql
                             sql: TIMESTAMPADD(MINUTE, {Minutes_From_Now}, NOW())
                     argument: Minutes_From_Now
+                - constraint:
+                    type: update value
+                    dialects:
+                        - dialect:
+                            platforms: mysql
+                            sql: TIMESTAMPADD(MINUTE, {Minutes_From_Now}, NOW())
+                    argument: Minutes_From_Now
         - column:
             name: Created_On
             type: timestamp
@@ -117,3 +124,9 @@ table:
                 - constraint:
                     type: initial value
                     value: "NULL"
+    constraints:
+        - constraint:
+            type: fake index
+            name: Ga_User_Source__Session_Signature_IDX
+            columns: "Ga_User_Source_Id, User_Agent,
+                Remote_Address, Forwarded_For"

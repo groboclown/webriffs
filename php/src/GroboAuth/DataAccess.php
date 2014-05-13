@@ -4,7 +4,6 @@ namespace GroboAuth;
 
 use PBO;
 use Base;
-use Tonic;
 
 // Requires "PasswordHash" for the hashing functions.
 // Requires the dbo files for GroboAuth.
@@ -109,14 +108,29 @@ class DataAccess {
      */
     public static function setUserSource($db, $userId, $sourceId, $username,
             $authenticationCode) {
-        $data = GaUserSource::$INSTANCE->readBy_Ga_User_Id_x_Ga_Source_Id($db, $userId, $sourceId);
+        
+        if (strlen($username) > 2046) {
+            throw new Base\ValidationException(array(
+                'username' => 'invalid username'
+            ));
+        }
+        if (strlen($authenticationCode) > 2048) {
+            throw new Base\ValidationException(array(
+                'authentication code' => 'authentication code too long'
+            ));
+        }
+        
+        $data = GaUserSource::$INSTANCE->readBy_Ga_User_Id_x_Ga_Source_Id(
+            $db, $userId, $sourceId);
 
         if (! $data || sizeof($data) <= 0) {
             // create
-            $data = GaUserSource::$INSTANCE->create($db, $userId, $sourceId, $username, $authenticationCode);
+            $data = GaUserSource::$INSTANCE->create(
+                $db, $userId, $sourceId, $username, $authenticationCode);
         } else {
             // update
-            $data = GaUserSource::$INSTANCE->update($db, $data[0]['Ga_User_Source_Id'], $username,
+            $data = GaUserSource::$INSTANCE->update($db,
+                $data[0]['Ga_User_Source_Id'], $username,
                 $authenticationCode);
         }
         DataAccess::checkError(GaUserSource::$INSTANCE, new Base\ValidationException(array(
@@ -300,7 +314,8 @@ class DataAccess {
      */
     public static function handlePasswordRequest($db, $userSourceId, $secretKey) {
         // TODO Should be handled in 2 queries.
-        $data = getActivePasswordRequestsForUserSource($db, $userSourceId);
+        $data = DataAccess::getActivePasswordRequestsForUserSource(
+            $db, $userSourceId);
         if (! $data) {
             // FIXME
             return false;
@@ -339,11 +354,27 @@ class DataAccess {
     // FIXME include the user agent, remote address, forwarded for information
     public static function recordLoginAttempt($db, $userSourceId, $User_Agent,
             $Remote_Address, $Forwarded_For, $wasSuccessful) {
-        // FIXME
+        // sanitize data
+        if (! is_string($User_Agent) || ! is_string($Remote_Address) ||
+                ! is_string($Forwarded_For)) {
+            throw new Base\ValidationException(array(
+                'unknown' => 'invalid user signature'
+            ));
+        }
+        if (strlen($User_Agent) > 64) {
+            $User_Agent = substr($User_Agent, 0, 64);
+        }
+        if (strlen($Remote_Address) > 2048) {
+            $Remote_Address = substr($Remote_Address, 0, 2048);
+        }
+        if (strlen($Forwarded_For) > 2048) {
+            $Forwarded_For = substr($Forwarded_For, 0, 2048);
+        }
+        
         $data = GaLoginAttempt::$INSTANCE->create($db, $userSourceId,
             $wasSuccessful ? 1 : 0);
         if (! $data) {
-            // FIXME
+            // FIXME error checking
             return false;
         }
         return true;
@@ -369,11 +400,30 @@ class DataAccess {
      * account is locked out (lock out logic is performed by the application,
      * as well as banning offences).
      *
-     * If the session is expired, then false is returned.
+     * If the session is expired, or the user was never logged in,
+     * then false is returned.
      */
     public static function getUserForSession($db, $userAgent, $remoteAddress,
             $forwardedFor, $authorizationChallenge, $sessionRenewalMinutes,
             $loginAttemptsMinutes) {
+        // sanitize data
+        if (! is_string($userAgent) || ! is_string($remoteAddress) ||
+                ! is_string($forwardedFor) ||
+                ! is_string($authorizationChallenge)) {
+            throw new Base\ValidationException(array(
+                'unknown' => 'invalid user signature'
+            ));
+        }
+        if (strlen($userAgent) > 64) {
+            $userAgent = substr($userAgent, 0, 64);
+        }
+        if (strlen($remoteAddress) > 2048) {
+            $remoteAddress = substr($remoteAddress, 0, 2048);
+        }
+        if (strlen($forwardedFor) > 2048) {
+            $forwardedFor = substr($forwardedFor, 0, 2048);
+        }
+        
         $data = VGaValidSession::$INSTANCE->
             readBy_User_Agent_x_Remote_Address_x_Forwarded_For_x_Authorization_Challenge(
                 $db, $userAgent, $remoteAddress, $forwardedFor,
@@ -400,20 +450,27 @@ class DataAccess {
         if (! $loginAttempts) {
             $loginAttempts = array();
         }
+        $userId = intval($data[0]['Ga_User_Id']);
+        $sourceId = intval($data[0]['Ga_Source_Id']);
         $ret = @array(
-            'Ga_Session_Id'
-        // FIXME
+            'Ga_Session_Id' => $sessionId,
+            'Ga_User_Id' => $userId,
+            'Ga_Source_Id' => $sourceId,
+            'Login_Attempts' => $loginAttempts,
         );
+        return $ret;
     }
     
     
     
-    public static function logoutSession($db, $authorizationChallenge) {
-        
+    public static function logoutSession($db, $sessionId) {
+        // For now, just expire the session
+        DataAccess::expireSession($db, $sessionId);
     }
     
     
     public static function countSessions($db, $userSourceId) {
+        // FIXME
     }
     
     
@@ -423,19 +480,94 @@ class DataAccess {
     
     
     public static function expireSession($db, $sessionId) {
-        // FIXME
+        // Force the session expiration time to be a lower number.
+        // TODO the expiration of sessions should be better tracked.
+        
+        GaSession::$INSTACE->update($db, $sessionId, -10000);
+        DataAccess::checkError(GaSession::$INSTANCE,
+            new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem with the user session'
+            )));
     }
     
     
     public static function renewSession($db, $sessionId, $sessionRenewalMinutes) {
-        // FIXME
+        $data = GaSession::$INSTACE->update($db, $sessionId, $sessionRenewalMinutes);
+        DataAccess::checkError(GaSession::$INSTANCE,
+            new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem with the user session'
+            )));
+        if ($data["*rows"] != 1) {
+            throw new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem with the user session'
+            ));
+        }
     }
     
     
+    /**
+     * Returns the session ID for the given information.  If the session
+     * already exists, it will be expired.  If another session shares the
+     * authorization challenge, then "false" is returned.
+     */
     public static function createSession($db, $userSourceId, $userAgent,
             $remoteAddress, $forwardedFor, $authorizationChallenge,
             $expirationInMinutes) {
-        // FIXME
+        
+        if  (! is_int($expirationInMinutes) || $expirationInMinutes < 1) {
+            throw new Base\ValidationException(array(
+                'expiration' => 'invalid expiration time'
+            ));
+        }
+        
+        if (! is_string($authorizationChallenge) ||
+                strlen($authorizationChallenge) > 2048) {
+            throw new Base\ValidationException(array(
+                'authorization challenge' => 'invalid generation of the authorization challenge'
+            ));
+        }
+        
+        // sanitize data
+        if (! is_string($userAgent) || ! is_string($remoteAddress) ||
+                ! is_string($forwardedFor)) {
+            throw new Base\ValidationException(array(
+                'unknown' => 'invalid user signature'
+            ));
+        }
+        if (strlen($userAgent) > 64) {
+            $userAgent = substr($userAgent, 0, 64);
+        }
+        if (strlen($remoteAddress) > 2048) {
+            $remoteAddress = substr($remoteAddress, 0, 2048);
+        }
+        if (strlen($forwardedFor) > 2048) {
+            $forwardedFor = substr($forwardedFor, 0, 2048);
+        }
+        
+        
+        // Invalidate existing sessions for this user signature
+        $data = GaSession::$INSTANCE->
+            readBy_Ga_User_Source_Id_x_User_Agent_x_Remote_Address_x_Forwarded_For(
+                $db, $userSourceId, $userAgent, $remoteAddress, $forwardedFor);
+        DataAccess::checkError(GaSession::$INSTANCE,
+            new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem with the user session'
+            )));
+        foreach ($data as $row) {
+            DataAccess::expireSession($db, $row['Ga_Session_Id']);
+        }
+        
+        $data = GaSession::$INSTANCE->create($db,
+            $userSourceId, $userAgent, $remoteAddress, $forwardedFor,
+            $authorizationChallenge, $expirationInMinutes);
+        DataAccess::checkError(GaSession::$INSTANCE,
+            new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem with the user session'
+            )));
+        if ($data === false) {
+            return false;
+        }
+        return intval($data);
     }
     
     

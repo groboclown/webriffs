@@ -5,15 +5,16 @@ namespace WebRiffs;
 
 use Tonic;
 
-class Resource extends Tonic\Resource
-{
+class Resource extends Tonic\Resource {
     /**
      * Validate that the given variable is a non-null number.
      */
     protected function validateId($id, $name) {
         if ($id == null || !is_int($id)) {
             // TODO include the id name in the error
-            throw new Tonic\NotAcceptableException;
+            throw new Base\ValidationException(array(
+                    $name => "not valid"
+                ));
         }
         return $id;
     }
@@ -34,26 +35,45 @@ class Resource extends Tonic\Resource
             throw new Tonic\NotFoundException;
         }
     }
-
-
-
-    protected function fetchSingleRow($statement) {
-        $row = $statement->fetch();
-        if (!$row) {
-            throw new Tonic\NotFoundException;
+    
+    
+    protected function getSourceId($sourceName) {
+        // For now, assume only one source.
+        if (! $this->container['sources'][$sourceName] ||
+                ! is_int($this->container['sources'][$sourceName]['id'])) {
+            error_log("No registered source '".$sourceName."'");
+            throw new Tonic\UnauthorizedException();
         }
-        $second = $statement->fetch();
-        if (!$second) {
-            return $row;
+        return validateId($this->container['sources'][$sourceName]['id'],
+            "source");
+    }
+    
+    
+    /**
+     * Ensures the request is authenticated, and stores the user authentication
+     * data in the container['user'].
+     */
+    function authenticated() {
+        if (! $_COOKIE[Resource::COOKIE_NAME]) {
+            throw new Tonic\UnauthorizedException;
         }
-        throw new Tonic\ConditionException;
+        $cookie = $_COOKIE[Resource::COOKIE_NAME];
+        
+        $db =& getDB();
+        $data =& AuthenticationLayer::getUserSession($db, $cookie,
+            $this->request->userAgent, $this->request->remoteAddr,
+            null,
+            Resource::DEFAULT_SESSION_TIMEOUT);
+        
+        $this->container['user'] =& $data;
     }
 
 
     function secure(string $role, int $minLevel) {
-        $db = getDB();
+        authenticated();
+        $db =& getDB();
 
-        $auth = getUserIdentity($db);
+        $auth =& $this->container['user'];
         if (! isUserAuthSecureForRole($auth, $role) {
             throw new Tonic\UnauthorizedException;
         }
@@ -94,4 +114,9 @@ class Resource extends Tonic\Resource
         }
     }
 
+    
+    
+    
+    const COOKIE_NAME = "WRAUTHCK";
+    const DEFAULT_SESSION_TIMEOUT = 3 * 60;
 }

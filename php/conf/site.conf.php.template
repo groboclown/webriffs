@@ -2,7 +2,7 @@
 /**
  * WebRiffs configuration file
  * ==========================================================
- * To use: rename to webriffs.conf.php and tweak as you like
+ * To use: rename to site.conf.php and tweak as you like
  */
 
 $siteConfig = array(
@@ -31,6 +31,16 @@ $siteConfig = array(
         'password' => ''
     ),
 
-
+    /**
+     * Authentication sources
+     */
+    'sources' => array(
+        'local' => array(
+            // The internal GA_SOURCE ID.
+            'id' => 1
+            
+            // FIXME the method for authenticating the user / key
+        ),
+    );
 
 );
