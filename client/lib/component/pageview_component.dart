@@ -6,11 +6,15 @@ import '../service/page.dart';
 
 
 /**
- * Abstract top-level component for ensuring the logic behind the
+ * Simple top-level component for ensuring the logic behind the
  * page transitions works as expected.
  */
-class AbstractPageView {
-    AbstractPageView(RouteProvider routeProvider, PageService page) {
+@Component(
+    selector: 'pageview',
+    templateUrl: 'packages/webriffs_client/component/pageview_component.html',
+    publishAs: 'cmp')
+class PageViewComponent {
+    PageViewComponent(RouteProvider routeProvider, PageService page) {
         page.route(routeProvider);
     }
 }

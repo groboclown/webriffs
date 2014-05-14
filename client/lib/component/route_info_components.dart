@@ -12,14 +12,20 @@ import '../service/page.dart';
     templateUrl: 'packages/webriffs_client/component/pagetitle_component.html',
     publishAs: 'cmp')
 class PageTitleComponent {
-    PageService _page;
-
-    String get name => _page.currentPage;
+    final Logger _log = new Logger('components.PageTitleComponent');
+    @NgOneWay('name')
+    String name;
 
     @NgOneWay('title')
-    String get title => name == null ? "WebRiffs" : (name + " - WebRiffs");
+    String title = "WebRiffs";
 
-    PageTitleComponent(this._page);
+    PageTitleComponent(PageService page) {
+        page.addListener((p) {
+            name = p.currentPage;
+            title = name == null ? "WebRiffs" : (name + " - WebRiffs");
+            _log.info("Set the title to [$title]");
+        });
+    }
 }
 
 
@@ -28,13 +34,19 @@ class PageTitleComponent {
     templateUrl: 'packages/webriffs_client/component/pageheader_component.html',
     publishAs: 'cmp')
 class PageHeaderComponent {
-    PageService _page;
-
-    String get name => _page.currentPage;
+    final Logger _log = new Logger('components.PageTitleComponent');
+    @NgOneWay('name')
+    String name;
 
     @NgOneWay('title')
-    String get title => name == null ? "" : name;
+    String title;
 
-    PageHeaderComponent(this._page);
+    PageHeaderComponent(PageService page) {
+        page.addListener((p) {
+            name = p.currentPage;
+            title = name == null ? "" : name;
+            _log.info("Set the title to [$title]");
+        });
+    }
 }
 

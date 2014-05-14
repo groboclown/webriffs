@@ -7,12 +7,17 @@ void webRiffsRouteInitializer(Router router, RouteViewFactory view) {
 
     router.root
         ..addRoute(
-                name: 'Create User',
+                defaultRoute: true,
+                name: 'Welcome - WebRiffs',
+                path: '/',
+                enter: view('./view/home.html'))
+        ..addRoute(
+                name: 'Create User - WebRiffs',
                 path: '/user/create',
                 enter: view('./view/create_user.html'))
         ..addRoute(
-                name: 'Login',
-                path: 'user/login',
+                name: 'Login - WebRiffs',
+                path: '/user/login',
                 enter: view('./view/'))
     ;
 }
