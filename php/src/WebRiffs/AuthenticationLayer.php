@@ -187,7 +187,7 @@ class AuthenticationLayer {
         $data['User_Id'] = intval($userData[0]['User_Id']);
         $data['Username'] = $userData[0]['Username'];
         $data['Contact'] = $userData[0]['Contact'];
-        $data['Is_Site_Admin'] = (intval($userData[0]['Is_Site_Admin']) == 1 ? true : false);
+        $data['Is_Admin'] = (intval($userData[0]['Is_Site_Admin']) == 1 ? true : false);
         $data['Created_On'] = $userData[0]['Created_On'];
         $data['Last_Updated_On'] = $userData[0]['Last_Updated_On'];
         

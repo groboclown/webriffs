@@ -20,13 +20,17 @@ if [ ! -d exports/dbo ]; then
     echo "You need to run gen-dbo.sh first."
     exit 1
 fi
+if [ ! -d ../client/build ]; then
+    echo "You need to run gen-client.sh first."
+    exit 1
+fi
 
 test -d deployed || mkdir deployed
 test -d deployed && rm -r deployed/* 2>/dev/null
 
 # Deploy the client files
 test -d "$DEPLOYMENT_DIR/web" || mkdir "$DEPLOYMENT_DIR/web"
-#  FIXME add client files
+cp -R ../client/build/web/* "$DEPLOYMENT_DIR/web/."
 
 # Deploy the PHP files
 cp -R exports/dbo ../php/lib ../php/web ../php/src "$DEPLOYMENT_DIR/." || exit 1

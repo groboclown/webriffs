@@ -7,6 +7,29 @@ use GroboAuth;
 use Base;
 
 /**
+ * @uri /authentication/current
+ */
+class AuthenticationCurrent extends Resource {
+    /**
+     * Retrieve the current user information.  This is made 'post' to prevent
+     * cross-site scripting attacks gaining more information than they need.
+     *
+     * @method POST
+     * @authenticated
+     */
+    public function data() {
+        $user =& $this->container['user'];
+        return array(
+            'username' => $user['Username'],
+            'contact' => $user['Contact'],
+            'is_admin' => $user['Is_Site_Admin'],
+            'created_on' => $user['Created_On'],
+            'last_updated_on' => $user['Last_Updated_On']
+        );
+    }
+}
+
+/**
  * @uri /authentication/login
  */
 class AuthenticationLogin extends Resource {
