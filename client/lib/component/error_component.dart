@@ -23,6 +23,9 @@ class ErrorComponent {
     @NgTwoWay('notices')
     List<String> get notices => _errors.notices;
 
+    @NgOneWay('has-criticals')
+    bool get hasCriticalMessages => _errors.criticalError != null;
+
     ErrorComponent(this._errors);
 }
 

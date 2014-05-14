@@ -30,7 +30,11 @@ test -d deployed && rm -r deployed/* 2>/dev/null
 
 # Deploy the client files
 test -d "$DEPLOYMENT_DIR/web" || mkdir "$DEPLOYMENT_DIR/web"
-cp -R ../client/build/web/* "$DEPLOYMENT_DIR/web/."
+cp -R ../client/build/web/* ../client/build/web/.ht* "$DEPLOYMENT_DIR/web/."
+# For native Dart browsers
+cp -R ../client/web/* ../client/web/.ht* "$DEPLOYMENT_DIR/web/."
+# A work-around for issues w/ strangely bundled dart dirs
+test -d ../client/build/x-web && cp -R ../client/build/x-web/* ../client/build/x-web/.ht* "$DEPLOYMENT_DIR/web/."
 
 # Deploy the PHP files
 cp -R exports/dbo ../php/lib ../php/web ../php/src "$DEPLOYMENT_DIR/." || exit 1

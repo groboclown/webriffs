@@ -1,33 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{{title}} - WebRiffs</title>
+    <page-title></page-title>
     <link rel="stylesheet" href="css/site.css">
     <script src="packages/web_components/platform.js"></script>
     <script src="packages/web_components/dart_support.js"></script>
 </head>
 <body ng-cloak>
 <div class="head">
-    <h1>WebRiffs</h1>
-    <h3>{{title}}</h3>
+    <page-header></page-header>
 </div>
+<error-report></error-report>
 
+<ng-view></ng-view>
 
-<div class="main" login>
-    <div class="field">
-        <span class="name">Username:</span>
-        <span class="input-value">
-            <input type="text" ng-model="username">
-        </span>
-    </div>
-    <div class="field">
-        <span class="name">Password:</span>
-        <span class="input-value">
-            <input type="password" ng-model="password">
-        </span>
-    </div>
-    <div class="control" ng-click="ctrl.login(username, password)">Login</div>
-</div>
 
 <div class="footer">
     Copyright (c) ? by ?
