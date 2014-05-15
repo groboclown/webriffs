@@ -8,10 +8,13 @@ import 'package:webriffs_client/routing/webriffs_router.dart';
 import 'package:webriffs_client/component/pageheader_component.dart';
 import 'package:webriffs_client/component/errorstatus_component.dart';
 import 'package:webriffs_client/component/createuser_component.dart';
+import 'package:webriffs_client/component/forgotpassword_component.dart';
+import 'package:webriffs_client/component/login_component.dart';
 import 'package:webriffs_client/service/error.dart';
 import 'package:webriffs_client/service/user.dart';
 import 'package:webriffs_client/createuser.dart';
 import 'package:webriffs_client/errorstatus.dart';
+import 'package:webriffs_client/login.dart';
 
 
 class WebRiffsModule extends Module {
@@ -22,6 +25,9 @@ class WebRiffsModule extends Module {
         type(CreateUserComponent);
         type(CreateUserController);
         type(ErrorStatusController);
+        type(ForgotPasswordComponent);
+        type(LoginComponent);
+        type(LoginController);
 
         // Stateful Services - that's why they're value, not type
         bind(ErrorService);

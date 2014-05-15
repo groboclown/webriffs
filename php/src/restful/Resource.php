@@ -62,13 +62,13 @@ class Resource extends Base\Resource {
         }
         $cookie = $_COOKIE[Resource::COOKIE_NAME];
         
-        $db =& $this->getDB();
-        $data =& AuthenticationLayer::getUserSession($db, $cookie,
+        $db = $this->getDB();
+        $data = AuthenticationLayer::getUserSession($db, $cookie,
             $this->request->userAgent, $this->request->remoteAddr,
             null,
             Resource::DEFAULT_SESSION_TIMEOUT);
         
-        $this->container['user'] =& $data;
+        $this->container['user'] = $data;
     }
 
 

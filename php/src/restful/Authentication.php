@@ -49,19 +49,19 @@ class AuthenticationLogin extends Resource {
     public function login() {
         $db =& $this->getDB();
         $data =& $this->getRequestData();
-        if (! $data['username'] || ! $data['password'] ||
-                ! $data['source'] ||
-                ! is_string($data['username']) ||
-                ! is_string($data['password']) ||
-                ! is_string($data['source'])) {
+        if (! $data->{'username'} || ! $data->{'password'} ||
+                ! $data->{'source'} ||
+                ! is_string($data->{'username'}) ||
+                ! is_string($data->{'password'}) ||
+                ! is_string($data->{'source'})) {
             throw new Base\ValidationException(array(
                 'data' => 'invalid request data'
             ));
         }
         
         $userData =& AuthenticationLayer::login($db,
-            $data['username'], getSourceId($data['source']),
-            $data['password'],
+            $data->{'username'}, getSourceId($data->{'source'}),
+            $data->{'password'},
             // TODO make this configurable per source
             AuthenticationLayer::validatePassword,
             
@@ -124,26 +124,30 @@ class AuthenticationCreate extends Resource {
      */
     public function createUser() {
         $db = $this->getDB();
-        $data =& $this->getRequestData();
-        print_r($data);
-        die;
-        if (! $data.username || ! $data.password ||
-                ! $data.source || ! $data.contact ||
-                ! is_string($data.username) ||
-                ! is_string($data.password) ||
-                ! is_string($data.contact) ||
-                ! is_string($data.source)) {
+        $data = $this->getRequestData();
+        #die;
+echo "username: ".$data->{'username'}." (false? ".(! $data->{'username'}).") (not is_string? ".! is_string($data->{'username'}).")\n";
+echo "password: ".$data->{'password'}." (false? ".(! $data->{'password'}).") (not is_string? ".! is_string($data->{'password'}).")\n";
+echo "contact: ".$data->{'contact'}." (false? ".(! $data->{'contact'}).") (not is_string? ".! is_string($data->{'contact'}).")\n";
+echo "source: ".$data->{'source'}." (false? ".(! $data->{'source'}).") (not is_string? ".! is_string($data->{'source'}).")\n";
+        if (! $data->{'username'} || ! $data->{'password'} ||
+                ! $data->{'source'} || ! $data->{'contact'} ||
+                ! is_string($data->{'username'}) ||
+                ! is_string($data->{'password'}) ||
+                ! is_string($data->{'contact'}) ||
+                ! is_string($data->{'source'})) {
+            var_dump($data);
             throw new Base\ValidationException(array(
-                'data' => 'invalid request data'
+                'json' => 'invalid request data'
             ));
         }
         
         // FIXME make this configurable per source
-        $password = AuthenticationLayer::hashPassword($data['password']);
+        $password = AuthenticationLayer::hashPassword($data->{'password'});
         
-        $userId = AuthenticationLayer::createUser($db, $data['username'],
-            getSourceId($data['source']), $data['username'],
-            $password, $data['contact'], false);
+        $userId = AuthenticationLayer::createUser($db, $data->{'username'},
+            getSourceId($data->{'source'}), $data->{'username'},
+            $password, $data->{'contact'}, false);
         
         // don't expose the internal ID to the user.
         $this->response->body = array(

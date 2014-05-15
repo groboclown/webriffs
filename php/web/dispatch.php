@@ -59,8 +59,11 @@ try {
 
 
     // decode JSON data received from HTTP request
-    if ($request->contentType == 'application/json') {
+    if ($request->contentType == 'application/json' ||
+            $request->contentType == 'text/json') {
         $request->data = json_decode($request->data);
+    } else {
+        throw new Tonic\NotAcceptableException();
     }
 
     $resource = $app->getResource($request);

@@ -1,0 +1,31 @@
+<div>
+    <div ng-if="cmp.userService.loggedIn">
+        <div>{{cmp.userService.info.username}}</div>
+    </div>
+    <div ng-if="! cmp.userService.loggedIn">
+        <div>
+            <div>
+                <span>
+                    <label>Username: </label>
+                    <input type="text" ng-model="cmp.value.username">
+                    <span ng-if="cmp.value.usernameError != null">{{ cmp.value.usernameError }}</span>
+                </span>
+            </div>
+            <div>
+                <span>
+                    <label>Password: </label>
+                    <input type="password" ng-model="cmp.value.password">
+                    <span ng-if="cmp.value.passwordError != null">{{ cmp.value.passwordError }}</span>
+                </span>
+            </div>
+        </div>
+        <div>
+            <span ng-if="cmp.hasError()">
+                <span>No Submit</span>
+            </span>
+            <span ng-if="!cmp.hasError()">
+                <span ng-click="cmp.submit()">Submit</span>
+            </span>
+        </div>
+    </div>
+</div>

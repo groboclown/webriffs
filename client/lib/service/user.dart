@@ -10,11 +10,15 @@ import 'error.dart';
 
 /**
  * Corresponds to API requests to the Authentication.php file.
+ *
+ * FIXME make another service that handles API requests to the server
+ * in a generic manner.
  */
 @Injectable()
 class UserService {
     final Http _http;
     final ErrorService _error;
+    final Map<String, dynamic> _headers;
 
     Future _loaded;
 
@@ -22,7 +26,9 @@ class UserService {
     bool loggedIn = false;
 
 
-    UserService(this._http, this._error) {
+    UserService(this._http, this._error) : _headers = {} {
+        _headers['Content-Type'] = 'application/json';
+
         _loaded = Future.wait([loadUserDetails()]);
     }
 
