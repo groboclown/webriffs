@@ -148,6 +148,7 @@ error_log("Ga_User_Source_Id = ".$data['Ga_User_Source_Id']);
      * 'Authentication_Code', or false if no such record exists.
      */
     public static function getUserSource($db, $userId, $sourceId) {
+    error_log("reading user source for [".$userId."] [".$sourceId."]");
         $data = GaUserSource::$INSTANCE->readBy_Ga_User_Id_x_Ga_Source_Id(
             $db, $userId, $sourceId);
         DataAccess::checkError(GaUserSource::$INSTANCE, new Base\ValidationException(array(
@@ -440,6 +441,7 @@ error_log("Ga_User_Source_Id = ".$data['Ga_User_Source_Id']);
                 'unknown' => 'there was an unknown problem finding the user session'
             )));
         if (! $data || sizeof($data) < 0) {
+            error_log("no rows for [".$userAgent."] [".$remoteAddress."] [".$forwardedFor."] [".$authorizationChallenge."]");
             return false;
         }
         if (sizeof($data) > 1) {
@@ -447,6 +449,7 @@ error_log("Ga_User_Source_Id = ".$data['Ga_User_Source_Id']);
             foreach ($data as $row) {
                 DataAccess::expireSession($db, $row['Ga_Session_Id']);
             }
+            error_log("multiple rows for [".$userAgent."] [".$remoteAddress."] [".$forwardedFor."] [".$authorizationChallenge."]");
             return false;
         }
         $sessionId = intval($data[0]['Ga_Session_Id']);
@@ -465,6 +468,8 @@ error_log("Ga_User_Source_Id = ".$data['Ga_User_Source_Id']);
             'Ga_Source_Id' => $sourceId,
             'Login_Attempts' => $loginAttempts,
         );
+        error_log("valid session for [".$userAgent."] [".$remoteAddress."] [".$forwardedFor."] [".$authorizationChallenge."]");
+
         return $ret;
     }
     
@@ -490,7 +495,7 @@ error_log("Ga_User_Source_Id = ".$data['Ga_User_Source_Id']);
         // Force the session expiration time to be a lower number.
         // TODO the expiration of sessions should be better tracked.
         
-        GaSession::$INSTACE->update($db, $sessionId, -10000);
+        GaSession::$INSTANCE->update($db, $sessionId, -10000);
         DataAccess::checkError(GaSession::$INSTANCE,
             new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem with the user session'
@@ -499,7 +504,7 @@ error_log("Ga_User_Source_Id = ".$data['Ga_User_Source_Id']);
     
     
     public static function renewSession($db, $sessionId, $sessionRenewalMinutes) {
-        $data = GaSession::$INSTACE->update($db, $sessionId, $sessionRenewalMinutes);
+        $data = GaSession::$INSTANCE->update($db, $sessionId, $sessionRenewalMinutes);
         DataAccess::checkError(GaSession::$INSTANCE,
             new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem with the user session'
@@ -561,7 +566,8 @@ error_log("Ga_User_Source_Id = ".$data['Ga_User_Source_Id']);
                 'unknown' => 'there was an unknown problem with the user session'
             )));
         foreach ($data as $row) {
-            DataAccess::expireSession($db, $row['Ga_Session_Id']);
+        // FIXME for testing purposes
+            //DataAccess::expireSession($db, $row['Ga_Session_Id']);
         }
         
         $data = GaSession::$INSTANCE->create($db,

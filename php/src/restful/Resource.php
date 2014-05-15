@@ -58,6 +58,9 @@ class Resource extends Base\Resource {
      */
     function authenticated() {
         if (! $_COOKIE[Resource::COOKIE_NAME]) {
+            error_log("no cookie for ".Resource::COOKIE_NAME);
+            print_r($_COOKIE);
+            
             throw new Tonic\UnauthorizedException;
         }
         $cookie = $_COOKIE[Resource::COOKIE_NAME];

@@ -71,7 +71,9 @@ class AuthenticationLogin extends Resource {
             // TODO make the session minutes settable by the user,
             // within reason
             Resource::DEFAULT_SESSION_TIMEOUT);
-        
+            
+error_log("login returned");
+print_r($userData);
         setcookie(Resource::COOKIE_NAME, $userData['Authentication_Challenge']);
         
         $userData['message'] = 'okay';

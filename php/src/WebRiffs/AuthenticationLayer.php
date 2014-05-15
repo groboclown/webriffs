@@ -81,9 +81,6 @@ class AuthenticationLayer {
                 ));
         }
         
-        // FIXME strip the User_Agent and Forwarded_For down to within the
-        // size limits.  And Remote_Address
-        
         // We allow these to be null, but we can't insert a null.
         if (! $Remote_Address || ! is_string($Remote_Address)) {
             $Remote_Address = "";
@@ -97,6 +94,9 @@ class AuthenticationLayer {
                 'username' => 'problem accessing users'
             )));
         if (sizeof($userData) != 1) {
+            // FIXME add in a bit of slowdown by performing a needless password
+            // check.
+        
             throw new Base\ValidationException(array(
                 // DO NOT let the caller know that the user doesn't exist.
                 'authentication' => 'authentication failed'
@@ -121,11 +121,13 @@ class AuthenticationLayer {
         }
         
         $userSourceId = intval($userSourceData['Ga_User_Source_Id']);
+        error_log("found user source ".$userSourceId);
         
         $loginValid = $authenticationCheckFunction(
             $userSourceData['Username'],
             $authenticationCode,
             $userSourceData['Authentication_Code']);
+        error_log("found validation result: ".$loginValid);
         
         // FIXME limitation in the code: we can only record login attempts
         // for valid user/source pairs.  If someone is brute forcing the system,
@@ -149,11 +151,14 @@ class AuthenticationLayer {
         // session information
         do {
             $authenticationChallenge = GroboAuth\DataAccess::createSecretKey();
+error_log("Generated auth key ".$authenticationChallenge);
         
             $sessionId = GroboAuth\DataAccess::createSession($db, $userSourceId,
                 $User_Agent, $Remote_Address, $Forwarded_For,
                 $authenticationChallenge, $sessionRenewalMinutes);
+error_log("Session id is ".$sessionId);
         } while ($sessionId === false);
+error_log("Session id is ".$sessionId);
         
         return array(
             'User_Id' => $userId,
@@ -176,9 +181,18 @@ class AuthenticationLayer {
     public static function getUserSession($db, $authenticationChallenge,
             $User_Agent, $Remote_Address, $Forwarded_For,
             $sessionRenewalMinutes) {
+        
+        // We allow these to be null, but we can't insert a null.
+        if (! $Remote_Address || ! is_string($Remote_Address)) {
+            $Remote_Address = "";
+        }
+        if (! $Forwarded_For || ! is_string($Forwarded_For)) {
+            $Forwarded_For = "";
+        }
+        
         $data = GroboAuth\DataAccess::getUserForSession($db,
             $User_Agent, $Remote_Address, $Forwarded_For,
-            $sessionRenewalMinutes);
+            $authenticationChallenge, $sessionRenewalMinutes, 10);
         if ($data === false) {
             throw new Tonic\UnauthorizedException();
         }
