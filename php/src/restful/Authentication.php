@@ -2,6 +2,8 @@
 
 namespace WebRiffs;
 
+require_once(__DIR__.'/Resource.php');
+
 use Tonic;
 use GroboAuth;
 use Base;
@@ -36,7 +38,7 @@ class AuthenticationLogin extends Resource {
     /**
      * @method GET
      */
-    public function list() {
+    public function fetch() {
         throw new Tonic\MethodNotAllowedException();
     }
 
@@ -82,7 +84,7 @@ class AuthenticationLogout extends Resource {
     /**
      * @method GET
      */
-    public function list() {
+    public function fetch() {
         throw new Tonic\MethodNotAllowedException();
     }
 
@@ -112,7 +114,7 @@ class AuthenticationCreate extends Resource {
     /**
      * @method GET
      */
-    public function list() {
+    public function fetch() {
         throw new Tonic\MethodNotAllowedException();
     }
     

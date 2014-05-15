@@ -23,13 +23,13 @@ class UserService {
 
 
     Future _loadUserDetails() {
-        return _http.post('/authentication/current', '{}')
+        return _http.post('api/authentication/current', '{}')
             .then((HttpResponse response) {
                 // response status is 200-299
             }, onError: (HttpResponse request) {
-
+                _error.addHttpRequestError(request);
             }).catchError((Exception e) {
-                _error.addException(e);
+                _error.addHttpRequestException(e);
             });
     }
 }

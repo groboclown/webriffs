@@ -214,7 +214,7 @@ function get_post_var($var)
         $parts = explode('/', $uri);
         $lastPart = array_pop($parts);
         $uri = join('/', $parts);
-
+        
         $parts = explode('.', $lastPart);
         $firstPart = array_shift($parts);
         $uri .= '/'.$firstPart;

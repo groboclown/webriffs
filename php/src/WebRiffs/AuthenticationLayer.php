@@ -96,11 +96,11 @@ class AuthenticationLayer {
         $gaUserId = intval($userData[0]['Ga_User_Id']);
         $contact = $userData[0]['Contact'];
         $isAdmin = intval($userData[0]['Is_Site_Admin']);
-        $createdOn = $userData[0]['Created_On']);
+        $createdOn = $userData[0]['Created_On'];
         $lastUpdatedOn = $userData[0]['Last_Updated_On'];
         
         $userSourceData = GroboAuth\DataAccess::getUserSource($db, $gaUserId,
-            $sourceId)
+            $sourceId);
         if (! $userSourceData) {
             throw new Base\ValidationException(array(
                 // DO NOT let the caller know that the user-source pair aren't

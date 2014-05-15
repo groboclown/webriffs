@@ -9,7 +9,7 @@ void webRiffsRouteInitializer(Router router, RouteViewFactory view) {
         ..addRoute(
                 defaultRoute: true,
                 name: 'Welcome',
-                path: '',
+                path: '/\$',
                 enter: view('./view/home.html'))
         ..addRoute(
                 name: 'Create User',

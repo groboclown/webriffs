@@ -74,7 +74,7 @@ class Resource extends Tonic\Resource {
         $db =& getDB();
 
         $auth =& $this->container['user'];
-        if (! isUserAuthSecureForRole($auth, $role) {
+        if (! isUserAuthSecureForRole($auth, $role)) {
             throw new Tonic\UnauthorizedException;
         }
         return true;
@@ -93,30 +93,9 @@ class Resource extends Tonic\Resource {
         return false;
     }
 
-
-    function filmAuth($db, $userAuth, $filmVersionId, $roleSet) {
-        if (!$userAuth) {
-            throw new Tonic\UnauthorizedException;
-        }
-        $userid = $userAuth['user_id'];
-
-        $args = array($filmVersionId, $userid);
-        $query = 'SELECT COUNT(*) FROM FILM_AUTH WHERE Film_Version_id = ? AND User_Id = ? AND Role IN ('
-            .implode(',', array_fill(1,count($roleSet),'?'))
-            .')';
-        $args = array_merge($args, $roleSet);
-
-        $stmt = $db->($query);
-        $stmt->execute($args);
-
-        if ($stmt->fetchColumn() <= 0) {
-            throw new Tonic\UnauthorizedException;
-        }
-    }
-
     
     
     
     const COOKIE_NAME = "WRAUTHCK";
-    const DEFAULT_SESSION_TIMEOUT = 3 * 60;
+    const DEFAULT_SESSION_TIMEOUT = 360;
 }

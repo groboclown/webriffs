@@ -3,15 +3,21 @@
 header('Content-Type: text/json');
 
 // load autoloader (delete as appropriate)
-require_once '../../lib/Tonic/Autoloader.php';
-require_once '../../lib/Pimple/Container.php';
+require_once '../lib/Tonic/Autoloader.php';
+require_once '../lib/Pimple/Container.php';
 
-require_once '../../conf/site.conf.php';
+require_once '../conf/site.conf.php';
 
 $tonicConfig = array(
-    'baseUri' => '/api/',
+    // notice no trailing slash
+    'baseUri' => '/api',
     'load' => array(
-        __DIR__.'/../src/WebRiffs/*.php', // load example resources
+        __DIR__.'/../src/Base/*.php',
+        __DIR__.'/../dbo/GroboAuth/*.php',
+        __DIR__.'/../dbo/WebRiffs/*.php',
+        __DIR__.'/../src/GroboAuth/*.php',
+        __DIR__.'/../src/WebRiffs/*.php',
+        __DIR__.'/../src/restful/*.php',
     ),
     #'cache' => new Tonic\MetadataCacheFile('/tmp/tonic.cache') // use the metadata cache
     #'cache' => new Tonic\MetadataCacheAPC // use the metadata cache
@@ -19,10 +25,16 @@ $tonicConfig = array(
 
 $app = new Tonic\Application($tonicConfig);
 
-$container = new Pimple\Container();
-$container['db_config'] =& $siteConfig['db_config'];
-$container['sources'] =& $siteConfig['sources'];
+$app->container = new Pimple\Container();
+$app->container['db_config'] = $siteConfig['db_config'];
+$app->container['sources'] = $siteConfig['sources'];
 
+# Debug the routing
+#echo "\nRedirect URL: ".$_SERVER['REDIRECT_URL'];
+#echo "\nScript name: ".$_SERVER['SCRIPT_NAME'];
+#echo "\nRequest URI: ".$_SERVER['REQUEST_URI'];
+#echo "\nPHP self: ".$_SERVER['PHP_SELF'];
+#die;
 
 #echo $app; die;
 
@@ -42,7 +54,11 @@ try {
     $response = new Tonic\Response(404, array('message' => $e->getMessage()));
 
 } catch (Tonic\UnauthorizedException $e) {
-    $response = new Tonic\Response(401, array('message' => $e->getMessage()));
+    // Groboclown: Note that we don't want to raise an actual 401 error,
+    // because that will trigger a browser to pop up the authentication
+    // dialog, when this will most likely occur during a back-end request.
+    // Instead, we'll give a pre-conditioned failed response.
+    $response = new Tonic\Response(412, array('message' => $e->getMessage()));
     $response->wwwAuthenticate = 'Basic realm="WebRiffs"';
 
 } catch (Tonic\MethodNotAllowedException $e) {

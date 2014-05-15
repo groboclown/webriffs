@@ -1,7 +1,16 @@
 <page-header></page-header>
 
-<div>
+<div create-user>
     <p>
-        (create user)
+     Create a new user.
     </p>
+    <p>
+    All passwords are one-way encrypted on the server, but they are passed
+    in plain-text to the server (no SSL).  In human terms, that means
+    that even if someone gained access to this site, it's doubtful they'd
+    be able to discover your password.  However, someone could listen in
+    on your login request, or your user creation request, and steal your
+    password that way.  So be careful with what you choose.
+    </p>
+    <create-user ng-model="ctrl.createuser"></create-user>
 </div>

@@ -1,0 +1,40 @@
+<div>
+    <div>
+        <div>
+            <span>
+                <label>Username: </label>
+                <input type="text" ng-model="cmp.value.username">
+                <span ng-if="cmp.value.usernameError != null">{{ cmp.value.usernameError }}</span>
+            </span>
+        </div>
+        <div>
+            <span>
+                <label>Password: </label>
+                <input type="password" ng-model="cmp.value.password">
+                <span ng-if="cmp.value.passwordError != null">{{ cmp.value.passwordError }}</span>
+            </span>
+        </div>
+        <div>
+            <span>
+                <label>Renter Password: </label>
+                <input type="password" ng-model="cmp.value.passwordMatch">
+                <span ng-if="cmp.value.passwordMatchError != null">{{ cmp.value.passwordMatchError }}</span>
+            </span>
+        </div>
+        <div>
+            <span>
+                <label>E-Mail: </label>
+                <input type="text" ng-model="cmp.value.contact">
+                <span ng-if="cmp.value.contactError != null">{{ cmp.value.contactError }}</span>
+            </span>
+        </div>
+    </div>
+    <div>
+        <span ng-if="cmp.hasError()">
+            <span>No Submit</span>
+        </span>
+        <span ng-if="!cmp.hasError()">
+            <span ng-click="cmp.submit()">Submit</span>
+        </span>
+    </div>
+</div>

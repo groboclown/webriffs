@@ -12,7 +12,7 @@ class UserCollection extends Tonic\Resource {
     /**
      * @method GET
      */
-    public function list() {
+    public function fetch() {
         // FIXME
     }
 
@@ -31,7 +31,7 @@ class UserCollection extends Tonic\Resource {
  *
  * @uri /user/:userid
  */
-class User extends Tonic\Resource {
+class UserObj extends Tonic\Resource {
     /**
      * For this particular method only, we fudge a bit and let the userid be
      * the user name.
@@ -41,7 +41,7 @@ class User extends Tonic\Resource {
     public function display() {
         $userid = $this->userid;
         $db = getDB();
-        $stmt = $db->('SELECT User_Id, Username, Email, Authentication_Source, Created_On, Last_Updated_On, Last_Access FROM USER WHERE Username = ? OR User_Id = ?');
+        $stmt = $db->prepare('SELECT User_Id, Username, Email, Authentication_Source, Created_On, Last_Updated_On, Last_Access FROM USER WHERE Username = ? OR User_Id = ?');
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
         $stmt->execute(array($userid, $userid));
 
@@ -52,7 +52,7 @@ class User extends Tonic\Resource {
             'User_Id' => $userid,
             'Username' => $userRow['Username'],
             'Last_Access' => $userRow['Last_Access'],
-            'attributes' => array();
+            'attributes' => array()
         );
 
         $canSeePrivate = false;
@@ -69,13 +69,13 @@ class User extends Tonic\Resource {
             $ret['Last_Updated_On'] = $userRow['Last_Updated_On'];
         }
 
-        $stmt = $db->('SELECT Attribute_Name, Attribute_Value FROM USER_ATTRIBUTE WHERE User_Id = ?');
+        $stmt = $db->prepare('SELECT Attribute_Name, Attribute_Value FROM USER_ATTRIBUTE WHERE User_Id = ?');
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
         $stmt->execute(array($userRow['User_Id']));
 
         if ($stmt) {
             while ($row = $stmt->fetch()) {
-                if (startsWith('role_', $row['Attribute_Name']
+                if (startsWith('role_', $row['Attribute_Name'])
 
                     // FIXME or other attributes that any user can know, such as
                     // ban expiration date.
@@ -108,7 +108,7 @@ class User extends Tonic\Resource {
         $data = $this->request->data;
 
         // FIXME update the data
-        $attributes =
+        //$attributes =
 
     }
 
