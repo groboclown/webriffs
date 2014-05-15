@@ -5,6 +5,8 @@ namespace GroboAuth;
 use PBO;
 use Base;
 
+require_once(__DIR__.'/../../lib/phpass/PasswordHash.php');
+
 // Requires "PasswordHash" for the hashing functions.
 // Requires the dbo files for GroboAuth.
 
@@ -136,6 +138,7 @@ class DataAccess {
         DataAccess::checkError(GaUserSource::$INSTANCE, new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem changing the user access'
             )));
+error_log("Ga_User_Source_Id = ".$data['Ga_User_Source_Id']);
         return intval($data['Ga_User_Source_Id']);
     }
     
@@ -357,6 +360,9 @@ class DataAccess {
         // sanitize data
         if (! is_string($User_Agent) || ! is_string($Remote_Address) ||
                 ! is_string($Forwarded_For)) {
+            error_log("bad data for one of these: useragent: [".
+                $User_Agent."], remoteaddr: [".$Remote_Address."], forward: [".
+                $Forwarded_For."]");
             throw new Base\ValidationException(array(
                 'unknown' => 'invalid user signature'
             ));
@@ -372,6 +378,7 @@ class DataAccess {
         }
         
         $data = GaLoginAttempt::$INSTANCE->create($db, $userSourceId,
+            $User_Agent, $Remote_Address, $Forwarded_For,
             $wasSuccessful ? 1 : 0);
         if (! $data) {
             // FIXME error checking

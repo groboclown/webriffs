@@ -63,6 +63,7 @@ try {
             $request->contentType == 'text/json') {
         $request->data = json_decode($request->data);
     } else {
+        //error_log("Invalid content type: " + $request->contentType);
         throw new Tonic\NotAcceptableException();
     }
 

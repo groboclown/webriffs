@@ -47,7 +47,7 @@ class Resource extends Base\Resource {
             error_log("No registered source '".$sourceName."'");
             throw new Tonic\UnauthorizedException();
         }
-        return validateId($this->container['sources'][$sourceName]['id'],
+        return $this->validateId($this->container['sources'][$sourceName]['id'],
             "source");
     }
     

@@ -6,7 +6,6 @@ import 'package:logging/logging.dart';
 
 import '../service/user.dart';
 import '../service/error.dart';
-import '../createuser.dart';
 
 @Component(
     selector: 'create-user',
@@ -15,25 +14,104 @@ import '../createuser.dart';
 class CreateUserComponent {
     final Logger _log = new Logger('components.CreateUserComponent');
 
-    NgModel _ngModel;
-
     UserService _user;
     ErrorService _error;
+    Router _router;
 
-    CreateUserComponent(this._ngModel, this._user, this._error) {
-        // FIXME HAAAAAAAAAAACK
-        if (_ngModel == null) {
-            throw new Exception("null ngModel");
+    bool get loggedIn => _user.loggedIn;
+
+
+    String _username;
+    String _password;
+    String _passwordMatch;
+    String _contact;
+
+
+    String usernameError;
+
+    String get username => _username;
+
+    set username(String un) {
+        if (un == null || un.length < 3) {
+            usernameError = "username length must be at least 3 characters";
         }
-        if (_ngModel.modelValue != null) {
-            _log.severe("model already has a value: " + _ngModel.modelValue.toString());
-            if (! (_ngModel.modelValue is CreateUserModel)) {
-                _log.severe("NOT A CreateUser!!!!");
-            }
+        // FIXME validate alphanum + (_ -) characters
+        else {
+            usernameError = null;
+        }
+        //_log.finest("Setting username to [$un] with error [$usernameError]");
+        _username = un;
+    }
+
+
+    String passwordError;
+
+    String get password => _password;
+
+    set password(String pw) {
+        _checkPasswordAndMatch(pw, passwordMatch);
+        //_log.finest("Setting password to [$pw] with error [$passwordError]");
+        _password = pw;
+    }
+
+
+    String passwordMatchError;
+
+    String get passwordMatch => _passwordMatch;
+
+    set passwordMatch(String pm) {
+        _checkPasswordAndMatch(password, pm);
+        //_log.finest("Setting passwordMatch to [$pm] with error [$passwordMatchError]");
+        _passwordMatch = pm;
+    }
+
+
+    String contactError;
+
+    String get contact => _contact;
+
+    set contact(String ct) {
+        if (ct == null || ct.length <= 0) {
+            contactError = "Must supply contact information";
+        }
+        // FIXME email validation
+        else {
+            contactError = null;
+        }
+        //_log.finest("Setting contact to [$ct] with error [$contactError]");
+        _contact = ct;
+    }
+
+
+    bool hasError() {
+        return (usernameError != null || passwordError != null || contactError != null || passwordMatchError != null);
+    }
+
+
+    _checkPasswordAndMatch(pw, pm) {
+        if (pw == null || pw.length <= 0) {
+            passwordError = "must set a password";
+        } else if (pw.length < 6) {
+            passwordError = "password length must be at least 6";
+        } else
+            // FIXME password strength check
+        {
+            passwordError = null;
+        }
+
+        if (pm != pw) {
+            passwordMatchError = "passwords do not match";
         } else {
-            _ngModel.modelValue = new CreateUserModel();
-            _log.severe("had to create our own new model value");
+            passwordMatchError = null;
         }
+    }
+
+
+    CreateUserComponent(this._user, this._error, this._router) {
+        username = null;
+        password = null;
+        passwordMatch = null;
+        contact = null;
     }
 
 
@@ -42,33 +120,28 @@ class CreateUserComponent {
             _log.info("error - cannot sumit");
         } else {
             _log.finest("sumit data: contact = [" +
-                value.contact + "], username = [" +
-                value.username + "], password = [" +
-                value.password + "], password-match = [" +
-                value.passwordMatch + "]");
+                contact + "], username = [" +
+                username + "], password = [" +
+                password + "], password-match = [" +
+                passwordMatch + "]");
             // submit
-            _user.createUser(value.username, value.password,
-                value.contact).
+            _user.createUser(username, password,
+                contact).
                 then((ServerResponse resp) {
                     if (resp.wasError) {
                         // FIXME better error reporting
                         // may just be a feature of the "error" stuff.
                         _log.severe("error communicating to server: " +
-                            resp.message);
+                            resp.message.toString());
                     } else {
                         // report success and redirect.
-                        _log.severe("created the user!");
+                        _log.fine("created the user!");
+
+                        _router.go('User Created', {});
                     }
                 });
         }
     }
 
-
-    bool hasError() {
-        return value.hasError();
-    }
-
-
-    CreateUserModel get value => _ngModel.modelValue;
 }
 

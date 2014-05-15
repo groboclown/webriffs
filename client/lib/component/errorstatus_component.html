@@ -1,8 +1,11 @@
 <div class="error-bit">
-    <div ng-if="! cmp.value.canConnectToServer">
+    <div ng-if="! cmp.canConnectToServer">
         Cannot connect to server.
     </div>
-    <div ng-if="cmp.value.criticalError != null">
-        Critical Error: {{cmp.value.criticalError}}
+    <div ng-if="cmp.criticalError != null">
+        Critical Error: {{cmp.criticalError}}
+    </div>
+    <div ng-repeat="notice in cmp.notices">
+        {{notice.message}} ({{notice.status}})
     </div>
 </div>

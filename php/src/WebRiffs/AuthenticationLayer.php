@@ -41,8 +41,8 @@ class AuthenticationLayer {
         // first line of defence will protect our code from inadvertently
         // creating a new ga_user record.
         
-        $rowcount = User::$INSTANCE->countBy_Username($username);
-        checkError(User::$INSTANCE, new Base\ValidationException(array(
+        $rowcount = User::$INSTANCE->countBy_Username($db, $username);
+        AuthenticationLayer::checkError(User::$INSTANCE, new Base\ValidationException(array(
                 'username' => 'username already exists'
             )));
         if ($rowcount > 0) {
@@ -52,7 +52,7 @@ class AuthenticationLayer {
         }
         
         $gaUserId = GroboAuth\DataAccess::createUser($db);
-        $gaUserSourceId = GroboAuth\DataAccess::setUserSource($gaUserId,
+        $gaUserSourceId = GroboAuth\DataAccess::setUserSource($db, $gaUserId,
             $sourceId, $sourceUser, $authenticationCode);
         
         $userId = intval(User::$INSTANCE->create($db, $username, $contact,
@@ -72,6 +72,8 @@ class AuthenticationLayer {
     public static function login($db, $username, $sourceId,
             $authenticationCode, $authenticationCheckFunction, $User_Agent,
             $Remote_Address, $Forwarded_For, $sessionRenewalMinutes) {
+        // FIXME rip out this debug
+        error_log("checking login for [".$username."] [".$sourceId."] [".$authenticationCode."] [".$User_Agent."]");
         
         if (! AuthenticationLayer::isValidUsername($username)) {
             throw new Base\ValidationException(array(
@@ -82,8 +84,16 @@ class AuthenticationLayer {
         // FIXME strip the User_Agent and Forwarded_For down to within the
         // size limits.  And Remote_Address
         
+        // We allow these to be null, but we can't insert a null.
+        if (! $Remote_Address || ! is_string($Remote_Address)) {
+            $Remote_Address = "";
+        }
+        if (! $Forwarded_For || ! is_string($Forwarded_For)) {
+            $Forwarded_For = "";
+        }
+        
         $userData = User::$INSTANCE->readBy_Username($db, $username);
-        checkError(User::$INSTANCE, new Base\ValidationException(array(
+        AuthenticationLayer::checkError(User::$INSTANCE, new Base\ValidationException(array(
                 'username' => 'problem accessing users'
             )));
         if (sizeof($userData) != 1) {
@@ -98,6 +108,7 @@ class AuthenticationLayer {
         $isAdmin = intval($userData[0]['Is_Site_Admin']);
         $createdOn = $userData[0]['Created_On'];
         $lastUpdatedOn = $userData[0]['Last_Updated_On'];
+        error_log("pulled in data [".$userId."] [".$gaUserId."] [".$contact."] [".$isAdmin."]");
         
         $userSourceData = GroboAuth\DataAccess::getUserSource($db, $gaUserId,
             $sourceId);
@@ -141,7 +152,7 @@ class AuthenticationLayer {
         
             $sessionId = GroboAuth\DataAccess::createSession($db, $userSourceId,
                 $User_Agent, $Remote_Address, $Forwarded_For,
-                $authorizationChallenge, $sessionRenewalMinutes);
+                $authenticationChallenge, $sessionRenewalMinutes);
         } while ($sessionId === false);
         
         return array(
@@ -174,7 +185,7 @@ class AuthenticationLayer {
         
         $userData = User::$INSTANCE->readBy_Ga_User_Id($db,
             $data['Ga_User_Id']);
-        checkError(User::$INSTANCE, new Base\ValidationException(array(
+        AuthenticationLayer::checkError(User::$INSTANCE, new Base\ValidationException(array(
                 'username' => 'problem accessing users'
             )));
         if (sizeof($userData) != 1) {
@@ -239,7 +250,7 @@ class AuthenticationLayer {
         }
         
         // ensure proper email address
-        if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (! filter_var($contact, FILTER_VALIDATE_EMAIL)) {
             return false;
         }
         

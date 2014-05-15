@@ -6,95 +6,62 @@ import 'dart:convert';
 
 import 'package:angular/angular.dart';
 
+import 'server.dart';
 import 'error.dart';
 
 /**
  * Corresponds to API requests to the Authentication.php file.
- *
- * FIXME make another service that handles API requests to the server
- * in a generic manner.
  */
 @Injectable()
-class UserService {
-    final Http _http;
-    final ErrorService _error;
-    final Map<String, dynamic> _headers;
-
+class UserService extends AbstractServerService{
     Future _loaded;
 
     UserInfo info;
     bool loggedIn = false;
 
 
-    UserService(this._http, this._error) : _headers = {} {
-        _headers['Content-Type'] = 'application/json';
-
+    UserService(Http http, ErrorService error) : super(http, error) {
         _loaded = Future.wait([loadUserDetails()]);
     }
 
 
     Future<ServerResponse> loadUserDetails() {
-        return _http.post('api/authentication/current', '{}')
-            .then((HttpResponse resp) {
-                ServerResponse response = _error.processResponse(resp);
-                if (response != null && ! response.wasError) {
+        return post('/authentication/current')
+            .then((ServerResponse response) {
+                if (response.wasError) {
+                    loggedIn = false;
+                    info = null;
+                } else {
                     // response status is 200-299
                     loggedIn = true;
                     info = new UserInfo.fromJson(response.jsonData);
                 }
                 return response;
-            }, onError: (HttpResponse response) {
-                loggedIn = false;
-                return _error.processResponse(response);
-            }).catchError((Exception e) {
-                loggedIn = false;
-                return _error.addHttpRequestException(e);
             });
     }
 
 
     Future<ServerResponse> login(String username, String password) {
         var req = new LoginRequest(username, password);
-        return _http.post('api/authentication/login',
-            JSON.encode(req.toJson()))
-            .then((HttpResponse resp) {
-                loggedIn = true;
-                ServerResponse response = _error.processResponse(resp);
-                if (response != null && ! response.wasError) {
-                    // future chaining
+        return post('/authentication/login', req.toJson())
+            .then((ServerResponse response) {
+                if (! response.wasError) {
+                    loggedIn = true;
                     return loadUserDetails();
                 }
                 return response;
-            },
-            onError: (HttpResponse response) {
-                loggedIn = false;
-                return _error.processResponse(response);
-            })
-            .catchError((Exception e) {
-                loggedIn = false;
-                return _error.addHttpRequestException(e);
             });
     }
 
 
     Future<ServerResponse> logout() {
-        return _http.post('api/authentication/logout', '{}')
-            .then((HttpResponse resp) {
-                loggedIn = false;
-                ServerResponse response = _error.processResponse(resp);
-                if (response != null && ! response.wasError) {
+        return post('/authentication/logout')
+            .then((ServerResponse response) {
+                if (response.wasError) {
+                    loggedIn = false;
                     info = null;
                 }
                 return response;
-            },
-            onError: (HttpResponse response) {
-                loggedIn = false;
-                return _error.processResponse(response);
-            })
-            .catchError((Exception e) {
-                // yes, we're still logged in.
-                loggedIn = true;
-                return _error.addHttpRequestException(e);
             });
     }
 
@@ -102,21 +69,13 @@ class UserService {
     Future<ServerResponse> createUser(String username, String password,
                                       String contact) {
         var req = new UserCreationRequest(username, password, contact);
-        return _http.post('api/authentication/create',
-                JSON.encode(req.toJson()))
-            .then((HttpResponse resp) {
-                loggedIn = false;
-                ServerResponse response = _error.processResponse(resp);
-                if (response != null && !response.wasError) {
+        return put('/authentication/create', req.toJson())
+            .then((ServerResponse response) {
+                if (! response.wasError) {
+                    loggedIn = false;
                     info = null;
                 }
                 return response;
-            }, onError: (HttpResponse response) {
-                loggedIn = false;
-                return _error.processResponse(response);
-            }).catchError((Exception e) {
-                loggedIn = false;
-                return _error.addHttpRequestException(e);
             });
     }
 }

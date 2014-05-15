@@ -34,28 +34,34 @@ class ErrorService {
     /**
      * Called when there was an exception generated during the HttpRequest.
      */
-    void addHttpRequestException(Exception e) {
+    void addHttpRequestException(String method, String url, String data,
+                                 Exception e) {
         // TODO clean up the error some?
         criticalError = e.toString();
-        _log.severe("HttpRequest generated an error", e);
+        _log.severe("HttpRequest ${method} to [${url}] " +
+            (data == null ? "" : " <= [${data}]") + " generated an error", e);
         canConnectToServer = false;
     }
 
 
     /**
-     * Called when there was an error status (not 200-299) on an HTTP request
-     * to the server.
+     * Called after the response comes back from the server.
      */
-    ServerResponse processResponse(HttpResponse e) {
+    ServerResponse processResponse(String method, String url,
+                                   String data, HttpResponse e) {
         if (e != null) {
             canConnectToServer = true;
             ServerResponse resp = new ServerResponse(e);
             if (resp.wasError) {
                 notices.add(resp);
             }
+            _log.finer("${method} [${url}]: ${e.status}" +
+                (data == null ? "" : " => [${data}]") + " <= [${e.data}]");
             return resp;
         }
-        return null;
+        _log.finer("${method} [${url}]: ?" +
+            (data == null ? "" : " => ${data}") + " <= !!no result!!");
+        return new ServerResponse(null);
     }
 }
 
@@ -73,6 +79,11 @@ class ServerResponse {
 
 
     factory ServerResponse(HttpResponse http) {
+        if (http == null) {
+            return new ServerResponse._(
+                null, true, "", new Map(), new Map(), 501);
+        }
+
         var wasError = (http.status < 200 || http.status >= 300);
         var jsonData = null;
 

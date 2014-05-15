@@ -1,21 +1,21 @@
 <div>
-    <div ng-if="cmp.userService.loggedIn">
-        <div>{{cmp.userService.info.username}}</div>
+    <div ng-if="cmp.loggedIn">
+        <div>{{cmp.info.username}}</div>
     </div>
-    <div ng-if="! cmp.userService.loggedIn">
+    <div ng-if="! cmp.loggedIn">
         <div>
             <div>
                 <span>
                     <label>Username: </label>
-                    <input type="text" ng-model="cmp.value.username">
-                    <span ng-if="cmp.value.usernameError != null">{{ cmp.value.usernameError }}</span>
+                    <input type="text" ng-model="cmp.username">
+                    <span ng-if="cmp.usernameError != null">{{ cmp.usernameError }}</span>
                 </span>
             </div>
             <div>
                 <span>
                     <label>Password: </label>
-                    <input type="password" ng-model="cmp.value.password">
-                    <span ng-if="cmp.value.passwordError != null">{{ cmp.value.passwordError }}</span>
+                    <input type="password" ng-model="cmp.password">
+                    <span ng-if="cmp.passwordError != null">{{ cmp.passwordError }}</span>
                 </span>
             </div>
         </div>
@@ -26,6 +26,9 @@
             <span ng-if="!cmp.hasError()">
                 <span ng-click="cmp.submit()">Submit</span>
             </span>
+        </div>
+        <div>
+            <a href="#/user/forgot">Forgot your password?</a>
         </div>
     </div>
 </div>

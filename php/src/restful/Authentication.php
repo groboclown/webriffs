@@ -21,13 +21,13 @@ class AuthenticationCurrent extends Resource {
      */
     public function data() {
         $user =& $this->container['user'];
-        return array(
+        return array(200, array(
             'username' => $user['Username'],
             'contact' => $user['Contact'],
             'is_admin' => $user['Is_Site_Admin'],
             'created_on' => $user['Created_On'],
             'last_updated_on' => $user['Last_Updated_On']
-        );
+        ));
     }
 }
 
@@ -59,11 +59,11 @@ class AuthenticationLogin extends Resource {
             ));
         }
         
-        $userData =& AuthenticationLayer::login($db,
-            $data->{'username'}, getSourceId($data->{'source'}),
+        $userData = AuthenticationLayer::login($db,
+            $data->{'username'}, $this->getSourceId($data->{'source'}),
             $data->{'password'},
             // TODO make this configurable per source
-            AuthenticationLayer::validatePassword,
+            function($u, $p, $h) { return AuthenticationLayer::validatePassword($u, $p, $h); },
             
             $this->request->userAgent,
             $this->request->remoteAddr,
@@ -73,6 +73,10 @@ class AuthenticationLogin extends Resource {
             Resource::DEFAULT_SESSION_TIMEOUT);
         
         setcookie(Resource::COOKIE_NAME, $userData['Authentication_Challenge']);
+        
+        $userData['message'] = 'okay';
+        
+        return array(200, $userData);
     }
 }
 
@@ -103,6 +107,8 @@ class AuthenticationLogout extends Resource {
         // old expiration date
         setcookie(Resource::COOKIE_NAME, $userAuth['Authentication_Challenge'],
             time() - 3600);
+        
+        return array(200, array('message' => 'okay'));
     }
 }
 
@@ -120,7 +126,7 @@ class AuthenticationCreate extends Resource {
     
     
     /**
-     * @method POST
+     * @method PUT
      */
     public function createUser() {
         $db = $this->getDB();
@@ -146,12 +152,12 @@ echo "source: ".$data->{'source'}." (false? ".(! $data->{'source'}).") (not is_s
         $password = AuthenticationLayer::hashPassword($data->{'password'});
         
         $userId = AuthenticationLayer::createUser($db, $data->{'username'},
-            getSourceId($data->{'source'}), $data->{'username'},
+            $this->getSourceId($data->{'source'}), $data->{'username'},
             $password, $data->{'contact'}, false);
         
         // don't expose the internal ID to the user.
-        $this->response->body = array(
+        return array(200, array(
             "message" => "User created successfully."
-        );
+        ));
     }
 }

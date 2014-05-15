@@ -15,22 +15,14 @@ import '../service/error.dart';
     //cssUrl: 'packages/webriffs_client/component/errorstatus_component.css',
     publishAs: 'cmp')
 class ErrorComponent {
-    NgModel _ngModel;
+    ErrorService _error;
 
-    ErrorService get value => _ngModel.modelValue;
+    ErrorComponent(this._error);
 
-    ErrorComponent(this._ngModel, ErrorService error) {
-        // FIXME HAAAAAAAAAAACK
-        if (_ngModel == null) {
-            throw new Exception("null ngModel");
-        }
-        if (_ngModel.modelValue != null) {
-            if (!(_ngModel.modelValue is ErrorService)) {
-                throw new Exception("model value is not ErrorService");
-            }
-        } else {
-            _ngModel.modelValue = error;
-        }
-    }
+    bool get canConnectToServer => _error.canConnectToServer;
+
+    String get criticalError => _error.criticalError;
+
+    List<ServerResponse> get notices => _error.notices;
 }
 

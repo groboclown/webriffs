@@ -20,11 +20,8 @@ class PageHeaderComponent implements DetachAware {
     String titleSuffix = " - WebRiffs";
     String defaultTitle = "WebRiffs";
 
-
-    //@NgOneWay('name')
     String name;
 
-    //@NgOneWay('title')
     String title;
 
     PageHeaderComponent(RouteProvider routeProvider) {

@@ -16,26 +16,8 @@ import '../service/user.dart';
      //cssUrl: 'packages/webriffs_client/component/errorstatus_component.css',
     publishAs: 'cmp')
 class ForgotPasswordComponent {
-    NgModel _ngModel;
-
-    ErrorService error;
-
     UserService userService;
 
-    ForgotPasswordComponent(this._ngModel, this.error, this.userService) {
-        // FIXME HAAAAAAAAAAACK
-        if (_ngModel == null) {
-            throw new Exception("null ngModel");
-        }
-        if (_ngModel.modelValue != null) {
-            // FIXME
-            //if (!(_ngModel.modelValue is ErrorService)) {
-            //    throw new Exception("model value is not ErrorService");
-            //}
-        } else {
-            // FIXME
-            //_ngModel.modelValue = error;
-        }
-    }
+    ForgotPasswordComponent(this.userService);
 }
 
