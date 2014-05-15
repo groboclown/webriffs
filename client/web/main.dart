@@ -6,11 +6,12 @@ import 'package:logging/logging.dart';
 
 import 'package:webriffs_client/routing/webriffs_router.dart';
 import 'package:webriffs_client/component/pageheader_component.dart';
-import 'package:webriffs_client/component/error_component.dart';
+import 'package:webriffs_client/component/errorstatus_component.dart';
 import 'package:webriffs_client/component/createuser_component.dart';
 import 'package:webriffs_client/service/error.dart';
 import 'package:webriffs_client/service/user.dart';
 import 'package:webriffs_client/createuser.dart';
+import 'package:webriffs_client/errorstatus.dart';
 
 
 class WebRiffsModule extends Module {
@@ -20,6 +21,7 @@ class WebRiffsModule extends Module {
         type(PageHeaderComponent);
         type(CreateUserComponent);
         type(CreateUserController);
+        type(ErrorStatusController);
 
         // Stateful Services - that's why they're value, not type
         bind(ErrorService);

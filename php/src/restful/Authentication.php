@@ -47,8 +47,8 @@ class AuthenticationLogin extends Resource {
      * @method POST
      */
     public function login() {
-        $db =& getDB();
-        $data =& getRequestData();
+        $db =& $this->getDB();
+        $data =& $this->getRequestData();
         if (! $data['username'] || ! $data['password'] ||
                 ! $data['source'] ||
                 ! is_string($data['username']) ||
@@ -94,7 +94,7 @@ class AuthenticationLogout extends Resource {
      * @authenticated
      */
     public function logout() {
-        $db =& getDB();
+        $db =& $this->getDB();
         $userAuth = $this->container['user'];
         AuthenticationLayer::logout($db, $userAuth['User_Id'],
             $userAuth['Ga_Session_Id']);
@@ -123,14 +123,16 @@ class AuthenticationCreate extends Resource {
      * @method POST
      */
     public function createUser() {
-        $db =& getDB();
-        $data =& getRequestData();
-         if (! $data['username'] || ! $data['password'] ||
-                ! $data['source'] || ! $data['contact'] ||
-                ! is_string($data['username']) ||
-                ! is_string($data['password']) ||
-                ! is_string($data['contact']) ||
-                ! is_string($data['source'])) {
+        $db = $this->getDB();
+        $data =& $this->getRequestData();
+        print_r($data);
+        die;
+        if (! $data.username || ! $data.password ||
+                ! $data.source || ! $data.contact ||
+                ! is_string($data.username) ||
+                ! is_string($data.password) ||
+                ! is_string($data.contact) ||
+                ! is_string($data.source)) {
             throw new Base\ValidationException(array(
                 'data' => 'invalid request data'
             ));

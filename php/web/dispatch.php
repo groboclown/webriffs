@@ -25,9 +25,6 @@ $tonicConfig = array(
 
 $app = new Tonic\Application($tonicConfig);
 
-$app->container = new Pimple\Container();
-$app->container['db_config'] = $siteConfig['db_config'];
-$app->container['sources'] = $siteConfig['sources'];
 
 # Debug the routing
 #echo "\nRedirect URL: ".$_SERVER['REDIRECT_URL'];
@@ -42,12 +39,32 @@ $request = new Tonic\Request();
 
 
 try {
+
+    $container = new Pimple\Container();
+    $container['db_config'] = array(
+        'dsn' => $siteConfig['db_config']['dsn'],
+        'username' => $siteConfig['db_config']['username'],
+        'password' => $siteConfig['db_config']['password']
+    );
+    
+    $container['sources'] = $siteConfig['sources'];
+    $container['dataStore'] = function($c) {
+        $conn = new PDO($c['db_config']['dsn'],
+            $c['db_config']['username'],
+            $c['db_config']['password']);
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        return $conn;
+    };
+
+
+
     // decode JSON data received from HTTP request
     if ($request->contentType == 'application/json') {
         $request->data = json_decode($request->data);
     }
 
     $resource = $app->getResource($request);
+    $resource->container = $container;
     $response = $resource->exec();
 
 } catch (Tonic\NotFoundException $e) {
@@ -77,6 +94,11 @@ try {
     # FIXME Production level code should not report the full error message,
     # but instead log it and give a generic error to the user.
     $response = new Tonic\Response(500, array('message' => $e->getMessage()));
+    
+    
+    error_log("Exception: ".$e->getMessage());
+    error_log($e->getTraceAsString());
+    
 }
 
 #echo $response;

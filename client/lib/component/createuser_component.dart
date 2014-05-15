@@ -41,12 +41,25 @@ class CreateUserComponent {
         if (hasError()) {
             _log.info("error - cannot sumit");
         } else {
-            _log.info("sumit data: contact = [" +
+            _log.finest("sumit data: contact = [" +
                 value.contact + "], username = [" +
                 value.username + "], password = [" +
                 value.password + "], password-match = [" +
                 value.passwordMatch + "]");
             // submit
+            _user.createUser(value.username, value.password,
+                value.contact).
+                then((ServerResponse resp) {
+                    if (resp.wasError) {
+                        // FIXME better error reporting
+                        // may just be a feature of the "error" stuff.
+                        _log.severe("error communicating to server: " +
+                            resp.message);
+                    } else {
+                        // report success and redirect.
+                        _log.severe("created the user!");
+                    }
+                });
         }
     }
 

@@ -24,7 +24,7 @@ class ErrorService {
      * Informative messages that the user should know about, but doesn't need
      * to act upon.
      */
-    List<String> notices;
+    List<ServerResponse> notices = new List<ServerResponse>();
 
     /**
      * Are there server connection problems?
@@ -35,8 +35,10 @@ class ErrorService {
      * Called when there was an exception generated during the HttpRequest.
      */
     void addHttpRequestException(Exception e) {
-        //criticalError = e.toString();
+        // TODO clean up the error some?
+        criticalError = e.toString();
         _log.severe("HttpRequest generated an error", e);
+        canConnectToServer = false;
     }
 
 
@@ -44,43 +46,67 @@ class ErrorService {
      * Called when there was an error status (not 200-299) on an HTTP request
      * to the server.
      */
-    void addHttpRequestError(HttpResponse e) {
-        // FIXME parse the error data.
-        var resp = new ErrorResponse.fromHttp(e);
-
+    ServerResponse processResponse(HttpResponse e) {
+        if (e != null) {
+            canConnectToServer = true;
+            ServerResponse resp = new ServerResponse(e);
+            if (resp.wasError) {
+                notices.add(resp);
+            }
+            return resp;
+        }
+        return null;
     }
 }
 
 
-class ErrorResponse {
-    final int code;
+class ServerResponse {
+    final HttpResponse http;
+    final int status;
+    final Map<String, dynamic> jsonData;
+    final bool wasError;
     final String message;
-    final Map<String, String> problems;
+    final Map<String, String> parameterNotes;
 
-    ErrorResponse._(this.code, this.message, this.problems);
+    ServerResponse._(this.http, this.wasError, this.message,
+                     this.parameterNotes, this.jsonData, this.status);
 
-    factory ErrorResponse.fromHttp(HttpResponse e) {
-        String message;
-        Map<String, String> problems = new Map();
-        if (e.headers('Content-Type') == 'application/json') {
-            Map<String, dynamic> data = JSON.decode(e.data);
-            if (data['message'] != null && data['message'] is String) {
-                message = data['message'];
-            }
-            if (data['problems'] != null && data['problems'] is Map) {
-                data['problems'].forEach((k, v) {
-                    if (k is String && v is String) {
-                        problems[k] = v;
-                    }
-                });
-            }
-        } else {
-            message = e.data.toString();
+
+    factory ServerResponse(HttpResponse http) {
+        var wasError = (http.status < 200 || http.status >= 300);
+        var jsonData = null;
+
+        if (http.headers('Content-Type') == 'application/json' ||
+                http.headers('Content-Type') == 'text/json') {
+            jsonData = JSON.decode(http.data);
         }
 
-        return new ErrorResponse._(e.status, message, problems);
+        var message = null;
+        var parameterNotes = new Map<String, String>();
+        if (jsonData != null) {
+            if (jsonData['message'] != null && jsonData['message'] is String) {
+                message = jsonData['message'];
+            }
+            if (jsonData['problems'] != null && jsonData['problems'] is Map) {
+                jsonData['problems'].forEach((k, v) {
+                    if (k is String && v is String) {
+                        parameterNotes[k] = v;
+                    }
+                });
+            } else if (jsonData['parameters'] != null &&
+                    jsonData['parameters'] is Map) {
+                jsonData['parameters'].forEach((k, v) {
+                    if (k is String && v is String) {
+                        parameterNotes[k] = v;
+                    }
+                });
+
+            }
+        }
+
+        return new ServerResponse._(http, wasError, message, parameterNotes,
+            jsonData, http.status);
     }
-
-
 }
+
 

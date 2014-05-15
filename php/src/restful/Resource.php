@@ -4,8 +4,10 @@
 namespace WebRiffs;
 
 use Tonic;
+use PDO;
+use Base;
 
-class Resource extends Tonic\Resource {
+class Resource extends Base\Resource {
     /**
      * Validate that the given variable is a non-null number.
      */
@@ -25,14 +27,15 @@ class Resource extends Tonic\Resource {
             return $this->container['dataStore'];
         }
         try {
-            $conn = new PDO($this->container['db_config']['dsn'],
-                $this->container['db_config']['username'],
-                $this->container['db_config']['password']);
+            $conn = new PDO($this->container['db_config-dsn'],
+                $this->container['db_config-username'],
+                $this->container['db_config-password']);
             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->container['dataStore'] = $conn;
             return $conn;
         } catch (Exception $e) {
-            throw new Tonic\NotFoundException;
+            //throw new Tonic\NotFoundException;
+            throw $e;
         }
     }
     
@@ -59,7 +62,7 @@ class Resource extends Tonic\Resource {
         }
         $cookie = $_COOKIE[Resource::COOKIE_NAME];
         
-        $db =& getDB();
+        $db =& $this->getDB();
         $data =& AuthenticationLayer::getUserSession($db, $cookie,
             $this->request->userAgent, $this->request->remoteAddr,
             null,
@@ -70,8 +73,8 @@ class Resource extends Tonic\Resource {
 
 
     function secure(string $role, int $minLevel) {
-        authenticated();
-        $db =& getDB();
+        $this->authenticated();
+        $db =& $this->getDB();
 
         $auth =& $this->container['user'];
         if (! isUserAuthSecureForRole($auth, $role)) {
