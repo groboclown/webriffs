@@ -92,9 +92,16 @@ class ServerResponse {
         var wasError = (http.status < 200 || http.status >= 300);
         var jsonData = null;
 
-        if (http.headers('content-type') == 'application/json' ||
-                http.headers('content-type') == 'text/json') {
-            jsonData = JSON.decode(http.data);
+        if (http.data != null && (
+                http.headers('content-type') == 'application/json' ||
+                http.headers('content-type') == 'text/json')) {
+            if (http.data is String) {
+                // the Http code can automatically decode Json responses.
+                jsonData = JSON.decode(http.data);
+            } else if (http.data is Map) {
+                jsonData = http.data;
+            }
+            // else no data
         }
 
         var message = null;
