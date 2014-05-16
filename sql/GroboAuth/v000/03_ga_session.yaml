@@ -50,25 +50,15 @@ table:
                     type: no update
         - column:
             name: Authorization_Challenge
-            type: nvarchar(2048)
+            type: varchar(700)
             constraints:
                 - constraint:
                     type: not null
                 - constraint:
                     type: no update
                 - constraint:
-                    # MySql InnoDB has a key length limit of 767, so to
-                    # bypass that we introduce a custom constraint that
-                    # forces the insert/update to only act if the values are
-                    # unique.
-                    type: value restriction
-                    dialects:
-                        - dialect:
-                            platforms: mysql
-                            sql: "NOT EXISTS (
-                                SELECT Authorization_Challenge FROM GA_SESSION
-                                WHERE Authorization_Challenge = {Authorization_Challenge})"
-                    argument: Authorization_Challenge
+                    type: unique index
+                    name: Ga_Session__Authorization_Challenge_IDX
         - column:
             name: Expires_On
             type: timestamp

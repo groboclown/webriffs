@@ -20,11 +20,11 @@ class AuthenticationCurrent extends Resource {
      * @authenticated
      */
     public function data() {
-        $user =& $this->container['user'];
+        $user = $this->container['user'];
         return array(200, array(
             'username' => $user['Username'],
             'contact' => $user['Contact'],
-            'is_admin' => $user['Is_Site_Admin'],
+            'is_admin' => $user['Is_Admin'],
             'created_on' => $user['Created_On'],
             'last_updated_on' => $user['Last_Updated_On']
         ));

@@ -138,7 +138,7 @@ class DataAccess {
         DataAccess::checkError(GaUserSource::$INSTANCE, new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem changing the user access'
             )));
-error_log("Ga_User_Source_Id = ".$data['Ga_User_Source_Id']);
+//error_log("Ga_User_Source_Id = ".$data['Ga_User_Source_Id']);
         return intval($data['Ga_User_Source_Id']);
     }
     
