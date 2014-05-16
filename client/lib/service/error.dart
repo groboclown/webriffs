@@ -9,10 +9,12 @@ import 'package:logging/logging.dart';
 /**
  * Shared data across controllers and services that stores the error
  * information.  This error information should only for the global data.
+ *
+ * TODO this needs to be a more general ServerStatusService.
  */
 @Injectable()
 class ErrorService {
-    final Logger _log = new Logger('service.ErrorService');
+    static final Logger _log = new Logger('service.ErrorService');
 
     /**
      * There can only be one critical error at a time.  Such a critical
@@ -57,6 +59,9 @@ class ErrorService {
             }
             _log.finer("${method} [${url}]: ${e.status}" +
                 (data == null ? "" : " => [${data}]") + " <= [${e.data}]");
+            _log.finest("  response headers (" + e.headers().runtimeType.toString() + "): " + e.headers().toString());
+            _log.finest("  response content type: " + e.headers('content-type').toString());
+            _log.finest("  response json data: " + resp.jsonData.toString());
             return resp;
         }
         _log.finer("${method} [${url}]: ?" +
@@ -67,6 +72,7 @@ class ErrorService {
 
 
 class ServerResponse {
+
     final HttpResponse http;
     final int status;
     final Map<String, dynamic> jsonData;
@@ -83,17 +89,17 @@ class ServerResponse {
             return new ServerResponse._(
                 null, true, "", new Map(), new Map(), 501);
         }
-
         var wasError = (http.status < 200 || http.status >= 300);
         var jsonData = null;
 
-        if (http.headers('Content-Type') == 'application/json' ||
-                http.headers('Content-Type') == 'text/json') {
+        if (http.headers('content-type') == 'application/json' ||
+                http.headers('content-type') == 'text/json') {
             jsonData = JSON.decode(http.data);
         }
 
         var message = null;
         var parameterNotes = new Map<String, String>();
+
         if (jsonData != null) {
             if (jsonData['message'] != null && jsonData['message'] is String) {
                 message = jsonData['message'];

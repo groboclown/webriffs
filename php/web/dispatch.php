@@ -1,6 +1,6 @@
 <?php
 
-header('Content-Type: text/json');
+header('Content-Type: application/json');
 
 // load autoloader (delete as appropriate)
 require_once '../lib/Tonic/Autoloader.php';
@@ -80,7 +80,7 @@ try {
     // dialog, when this will most likely occur during a back-end request.
     // Instead, we'll give a pre-conditioned failed response.
     $response = new Tonic\Response(412, array('message' => $e->getMessage()));
-    $response->wwwAuthenticate = 'Basic realm="WebRiffs"';
+    //$response->wwwAuthenticate = 'Basic realm="WebRiffs"';
 
 } catch (Tonic\MethodNotAllowedException $e) {
     $response = new Tonic\Response($e->getCode(), array('message' => $e->getMessage()));
@@ -109,7 +109,7 @@ try {
 
 // encode output after exception handling
 //if ($response->contentType == 'application/json') {
+$response->contentType = 'application/json';
 $response->body = json_encode($response->body);
 //}
-
 $response->output();

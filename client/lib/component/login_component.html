@@ -1,6 +1,9 @@
 <div>
     <div ng-if="cmp.loggedIn">
-        <div>{{cmp.info.username}}</div>
+        <div>Hello, {{cmp.loggedInUser}}</div>
+        <div>
+            <span ng-click="cmp.logOut()">Log out</span>
+        </div>
     </div>
     <div ng-if="! cmp.loggedIn">
         <div>

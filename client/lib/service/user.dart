@@ -18,14 +18,17 @@ class UserService extends AbstractServerService{
 
     UserInfo info;
     bool loggedIn = false;
+    bool loading;
 
 
     UserService(Http http, ErrorService error) : super(http, error) {
+        loading = true;
         _loaded = Future.wait([loadUserDetails()]);
     }
 
 
     Future<ServerResponse> loadUserDetails() {
+        loading = true;
         return post('/authentication/current')
             .then((ServerResponse response) {
                 if (response.wasError) {
@@ -36,6 +39,7 @@ class UserService extends AbstractServerService{
                     loggedIn = true;
                     info = new UserInfo.fromJson(response.jsonData);
                 }
+                loading = false;
                 return response;
             });
     }

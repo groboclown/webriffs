@@ -26,6 +26,8 @@ class LoginComponent {
 
     UserInfo get info => _user.info;
 
+    String get loggedInUser => _user.info.username;
+
 
     String _username;
     String _password;
@@ -79,6 +81,13 @@ class LoginComponent {
                 // FIXME do something interesting
                 return response;
             });
+        }
+    }
+
+
+    Future<ServerResponse> logOut() {
+        if (loggedIn) {
+            return _user.logout();
         }
     }
 }

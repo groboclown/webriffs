@@ -1,4 +1,7 @@
 <div class="error-bit">
+    <div ng-if="cmp.canConnectToServer">
+        Connection seems fine.
+    </div>
     <div ng-if="! cmp.canConnectToServer">
         Cannot connect to server.
     </div>

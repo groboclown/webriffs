@@ -1,4 +1,7 @@
-<div>
+<div ng-if="cmp.loggedIn">
+    You are already logged in. There's no need to create a new user.
+</div>
+<div ng-if="! cmp.loggedIn">
     <div>
         <div>
             <span>

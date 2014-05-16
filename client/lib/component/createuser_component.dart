@@ -137,7 +137,7 @@ class CreateUserComponent {
                         // report success and redirect.
                         _log.fine("created the user!");
 
-                        _router.go('User Created', {});
+                        //_router.go('User Created', {});
                     }
                 });
         }
