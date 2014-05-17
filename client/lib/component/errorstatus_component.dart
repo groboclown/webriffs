@@ -24,5 +24,7 @@ class ErrorComponent {
     String get criticalError => _error.criticalError;
 
     List<ServerResponse> get notices => _error.notices;
+
+    bool get isLoading => _error.isLoading;
 }
 

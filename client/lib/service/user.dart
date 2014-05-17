@@ -9,29 +9,36 @@ import 'package:angular/angular.dart';
 import 'server.dart';
 import 'error.dart';
 
+IsErrorCheckerFunc UNAUTHORIZED_IS_NOT_ERROR = (int code) {
+    if (DEFAULT_IS_ERROR_CHECKER_FUNC(code)) {
+        // custom unauthorized error code.
+        return code != 412;
+    }
+    return false;
+};
+
+
 /**
  * Corresponds to API requests to the Authentication.php file.
  */
 @Injectable()
-class UserService extends AbstractServerService{
+class UserService extends AbstractServerService {
     Future _loaded;
 
     UserInfo info;
     bool loggedIn = false;
-    bool loading;
 
 
     UserService(Http http, ErrorService error) : super(http, error) {
-        loading = true;
         _loaded = Future.wait([loadUserDetails()]);
     }
 
 
     Future<ServerResponse> loadUserDetails() {
-        loading = true;
-        return post('/authentication/current')
+        return post('/authentication/current',
+                isErrorChecker: UNAUTHORIZED_IS_NOT_ERROR)
             .then((ServerResponse response) {
-                if (response.wasError) {
+                if (response.status == 412 || response.wasError) {
                     loggedIn = false;
                     info = null;
                 } else {
@@ -39,7 +46,6 @@ class UserService extends AbstractServerService{
                     loggedIn = true;
                     info = new UserInfo.fromJson(response.jsonData);
                 }
-                loading = false;
                 return response;
             });
     }
@@ -47,25 +53,20 @@ class UserService extends AbstractServerService{
 
     Future<ServerResponse> login(String username, String password) {
         var req = new LoginRequest(username, password);
-        return post('/authentication/login', req.toJson())
+        return post('/authentication/login', data: req.toJson())
             .then((ServerResponse response) {
-                if (! response.wasError) {
-                    loggedIn = true;
-                    return loadUserDetails();
-                }
-                return response;
+                // Force a check to see if we are indeed logged in.
+                return loadUserDetails();
             });
     }
 
 
     Future<ServerResponse> logout() {
-        return post('/authentication/logout')
+        return post('/authentication/logout',
+                isErrorChecker: UNAUTHORIZED_IS_NOT_ERROR)
             .then((ServerResponse response) {
-                if (response.wasError) {
-                    loggedIn = false;
-                    info = null;
-                }
-                return response;
+                // Force a check to see if we are indeed logged in or not.
+                return loadUserDetails();
             });
     }
 
@@ -73,7 +74,8 @@ class UserService extends AbstractServerService{
     Future<ServerResponse> createUser(String username, String password,
                                       String contact) {
         var req = new UserCreationRequest(username, password, contact);
-        return put('/authentication/create', req.toJson())
+        return put('/authentication/create',
+                data: req.toJson())
             .then((ServerResponse response) {
                 if (! response.wasError) {
                     loggedIn = false;

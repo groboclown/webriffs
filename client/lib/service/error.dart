@@ -6,6 +6,13 @@ import 'dart:convert';
 import 'package:angular/angular.dart';
 import 'package:logging/logging.dart';
 
+
+typedef bool IsErrorCheckerFunc(int statusCode);
+
+final IsErrorCheckerFunc DEFAULT_IS_ERROR_CHECKER_FUNC = (int statusCode) {
+    return (statusCode < 200 || statusCode >= 300);
+};
+
 /**
  * Shared data across controllers and services that stores the error
  * information.  This error information should only for the global data.
@@ -33,16 +40,23 @@ class ErrorService {
      */
     bool canConnectToServer;
 
+
+    int activeRequests = 0;
+
+    bool get isLoading => activeRequests > 0;
+
+
     /**
      * Called when there was an exception generated during the HttpRequest.
      */
-    void addHttpRequestException(String method, String url, String data,
-                                 Exception e) {
+    ServerResponse addHttpRequestException(String method, String url,
+            String data, Exception e) {
         // TODO clean up the error some?
         criticalError = e.toString();
         _log.severe("HttpRequest ${method} to [${url}] " +
             (data == null ? "" : " <= [${data}]") + " generated an error", e);
         canConnectToServer = false;
+        return new ServerResponse(null, null);
     }
 
 
@@ -50,10 +64,11 @@ class ErrorService {
      * Called after the response comes back from the server.
      */
     ServerResponse processResponse(String method, String url,
-                                   String data, HttpResponse e) {
+                                   String data, HttpResponse e,
+                                   IsErrorCheckerFunc isErrorChecker) {
         if (e != null) {
             canConnectToServer = true;
-            ServerResponse resp = new ServerResponse(e);
+            ServerResponse resp = new ServerResponse(e, isErrorChecker);
             if (resp.wasError) {
                 notices.add(resp);
             }
@@ -66,7 +81,7 @@ class ErrorService {
         }
         _log.finer("${method} [${url}]: ?" +
             (data == null ? "" : " => ${data}") + " <= !!no result!!");
-        return new ServerResponse(null);
+        return new ServerResponse(null, null);
     }
 }
 
@@ -84,12 +99,16 @@ class ServerResponse {
                      this.parameterNotes, this.jsonData, this.status);
 
 
-    factory ServerResponse(HttpResponse http) {
+    factory ServerResponse(HttpResponse http,
+                           IsErrorCheckerFunc isErrorChecker) {
+        if (isErrorChecker == null) {
+            isErrorChecker = DEFAULT_IS_ERROR_CHECKER_FUNC;
+        }
         if (http == null) {
             return new ServerResponse._(
                 null, true, "", new Map(), new Map(), 501);
         }
-        var wasError = (http.status < 200 || http.status >= 300);
+        var wasError = isErrorChecker(http.status);
         var jsonData = null;
 
         if (http.data != null && (

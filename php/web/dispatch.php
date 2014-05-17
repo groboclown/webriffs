@@ -110,6 +110,12 @@ try {
 // encode output after exception handling
 //if ($response->contentType == 'application/json') {
 $response->contentType = 'application/json';
-$response->body = json_encode($response->body);
+//var_dump($response->body);
+if (! is_string($response->body)) {
+    $response->body = json_encode($response->body);
+} else {
+    error_log("Request generated string body, instead of array: (" +
+        $response->body + ")");
+}
 //}
 $response->output();

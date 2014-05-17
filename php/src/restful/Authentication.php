@@ -72,8 +72,6 @@ class AuthenticationLogin extends Resource {
             // within reason
             Resource::DEFAULT_SESSION_TIMEOUT);
             
-error_log("login returned");
-print_r($userData);
         setcookie(Resource::COOKIE_NAME, $userData['Authentication_Challenge']);
         
         $userData['message'] = 'okay';
@@ -133,11 +131,6 @@ class AuthenticationCreate extends Resource {
     public function createUser() {
         $db = $this->getDB();
         $data = $this->getRequestData();
-        #die;
-echo "username: ".$data->{'username'}." (false? ".(! $data->{'username'}).") (not is_string? ".! is_string($data->{'username'}).")\n";
-echo "password: ".$data->{'password'}." (false? ".(! $data->{'password'}).") (not is_string? ".! is_string($data->{'password'}).")\n";
-echo "contact: ".$data->{'contact'}." (false? ".(! $data->{'contact'}).") (not is_string? ".! is_string($data->{'contact'}).")\n";
-echo "source: ".$data->{'source'}." (false? ".(! $data->{'source'}).") (not is_string? ".! is_string($data->{'source'}).")\n";
         if (! $data->{'username'} || ! $data->{'password'} ||
                 ! $data->{'source'} || ! $data->{'contact'} ||
                 ! is_string($data->{'username'}) ||

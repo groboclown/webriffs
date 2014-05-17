@@ -57,10 +57,9 @@ class Resource extends Base\Resource {
      * data in the container['user'].
      */
     function authenticated() {
+        // FIXME this line causes a warning if the cookie isn't in the
+        // request.  Need to find the correct way to check if the key exists.
         if (! $_COOKIE[Resource::COOKIE_NAME]) {
-            error_log("no cookie for ".Resource::COOKIE_NAME);
-            print_r($_COOKIE);
-            
             throw new Tonic\UnauthorizedException;
         }
         $cookie = $_COOKIE[Resource::COOKIE_NAME];

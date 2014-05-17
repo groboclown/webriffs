@@ -16,10 +16,12 @@ class CreateUserComponent {
 
     UserService _user;
     ErrorService _error;
-    Router _router;
 
     bool get loggedIn => _user.loggedIn;
 
+    bool _createdUser = false;
+
+    bool get createdUser => _createdUser;
 
     String _username;
     String _password;
@@ -39,7 +41,6 @@ class CreateUserComponent {
         else {
             usernameError = null;
         }
-        //_log.finest("Setting username to [$un] with error [$usernameError]");
         _username = un;
     }
 
@@ -50,7 +51,6 @@ class CreateUserComponent {
 
     set password(String pw) {
         _checkPasswordAndMatch(pw, passwordMatch);
-        //_log.finest("Setting password to [$pw] with error [$passwordError]");
         _password = pw;
     }
 
@@ -61,7 +61,6 @@ class CreateUserComponent {
 
     set passwordMatch(String pm) {
         _checkPasswordAndMatch(password, pm);
-        //_log.finest("Setting passwordMatch to [$pm] with error [$passwordMatchError]");
         _passwordMatch = pm;
     }
 
@@ -107,7 +106,7 @@ class CreateUserComponent {
     }
 
 
-    CreateUserComponent(this._user, this._error, this._router) {
+    CreateUserComponent(this._user, this._error) {
         username = null;
         password = null;
         passwordMatch = null;
@@ -137,7 +136,13 @@ class CreateUserComponent {
                         // report success and redirect.
                         _log.fine("created the user!");
 
-                        //_router.go('User Created', {});
+                        _createdUser = true;
+
+                        // Clear out the fields
+                        username = null;
+                        password = null;
+                        passwordMatch = null;
+                        contact = null;
                     }
                 });
         }

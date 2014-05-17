@@ -78,7 +78,8 @@ class LoginComponent {
         if (! hasError() && ! loggedIn) {
             _user.login(username, password).
             then((ServerResponse response) {
-                // FIXME do something interesting
+                // clear the password field
+                password = null;
                 return response;
             });
         }
