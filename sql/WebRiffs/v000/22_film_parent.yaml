@@ -1,71 +1,48 @@
-# A versioned quip is the revision of a single quote.  These can be tracked
-# through a revision history.  Note that the film version does not associate
-# here, because that can be a many-to-one relationship.
+# Stores the full parent history for a film version.  This allows us to
+# create a view of all the quips that this film version has.  This is a
+# combination of the FILM_VERSION parent + all the parents of that film
+# version.  All film versions have at least one row in this table, that
+# is the film version itself (parent = film id).  If a film version has
+# a parent, but only one record in this table, then that means that the
+# film version was copied, not forked.
 
-# Deleted quips have the "ACTIVE" flag set to false.
+# Love that comment formatting!
 
 table:
-    tableName: QUIP_VERSION
+    tableName: FILM_PARENT
     columns:
         - column:
-            name: Quip_Version_Id
+            name: Film_Parent_Id
             type: int
             autoIncrement: true
             constraints:
                 - constraint:
                     type: primary key
-                    name: Quip_Version_Id_Key
+                    name: Film_Parent_Id_Key
         - column:
-            name: Quip_Id
+            name: Film_Version_Id
             type: int
+            autoIncrement: true
             constraints:
                 - constraint:
                     type: not null
                 - constraint:
                     type: foreign key
-                    name: Quip_Version__Quip_Id_FK
-                    table: QUIP
-                    column: Quip_Id
+                    name: Film_Parent__Film_Version_FK
+                    table: FILM_VERSION
+                    column: Film_Version_Id
                     relationship: owner
         - column:
-            name: Author_User_Id
+            name: Parent_Film_Version_Id
             type: int
             constraints:
                 - constraint:
                     type: not null
                 - constraint:
                     type: foreign key
-                    name: Quip_Version__User_Id_FK
-                    table: USER
-                    column: User_Id
-                    pull: lazy
-
-        # As each kind of media is created, use a new column.  When multiple
-        # media kinds are in place, switch these to be NULL (rather than
-        # NOT NULL), so that a NULL value will indicate that that kind of media
-        # isn't available.
-        - column:
-            name: Text_Value
-            type: nvarchar(2048)
-            constraints:
-                - constraint:
-                    type: not null
-
-        - column:
-            name: Timestamp_Millis
-            type: int
-            constraints:
-                - constraint:
-                    type: not null
-
-        # Inactive quips are essentially a marker that the quip was deleted
-        # for this version.
-        - column:
-            name: Active
-            type: tinyint
-            constraints:
-                - constraint:
-                    type: not null
+                    name: Film_Parent__Parent_Film_Version_Id_FK
+                    table: FILM_VERSION
+                    column: Film_Version_Id
         - column:
             name: Created_On
             type: timestamp

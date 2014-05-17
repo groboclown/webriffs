@@ -1,0 +1,115 @@
+# Lists all the quip versions for a single film version.  It looks up the parent
+# hierarchy to find them all.
+
+view:
+    viewName: V_FILM_VERSION_QUIP
+    query: "
+        SELECT  q.Film_Id Film_Id
+                , quip_versions.Film_Version_Id Film_Version_Id
+                , quip_versions.Quip_Id Quip_Id
+                , quip_versions.Quip_Version_Id Quip_Version_Id
+                , qv.Author_User_Id Author_User_Id
+                , qv.Timestamp_Millis Timestamp_Millis
+                , qv.Text_Value Text_Value
+
+                -- A quip version can be updated before the film version is
+                -- committed.  Once it's been committed, it won't be updated
+                -- again.  Therefore, the "Last_Updated_On" field represents
+                -- the time when the last update on this quip was added to
+                -- the repository.
+                --, qv.Created_On Created_On
+                -- , qv.Last_Updated_On
+                , qv.Last_Updated_On Created_On
+
+                -- Finally, all the supported media.  Update this as the
+                -- quip_version table is updated.
+                , qv.Text_Value Text_Value
+        FROM
+
+            -- Sub-select to extract the correct quip versions
+            -- for the quips up the parent hierarchy.  This assumes
+            -- that a film version, once committed, is unchanging, and thus
+            -- the quip versions can only increase
+            (SELECT
+                    MAX(qv.Quip_Version_Id) Quip_Version_Id
+                    , qv.Quip_Id Quip_Id
+                    , fp.Film_Version_Id Film_Version_Id
+            FROM FILM_PARENT fp
+            INNER JOIN QUIP_VERSION qv
+                on qv.Film_Version_Id = fp.Parent_Film_Version_Id
+            GROUP BY fp.Film_Version_Id, qv.Quip_Id) quip_versions
+
+        INNER JOIN QUIP q
+            ON q.Quip_Id = quip_versions.Quip_Id
+
+        INNER JOIN QUIP_VERSION qv
+            ON qv.Quip_Version_Id = quip_versions.Quip_Version_Id
+
+        -- Finally, we only show the active quips.  This is done outside the
+        -- inner select, because we want to ensure we don't pick up the
+        -- parent quip version, which might be active, when a child deleted it.
+        WHERE qv.Active = 1
+        "
+    columns:
+        - column:
+            name: Ga_Session_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: primary key
+        - column:
+            name: Ga_User_Source_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    table: GA_USER_SOURCE
+                    column: Ga_User_Source_Id
+                - constraint:
+                    type: no update
+        - column:
+            name: Ga_User_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    table: GA_USER
+                    column: Ga_User_Id
+        - column:
+            name: Ga_Source_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    table: GA_SOURCE
+                    column: Ga_Source_Id
+        - column:
+            name: User_Agent
+            type: nvarchar(64)
+            constraints:
+                - constraint:
+                    type: not null
+        - column:
+            name: Remote_Address
+            type: nvarchar(2048)
+        - column:
+            name: Forwarded_For
+            type: nvarchar(2048)
+        - column:
+            name: Authorization_Challenge
+            type: nvarchar(2048)
+            constraints:
+                - constraint:
+                    type: not null
+    constraints:
+        - constraint:
+            type: fake index
+            columns: User_Agent, Remote_Address, Forwarded_For, Authorization_Challenge

@@ -28,6 +28,9 @@ table:
                     table: FILM
                     column: Film_Id
                     relationship: owner
+
+        # The parent from which this film version was copied / branched.  This
+        # also means that a film version represents a single "change list".
         - column:
             name: Parent_Film_Version_Id
             type: int
@@ -42,8 +45,15 @@ table:
                     name: Film_Version__Film_Version_Id_FK
                     table: FILM_VERSION
                     column: Film_Version_Id
+                - constraint:
+                    type: index
+                    name: Film_Version__Parent_Film_version_Id_IDX
+
+        # An inactive film version means that the user's list of quips and
+        # other changes haven't been committed.  This is the equivalent to
+        # a "pending changelist".
         - column:
-            name: Parent_Transparent
+            name: Active
             type: tinyint
             constraints:
                 - constraint:
