@@ -1,41 +1,41 @@
-# An active film branch; represents the "head" revision.
+# Public authentication requirements for accessing a film version.
+# The authentication requirement matches the global role on the user
+# (USER_ACCESS).
+# Individual special access (such as "maintainer") is stored in the
+# FILM_BRANCH_USER table.
+
 
 table:
-    tableName: FILM_BRANCH
+    tableName: FILM_BRANCH_PUBLIC
     columns:
         - column:
-            name: Film_Branch_Id
+            name: Film_Branch_Public_Id
             type: int
             autoIncrement: true
             constraints:
                 - constraint:
                     type: primary key
-                    name: Film_Branch_Id_Key
+                    name: Film_Branch_Public_Id_Key
         - column:
-            name: Film_Version_Id
+            name: Film_Branch_Id
             type: int
             constraints:
                 - constraint:
                     type: not null
                 - constraint:
                     type: foreign key
-                    name: Film_Auth__Film_Version_Id_FK
-                    table: FILM_VERSION
-                    column: Film_Version_Id
+                    name: Film_Branch_Public__Film_Branch_Id_FK
+                    table: FILM_BRANCH
+                    column: Film_Branch_Id
         - column:
-            name: Maintainer_User_Id
-            type: int
+            name: Access
+            type: varchar(64)
             constraints:
                 - constraint:
                     type: not null
-                - constraint:
-                    type: foreign key
-                    name: Film_Branch__User_Id_FK
-                    table: USER
-                    column: User_Id
         - column:
-            name: Name
-            type: nvarchar(255)
+            name: Minimum_Privilege_Level
+            type: int
             constraints:
                 - constraint:
                     type: not null
@@ -68,4 +68,3 @@ table:
                 - constraint:
                     type: initial value
                     value: "NULL"
-                    

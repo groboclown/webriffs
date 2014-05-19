@@ -1,63 +1,19 @@
-# Stores a specific list of quips for a film.  A film can have many different
-# versions.  The app will need to be able to manage version operations
-# (merge, fork, etc).  A parented film version means that it overrides the
-# parent quips.  A transparent parent means that all quips in the parent that
-# are not overridden by the child will be visible.
+# History of film branches, so that we can record the history of when a film
+# comments was copied.  It also allows for accurate construction of the current
+# list of quips.
 
 
 table:
-    tableName: FILM_VERSION
+    tableName: FILM_BRANCH_HISTORY
     columns:
         - column:
-            name: Film_Version_Id
+            name: Film_Branch_History_Id
             type: int
             autoIncrement: true
             constraints:
                 - constraint:
                     type: primary key
-                    name: Film_Version_Id_Key
-        - column:
-            name: Film_Id
-            type: int
-            constraints:
-                - constraint:
-                    type: not null
-                - constraint:
-                    type: foreign key
-                    name: Film_Version__Film_Id_FK
-                    table: FILM
-                    column: Film_Id
-                    relationship: owner
-
-        # The parent from which this film version was copied / branched.  This
-        # also means that a film version represents a single "change list".
-        - column:
-            name: Parent_Film_Version_Id
-            type: int
-            constraints:
-                - constraint:
-                    # Null means there is no parent
-                    type: nullable
-                # Don't make this a real foreign key, as it can cause all
-                # kinds of unexpected trouble
-                - constraint:
-                    type: fake foreign key
-                    name: Film_Version__Film_Version_Id_FK
-                    table: FILM_VERSION
-                    column: Film_Version_Id
-                - constraint:
-                    type: index
-                    name: Film_Version__Parent_Film_version_Id_IDX
-
-        # An inactive film version means that the user's list of quips and
-        # other changes haven't been committed.  This is the equivalent to
-        # a "pending changelist".
-        - column:
-            name: Active
-            type: tinyint
-            constraints:
-                - constraint:
-                    type: not null
+                    name: Film_Branch_History_Id_Key
         - column:
             name: Author_User_Id
             type: int
@@ -66,9 +22,57 @@ table:
                     type: not null
                 - constraint:
                     type: foreign key
-                    name: Film_Version__User_Id_FK
+                    name: Film_Branch_History__User_Id_FK
                     table: USER
                     column: User_Id
+        # The branch which received the quips
+        - column:
+            name: Target_Film_Branch_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    name: Film_Branch_History__Target_Film_Branch_FK
+                    table: FILM_BRANCH
+                    column: Film_Branch_Id
+        # The branch which gave the quips
+        - column:
+            name: Source_Film_Branch_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    name: Film_Branch_History__Source_Film_Branch_FK
+                    table: FILM_BRANCH
+                    column: Film_Branch_Id
+        - column:
+            name: Target_Film_Version_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    name: Film_Branch_History__Target_Film_Version_FK
+                    table: FILM_VERSION
+                    column: Film_Version_Id
+                    relationship: owner
+        - column:
+            name: Source_Film_Version_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    name: Film_Branch_History__Source_Film_Version_FK
+                    table: FILM_VERSION
+                    column: Film_Version_Id
+                    relationship: owner
         - column:
             name: Created_On
             type: timestamp

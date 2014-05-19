@@ -1,68 +1,49 @@
-# A versioned quip is the revision of a single quote.  These can be tracked
-# through a revision history.  Note that the film version does not associate
-# here, because that can be a many-to-one relationship.
+# Stores individual special access (such as "maintainer") per film branch.
+# Public access information is stored in the FILM_BRANCH_PUBLIC table.
 
-# Deleted quips have the "ACTIVE" flag set to false.
 
 table:
-    tableName: QUIP_VERSION
+    tableName: FILM_BRANCH_USER
     columns:
         - column:
-            name: Quip_Version_Id
+            name: Film_Branch_User_Id
             type: int
             autoIncrement: true
             constraints:
                 - constraint:
                     type: primary key
-                    name: Quip_Version_Id_Key
+                    name: Film_Branch_User_Id_Key
         - column:
-            name: Quip_Id
+            name: Film_Branch_Id
             type: int
             constraints:
                 - constraint:
                     type: not null
                 - constraint:
                     type: foreign key
-                    name: Quip_Version__Quip_Id_FK
-                    table: QUIP
-                    column: Quip_Id
-                    relationship: owner
+                    name: Film_Branch_User__Film_Branch_Id_FK
+                    table: FILM_BRANCH
+                    column: Film_Branch_Id
         - column:
-            name: Author_User_Id
+            name: User_Id
             type: int
             constraints:
                 - constraint:
                     type: not null
                 - constraint:
                     type: foreign key
-                    name: Quip_Version__User_Id_FK
+                    name: Film_Branch_User__User_Id_FK
                     table: USER
                     column: User_Id
-                    pull: lazy
-
-        # As each kind of media is created, use a new column.  When multiple
-        # media kinds are in place, switch these to be NULL (rather than
-        # NOT NULL), so that a NULL value will indicate that that kind of media
-        # isn't available.
         - column:
-            name: Text_Value
-            type: nvarchar(2048)
+            name: Access
+            type: varchar(64)
             constraints:
                 - constraint:
                     type: not null
-
         - column:
-            name: Timestamp_Millis
+            name: Privilege_Level
             type: int
-            constraints:
-                - constraint:
-                    type: not null
-
-        # Dead quips are essentially a marker that the quip was deleted
-        # for this version.
-        - column:
-            name: Alive
-            type: tinyint
             constraints:
                 - constraint:
                     type: not null

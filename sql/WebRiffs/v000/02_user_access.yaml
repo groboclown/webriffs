@@ -1,4 +1,5 @@
-# The access which the user has rights to.
+# The general site-wide access which the user has rights to.  Individual
+# permissions to film branches is stored in the FILM_BRANCH_USER table.
 
 table:
     tableName: USER_ACCESS

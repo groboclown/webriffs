@@ -1,32 +1,59 @@
-# A versioned quip is the revision of a single quote.  These can be tracked
-# through a revision history.  Note that the film version does not associate
-# here, because that can be a many-to-one relationship.
+# Stores a specific list of quips for a film.  A film can have many different
+# versions.  The app will need to be able to manage version operations
+# (merge, fork, etc).  A parented film version means that it overrides the
+# parent quips.  A transparent parent means that all quips in the parent that
+# are not overridden by the child will be visible.
 
-# Deleted quips have the "ACTIVE" flag set to false.
 
 table:
-    tableName: QUIP_VERSION
+    tableName: FILM_VERSION
     columns:
         - column:
-            name: Quip_Version_Id
+            name: Film_Version_Id
             type: int
             autoIncrement: true
             constraints:
                 - constraint:
                     type: primary key
-                    name: Quip_Version_Id_Key
+                    name: Film_Version_Id_Key
         - column:
-            name: Quip_Id
+            name: Film_Id
             type: int
             constraints:
                 - constraint:
                     type: not null
                 - constraint:
                     type: foreign key
-                    name: Quip_Version__Quip_Id_FK
-                    table: QUIP
-                    column: Quip_Id
+                    name: Film_Version__Film_Id_FK
+                    table: FILM
+                    column: Film_Id
                     relationship: owner
+
+        # The branch to which this version belongs
+        - column:
+            name: Film_Branch_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    name: Film_Version__Film_Branch_Id_FK
+                    table: FILM_BRANCH
+                    column: Film_Branch_Id
+                - constraint:
+                    type: index
+                    name: Film_Version__Film_Branch_Id_IDX
+
+        # An inactive film version means that the user's list of quips and
+        # other changes haven't been committed.  This is the equivalent to
+        # a "pending changelist".
+        - column:
+            name: Active
+            type: tinyint
+            constraints:
+                - constraint:
+                    type: not null
         - column:
             name: Author_User_Id
             type: int
@@ -35,37 +62,9 @@ table:
                     type: not null
                 - constraint:
                     type: foreign key
-                    name: Quip_Version__User_Id_FK
+                    name: Film_Version__User_Id_FK
                     table: USER
                     column: User_Id
-                    pull: lazy
-
-        # As each kind of media is created, use a new column.  When multiple
-        # media kinds are in place, switch these to be NULL (rather than
-        # NOT NULL), so that a NULL value will indicate that that kind of media
-        # isn't available.
-        - column:
-            name: Text_Value
-            type: nvarchar(2048)
-            constraints:
-                - constraint:
-                    type: not null
-
-        - column:
-            name: Timestamp_Millis
-            type: int
-            constraints:
-                - constraint:
-                    type: not null
-
-        # Dead quips are essentially a marker that the quip was deleted
-        # for this version.
-        - column:
-            name: Alive
-            type: tinyint
-            constraints:
-                - constraint:
-                    type: not null
         - column:
             name: Created_On
             type: timestamp
