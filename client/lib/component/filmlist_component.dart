@@ -4,7 +4,7 @@ library filmlist_component;
 
 import 'package:angular/angular.dart';
 
-import '../service/serverstatus.dart';
+import '../service/server.dart';
 
 /**
  * The UI component view of the list of films.

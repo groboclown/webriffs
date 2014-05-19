@@ -5,7 +5,7 @@ import 'package:angular/angular.dart';
 import 'package:logging/logging.dart';
 
 import '../service/user.dart';
-import '../service/serverstatus.dart';
+import '../service/server.dart';
 
 @Component(
     selector: 'create-user',
