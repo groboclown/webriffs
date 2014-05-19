@@ -2,6 +2,7 @@
 library error_service;
 
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:angular/angular.dart';
 import 'package:logging/logging.dart';
@@ -16,12 +17,19 @@ final IsErrorCheckerFunc DEFAULT_IS_ERROR_CHECKER_FUNC = (int statusCode) {
 /**
  * Shared data across controllers and services that stores the error
  * information.  This error information should only for the global data.
- *
- * TODO this needs to be a more general ServerStatusService.
  */
 @Injectable()
 class ServerStatusService {
     static final Logger _log = new Logger('service.ServerStatusService');
+    static final Map<String, dynamic> _headers = {
+      'Content-Type': 'application/json'
+    };
+    
+    final Http _http;
+    
+    bool _canConnectToServer;
+    
+    int _activeRequests = 0;
 
     /**
      * There can only be one critical error at a time.  Such a critical
@@ -38,24 +46,141 @@ class ServerStatusService {
     /**
      * Are there server connection problems?
      */
-    bool canConnectToServer;
+    bool get canConnectToServer => _canConnectToServer;
+
+    int get activeRequests => _activeRequests;
+
+    bool get isLoading => _activeRequests > 0;
+    
+    ServerStatusService(this._http);
+
+    Future<ServerResponse> get(String url, {
+            IsErrorCheckerFunc isErrorChecker : null }) {
+        String fullUrl = _fullUrl(url);
+        try {
+            _activeRequests++;
+            return _http.get(fullUrl, headers: _headers)
+                .then((HttpResponse response) {
+                    _activeRequests--;
+                    return _processResponse("GET", fullUrl, null, response,
+                        isErrorChecker);
+                }, onError: (HttpResponse response) {
+                    _activeRequests--;
+                    return _processResponse("GET", fullUrl, null, response,
+                        isErrorChecker);
+                }).catchError((Exception e) {
+                    _activeRequests--;
+                    return _addHttpRequestException("GET", fullUrl, null, e);
+                });
+        } catch (e) {
+            _activeRequests--;
+            throw e;
+        }
+    }
+
+    Future<ServerResponse> put(String url,
+                               { Map<String, dynamic> data : null,
+                               IsErrorCheckerFunc isErrorChecker : null }) {
+        String jsonData;
+        if (data == null) {
+            jsonData = "{}";
+        } else {
+            jsonData = JSON.encode(data);
+        }
+        String fullUrl = _fullUrl(url);
+        try {
+            _activeRequests++;
+            return _http.put(fullUrl, jsonData, headers: _headers).then((HttpResponse response) {
+                _activeRequests--;
+                return _processResponse("PUT", fullUrl, jsonData, response, isErrorChecker);
+            }, onError: (HttpResponse response) {
+                _activeRequests--;
+                return _processResponse("PUT", fullUrl, jsonData, response, isErrorChecker);
+            }).catchError((Exception e) {
+                _activeRequests--;
+                return _addHttpRequestException("PUT", fullUrl, jsonData, e);
+            });
+        } catch (e) {
+            _activeRequests--;
+            throw e;
+        }
+    }
+
+    Future<ServerResponse> post(String url,
+                                { Map<String, dynamic> data : null,
+                                IsErrorCheckerFunc isErrorChecker: null }) {
+        String jsonData;
+        if (data == null) {
+            jsonData = "{}";
+        } else {
+            jsonData = JSON.encode(data);
+        }
+        String fullUrl = _fullUrl(url);
+        try {
+            _activeRequests++;
+            return _http.post(fullUrl, jsonData, headers: _headers)
+            .then((HttpResponse response) {
+                _activeRequests--;
+                return _processResponse("POST", fullUrl, jsonData, response,
+                    isErrorChecker);
+            }, onError: (HttpResponse response) {
+                _activeRequests--;
+                return _processResponse("POST", fullUrl, jsonData, response,
+                    isErrorChecker);
+            }).catchError((Exception e) {
+                _activeRequests--;
+                return _addHttpRequestException("POST", fullUrl, jsonData, e);
+            });
+        } catch (e) {
+            _activeRequests--;
+            throw e;
+        }
+    }
+
+    Future<ServerResponse> delete(String url, {
+            IsErrorCheckerFunc isErrorChecker : null }) {
+        String fullUrl = _fullUrl(url);
+        try {
+            _activeRequests++;
+            return _http.delete(fullUrl, headers: _headers)
+            .then((HttpResponse response) {
+                _activeRequests--;
+                return _processResponse("DELETE", fullUrl, null, response,
+                    isErrorChecker);
+            }, onError: (HttpResponse response) {
+                _activeRequests--;
+                return _processResponse("DELETE", fullUrl, null, response,
+                    isErrorChecker);
+            }).catchError((Exception e) {
+                _activeRequests--;
+                return _addHttpRequestException("DELETE", fullUrl, null, e);
+            });
+        } catch (e) {
+            _activeRequests--;
+            throw e;
+        }
+    }
 
 
-    int activeRequests = 0;
-
-    bool get isLoading => activeRequests > 0;
+    String _fullUrl(String url) {
+        if (! url.startsWith('/')) {
+            url = '/' + url;
+        }
+        return 'api' + url;
+    }
+    
 
 
     /**
      * Called when there was an exception generated during the HttpRequest.
      */
-    ServerResponse addHttpRequestException(String method, String url,
+    ServerResponse _addHttpRequestException(String method, String url,
             String data, Exception e) {
         // TODO clean up the error some?
         criticalError = e.toString();
         _log.severe("HttpRequest ${method} to [${url}] " +
             (data == null ? "" : " <= [${data}]") + " generated an error", e);
-        canConnectToServer = false;
+        _canConnectToServer = false;
         return new ServerResponse(null, null);
     }
 
@@ -63,11 +188,11 @@ class ServerStatusService {
     /**
      * Called after the response comes back from the server.
      */
-    ServerResponse processResponse(String method, String url,
+    ServerResponse _processResponse(String method, String url,
                                    String data, HttpResponse e,
                                    IsErrorCheckerFunc isErrorChecker) {
         if (e != null) {
-            canConnectToServer = true;
+            _canConnectToServer = true;
             ServerResponse resp = new ServerResponse(e, isErrorChecker);
             if (resp.wasError) {
                 notices.add(resp);

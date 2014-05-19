@@ -11,7 +11,7 @@ import 'package:webriffs_client/component/createuser_component.dart';
 import 'package:webriffs_client/component/forgotpassword_component.dart';
 import 'package:webriffs_client/component/login_component.dart';
 import 'package:webriffs_client/component/filmlist_component.dart';
-import 'package:webriffs_client/service/error.dart';
+import 'package:webriffs_client/service/serverstatus.dart';
 import 'package:webriffs_client/service/user.dart';
 
 
@@ -26,7 +26,7 @@ class WebRiffsModule extends Module {
         bind(FilmListComponent);
 
         // Stateful Services - that's why they're value, not type
-        bind(ErrorService);
+        bind(ServerStatusService);
         bind(UserService);
 
         // Routes

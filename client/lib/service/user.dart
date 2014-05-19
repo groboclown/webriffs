@@ -2,7 +2,6 @@
 library user_service;
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:angular/angular.dart';
 
@@ -29,13 +28,13 @@ class UserService extends AbstractServerService {
     bool loggedIn = false;
 
 
-    UserService(Http http, ServerStatusService error) : super(http, error) {
+    UserService(ServerStatusService error) : super(error) {
         _loaded = Future.wait([loadUserDetails()]);
     }
 
 
     Future<ServerResponse> loadUserDetails() {
-        return post('/authentication/current',
+        return server.post('/authentication/current',
                 isErrorChecker: UNAUTHORIZED_IS_NOT_ERROR)
             .then((ServerResponse response) {
                 if (response.status == 412 || response.wasError) {
@@ -53,7 +52,7 @@ class UserService extends AbstractServerService {
 
     Future<ServerResponse> login(String username, String password) {
         var req = new LoginRequest(username, password);
-        return post('/authentication/login', data: req.toJson())
+        return server.post('/authentication/login', data: req.toJson())
             .then((ServerResponse response) {
                 // Force a check to see if we are indeed logged in.
                 return loadUserDetails();
@@ -62,7 +61,7 @@ class UserService extends AbstractServerService {
 
 
     Future<ServerResponse> logout() {
-        return post('/authentication/logout',
+        return server.post('/authentication/logout',
                 isErrorChecker: UNAUTHORIZED_IS_NOT_ERROR)
             .then((ServerResponse response) {
                 // Force a check to see if we are indeed logged in or not.
@@ -74,7 +73,7 @@ class UserService extends AbstractServerService {
     Future<ServerResponse> createUser(String username, String password,
                                       String contact) {
         var req = new UserCreationRequest(username, password, contact);
-        return put('/authentication/create',
+        return server.put('/authentication/create',
                 data: req.toJson())
             .then((ServerResponse response) {
                 if (! response.wasError) {
