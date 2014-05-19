@@ -1,4 +1,4 @@
-# An active film branch; represents the "head" revision.
+# A film branch relates to a branch.
 
 table:
     tableName: FILM_BRANCH
@@ -12,22 +12,24 @@ table:
                     type: primary key
                     name: Film_Branch_Id_Key
         - column:
-            name: Film_Id
+            name: Gv_Branch_Id
             type: int
             constraints:
                 - constraint:
-                    type: not null
-                - constraint:
                     type: foreign key
-                    name: Film_Branch__Film_Id_FK
-                    table: USER
-                    column: User_Id
+                    name: Film_Branch__Gv_Branch_Id_FK
+                    table: GV_BRANCH
+                    column: Gv_Branch_Id
+                - constraint:
+                    type: no update
         - column:
-            name: Name
+            name: Branch_Name
             type: nvarchar(255)
             constraints:
                 - constraint:
                     type: not null
+                - constraint:
+                    type: no update
         - column:
             name: Created_On
             type: timestamp
@@ -36,12 +38,6 @@ table:
                     type: not null
                 - constraint:
                     type: no update
-                - constraint:
-                    type: initial value
-                    dialects:
-                        - dialect:
-                            platforms: mysql
-                            sql: NOW()
         - column:
             name: Last_Updated_On
             type: timestamp
@@ -49,12 +45,4 @@ table:
                 - constraint:
                     type: nullable
                 - constraint:
-                    type: constant update
-                    dialects:
-                        - dialect:
-                            platforms: mysql
-                            sql: NOW()
-                - constraint:
-                    type: initial value
-                    value: "NULL"
-                    
+                    type: no update

@@ -1,5 +1,4 @@
-# A single quip, which may be versioned.  This essentially allows for following
-# the trail of edits on a single quip.
+# A single quip, which is a kind of item in the versioning model.
 
 
 table:
@@ -14,16 +13,16 @@ table:
                     type: primary key
                     name: Quip_Id_Key
         - column:
-            name: Film_Id
+            name: Gv_Item_Id
             type: int
             constraints:
                 - constraint:
                     type: not null
                 - constraint:
                     type: foreign key
-                    name: Quip__Film_Id_FK
-                    table: FILM
-                    column: Film_Id
+                    name: Quip__Gv_Item_Id_FK
+                    table: GV_ITEM
+                    column: Gv_Item_Id
         - column:
             name: Created_On
             type: timestamp

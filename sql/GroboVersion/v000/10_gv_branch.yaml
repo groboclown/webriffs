@@ -23,12 +23,6 @@ table:
                     table: GV_PROJECT
                     column: Gv_Project_Id
         - column:
-            name: Name
-            type: nvarchar(255)
-            constraints:
-                - constraint:
-                    type: not null
-        - column:
             name: Created_On
             type: timestamp
             constraints:

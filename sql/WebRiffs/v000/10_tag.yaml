@@ -1,4 +1,6 @@
-# Repository of all the tags known by the system.
+# Repository of all the tags known by the system.  Tags are stored as items
+# in the version repository, so that the adding and removal of tags can be
+# associated with quips and branches.
 
 table:
     tableName: TAG
@@ -11,6 +13,15 @@ table:
                 - constraint:
                     type: primary key
                     name: Tag_Id_Key
+        - column:
+            name: Gv_Item_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Tag__Gv_Item_Id_FK
+                    table: GV_ITEM
+                    column: Gv_Item_Id
         - column:
             name: Name
             type: nvarchar(64)

@@ -23,17 +23,6 @@ table:
                     table: GV_ITEM
                     column: Gv_Item_Id
                     relationship: owner
-        - column:
-            name: Author_User_Id
-            type: int
-            constraints:
-                - constraint:
-                    type: not null
-                - constraint:
-                    type: foreign key
-                    name: Gv_Item_Version__Ga_User_Id_FK
-                    table: GA_USER
-                    column: Ga_User_Id
 
         # Dead items are essentially a marker that the item was deleted
         # for this version.

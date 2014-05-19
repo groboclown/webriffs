@@ -8,7 +8,6 @@ view:
         SELECT
             b.Gv_Branch_Id Gv_Branch_Id
             , b.Gv_Project_Id Gv_Project_Id
-            , b.Name Name
             , MAX(c.Gv_Change_Id) Gv_Change_Id
         FROM GV_BRANCH b
         INNER JOIN GV_CHANGE c
@@ -38,12 +37,6 @@ view:
                     name: V_Gv_Branch_Head__Gv_Project_Id_FK
                     table: GV_PROJECT
                     column: Gv_Project_Id
-        - column:
-            name: Name
-            type: nvarchar(255)
-            constraints:
-                - constraint:
-                    type: not null
         - column:
             name: Gv_Change_Id
             type: int

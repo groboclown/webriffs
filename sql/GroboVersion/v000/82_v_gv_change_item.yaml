@@ -1,5 +1,4 @@
-# All the active items per change.  Unfortunately, it does not tell us the
-# active state easily.
+# All the active items per change.
 
 view:
     viewName: V_GV_CHANGE_ITEM
@@ -10,6 +9,7 @@ view:
             , tciv.Gv_Change_Id Gv_Change_Id
             , tciv.Gv_Item_Id Gv_Item_Id
             , tciv.Gv_Item_Version_Id Gv_Item_Version_Id
+            , c.Ga_User_Id Ga_User_Id
             , COALESCE(iv.Last_Updated_On, iv.Created_On) Updated_On
         FROM
             V_GV_TOP_CHANGE_ITEM_VERSION tciv
@@ -76,6 +76,17 @@ view:
                     name: V_Gv_Change_Item__Gv_Item_Id_FK
                     table: GV_ITEM
                     column: Gv_Item_Id
+        - column:
+            name: Ga_User_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    name: V_Gv_Change_Item__Ga_User_Id_FK
+                    table: GA_USER
+                    column: Ga_User_Id
         - column:
             name: Updated_On
             type: timestamp

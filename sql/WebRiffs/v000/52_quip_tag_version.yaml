@@ -1,49 +1,41 @@
+# Associates a Quip version with a tag.  This is stored as part of a branch
+# change.  The Item ID is the tag, the item_version_id is the version of the
+# tag on this quip.  These are associated with the quip, not the quip version.
+
 table:
-    tableName: QUIP_TAG
+    tableName: QUIP_TAG_VERSION
     columns:
         - column:
-            name: Quip_Tag_Id
+            name: Quip_Tag_Version_Id
             type: int
             autoIncrement: true
             constraints:
                 - constraint:
                     type: primary key
-                    name: Quip_Tag_Id_Key
+                    name: Quip_Tag_Version_Id_Key
         - column:
-            name: Quip_Version_Id
+            name: Ga_Item_Version_Id
             type: int
             constraints:
                 - constraint:
                     type: not null
                 - constraint:
                     type: foreign key
-                    name: Quip_Tag__Quip_Version_Id_FK
-                    table: QUIP_VERSION
-                    column: Quip_Version_Id
+                    name: Quip_Tag_Version__Ga_Item_Version_Id_FK
+                    table: GA_ITEM_VERSION
+                    column: Ga_Item_Version_Id
                     relationship: owner
         - column:
-            name: Tag_Id
+            name: Quip_Id
             type: int
             constraints:
                 - constraint:
                     type: not null
                 - constraint:
                     type: foreign key
-                    name: Quip_Tag__Tag_Id_FK
-                    table: TAG
-                    column: Tag_Id
-                    pull: always
-        - column:
-            name: Author_User_Id
-            type: int
-            constraints:
-                - constraint:
-                    type: not null
-                - constraint:
-                    type: foreign key
-                    name: Quip_Tag__User_Id_FK
-                    table: USER
-                    column: User_Id
+                    name: Quip_Tag_Version__Quip_Id_FK
+                    table: QUIP
+                    column: Quip_Id
         - column:
             name: Created_On
             type: timestamp

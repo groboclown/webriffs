@@ -1,3 +1,5 @@
+# The Film object corresponds to a project object in the versioning model.
+
 table:
     tableName: FILM
     columns:
@@ -9,6 +11,15 @@ table:
                 - constraint:
                     type: primary key
                     name: Film_Id_Key
+        - column:
+            name: Gv_Project_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Film__Gv_Project_Id_FK
+                    table: GV_PROJECT
+                    column: Gv_Project_Id
         - column:
             name: Name
             type: nvarchar(200)

@@ -1,8 +1,4 @@
-# A versioned quip is the revision of a single quote.  These can be tracked
-# through a revision history.  Note that the film version does not associate
-# here, because that can be a many-to-one relationship.
-
-# Deleted quips have the "ACTIVE" flag set to false.
+# A quip associated with the quip item's version.
 
 table:
     tableName: QUIP_VERSION
@@ -16,7 +12,7 @@ table:
                     type: primary key
                     name: Quip_Version_Id_Key
         - column:
-            name: Quip_Id
+            name: Gv_Item_Version_Id
             type: int
             constraints:
                 - constraint:
@@ -27,18 +23,6 @@ table:
                     table: QUIP
                     column: Quip_Id
                     relationship: owner
-        - column:
-            name: Author_User_Id
-            type: int
-            constraints:
-                - constraint:
-                    type: not null
-                - constraint:
-                    type: foreign key
-                    name: Quip_Version__User_Id_FK
-                    table: USER
-                    column: User_Id
-                    pull: lazy
 
         # As each kind of media is created, use a new column.  When multiple
         # media kinds are in place, switch these to be NULL (rather than
@@ -58,14 +42,6 @@ table:
                 - constraint:
                     type: not null
 
-        # Dead quips are essentially a marker that the quip was deleted
-        # for this version.
-        - column:
-            name: Alive
-            type: tinyint
-            constraints:
-                - constraint:
-                    type: not null
         - column:
             name: Created_On
             type: timestamp

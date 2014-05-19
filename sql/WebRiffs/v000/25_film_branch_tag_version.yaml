@@ -1,47 +1,29 @@
-# Stores the full parent history for a film version.  This allows us to
-# create a view of all the quips that this film version has.  This is a
-# combination of the FILM_VERSION parent + all the parents of that film
-# version.  All film versions have at least one row in this table, that
-# is the film version itself (parent = film id).  If a film version has
-# a parent, but only one record in this table, then that means that the
-# film version was copied, not forked.
-
-# Love that comment formatting!
+# Associates a tag with a film branch.  The tags are stored as items on a
+# change, so the per-branch tags are stored as item versions.
 
 table:
-    tableName: FILM_PARENT
+    tableName: FILM_BRANCH_TAG_VERSION
     columns:
         - column:
-            name: Film_Parent_Id
+            name: Film_Branch_Tag_Version_Id
             type: int
             autoIncrement: true
             constraints:
                 - constraint:
                     type: primary key
-                    name: Film_Parent_Id_Key
+                    name: Film_Branch_Tag_Version_Id_Key
         - column:
-            name: Film_Version_Id
+            name: Gv_Item_Version_Id
             type: int
             constraints:
                 - constraint:
                     type: not null
                 - constraint:
                     type: foreign key
-                    name: Film_Parent__Film_Version_FK
-                    table: FILM_VERSION
-                    column: Film_Version_Id
+                    name: Film_Branch_Tag_Version__Gv_Item_Version_Id_FK
+                    table: GV_ITEM_VERSION
+                    column: Gv_Item_Version_Id
                     relationship: owner
-        - column:
-            name: Parent_Film_Version_Id
-            type: int
-            constraints:
-                - constraint:
-                    type: not null
-                - constraint:
-                    type: foreign key
-                    name: Film_Parent__Parent_Film_Version_Id_FK
-                    table: FILM_VERSION
-                    column: Film_Version_Id
         - column:
             name: Created_On
             type: timestamp
