@@ -22,7 +22,6 @@ table:
         - column:
             name: Film_Version_Id
             type: int
-            autoIncrement: true
             constraints:
                 - constraint:
                     type: not null

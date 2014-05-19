@@ -3,8 +3,7 @@
 
 view:
     viewName: V_FILM_VERSION_QUIP
-    query: "
-        SELECT  q.Film_Id Film_Id
+    query: "SELECT  q.Film_Id Film_Id
                 , quip_versions.Film_Version_Id Film_Version_Id
                 , quip_versions.Quip_Id Quip_Id
                 , quip_versions.Quip_Version_Id Quip_Version_Id
@@ -14,7 +13,7 @@ view:
 
                 -- A quip version can be updated before the film version is
                 -- committed.  Once it's been committed, it won't be updated
-                -- again.  Therefore, the "Last_Updated_On" field represents
+                -- again.  Therefore, the 'Last_Updated_On' field represents
                 -- the time when the last update on this quip was added to
                 -- the repository.
                 --, qv.Created_On Created_On
@@ -52,63 +51,81 @@ view:
         "
     columns:
         - column:
-            name: Ga_Session_Id
-            type: int
-            constraints:
-                - constraint:
-                    type: not null
-                - constraint:
-                    type: primary key
-        - column:
-            name: Ga_User_Source_Id
+            name: Film_Id
             type: int
             constraints:
                 - constraint:
                     type: not null
                 - constraint:
                     type: foreign key
-                    table: GA_USER_SOURCE
-                    column: Ga_User_Source_Id
+                    table: FILM
+                    column: Film_Id
                 - constraint:
                     type: no update
         - column:
-            name: Ga_User_Id
+            name: Film_Version_Id
             type: int
             constraints:
                 - constraint:
                     type: not null
                 - constraint:
                     type: foreign key
-                    table: GA_USER
-                    column: Ga_User_Id
+                    table: FILM_VERSION
+                    column: Film_Version_Id
+                - constraint:
+                    type: no update
         - column:
-            name: Ga_Source_Id
+            name: Quip_Id
             type: int
             constraints:
                 - constraint:
                     type: not null
                 - constraint:
                     type: foreign key
-                    table: GA_SOURCE
-                    column: Ga_Source_Id
+                    table: QUIP
+                    column: Quip_Id
+                - constraint:
+                    type: no update
         - column:
-            name: User_Agent
-            type: nvarchar(64)
+            name: Quip_Version_Id
+            type: int
             constraints:
                 - constraint:
                     type: not null
+                - constraint:
+                    type: foreign key
+                    table: QUIP_VERSION
+                    column: Quip_Version_Id
+                - constraint:
+                    type: no update
         - column:
-            name: Remote_Address
-            type: nvarchar(2048)
+            name: Author_User_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    table: USER
+                    column: User_Id
+                - constraint:
+                    type: no update
         - column:
-            name: Forwarded_For
-            type: nvarchar(2048)
+            name: Timestamp_Millis
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: no update
         - column:
-            name: Authorization_Challenge
+            name: Text_Value
             type: nvarchar(2048)
             constraints:
                 - constraint:
                     type: not null
+                - constraint:
+                    type: no update
     constraints:
         - constraint:
             type: fake index
