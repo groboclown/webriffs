@@ -1,0 +1,84 @@
+# All the active items per change.  Unfortunately, it does not tell us the
+# active state easily.
+
+view:
+    viewName: V_GV_CHANGE_ITEM
+    query: "
+        SELECT
+            b.Gv_Project_Id Gv_Project_Id
+            , b.Gv_Branch_Id Gv_Branch_Id
+            , tciv.Gv_Change_Id Gv_Change_Id
+            , tciv.Gv_Item_Id Gv_Item_Id
+            , tciv.Gv_Item_Version_Id Gv_Item_Version_Id
+            , COALESCE(iv.Last_Updated_On, iv.Created_On) Updated_On
+        FROM
+            V_GV_TOP_CHANGE_ITEM_VERSION tciv
+        INNER JOIN GV_CHANGE c
+            ON c.Gv_Change_Id = tciv.Gv_Change_Id
+        INNER JOIN GV_ITEM_VERSION iv
+            ON tciv.Gv_Item_Id = iv.Gv_Item_Id
+        INNER JOIN GV_BRANCH b
+            ON c.Gv_Branch_Id = b.Gv_Branch_Id
+        WHERE iv.Alive = 1
+        "
+    columns:
+        - column:
+            name: Gv_Project_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    name: V_Gv_Change_Item__Gv_Project_Id_FK
+                    table: GV_PROJECT
+                    column: Gv_Project_Id
+        - column:
+            name: Gv_Branch_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    name: V_Gv_Change_Item__Gv_Branch_Id_FK
+                    table: GV_BRANCH
+                    column: Gv_Branch_Id
+        - column:
+            name: Gv_Change_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    name: V_Gv_Change_Item__Gv_Change_Id_FK
+                    table: GV_CHANGE
+                    column: Gv_Change_Id
+        - column:
+            name: Gv_Item_Version_Id
+            type: int
+            autoIncrement: true
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: V_Gv_Change_Item__Gv_Item_Version_Id_Key
+                    table: GV_ITEM_VERSION
+                    column: Gv_Item_Version_Id
+        - column:
+            name: Gv_Item_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    name: V_Gv_Change_Item__Gv_Item_Id_FK
+                    table: GV_ITEM
+                    column: Gv_Item_Id
+        - column:
+            name: Updated_On
+            type: timestamp
+            constraints:
+                - constraint:
+                    type: not null

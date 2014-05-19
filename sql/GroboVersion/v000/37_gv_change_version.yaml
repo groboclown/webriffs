@@ -1,60 +1,40 @@
-# The user registration table.  It depends upon the GroboAuth schema.
+# An item associated with a change.  This allows multiple changes to associate
+# with a single item version.
 
 table:
-    tableName: USER
+    tableName: GV_CHANGE_VERSION
     columns:
         - column:
-            name: User_Id
+            name: Gv_Change_Version_Id
             type: int
             autoIncrement: true
             constraints:
                 - constraint:
                     type: primary key
-                    name: User_Id_Key
+                    name: Gv_Change_Version_Id_Key
         - column:
-            name: Username
-            type: nvarchar(64)
-            constraints:
-                - constraint:
-                    type: not null
-                - constraint:
-                    type: unique index
-                    name: Username__IDX
-        - column:
-            name: Contact
-            type: nvarchar(2048)
-            constraints:
-                - constraint:
-                    type: not null
-        - column:
-            name: Ga_User_Id
+            name: Gv_Item_Version_Id
             type: int
             constraints:
                 - constraint:
                     type: not null
                 - constraint:
                     type: foreign key
-                    name: User__Ga_User_Id_FK
-                    table: GA_USER
-                    column: Ga_User_Id
-        # The primary source the user uses.
+                    name: Gv_Change_Version__Gv_Item_Version_Id_FK
+                    table: GV_ITEM
+                    column: Gv_Item_Id
+                    relationship: owner
         - column:
-            name: Primary_Source_Id
+            name: Gv_Change_Id
             type: int
             constraints:
                 - constraint:
                     type: not null
                 - constraint:
                     type: foreign key
-                    name: User__Ga_Source_Id_FK
-                    table: GA_SOURCE
-                    column: Ga_Source_Id
-        - column:
-            name: Is_Site_Admin
-            type: tinyint
-            constraints:
-                - constraint:
-                    type: not null
+                    name: Gv_Item_Version__Gv_Change_Id_FK
+                    table: GV_CHANGE
+                    column: Gv_Change_Id
         - column:
             name: Created_On
             type: timestamp

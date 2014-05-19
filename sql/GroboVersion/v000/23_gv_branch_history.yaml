@@ -1,60 +1,79 @@
-# The user registration table.  It depends upon the GroboAuth schema.
+# History of branches, so that we can record the history of when a project
+# was copied.  It also allows for accurate construction of the current
+# list of items.
+
 
 table:
-    tableName: USER
+    tableName: GV_BRANCH_HISTORY
     columns:
         - column:
-            name: User_Id
+            name: Gv_Branch_History_Id
             type: int
             autoIncrement: true
             constraints:
                 - constraint:
                     type: primary key
-                    name: User_Id_Key
+                    name: Gv_Branch_History_Id_Key
+        # Who made the change
         - column:
-            name: Username
-            type: nvarchar(64)
-            constraints:
-                - constraint:
-                    type: not null
-                - constraint:
-                    type: unique index
-                    name: Username__IDX
-        - column:
-            name: Contact
-            type: nvarchar(2048)
-            constraints:
-                - constraint:
-                    type: not null
-        - column:
-            name: Ga_User_Id
+            name: Author_User_Id
             type: int
             constraints:
                 - constraint:
                     type: not null
                 - constraint:
                     type: foreign key
-                    name: User__Ga_User_Id_FK
+                    name: Gv_Branch_History__Ga_User_Id_FK
                     table: GA_USER
                     column: Ga_User_Id
-        # The primary source the user uses.
+        # The branch which received the items
         - column:
-            name: Primary_Source_Id
+            name: Target_Branch_Id
             type: int
             constraints:
                 - constraint:
                     type: not null
                 - constraint:
                     type: foreign key
-                    name: User__Ga_Source_Id_FK
-                    table: GA_SOURCE
-                    column: Ga_Source_Id
+                    name: Gv_Branch_History__Target_Branch_FK
+                    table: GV_BRANCH
+                    column: Gv_Branch_Id
+        # The branch which gave the items
         - column:
-            name: Is_Site_Admin
-            type: tinyint
+            name: Source_Branch_Id
+            type: int
             constraints:
                 - constraint:
                     type: not null
+                - constraint:
+                    type: foreign key
+                    name: Gv_Branch_History__Source_Branch_FK
+                    table: GV_BRANCH
+                    column: Gv_Branch_Id
+        # Change which contains the changes in the target branch
+        - column:
+            name: Target_Change_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    name: Gv_Branch_History__Target_Change_FK
+                    table: GV_CHANGE
+                    column: Gv_Change_Id
+        # Change of the source branch it came from
+        - column:
+            name: Source_Change_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    name: Film_Branch_History__Source_Change_FK
+                    table: GV_CHANGE
+                    column: Gv_Change_Id
         - column:
             name: Created_On
             type: timestamp

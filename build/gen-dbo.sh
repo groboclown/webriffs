@@ -8,7 +8,7 @@ source ../local-settings.sh
 test -d exports/dbo && rm -r exports/dbo 2>/dev/null
 
 PYTHONPATH="${PYTHONPATH}:../sql-migration/src"
-for d in ../sql/GroboAuth ../sql/WebRiffs; do
+for d in ../sql/GroboAuth ../sql/GroboVersion ../sql/WebRiffs; do
     dd=$(basename $d)  
     outd=exports/dbo/$dd
     test -d ${outd} || mkdir -p ${outd}

@@ -9,7 +9,7 @@ test -d exports/sql && rm -r exports/sql 2>/dev/null
 # Make sure ordering is correct
 DIRC=0
 PYTHONPATH="${PYTHONPATH}:../sql-migration/src"
-for d in ../sql/GroboAuth ../sql/WebRiffs; do
+for d in ../sql/GroboAuth ../sql/GroboVersion ../sql/WebRiffs; do
     outd=exports/sql/$(printf "%02d" ${DIRC})
     test -d ${outd} || mkdir -p ${outd}
 

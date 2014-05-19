@@ -1,0 +1,44 @@
+# A single, master item.  Items have a version, which represents a change,
+# and the group of changes on an item are contained in a change.
+
+
+table:
+    tableName: GV_ITEM
+    columns:
+        - column:
+            name: Gv_Item_Id
+            type: int
+            autoIncrement: true
+            constraints:
+                - constraint:
+                    type: primary key
+                    name: Gv_Item_Id_Key
+        - column:
+            name: Created_On
+            type: timestamp
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: no update
+                - constraint:
+                    type: initial value
+                    dialects:
+                        - dialect:
+                            platforms: mysql
+                            sql: NOW()
+        - column:
+            name: Last_Updated_On
+            type: timestamp
+            constraints:
+                - constraint:
+                    type: nullable
+                - constraint:
+                    type: constant update
+                    dialects:
+                        - dialect:
+                            platforms: mysql
+                            sql: NOW()
+                - constraint:
+                    type: initial value
+                    value: "NULL"

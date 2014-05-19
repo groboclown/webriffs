@@ -1,28 +1,43 @@
-# The user registration table.  It depends upon the GroboAuth schema.
+# Stores the changed items.  It can be in one of three states:
+# - Committed - the change is put into the branch and can be publicly viewed.
+# - Pending - the change is being altered by one individual, and usually can't
+#     be seen by others.
+# - Deleted - the pending change was committed, causing a new committed change
+#     to be added, and the old one was removed.
+
 
 table:
-    tableName: USER
+    tableName: GV_CHANGE
     columns:
         - column:
-            name: User_Id
+            name: Gv_Change_Id
             type: int
             autoIncrement: true
             constraints:
                 - constraint:
                     type: primary key
-                    name: User_Id_Key
+                    name: Gv_Change_Id_Key
         - column:
-            name: Username
-            type: nvarchar(64)
+            name: Gv_Branch_Id
+            type: int
             constraints:
                 - constraint:
                     type: not null
                 - constraint:
-                    type: unique index
-                    name: Username__IDX
+                    type: foreign key
+                    name: Gv_Change__Gv_Branch_Id_FK
+                    table: GV_BRANCH
+                    column: Gv_Branch_Id
+                    relationship: owner
+
+        # Committed changes cannot be changed.  Uncommitted changes reflect
+        # a pending change that the user can alter.  When an uncommitted change
+        # is committed, the old change is removed (marked deleted), and its
+        # pending changes are given to a new change entry, so that the history
+        # of changes are always increasing through history.
         - column:
-            name: Contact
-            type: nvarchar(2048)
+            name: Active_State
+            type: tinyint
             constraints:
                 - constraint:
                     type: not null
@@ -34,27 +49,9 @@ table:
                     type: not null
                 - constraint:
                     type: foreign key
-                    name: User__Ga_User_Id_FK
+                    name: Gv_Change__Ga_User_Id_FK
                     table: GA_USER
                     column: Ga_User_Id
-        # The primary source the user uses.
-        - column:
-            name: Primary_Source_Id
-            type: int
-            constraints:
-                - constraint:
-                    type: not null
-                - constraint:
-                    type: foreign key
-                    name: User__Ga_Source_Id_FK
-                    table: GA_SOURCE
-                    column: Ga_Source_Id
-        - column:
-            name: Is_Site_Admin
-            type: tinyint
-            constraints:
-                - constraint:
-                    type: not null
         - column:
             name: Created_On
             type: timestamp
