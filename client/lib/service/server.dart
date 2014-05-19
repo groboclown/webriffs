@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'package:angular/angular.dart';
 import 'package:logging/logging.dart';
 
-import 'error.dart';
+import 'serverstatus.dart';
 
 
 /**
@@ -16,14 +16,14 @@ import 'error.dart';
  */
 class AbstractServerService {
     final Http _http;
-    final ErrorService _error;
+    final ServerStatusService _status;
     final Map<String, dynamic> _headers;
 
 
-    bool get isLoading => _error.isLoading;
+    bool get isLoading => _status.isLoading;
 
 
-    AbstractServerService(this._http, this._error) :
+    AbstractServerService(this._http, this._status) :
             _headers = {} {
         _headers['Content-Type'] = 'application/json';
     }
@@ -33,22 +33,22 @@ class AbstractServerService {
         // TODO this isn't the right approach to capturing the requests in progress.
         String fullUrl = _fullUrl(url);
         try {
-            _error.activeRequests++;
+            _status.activeRequests++;
             return _http.get(fullUrl, headers: _headers)
                 .then((HttpResponse response) {
-                    _error.activeRequests--;
-                    return _error.processResponse("GET", fullUrl, null, response,
+                    _status.activeRequests--;
+                    return _status.processResponse("GET", fullUrl, null, response,
                         isErrorChecker);
                 }, onError: (HttpResponse response) {
-                    _error.activeRequests--;
-                    return _error.processResponse("GET", fullUrl, null, response,
+                    _status.activeRequests--;
+                    return _status.processResponse("GET", fullUrl, null, response,
                         isErrorChecker);
                 }).catchError((Exception e) {
-                    _error.activeRequests--;
-                    return _error.addHttpRequestException("GET", fullUrl, null, e);
+                    _status.activeRequests--;
+                    return _status.addHttpRequestException("GET", fullUrl, null, e);
                 });
         } catch (e) {
-            _error.activeRequests--;
+            _status.activeRequests--;
             throw e;
         }
     }
@@ -64,19 +64,19 @@ class AbstractServerService {
         }
         String fullUrl = _fullUrl(url);
         try {
-            _error.activeRequests++;
+            _status.activeRequests++;
             return _http.put(fullUrl, jsonData, headers: _headers).then((HttpResponse response) {
-                _error.activeRequests--;
-                return _error.processResponse("PUT", fullUrl, jsonData, response, isErrorChecker);
+                _status.activeRequests--;
+                return _status.processResponse("PUT", fullUrl, jsonData, response, isErrorChecker);
             }, onError: (HttpResponse response) {
-                _error.activeRequests--;
-                return _error.processResponse("PUT", fullUrl, jsonData, response, isErrorChecker);
+                _status.activeRequests--;
+                return _status.processResponse("PUT", fullUrl, jsonData, response, isErrorChecker);
             }).catchError((Exception e) {
-                _error.activeRequests--;
-                return _error.addHttpRequestException("PUT", fullUrl, jsonData, e);
+                _status.activeRequests--;
+                return _status.addHttpRequestException("PUT", fullUrl, jsonData, e);
             });
         } catch (e) {
-            _error.activeRequests--;
+            _status.activeRequests--;
             throw e;
         }
     }
@@ -92,22 +92,22 @@ class AbstractServerService {
         }
         String fullUrl = _fullUrl(url);
         try {
-            _error.activeRequests++;
+            _status.activeRequests++;
             return _http.post(fullUrl, jsonData, headers: _headers)
             .then((HttpResponse response) {
-                _error.activeRequests--;
-                return _error.processResponse("POST", fullUrl, jsonData, response,
+                _status.activeRequests--;
+                return _status.processResponse("POST", fullUrl, jsonData, response,
                     isErrorChecker);
             }, onError: (HttpResponse response) {
-                _error.activeRequests--;
-                return _error.processResponse("POST", fullUrl, jsonData, response,
+                _status.activeRequests--;
+                return _status.processResponse("POST", fullUrl, jsonData, response,
                     isErrorChecker);
             }).catchError((Exception e) {
-                _error.activeRequests--;
-                return _error.addHttpRequestException("POST", fullUrl, jsonData, e);
+                _status.activeRequests--;
+                return _status.addHttpRequestException("POST", fullUrl, jsonData, e);
             });
         } catch (e) {
-            _error.activeRequests--;
+            _status.activeRequests--;
             throw e;
         }
     }
@@ -116,22 +116,22 @@ class AbstractServerService {
             IsErrorCheckerFunc isErrorChecker : null }) {
         String fullUrl = _fullUrl(url);
         try {
-            _error.activeRequests++;
+            _status.activeRequests++;
             return _http.delete(fullUrl, headers: _headers)
             .then((HttpResponse response) {
-                _error.activeRequests--;
-                return _error.processResponse("DELETE", fullUrl, null, response,
+                _status.activeRequests--;
+                return _status.processResponse("DELETE", fullUrl, null, response,
                     isErrorChecker);
             }, onError: (HttpResponse response) {
-                _error.activeRequests--;
-                return _error.processResponse("DELETE", fullUrl, null, response,
+                _status.activeRequests--;
+                return _status.processResponse("DELETE", fullUrl, null, response,
                     isErrorChecker);
             }).catchError((Exception e) {
-                _error.activeRequests--;
-                return _error.addHttpRequestException("DELETE", fullUrl, null, e);
+                _status.activeRequests--;
+                return _status.addHttpRequestException("DELETE", fullUrl, null, e);
             });
         } catch (e) {
-            _error.activeRequests--;
+            _status.activeRequests--;
             throw e;
         }
     }

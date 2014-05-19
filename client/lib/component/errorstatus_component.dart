@@ -4,7 +4,7 @@ library error_component;
 
 import 'package:angular/angular.dart';
 
-import '../service/error.dart';
+import '../service/serverstatus.dart';
 
 /**
  * The UI component view of the error service information.
@@ -15,7 +15,7 @@ import '../service/error.dart';
     //cssUrl: 'packages/webriffs_client/component/errorstatus_component.css',
     publishAs: 'cmp')
 class ErrorComponent {
-    ErrorService _error;
+    ServerStatusService _error;
 
     ErrorComponent(this._error);
 

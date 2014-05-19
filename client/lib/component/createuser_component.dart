@@ -5,7 +5,7 @@ import 'package:angular/angular.dart';
 import 'package:logging/logging.dart';
 
 import '../service/user.dart';
-import '../service/error.dart';
+import '../service/serverstatus.dart';
 
 @Component(
     selector: 'create-user',
@@ -15,7 +15,7 @@ class CreateUserComponent {
     final Logger _log = new Logger('components.CreateUserComponent');
 
     UserService _user;
-    ErrorService _error;
+    ServerStatusService _error;
 
     bool get loggedIn => _user.loggedIn;
 

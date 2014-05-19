@@ -70,12 +70,6 @@ table:
                     table: USER
                     column: User_Id
         - column:
-            name: Name
-            type: nvarchar(255)
-            constraints:
-                - constraint:
-                    type: not null
-        - column:
             name: Created_On
             type: timestamp
             constraints:

@@ -23,5 +23,13 @@ void webRiffsRouteInitializer(Router router, RouteViewFactory view) {
                 name: 'Forgot Password',
                 path: '/user/forgot',
                 enter: view('./view/forgot_password.html'))
+        ..addRoute(
+                name: 'Films',
+                path: '/films/list',
+                enter: view('./view/film_list.html'))
+        ..addRoute(
+                name: 'Add a Film',
+                path: '/films/create',
+                enter: view('./view/create_film.html'))
         ;
 }

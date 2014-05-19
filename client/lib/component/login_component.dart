@@ -6,7 +6,7 @@ import 'dart:async';
 import 'package:angular/angular.dart';
 import 'package:logging/logging.dart';
 
-import '../service/error.dart';
+import '../service/serverstatus.dart';
 import '../service/user.dart';
 
 /**

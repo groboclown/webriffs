@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'package:angular/angular.dart';
 
 import 'server.dart';
-import 'error.dart';
+import 'serverstatus.dart';
 
 IsErrorCheckerFunc UNAUTHORIZED_IS_NOT_ERROR = (int code) {
     if (DEFAULT_IS_ERROR_CHECKER_FUNC(code)) {
@@ -29,7 +29,7 @@ class UserService extends AbstractServerService {
     bool loggedIn = false;
 
 
-    UserService(Http http, ErrorService error) : super(http, error) {
+    UserService(Http http, ServerStatusService error) : super(http, error) {
         _loaded = Future.wait([loadUserDetails()]);
     }
 

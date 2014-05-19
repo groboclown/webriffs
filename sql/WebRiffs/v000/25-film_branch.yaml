@@ -1,41 +1,41 @@
-# Authentication requirements for accessing a film version.
-# This allows for storing the public privilege information on the film branch,
-# and the per-user additional access in the USER_ACCESS table.
-
+# An active film branch; represents the "head" revision.
 
 table:
-    tableName: FILM_AUTH
+    tableName: FILM_BRANCH
     columns:
         - column:
-            name: Film_Auth_Id
+            name: Film_Branch_Id
             type: int
             autoIncrement: true
             constraints:
                 - constraint:
                     type: primary key
-                    name: Film_Auth_Id_Key
+                    name: Film_Branch_Id_Key
         - column:
-            name: Film_Branch_Id
+            name: Film_Version_Id
             type: int
             constraints:
                 - constraint:
                     type: not null
                 - constraint:
                     type: foreign key
-                    name: Film_Auth__Film_Branch_Id_FK
-                    table: FILM_BRANCH
-                    column: Film_Branch_Id
+                    name: Film_Auth__Film_Version_Id_FK
+                    table: FILM_VERSION
+                    column: Film_Version_Id
         - column:
-            # Roles are stored as an integer, but their meaning is in the
-            # App itself.
-            name: Role
+            name: Maintainer_User_Id
             type: int
             constraints:
                 - constraint:
                     type: not null
+                - constraint:
+                    type: foreign key
+                    name: Film_Branch__User_Id_FK
+                    table: USER
+                    column: User_Id
         - column:
-            name: Minimum_Privilege
-            type: int
+            name: Name
+            type: nvarchar(255)
             constraints:
                 - constraint:
                     type: not null
@@ -68,3 +68,4 @@ table:
                 - constraint:
                     type: initial value
                     value: "NULL"
+                    

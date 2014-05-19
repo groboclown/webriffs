@@ -1,4 +1,4 @@
-# Don’t commit the following directories created by pub.
+# Don't commit the following directories created by pub.
 client/build/
 client/packages/
 client/web/packages
@@ -28,3 +28,7 @@ php/conf/*.php
 # Project files
 .idea/
 *.iml
+.project
+.settings/
+.pydevproject
+*/*.iml

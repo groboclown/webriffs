@@ -20,8 +20,8 @@ final IsErrorCheckerFunc DEFAULT_IS_ERROR_CHECKER_FUNC = (int statusCode) {
  * TODO this needs to be a more general ServerStatusService.
  */
 @Injectable()
-class ErrorService {
-    static final Logger _log = new Logger('service.ErrorService');
+class ServerStatusService {
+    static final Logger _log = new Logger('service.ServerStatusService');
 
     /**
      * There can only be one critical error at a time.  Such a critical

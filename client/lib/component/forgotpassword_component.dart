@@ -4,7 +4,7 @@ library forgotpassword_component;
 
 import 'package:angular/angular.dart';
 
-import '../service/error.dart';
+import '../service/serverstatus.dart';
 import '../service/user.dart';
 
 /**
