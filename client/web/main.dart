@@ -11,7 +11,7 @@ import 'package:webriffs_client/component/createuser_component.dart';
 import 'package:webriffs_client/component/forgotpassword_component.dart';
 import 'package:webriffs_client/component/login_component.dart';
 import 'package:webriffs_client/component/filmlist_component.dart';
-import 'package:webriffs_client/service/serverstatus.dart';
+import 'package:webriffs_client/service/server.dart';
 import 'package:webriffs_client/service/user.dart';
 
 
