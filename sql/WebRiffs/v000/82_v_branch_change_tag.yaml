@@ -5,7 +5,7 @@
 
 
 view:
-    viewName: V_FILM_CHANGE_TAG
+    viewName: V_BRANCH_CHANGE_TAG
     query: "
         SELECT
             f.Film_Id Film_Id
@@ -19,7 +19,6 @@ view:
             
             , bt.Branch_Tag_Id Branch_Tag_Id
             , ci.Gv_Item_Id Gv_Item_Id
-            , fbtv.Film_Branch_Tag_Version_Id Film_Branch_Tag_Version_Id
             , ci.Gv_Item_Version_Id Gv_Item_Version_Id
             , ci.Updated_On Updated_On
             
@@ -31,10 +30,8 @@ view:
             ON ci.Gv_Project_Id = f.Gv_Project_Id
         INNER JOIN FILM_BRANCH fb
             ON ci.Gv_Branch_Id = fb.Gv_Branch_Id
-        INNER JOIN TAG bt
+        INNER JOIN BRANCH_TAG bt
             ON bt.Gv_Item_Id = ci.Gv_Item_Id
-        INNER JOIN Film_Branch_Tag_Version_Id fbtv
-            ON fbtv.Gv_Item_Version_Id = ci.Gv_Item_Version_Id
         "
     columns:
         - column:
@@ -124,15 +121,15 @@ view:
                     table: GA_USER
                     column: Ga_User_Id
         - column:
-            name: Tag_Id
+            name: Branch_Tag_Id
             type: int
             constraints:
                 - constraint:
                     type: not null
                 - constraint:
                     type: foreign key
-                    table: TAG
-                    column: Tag_Id
+                    table: BRANCH_TAG
+                    column: Branch_Tag_Id
                 - constraint:
                     type: no update
         - column:
@@ -146,18 +143,6 @@ view:
                     name: V_Gv_Change_Item__Gv_Item_Id_FK
                     table: GV_ITEM
                     column: Gv_Item_Id
-        - column:
-            name: Film_Branch_Tag_Version_Id
-            type: int
-            constraints:
-                - constraint:
-                    type: not null
-                - constraint:
-                    type: foreign key
-                    table: FILM_BRANCH_TAG_VERSION
-                    column: Film_Branch_Tag_Version_Id
-                - constraint:
-                    type: no update
         - column:
             name: Gv_Item_Version_Id
             type: int

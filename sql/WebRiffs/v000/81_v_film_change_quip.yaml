@@ -23,8 +23,6 @@ view:
           
           , qv.Timestamp_Millis
           
-          -- This needs to be updated as each kind of media is added to the
-          -- quip_version table.
           , qv.Text_Value
         FROM V_GV_CHANGE_ITEM ci
         INNER JOIN USER u
