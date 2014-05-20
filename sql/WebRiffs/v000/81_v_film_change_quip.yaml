@@ -1,29 +1,31 @@
-# Shows all the active branch tags for each film change.
+# Lists all the quips for each film change.
 
 # This view is to be selected on by the Film_Id and Film_Branch_Id, so the
 # columns from those tables are not pulled into the view.
 
-
 view:
-    viewName: V_FILM_CHANGE_TAG
-    query: "
-        SELECT
-            f.Film_Id Film_Id
-            , ci.Gv_Project_Id Gv_Project_Id
-            , fb.Film_Branch_Id Film_Branch_Id
-            , ci.Gv_Branch_Id Gv_Branch_Id
-            , ci.Gv_Change_Id Gv_Change_Id
-            , u.User_Id User_Id
-            , u.Username Username
-            , ci.Ga_User_Id Ga_User_Id
-            
-            , bt.Branch_Tag_Id Branch_Tag_Id
-            , ci.Gv_Item_Id Gv_Item_Id
-            , fbtv.Film_Branch_Tag_Version_Id Film_Branch_Tag_Version_Id
-            , ci.Gv_Item_Version_Id Gv_Item_Version_Id
-            , ci.Updated_On Updated_On
-            
-            , bt.Name Tag_Name
+    viewName: V_FILM_CHANGE_QUIP
+    query: "SELECT
+          f.Film_Id Film_Id
+          , ci.Gv_Project_Id Gv_Project_Id
+          , fb.Film_Branch_Id Film_Branch_Id
+          , ci.Gv_Branch_Id Gv_Branch_Id
+          , ci.Gv_Change_Id Gv_Change_Id
+          , u.User_Id User_Id
+          , u.Username Username
+          , ci.Ga_User_Id Ga_User_Id
+          
+          , q.Quip_Id Quip_Id
+          , ci.Gv_Item_Id Gv_Item_Id
+          , qv.Quip_Version_Id Quip_Version_Id
+          , ci.Gv_Item_Version_Id Gv_Item_Version_Id
+          , ci.Updated_On Updated_On
+          
+          , qv.Timestamp_Millis
+          
+          -- This needs to be updated as each kind of media is added to the
+          -- quip_version table.
+          , qv.Text_Value
         FROM V_GV_CHANGE_ITEM ci
         INNER JOIN USER u
             ON ci.Ga_User_Id = u.Ga_User_Id
@@ -31,10 +33,10 @@ view:
             ON ci.Gv_Project_Id = f.Gv_Project_Id
         INNER JOIN FILM_BRANCH fb
             ON ci.Gv_Branch_Id = fb.Gv_Branch_Id
-        INNER JOIN TAG bt
-            ON bt.Gv_Item_Id = ci.Gv_Item_Id
-        INNER JOIN Film_Branch_Tag_Version_Id fbtv
-            ON fbtv.Gv_Item_Version_Id = ci.Gv_Item_Version_Id
+        INNER JOIN QUIP q
+            ON ci.Gv_Item_Id = q.Gv_Item_Id
+        INNER JOIN QUIP_VERSION qv
+            ON ci.Gv_Item_Version_Id = qv.Gv_Item_Version_Id
         "
     columns:
         - column:
@@ -45,6 +47,7 @@ view:
                     type: not null
                 - constraint:
                     type: foreign key
+                    name: V_Film_Change_Quip__Film_Id_FK
                     table: FILM
                     column: Film_Id
                 - constraint:
@@ -57,7 +60,7 @@ view:
                     type: not null
                 - constraint:
                     type: foreign key
-                    name: V_Gv_Change_Item__Gv_Project_Id_FK
+                    name: V_Film_Change_Quip__Gv_Project_Id_FK
                     table: GV_PROJECT
                     column: Gv_Project_Id
         - column:
@@ -68,6 +71,7 @@ view:
                     type: not null
                 - constraint:
                     type: foreign key
+                    name: V_Film_Change_Quip__Film_Branch_Id_FK
                     table: FILM_BRANCH
                     column: Film_Branch_Id
                 - constraint:
@@ -80,7 +84,7 @@ view:
                     type: not null
                 - constraint:
                     type: foreign key
-                    name: V_Gv_Change_Item__Gv_Branch_Id_FK
+                    name: V_Film_Change_Quip__Gv_Branch_Id_FK
                     table: GV_BRANCH
                     column: Gv_Branch_Id
         - column:
@@ -91,7 +95,7 @@ view:
                     type: not null
                 - constraint:
                     type: foreign key
-                    name: V_Gv_Change_Item__Gv_Change_Id_FK
+                    name: V_Gv_Film_Change_Quip__Gv_Change_Id_FK
                     table: GV_CHANGE
                     column: Gv_Change_Id
         - column:
@@ -102,6 +106,7 @@ view:
                     type: not null
                 - constraint:
                     type: foreign key
+                    name: V_Film_Change_Quip__User_Id_FK
                     table: USER
                     column: User_Id
                 - constraint:
@@ -120,19 +125,20 @@ view:
                     type: not null
                 - constraint:
                     type: foreign key
-                    name: V_Gv_Change_Item__Ga_User_Id_FK
+                    name: V_Film_Change_Quip__Ga_User_Id_FK
                     table: GA_USER
                     column: Ga_User_Id
         - column:
-            name: Tag_Id
+            name: Quip_Id
             type: int
             constraints:
                 - constraint:
                     type: not null
                 - constraint:
                     type: foreign key
-                    table: TAG
-                    column: Tag_Id
+                    name: V_Film_Change_Quip__Quip_Id_FK
+                    table: QUIP
+                    column: Quip_Id
                 - constraint:
                     type: no update
         - column:
@@ -143,19 +149,20 @@ view:
                     type: not null
                 - constraint:
                     type: foreign key
-                    name: V_Gv_Change_Item__Gv_Item_Id_FK
+                    name: V_Film_Change_Quip__Gv_Item_Id_FK
                     table: GV_ITEM
                     column: Gv_Item_Id
         - column:
-            name: Film_Branch_Tag_Version_Id
+            name: Quip_Version_Id
             type: int
             constraints:
                 - constraint:
                     type: not null
                 - constraint:
                     type: foreign key
-                    table: FILM_BRANCH_TAG_VERSION
-                    column: Film_Branch_Tag_Version_Id
+                    name: V_Film_Change_Quip__Quip_Version_Id_FK
+                    table: QUIP_VERSION
+                    column: Quip_Version_Id
                 - constraint:
                     type: no update
         - column:
@@ -165,7 +172,7 @@ view:
             constraints:
                 - constraint:
                     type: foreign key
-                    name: V_Gv_Change_Item__Gv_Item_Version_Id_Key
+                    name: V_Film_Change_Quip__Gv_Item_Version_Id_Key
                     table: GV_ITEM_VERSION
                     column: Gv_Item_Version_Id
         - column:
@@ -175,11 +182,21 @@ view:
                 - constraint:
                     type: not null
         - column:
-            name: Tag_Name
-            type: nvarchar(64)
+            name: Timestamp_Millis
+            type: int
             constraints:
                 - constraint:
                     type: not null
+                - constraint:
+                    type: no update
+        - column:
+            name: Text_Value
+            type: nvarchar(2048)
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: no update
     constraints:
         - constraint:
             type: fake index

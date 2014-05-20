@@ -1,41 +1,36 @@
-# Associates a Quip version with a tag.  This is stored as part of a branch
-# change.  The Item ID is the tag, the item_version_id is the version of the
-# tag on this quip.  These are associated with the quip, not the quip version.
+# Tags used for film branches.  There can be overlaps between these tags and
+# the quip tags, but they will never be directly shared.  This is particularly
+# important, because it means that the user can never directly search for
+
+# These are all items, which means that they can be included in a change for a
+# branch.
 
 table:
-    tableName: QUIP_TAG_VERSION
+    tableName: BRANCH_TAG
     columns:
         - column:
-            name: Quip_Tag_Version_Id
+            name: Branch_Tag_Id
             type: int
             autoIncrement: true
             constraints:
                 - constraint:
                     type: primary key
-                    name: Quip_Tag_Version_Id_Key
+                    name: Branch_Tag_Id_Key
         - column:
-            name: Ga_Item_Version_Id
+            name: Gv_Item_Id
             type: int
             constraints:
                 - constraint:
-                    type: not null
-                - constraint:
                     type: foreign key
-                    name: Quip_Tag_Version__Ga_Item_Version_Id_FK
-                    table: GA_ITEM_VERSION
-                    column: Ga_Item_Version_Id
-                    relationship: owner
+                    name: Branch_Tag__Gv_Item_Id_FK
+                    table: GV_ITEM
+                    column: Gv_Item_Id
         - column:
-            name: Quip_Id
-            type: int
+            name: Name
+            type: nvarchar(64)
             constraints:
                 - constraint:
                     type: not null
-                - constraint:
-                    type: foreign key
-                    name: Quip_Tag_Version__Quip_Id_FK
-                    table: QUIP
-                    column: Quip_Id
         - column:
             name: Created_On
             type: timestamp
