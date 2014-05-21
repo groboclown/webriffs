@@ -148,7 +148,7 @@ class DataAccess {
      * 'Authentication_Code', or false if no such record exists.
      */
     public static function getUserSource($db, $userId, $sourceId) {
-    error_log("reading user source for [".$userId."] [".$sourceId."]");
+        //error_log("reading user source for [".$userId."] [".$sourceId."]");
         $data = GaUserSource::$INSTANCE->readBy_Ga_User_Id_x_Ga_Source_Id(
             $db, $userId, $sourceId);
         DataAccess::checkError(GaUserSource::$INSTANCE, new Base\ValidationException(array(
@@ -196,10 +196,9 @@ class DataAccess {
      */
     public static function countUserSources($db) {
         $data = GaUserSource::$INSTANCE->countAll($db);
-        if ($data === false) {
-            // FIXME
-            return false;
-        }
+        DataAccess::checkError(GaUserSource::$INSTANCE, new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem with the user access'
+            )));
         return $data;
     }
     
@@ -209,10 +208,9 @@ class DataAccess {
      */
     public static function getUserSources($db, $start, $end) {
         $data = GaUserSource::$INSTANCE->readAll($db, false, $start, $end);
-        if (! $data || sizeof($data)) {
-            // FIXME
-            return false;
-        }
+        DataAccess::checkError(GaUserSource::$INSTANCE, new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem with the user sources'
+            )));
         return $data;
     }
     
@@ -234,10 +232,9 @@ class DataAccess {
         $gapasswordrequest =& GaPasswordRequest::$INSTANCE;
         
         $data = $gapasswordrequest->create($db, $userSourceId, $secretKey, 0, $expirationMinutes);
-        if (! $data || sizeof($data) <= 0) {
-            // FIXME
-            return false;
-        }
+        DataAccess::checkError(GaUserSource::$INSTANCE, new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem with the password request'
+            )));
         return array(
             'Ga_Login_Attempt_Id' => $data['Ga_Login_Attempt_Id'],
             'Ga_User_Source_Id' => $userSourceId,
@@ -650,7 +647,7 @@ class DataAccess {
      * Helper function to cryptographically hash a value.
      *
      * $iterations is an integer between 4 and 1000.  8 is a good number to use.
-     * 
+     *
      */
     public static function hashPassword($password, $iterations,
             $portable = FALSE) {
@@ -679,7 +676,7 @@ class DataAccess {
     /**
      * Creates a secure random string of "len" bytes of entropy, encoded as an
      * ASCII string.
-     */ 
+     */
     public static function createSecretKey($len = 64) {
         $ret = base64_encode(openssl_random_pseudo_bytes($len));
         return $ret;

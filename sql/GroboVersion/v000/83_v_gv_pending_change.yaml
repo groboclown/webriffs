@@ -1,0 +1,93 @@
+# All the pending changes
+
+view:
+    viewName: V_GV_PENDING_CHANGE
+    query: "
+        SELECT
+            b.Gv_Project_Id Gv_Project_Id
+            , c.Gv_Branch_Id Gv_Branch_Id
+            , c.Gv_Change_Id Gv_Change_Id
+            , c.Ga_User_Id Ga_User_Id
+            , c.Last_Updated_On Last_Updated_On
+            , c.Created_On Created_On
+        FROM
+            GV_CHANGE c
+        INNER JOIN
+            GV_BRANCH b
+                ON b.Gv_Branch_Id = c.Gv_Branch_Id
+        WHERE c.Active_State = 0
+        "
+    columns:
+        - column:
+            name: Gv_Project_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    table: GV_PROJECT
+                    column: Gv_Project_Id
+        - column:
+            name: Gv_Branch_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    table: GV_BRANCH
+                    column: Gv_Branch_Id
+        - column:
+            name: Gv_Change_Id
+            type: int
+            autoIncrement: true
+            constraints:
+                - constraint:
+                    type: primary key
+                    name: Gv_Change_Id_Key
+        - column:
+            name: Ga_User_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    name: Gv_Change__Ga_User_Id_FK
+                    table: GA_USER
+                    column: Ga_User_Id
+        - column:
+            name: Created_On
+            type: timestamp
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: no update
+                - constraint:
+                    type: initial value
+                    dialects:
+                        - dialect:
+                            platforms: mysql
+                            sql: NOW()
+        - column:
+            name: Last_Updated_On
+            type: timestamp
+            constraints:
+                - constraint:
+                    type: nullable
+                - constraint:
+                    type: constant update
+                    dialects:
+                        - dialect:
+                            platforms: mysql
+                            sql: NOW()
+                - constraint:
+                    type: initial value
+                    value: "NULL"
+    constraints:
+        - constraint:
+            type: fake index
+            columns: Gv_Branch_Id, Ga_User_Id
+            

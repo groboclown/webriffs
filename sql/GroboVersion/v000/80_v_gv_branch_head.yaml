@@ -12,7 +12,7 @@ view:
         FROM GV_BRANCH b
         INNER JOIN GV_CHANGE c
             ON b.Gv_Branch_Id = c.Gv_Branch_Id
-        GROUP BY b.Gv_Branch_Id
+        GROUP BY b.Gv_Branch_Id, b.Gv_Project_Id
         "
     columns:
         - column:
