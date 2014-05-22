@@ -41,10 +41,11 @@ class AuthenticationLayer {
         // first line of defence will protect our code from inadvertently
         // creating a new ga_user record.
         
-        $rowcount = User::$INSTANCE->countBy_Username($db, $username);
-        AuthenticationLayer::checkError(User::$INSTANCE, new Base\ValidationException(array(
+        $data = User::$INSTANCE->countBy_Username($db, $username);
+        AuthenticationLayer::checkError($data, new Base\ValidationException(array(
                 'username' => 'username already exists'
             )));
+        $rowcount = $data['result'];
         if ($rowcount > 0) {
             throw new Base\ValidationException(array(
                 'username' => 'username already exists'
@@ -55,8 +56,12 @@ class AuthenticationLayer {
         $gaUserSourceId = GroboAuth\DataAccess::setUserSource($db, $gaUserId,
             $sourceId, $sourceUser, $authenticationCode);
         
-        $userId = intval(User::$INSTANCE->create($db, $username, $contact,
-            $gaUserId, $isAdmin));
+        $data = User::$INSTANCE->create($db, $username, $contact,
+            $gaUserId, $sourceId, $isAdmin);
+        AuthenticationLayer::checkError($data, new Base\ValidationException(array(
+            'username' => 'problem creating the user'
+        )));
+        $userId = $data['result'];
         return $userId;
     }
     
@@ -89,11 +94,11 @@ class AuthenticationLayer {
             $Forwarded_For = "";
         }
         
-        $userData = User::$INSTANCE->readBy_Username($db, $username);
-        AuthenticationLayer::checkError(User::$INSTANCE, new Base\ValidationException(array(
+        $data = User::$INSTANCE->readBy_Username($db, $username);
+        AuthenticationLayer::checkError($data, new Base\ValidationException(array(
                 'username' => 'problem accessing users'
             )));
-        if (sizeof($userData) != 1) {
+        if (sizeof($data['result']) != 1) {
             // FIXME add in a bit of slowdown by performing a needless password
             // check.
         
@@ -102,12 +107,13 @@ class AuthenticationLayer {
                 'authentication' => 'authentication failed'
             ));
         }
-        $userId = intval($userData[0]['User_Id']);
-        $gaUserId = intval($userData[0]['Ga_User_Id']);
-        $contact = $userData[0]['Contact'];
-        $isAdmin = intval($userData[0]['Is_Site_Admin']);
-        $createdOn = $userData[0]['Created_On'];
-        $lastUpdatedOn = $userData[0]['Last_Updated_On'];
+        $userData = $data['result'][0];
+        $userId = intval($userData['User_Id']);
+        $gaUserId = intval($userData['Ga_User_Id']);
+        $contact = $userData['Contact'];
+        $isAdmin = intval($userData['Is_Site_Admin']) == 0 ? false : true;
+        $createdOn = $userData['Created_On'];
+        $lastUpdatedOn = $userData['Last_Updated_On'];
         error_log("pulled in data [".$userId."] [".$gaUserId."] [".$contact."] [".$isAdmin."]");
         
         $userSourceData = GroboAuth\DataAccess::getUserSource($db, $gaUserId,
@@ -190,35 +196,36 @@ error_log("Session id is ".$sessionId);
             $Forwarded_For = "";
         }
         
-        $data = GroboAuth\DataAccess::getUserForSession($db,
+        $retData = GroboAuth\DataAccess::getUserForSession($db,
             $User_Agent, $Remote_Address, $Forwarded_For,
             $authenticationChallenge, $sessionRenewalMinutes, 10);
-        if ($data === false) {
+        if ($retData === false) {
             throw new Tonic\UnauthorizedException();
         }
         
-        $userData = User::$INSTANCE->readBy_Ga_User_Id($db,
-            $data['Ga_User_Id']);
-        AuthenticationLayer::checkError(User::$INSTANCE, new Base\ValidationException(array(
+        $data = User::$INSTANCE->readBy_Ga_User_Id($db,
+            $retData['Ga_User_Id']);
+        AuthenticationLayer::checkError($data, new Base\ValidationException(array(
                 'username' => 'problem accessing users'
             )));
-        if (sizeof($userData) != 1) {
+        if (sizeof($data['result']) != 1) {
             // TODO should remove the GroboAuth data corresponding to this
             // user session.
             
             throw new Tonic\UnauthorizedException();
         }
-        
-        $data['User_Id'] = intval($userData[0]['User_Id']);
-        $data['Username'] = $userData[0]['Username'];
-        $data['Contact'] = $userData[0]['Contact'];
-        $data['Is_Admin'] = (intval($userData[0]['Is_Site_Admin']) == 1 ? true : false);
-        $data['Created_On'] = $userData[0]['Created_On'];
-        $data['Last_Updated_On'] = $userData[0]['Last_Updated_On'];
+        $userData = $data['result'][0];
+        $retData['User_Id'] = intval($userData['User_Id']);
+        $retData['Username'] = $userData['Username'];
+        $retData['Contact'] = $userData['Contact'];
+        $retData['Is_Admin'] = (intval($userData['Is_Site_Admin']) == 0
+                ? false : true);
+        $retData['Created_On'] = $userData['Created_On'];
+        $retData['Last_Updated_On'] = $userData['Last_Updated_On'];
         
         // FIXME pull in the other user authentication data.
         
-        return $data;
+        return $retData;
     }
     
     
@@ -296,10 +303,10 @@ error_log("Session id is ".$sessionId);
     // Private Functions
     
     
-    private static function checkError($errorSource, $exception) {
-        if (sizeof($errorSource->errors) > 0) {
-            $backtrace = 'Database access error (['.
-                implode('], [', $errorSource->errors).']):';
+    private static function checkError($returned, $exception) {
+        if ($returned["haserror"]) {
+            $backtrace = 'Database access error ('.
+                $returned["errorcode"].' '.$returned["error"].'):';
             foreach (debug_backtrace() as $stack) {
                 $backtrace .= '\n    '.$stack['function'].'('.
                     implode(', ', $stack['args']).') ['.

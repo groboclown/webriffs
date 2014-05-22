@@ -13,3 +13,6 @@ WebRiffs allows you to create your own comments to a film (with time markers), a
 # What's Required
 
 WebRiffs runs on PHP and MySQL, and uses the browser to manage and maintain a repository of comments.
+
+# Building WebRiffs
+

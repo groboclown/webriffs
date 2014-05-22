@@ -34,5 +34,5 @@ class FilmLayer {
     }
 
 
-    public static
+    //public static
 }

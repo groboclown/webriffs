@@ -63,7 +63,7 @@ try {
             $request->contentType == 'text/json') {
         $request->data = json_decode($request->data);
     } else {
-        //error_log("Invalid content type: " + $request->contentType);
+        error_log("Invalid content type: " + $request->contentType);
         throw new Tonic\NotAcceptableException();
     }
 
@@ -83,26 +83,35 @@ try {
     //$response->wwwAuthenticate = 'Basic realm="WebRiffs"';
 
 } catch (Tonic\MethodNotAllowedException $e) {
+    error_log("Method not allowed: ".$e->getMessage());
+    error_log($e->getTraceAsString());
+        
     $response = new Tonic\Response($e->getCode(), array('message' => $e->getMessage()));
     $response->allow = implode(', ', $resource->allowedMethods());
 
 } catch (Base\ValidationException $e) {
+    error_log("Validation error: ".$e->getMessage());
+    error_log(print_r($e->problems, true));
+    error_log($e->getTraceAsString());
+    
     $response = new Tonic\Response($e->getCode(), array(
         'message' => $e->getMessage(),
         'problems' => $e->problems));
 
 } catch (Tonic\Exception $e) {
-    $response = new Tonic\Response($e->getCode(), array('message' => $e->getMessage()));
-
-} catch (Exception $e) {
-    # FIXME Production level code should not report the full error message,
-    # but instead log it and give a generic error to the user.
-    $response = new Tonic\Response(500, array('message' => $e->getMessage()));
-    
-    
     error_log("Exception: ".$e->getMessage());
     error_log($e->getTraceAsString());
     
+    $response = new Tonic\Response($e->getCode(), array('message' => $e->getMessage()));
+
+} catch (Exception $e) {
+    
+    # Production level code should not report the full error message,
+    # but instead log it and give a generic error to the user.
+    error_log("Exception: ".$e->getMessage());
+    error_log($e->getTraceAsString());
+    
+    $response = new Tonic\Response(500, array('message' => "server error"));
 }
 
 #echo $response;

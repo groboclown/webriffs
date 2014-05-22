@@ -21,7 +21,7 @@ class DataAccess {
     public static function createUser($db) {
         try {
             $data = GaUser::$INSTANCE->create($db);
-            DataAccess::checkError(GaUser::$INSTANCE, new Base\ValidationException(array(
+            DataAccess::checkError($data, new Base\ValidationException(array(
                     'unknown' => 'there was an unknown problem during user creation'
                 )));
         } catch (Exception $e) {
@@ -30,7 +30,7 @@ class DataAccess {
                     'unknown' => 'there was an unknown problem during user creation'
                 ));
         }
-        return intval($data);
+        return $data["result"];
     }
     
     
@@ -40,17 +40,18 @@ class DataAccess {
      */
     public static function removeUser($db, $id) {
         $userSources = GaUserSource::$INSTANCE->readBy_Ga_User_Id($db, $id);
-        DataAccess::checkError(GaUserSource::$INSTANCE, new Base\ValidationException(array(
+        DataAccess::checkError($userSources, new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem accessing the user'
             )));
-        foreach ($userSources as $usData) {
+        foreach ($userSources["result"] as $usData) {
             $usId = intval($usData["Ga_User_Source_Id"]);
             DataAccess::removeUserSource($db, $usId);
         }
-        $count = GaUser::$INSTANCE->remove($db, $id);
-        DataAccess::checkError(GaUserSource::$INSTANCE, new Base\ValidationException(array(
+        $data = GaUser::$INSTANCE->remove($db, $id);
+        DataAccess::checkError($data, new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem removing the user'
             )));
+        $count = $data["result"];
         if ($count <= 0) {
             error_log("Did not remove any rows for ga_user ".$id);
             throw new Base\ValidationException(array(
@@ -72,10 +73,10 @@ class DataAccess {
     public static function createSource($db, $sourceName) {
         try {
             $data = GaSource::$INSTANCE->create($db, $sourceName);
-            DataAccess::checkError(GaSource::$INSTANCE, new Base\ValidationException(array(
+            DataAccess::checkError($data, new Base\ValidationException(array(
                     'unknown' => 'there was an unknown problem creating the source (already exists?)'
                 )));
-            return intval($data['Ga_Source_Id']);
+            return $data['result'];
         } catch (Exception $e) {
             throw new Base\ValidationException(array(
                 'sourceName' => 'already exists'
@@ -124,22 +125,31 @@ class DataAccess {
         
         $data = GaUserSource::$INSTANCE->readBy_Ga_User_Id_x_Ga_Source_Id(
             $db, $userId, $sourceId);
-
-        if (! $data || sizeof($data) <= 0) {
+        DataAccess::checkError($data,
+            new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem changing the user access'
+            )));
+        $rows = $data['result'];
+        
+        $retId = null;
+        if (sizeof($rows) <= 0) {
             // create
             $data = GaUserSource::$INSTANCE->create(
                 $db, $userId, $sourceId, $username, $authenticationCode);
+            $retId = $data['result'];
         } else {
             // update
+            $retId = intval($rows[0]['Ga_User_Source_Id']);
             $data = GaUserSource::$INSTANCE->update($db,
-                $data[0]['Ga_User_Source_Id'], $username,
+                $retId, $username,
                 $authenticationCode);
         }
-        DataAccess::checkError(GaUserSource::$INSTANCE, new Base\ValidationException(array(
+        DataAccess::checkError($data,
+            new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem changing the user access'
             )));
-//error_log("Ga_User_Source_Id = ".$data['Ga_User_Source_Id']);
-        return intval($data['Ga_User_Source_Id']);
+        //error_log("Ga_User_Source_Id = ".$data['Ga_User_Source_Id']);
+        return $retId;
     }
     
     
@@ -151,19 +161,20 @@ class DataAccess {
         //error_log("reading user source for [".$userId."] [".$sourceId."]");
         $data = GaUserSource::$INSTANCE->readBy_Ga_User_Id_x_Ga_Source_Id(
             $db, $userId, $sourceId);
-        DataAccess::checkError(GaUserSource::$INSTANCE, new Base\ValidationException(array(
+        DataAccess::checkError($data, new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem changing the user access'
             )));
-        if (sizeof($data) <= 0) {
+        if (sizeof($data['result']) <= 0) {
             return false;
         }
+        $row = $data['result'][0];
         
         return array(
-            'Ga_User_Id' => intval($data[0]['Ga_User_Id']),
-            'Ga_Source_Id' => intval($data[0]['Ga_Source_Id']),
-            'Ga_User_Source_Id' => intval($data[0]['Ga_User_Source_Id']),
-            'Username' => $data[0]['Username'],
-            'Authentication_Code' => $data[0]['Authentication_Code']
+            'Ga_User_Id' => intval($row['Ga_User_Id']),
+            'Ga_Source_Id' => intval($row['Ga_Source_Id']),
+            'Ga_User_Source_Id' => intval($row['Ga_User_Source_Id']),
+            'Username' => $row['Username'],
+            'Authentication_Code' => $row['Authentication_Code']
         );
     }
 
@@ -172,22 +183,46 @@ class DataAccess {
      * Removes the source references for this user id.
      */
     public static function removeUserSource($db, $id) {
-        $sessions = GaSession::$INSTANCE->readBy_Ga_User_Source_Id($db, $id);
+        $data = GaSession::$INSTANCE->readBy_Ga_User_Source_Id($db, $id);
+        DataAccess::checkError($data, new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem finding the user'
+            )));
+        $sessions = $data['result'];
         foreach ($sessions as $sessionData) {
             $sessionId = intval($sessionData["Ga_Session_Id"]);
-            GaSession::$INSTANCE->remove($db, $sessionId);
+            $data = GaSession::$INSTANCE->remove($db, $sessionId);
+            DataAccess::checkError($data, new Base\ValidationException(array(
+                    'unknown' => 'there was an unknown problem removing the user sessions'
+                )));
         }
-        $pwrequests = GaPasswordRequest::$INSTANCE->readBy_Ga_User_Source_Id($db, $id);
+        $data = GaPasswordRequest::$INSTANCE->readBy_Ga_User_Source_Id($db, $id);
+        DataAccess::checkError($data, new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem finding the user'
+            )));
+        $pwrequests = $data['result'];
         foreach ($pwrequests as $pwData) {
             $pwrId = intval($pwData["Ga_Password_Request_Id"]);
-            GaPasswordRequest::$INSTANCE->remove($db, $pwrId);
+            $data = GaPasswordRequest::$INSTANCE->remove($db, $pwrId);
+            DataAccess::checkError($data, new Base\ValidationException(array(
+                    'unknown' => 'there was an unknown problem removing the password requests'
+                )));
         }
-        $las = GaLoginAttempt::$INSTANCE->readBy_Ga_User_Source_Id($db, $id);
+        $data = GaLoginAttempt::$INSTANCE->readBy_Ga_User_Source_Id($db, $id);
+        DataAccess::checkError($data, new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem finding the user'
+            )));
+        $las = $data['result'];
         foreach ($las as $laData) {
             $laId = intval($laData["Ga_Login_Attempt_Id"]);
-            GaLoginAttempt::$INSTANCE->remove($db, $laId);
-        }
-        GaUserSource::$INSTANCE->remove($db, $id);
+            $data = GaLoginAttempt::$INSTANCE->remove($db, $laId);
+            DataAccess::checkError($data, new Base\ValidationException(array(
+                    'unknown' => 'there was an unknown problem removing the logins'
+                )));
+            }
+        $data = GaUserSource::$INSTANCE->remove($db, $id);
+        DataAccess::checkError($data, new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem removing the user'
+            )));
     }
     
     
@@ -196,10 +231,10 @@ class DataAccess {
      */
     public static function countUserSources($db) {
         $data = GaUserSource::$INSTANCE->countAll($db);
-        DataAccess::checkError(GaUserSource::$INSTANCE, new Base\ValidationException(array(
+        DataAccess::checkError($data, new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem with the user access'
             )));
-        return $data;
+        return $data['result'];
     }
     
     
@@ -208,10 +243,10 @@ class DataAccess {
      */
     public static function getUserSources($db, $start, $end) {
         $data = GaUserSource::$INSTANCE->readAll($db, false, $start, $end);
-        DataAccess::checkError(GaUserSource::$INSTANCE, new Base\ValidationException(array(
+        DataAccess::checkError($data, new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem with the user sources'
             )));
-        return $data;
+        return $data['result'];
     }
     
     
@@ -229,14 +264,12 @@ class DataAccess {
             $secretKey = createSecretKey();
         }
         
-        $gapasswordrequest =& GaPasswordRequest::$INSTANCE;
-        
-        $data = $gapasswordrequest->create($db, $userSourceId, $secretKey, 0, $expirationMinutes);
-        DataAccess::checkError(GaUserSource::$INSTANCE, new Base\ValidationException(array(
+        $data = GaPasswordRequest::$INSTANCE->create($db, $userSourceId, $secretKey, 0, $expirationMinutes);
+        DataAccess::checkError($data, new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem with the password request'
             )));
         return array(
-            'Ga_Login_Attempt_Id' => $data['Ga_Login_Attempt_Id'],
+            'Ga_Login_Attempt_Id' => $data['result'],
             'Ga_User_Source_Id' => $userSourceId,
             'Secret_Key' => $secretKey
         );
@@ -244,29 +277,26 @@ class DataAccess {
     
     
     private static function hasPasswordSecretKey($db, $secretKey) {
-        $c = GaPasswordRequest::$INSTANCE->countBy_Secret_Key($db, $secretKey);
-        if ($c === false) {
-            // FIXME log error
-            return false;
-        }
-        return $c > 0;
+        $data = GaPasswordRequest::$INSTANCE->countBy_Secret_Key($db, $secretKey);
+        DataAccess::checkError($data, new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem with the password request'
+            )));
+        return $data['result'] > 0;
     }
     
     
     public static function getUserSourceForPasswordRequestSecretKey($db, $secretKey) {
         $data = GaPasswordRequest::$INSTANCE->readBy_Secret_Key($db, $secretKey);
-        if (! $data) {
-            // FIXME
-            return false;
-        }
-        if (sizeof($data) != 1) {
+        DataAccess::checkError($data, new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem with the password request'
+            )));
+        if (sizeof($data['result']) != 1) {
             // either there was no data (no request), or
             // there was a data integrity error
             return false;
         }
-        return intval($data[0]['Ga_User_Source_Id']);
+        return intval($data['result'][0]['Ga_User_Source_Id']);
     }
-    
     
     
     /**
@@ -274,11 +304,10 @@ class DataAccess {
      */
     public static function getAllActivePasswordRequests($db) {
         $data = VGaPasswordRequest::$INSTANCE->readAll($db);
-        if (! $data || sizeof($data) <= 0) {
-            // FIXME
-            return false;
-        }
-        return $data;
+        DataAccess::checkError($data, new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem finding the requests'
+            )));
+        return $data['result'];
     }
     
     
@@ -288,11 +317,10 @@ class DataAccess {
      */
     public static function getActivePasswordRequestsForSource($db, $sourceId) {
         $data = VGaPasswordRequest::$INSTANCE->readBy_Ga_Source_Id($db, $sourceId);
-        if (! $data || sizeof($data) <= 0) {
-             // FIXME
-           return false;
-        }
-        return $data;
+        DataAccess::checkError($data, new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem finding the requests'
+            )));
+        return $data['result'];
     }
     
     
@@ -300,12 +328,12 @@ class DataAccess {
      *
      */
     public static function getActivePasswordRequestsForUserSource($db, $userSourceId) {
-        $data = VGaPasswordRequest::$INSTANCE->readBy_Ga_User_Source_Id($db, $userSourceId);
-        if (! $data || sizeof($data) <= 0) {
-            // FIXME
-            return false;
-        }
-        return $data;
+        $data = VGaPasswordRequest::$INSTANCE->readBy_Ga_User_Source_Id(
+                $db, $userSourceId);
+        DataAccess::checkError($data, new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem finding the requests'
+            )));
+        return $data['result'];
     }
     
     
@@ -317,22 +345,30 @@ class DataAccess {
         // TODO Should be handled in 2 queries.
         $data = DataAccess::getActivePasswordRequestsForUserSource(
             $db, $userSourceId);
-        if (! $data) {
-            // FIXME
-            return false;
-        }
+        DataAccess::checkError($data, new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem finding the requests'
+            )));
+        $rows = $data['result'];
         $direct = false;
-        foreach ($data as $row) {
+        $found = false;
+        foreach ($rows as $row) {
+            $found = true;
             if ($row['Secret_Key'] == $secretKey) {
                 // directly handled
-                GaPasswordRequest::$INSTANCE->update($db, $row['Ga_Password_Request_Id'], 1);
+                $data = GaPasswordRequest::$INSTANCE->update($db, $row['Ga_Password_Request_Id'], 1);
+                DataAccess::checkError($data, new Base\ValidationException(array(
+                        'unknown' => 'there was an unknown problem updating the requests'
+                    )));
                 $direct = true;
             } else {
                 // indirectly handled
-                GaPasswordRequest::$INSTANCE->update($db, $row['Ga_Password_Request_Id'], 2);
+                $data = GaPasswordRequest::$INSTANCE->update($db, $row['Ga_Password_Request_Id'], 2);
+                DataAccess::checkError($data, new Base\ValidationException(array(
+                        'unknown' => 'there was an unknown problem updating the requests'
+                    )));
             }
         }
-        return ($direct ? 1 : 2);
+        return ($found ? ($direct ? 1 : 2) : 0);
     }
     
     
@@ -344,11 +380,10 @@ class DataAccess {
             $start, $end) {
         $data = GaPasswordRequest::$INSTANCE->readBy_Ga_User_Source_Id($db,
             "Expires_On DESC", $start, $end);
-        if (! $data) {
-            // FIXME
-            return false;
-        }
-        return $data;
+        DataAccess::checkError($data, new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem finding the requests'
+            )));
+        return $data['result'];
     }
     
     
@@ -378,10 +413,9 @@ class DataAccess {
         $data = GaLoginAttempt::$INSTANCE->create($db, $userSourceId,
             $User_Agent, $Remote_Address, $Forwarded_For,
             $wasSuccessful ? 1 : 0);
-        if (! $data) {
-            // FIXME error checking
-            return false;
-        }
+        DataAccess::checkError($data, new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem with the login'
+            )));
         return true;
     }
     
@@ -433,11 +467,12 @@ class DataAccess {
             readBy_User_Agent_x_Remote_Address_x_Forwarded_For_x_Authorization_Challenge(
                 $db, $userAgent, $remoteAddress, $forwardedFor,
                 $authorizationChallenge);
-        DataAccess::checkError(VGaValidSession::$INSTANCE,
+        DataAccess::checkError($data,
             new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem finding the user session'
             )));
-        if (! $data || sizeof($data) < 0) {
+        $data = $data['result'];
+        if (sizeof($data) < 0) {
             error_log("no rows for [".$userAgent."] [".$remoteAddress."] [".$forwardedFor."] [".$authorizationChallenge."]");
             return false;
         }
@@ -459,12 +494,15 @@ class DataAccess {
         }
         $userId = intval($data[0]['Ga_User_Id']);
         $sourceId = intval($data[0]['Ga_Source_Id']);
-        $ret = @array(
+        $ret = array(
             'Ga_Session_Id' => $sessionId,
             'Ga_User_Id' => $userId,
             'Ga_Source_Id' => $sourceId,
             'Login_Attempts' => $loginAttempts,
+            'Authentication_Challenge' => $authorizationChallenge,
         );
+        
+        // FIXME DEBUG
         error_log("valid session for [".$userAgent."] [".$remoteAddress."] [".$forwardedFor."] [".$authorizationChallenge."]");
 
         return $ret;
@@ -492,8 +530,8 @@ class DataAccess {
         // Force the session expiration time to be a lower number.
         // TODO the expiration of sessions should be better tracked.
         
-        GaSession::$INSTANCE->update($db, $sessionId, -10000);
-        DataAccess::checkError(GaSession::$INSTANCE,
+        $data = GaSession::$INSTANCE->update($db, $sessionId, -10000);
+        DataAccess::checkError($data,
             new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem with the user session'
             )));
@@ -502,11 +540,11 @@ class DataAccess {
     
     public static function renewSession($db, $sessionId, $sessionRenewalMinutes) {
         $data = GaSession::$INSTANCE->update($db, $sessionId, $sessionRenewalMinutes);
-        DataAccess::checkError(GaSession::$INSTANCE,
+        DataAccess::checkError($data,
             new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem with the user session'
             )));
-        if ($data["*rows"] != 1) {
+        if ($data['rowcount'] != 1) {
             throw new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem with the user session'
             ));
@@ -558,25 +596,22 @@ class DataAccess {
         $data = GaSession::$INSTANCE->
             readBy_Ga_User_Source_Id_x_User_Agent_x_Remote_Address_x_Forwarded_For(
                 $db, $userSourceId, $userAgent, $remoteAddress, $forwardedFor);
-        DataAccess::checkError(GaSession::$INSTANCE,
+        DataAccess::checkError($data,
             new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem with the user session'
             )));
-        foreach ($data as $row) {
-        // FIXME for testing purposes
+        foreach ($data['result'] as $row) {
+        // FIXME for testing purposes keep this commented out
             //DataAccess::expireSession($db, $row['Ga_Session_Id']);
         }
         
         $data = GaSession::$INSTANCE->create($db,
             $userSourceId, $userAgent, $remoteAddress, $forwardedFor,
             $authorizationChallenge, $expirationInMinutes);
-        DataAccess::checkError(GaSession::$INSTANCE,
+        DataAccess::checkError($data,
             new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem with the user session'
             )));
-        if ($data === false) {
-            return false;
-        }
         return intval($data);
     }
     
@@ -683,10 +718,10 @@ class DataAccess {
     }
     
     
-    private static function checkError($errorSource, $exception) {
-        if (sizeof($errorSource->errors) > 0) {
-            $backtrace = 'Database access error (['.
-                implode('], [', $errorSource->errors).']):';
+    private static function checkError($returned, $exception) {
+        if ($returned["haserror"]) {
+            $backtrace = 'Database access error ('.
+                $returned["errorcode"].' '.$returned["error"].'):';
             foreach (debug_backtrace() as $stack) {
                 $backtrace .= '\n    '.$stack['function'].'('.
                     implode(', ', $stack['args']).') ['.

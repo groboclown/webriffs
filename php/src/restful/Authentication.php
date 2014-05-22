@@ -47,8 +47,8 @@ class AuthenticationLogin extends Resource {
      * @method POST
      */
     public function login() {
-        $db =& $this->getDB();
-        $data =& $this->getRequestData();
+        $db = $this->getDB();
+        $data = $this->getRequestData();
         if (! $data->{'username'} || ! $data->{'password'} ||
                 ! $data->{'source'} ||
                 ! is_string($data->{'username'}) ||
@@ -98,8 +98,9 @@ class AuthenticationLogout extends Resource {
      * @authenticated
      */
     public function logout() {
-        $db =& $this->getDB();
+        $db = $this->getDB();
         $userAuth = $this->container['user'];
+        //error_log('User auth value: '.print_r($userAuth, true));
         AuthenticationLayer::logout($db, $userAuth['User_Id'],
             $userAuth['Ga_Session_Id']);
         
