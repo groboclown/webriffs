@@ -25,11 +25,12 @@ class DataAccess {
      * @return int the created project id
      */
     public static function createProject($db) {
-        $projectId = intval(GvProject::$INSTANCE->create($db));
-        DataAccess::checkError(GvProject::$INSTANCE,
+        $data = GvProject::$INSTANCE->create($db);
+        DataAccess::checkError($data,
             new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem accessing the project'
             )));
+        $projectId = intval($data['result']);
         return $projectId;
     }
     
@@ -42,11 +43,12 @@ class DataAccess {
      */
     public static function deleteProject($db, $projectId) {
         // This will usually fail horribly
-        $deletedCount = intval(GvProject::$INSTANCE->remove($db, $projectId));
-        DataAccess::checkError(GvProject::$INSTANCE,
+        $data = intval(GvProject::$INSTANCE->remove($db, $projectId));
+        DataAccess::checkError($data,
             new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem removing the project'
             )));
+        $deletedCount = $data['rowcount'];
         return $deletedCount <= 0;
     }
     
@@ -65,11 +67,12 @@ class DataAccess {
      * @return int branch ID
      */
     public static function createBranch($db, $projectId, $parentBranchId) {
-        $id = intval(GvBranch::$INSTANCE->create($db, $projectId));
-        DataAccess::checkError(GvBranch::$INSTANCE,
+        $data = GvBranch::$INSTANCE->create($db, $projectId);
+        DataAccess::checkError($data,
             new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem creating a branch'
             )));
+        $id = intval($data['result']);
         if ($parentBranchId !== null) {
             DataAccess::branchTo($db, $id, $parentBranchId, null);
         }
@@ -103,58 +106,50 @@ class DataAccess {
         }
         
         // Record the branch in the history
-        $branchHistoryId = intval(GvBranchHistory::$INSTANCE->create(
+        $data = intval(GvBranchHistory::$INSTANCE->create(
                 $db, $gaUserId, $targetBranchId, $sourceBranchId,
                 $targetChangeId, $sourceVersionId));
-        DataAccess::checkError(GvBranchHistory::$INSTANCE,
+        DataAccess::checkError($data,
             new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem creating the branch history'
             )));
-            
-        // FIXME move this into the generator, so that the mock class works
-        // correctly.
-        // Special sql for speed.  All the changes in the source branch
-        // at that version are put into the target branch.
+        $branchHistoryId = intval($data['result']);
         
         //  FIXME ensure the item versions are not already in the branch.
         
-        $stmt = $db->prepare("INSERT INTO GV_CHANGE_VERSION (".
-                "Gv_Item_Version_Id, Gv_Change_Id, Created_On, Last_Updated_On".
-                ") SELECT Gv_Item_Version_Id, Gv_Change_Id, NOW(), NULL FROM ".
-                "V_GV_CHANGE_ITEM WHERE Gv_Branch_Id = :Gv_Branch_Id AND ".
-                "Gv_Change_Id = :Gv_Change_Id");
-        $data = array(
-                "Gv_Change_Id" => $sourceVersionId,
-                "Gv_Branch_Id" => $sourceBranchId,
-        );
-        $res = $stmt->execute($data);
-        $errs = $db->errorInfo();
-        if ($errs[1] !== null) {
-            GvChangeVersion::$INSTANCE->errors[] = $errs[2];
-            GvChangeVersion::$INSTANCE->errnos[] = $errs[1];
-            DataAccess::checkError(GvChangeVersion::$INSTANCE,
-                new Base\ValidationException(array(
-                    'unknown' => 'there was an unknown problem branching'
-                )));
-        }
+        $data = GvChangeVersion::$INSTANCE->runInsertFromChangeItems($db,
+            $sourceVersionId, $sourceBranchId);
+        DataAccess::checkError($data,
+            new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem branching'
+            )));
+        // TODO Should we check the row counts?
+        
         return $branchHistoryId;
     }
     
     
+    /**
+     *
+     * @param PBO $db
+     * @param int $branchId
+     * @return int the head change ID, or null if no change for the branch.
+     */
     public static function getHeadChange($db, $branchId) {
-        $ret = VGvBranchHead::$INSTANCE->readBy_Gv_Branch_Id($db, $branchId,
+        $data = VGvBranchHead::$INSTANCE->readBy_Gv_Branch_Id($db, $branchId,
             // Order largest to smallest
             'Gv_Change_Id DESC');
-        DataAccess::checkError(VGvBranchHead::$INSTANCE,
+        DataAccess::checkError($data,
             new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem retrieving the version'
             )));
+        $ret = $data['result'];
         if (sizeof($ret) <= 0) {
             return null;
         }
         if (sizeof($ret) > 1) {
-            error_log("Bad view for branch head - it should return at most ".
-                    "1 row per branch.");
+            error_log("WARNING: Bad view for branch head - it should return " .
+                    " at most 1 row per branch, found ".sizeof($ret).".");
             // but allow it
         }
         return intval($ret[0]['Gv_Change_Id']);
@@ -163,15 +158,16 @@ class DataAccess {
     
     /**
      *
-     * @param unknown $db
+     * @param PBO $db
+     * @return int the item ID
      */
     public static function createItem($db) {
-        $id = GvItem::$INSTANCE->create($db);
-        DataAccess::checkError(GvChange::$INSTANCE,
+        $data = GvItem::$INSTANCE->create($db);
+        DataAccess::checkError($data,
             new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem creating an item'
             )));
-        return intval($id);
+        return intval($data['result']);
     }
     
     
@@ -194,23 +190,21 @@ class DataAccess {
         
         // FIXME ensure the item is not already in the change.
         
-        if (!! $deleted) {
-            $alive = 0;
-        } else {
-            $alive = 1;
-        }
+        $alive = (!! $deleted) ? 0 : 1;
         
-        $ivId = intval(GvItemVersion::$INSTANCE->create($db, $itemId, $alive));
+        $data = GvItemVersion::$INSTANCE->create($db, $itemId, $alive);
         DataAccess::checkError(GvItemVersion::$INSTANCE,
             new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem creating the version'
             )));
-        $cvId = intval(GvChangeVersion::$INSTANCE->create($db, $ivId,
-                $changeId));
-        DataAccess::checkError(GvChangeVersion::$INSTANCE,
+        $ivId = intval($data['result']);
+        $data = GvChangeVersion::$INSTANCE->create($db, $ivId,
+                $changeId);
+        DataAccess::checkError($data,
             new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem creating the version'
             )));
+        $cvId = intval($data['result']);
         return array($ivId, $cvId);
     }
     
@@ -221,16 +215,17 @@ class DataAccess {
             new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem creating the version'
             )));
-        if (sizeof($data) <= 0) {
+        $rows = $data['result'];
+        if (sizeof($rows) <= 0) {
             // might lead to leaking information
             throw new Exception("unknown change id ".$changeId);
         }
-        if (sizeof($data) > 1) {
+        if (sizeof($rows) > 1) {
             // multiple change IDs - should be impossible
             error_log("found multiple committed changes with id ".$changeId);
             // but keep going
         }
-        return $data[0]['Active_State'] == 1 ? true : false;
+        return $rows[0]['Active_State'] == 1 ? true : false;
     }
     
     
@@ -243,23 +238,23 @@ class DataAccess {
      * @return int the change ID
      */
     public static function createChange($db, $branchId, $gaUserId) {
-        $ret = GvChange::$INSTANCE->create($db, $branchId, 0, $gaUserId);
-        DataAccess::checkError(GvChange::$INSTANCE,
+        $data = GvChange::$INSTANCE->create($db, $branchId, 0, $gaUserId);
+        DataAccess::checkError($data,
             new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem creating a change'
             )));
-        return intval($ret);
+        return intval($data['result']);
     }
     
     
     public static function countItemsInChange($db, $changeId) {
-        $count = GvChangeVersion::$INSTANCE->countBy_Gv_Change_Id($db,
+        $data = GvChangeVersion::$INSTANCE->countBy_Gv_Change_Id($db,
                 $changeId);
-        DataAccess::checkError(GvChangeVersion::$INSTANCE,
+        DataAccess::checkError($data,
             new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem searching the change'
             )));
-        return intval($count);
+        return intval($data['result']);
     }
     
     
@@ -275,22 +270,23 @@ class DataAccess {
     public static function getItemsInChange($db, $changeId, $rowStart, $rowEnd) {
         $data = GvChangeVersion::$INSTANCE->readBy_Gv_Change_Id($db, $changeId,
                 $rowStart, $rowEnd);
-        DataAccess::checkError(GvChangeVersion::$INSTANCE,
+        DataAccess::checkError($data,
             new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem searching the change'
             )));
-        return $data;
+        return $data['result'];
     }
     
     
     public static function countPendingChangesForUser($db, $gaUserId,
             $branchId) {
-        $count = VGvPendingChange::$INSTANCE->countBy_Gv_Branch_Id_x_Ga_User_Id(
+        $data = VGvPendingChange::$INSTANCE->countBy_Gv_Branch_Id_x_Ga_User_Id(
              $db, $branchId, $gaUserId);
-        DataAccess::checkError(VGvPendingChange::$INSTANCE,
+        DataAccess::checkError($data,
             new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem searching the changes'
             )));
+        $count = $data['result'];
         return intval($count);
     }
     
@@ -306,12 +302,35 @@ class DataAccess {
             $rowStart, $rowEnd) {
         $data = VGvPendingChange::$INSTANCE->readBy_Gv_Branch_Id_x_Ga_User_Id(
                 $db, $branchId, $gaUserId, $rowStart, $rowEnd);
-        DataAccess::checkError(VGvPendingChange::$INSTANCE,
+        DataAccess::checkError($data,
             new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem searching the changes'
             )));
-        return $data;
+        return $data['result'];
+    }
 
+
+    public static function commitChange($db, $changeId) {
+        $data = GvChange::$INSTANCE->update($db, $changeId, 1);
+        DataAccess::checkError($data,
+            new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem searching the changes'
+            )));
+
+        if ($data['rowcount'] != 1) {
+            throw new Exception("could not find change (".$data['rowcount'].
+                    ")");
+        }
+    }
+    
+    
+    public static function getChangeHistory($db, $branchId, $start, $end) {
+        // FIXME
+    }
+    
+    
+    public static function getItemsInChange($db, $changeId, $start, $end) {
+        // FIXME
     }
     
     
