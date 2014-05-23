@@ -64,3 +64,19 @@ table:
                 - constraint:
                     type: initial value
                     value: "NULL"
+    extend:
+        - sql:
+            name: insert_from_change_items
+            type: insert
+            execute: "
+              INSERT INTO GV_CHANGE_VERSION (
+                Gv_Item_Version_Id, Gv_Change_Id, Created_On, Last_Updated_On
+              )
+              SELECT
+                Gv_Item_Version_Id, Gv_Change_Id, NOW(), NULL
+              FROM
+                V_GV_CHANGE_ITEM
+              WHERE Gv_Branch_Id = {Gv_Branch_Id} AND Gv_Change_Id = {Gv_Change_Id}
+              "
+            arguments: Gv_Change_Id, Gv_Branch_Id
+      
