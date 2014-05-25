@@ -77,8 +77,7 @@ class AuthenticationLayer {
     public static function login($db, $username, $sourceId,
             $authenticationCode, $authenticationCheckFunction, $User_Agent,
             $Remote_Address, $Forwarded_For, $sessionRenewalMinutes) {
-        // FIXME rip out this debug
-        error_log("checking login for [".$username."] [".$sourceId."] [".$authenticationCode."] [".$User_Agent."]");
+        //error_log("checking login for [".$username."] [".$sourceId."] [".$authenticationCode."] [".$User_Agent."]");
         
         if (! AuthenticationLayer::isValidUsername($username)) {
             throw new Base\ValidationException(array(

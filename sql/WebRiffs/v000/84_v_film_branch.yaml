@@ -1,0 +1,93 @@
+
+# A join between the film and branch, so that all that information can be
+# retrieved in a single query.
+
+view:
+    viewName: V_FILM_BRANCH
+    query: "SELECT
+          f.Film_Id Film_Id
+          , f.Gv_Project_Id Gv_Project_Id
+          , f.Name Film_Name
+          , f.Release_Year Release_Year
+          , f.Imdb_Url Imdb_Url
+          , f.Wikipedia_Url Wikipedia_Url
+          , f.Created_On Film_Created_On
+          , f.Last_Updated_On Film_Last_Updated_On
+          
+          , fb.Film_Branch_Id Film_Branch_Id
+          , fb.Gv_Branch_Id Gv_Branch_Id
+          , fb.Branch_Name Branch_Name
+          , fb.Created_On Branch_Created_On
+          , fb.Last_Updated_On Last_Updated_On
+        FROM FILM f
+        INNER JOIN GV_BRANCH b
+            ON f.Gv_Project_Id = b.Gv_Project_Id
+        INNER JOIN FILM_BRANCH fb
+            ON b.Gv_Branch_Id = fb.Gv_Branch_Id
+        "
+    columns:
+        - column:
+            name: Film_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: FILM
+                    column: Film_Id
+        - column:
+            name: Gv_Project_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_PROJECT
+                    column: Gv_Project_Id
+        - column:
+            name: Film_Name
+            type: nvarchar(200)
+        - column:
+            name: Release_Year
+            type: int
+        - column:
+            name: Imdb_Url
+            type: nvarchar(2048)
+        - column:
+            name: Wikipedia_Url
+            type: nvarchar(2048)
+        - column:
+            name: Created_On
+            type: timestamp
+        - column:
+            name: Film_Last_Updated_On
+            type: timestamp
+        - column:
+            name: Film_Branch_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: V_Film_Change_Quip__Film_Branch_Id_FK
+                    table: FILM_BRANCH
+                    column: Film_Branch_Id
+        - column:
+            name: Gv_Branch_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: V_Film_Change_Quip__Gv_Branch_Id_FK
+                    table: GV_BRANCH
+                    column: Gv_Branch_Id
+        - column:
+            name: Branch_Name
+            type: nvarchar(255)
+        - column:
+            name: Branch_Created_On
+            type: timestamp
+        - column:
+            name: Branch_Last_Updated_On
+            type: timestamp
+    constraints:
+        - constraint:
+            type: fake index
+            columns: Film_Id, Film_Branch_Id

@@ -8,10 +8,6 @@ use Base;
 // The code references the GA_USER table, but that isn't directly used here.
 
 /**
- * Usage notes:
- *
- * Projects are only for the caller to use as a reference to their own
- * objects; there's no reason (other than basic admin cleanup) to list them.
  *
  * @author Groboclown
  *
@@ -33,6 +29,48 @@ class DataAccess {
         $projectId = intval($data['result']);
         return $projectId;
     }
+    
+    
+    /**
+     * @param PBO $db
+     * @return int the number of projects
+     */
+    public static function getProjectCount($db) {
+        $data = GvProject::$INSTANCE->countAll($db);
+        DataAccess::checkError($data,
+            new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem accessing the projects'
+            )));
+        $count = intval($data['result']);
+        return $count;
+    }
+    
+    
+    /**
+     * Returns the list of the projects in the db.  This should be only used
+     * for administrative purposes, as the actual IDs should be associated with
+     * the corresponding business object.
+     *
+     * @param unknown $db
+     * @param int $start
+     * @param int $end
+     * @return array(rows) all the projects.  Each project is an array with
+     *      the keys
+     *      [int Gv_Project_Id, string Created_On, string Last_Updated_On]
+     */
+    public static function getProjects($db, $start, $end) {
+        if (! is_integer($start) || ! is_integer($end)) {
+            throw new Base\ValidationException(
+                array("start" => $start, "end" => $end));
+        }
+        $data = GvProject::$INSTANCE->readAll($db, false, $start, $end);
+        DataAccess::checkError($data,
+            new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem accessing the projects'
+            )));
+        return $data['result'];
+    }
+    
     
     
     /**
@@ -188,7 +226,16 @@ class DataAccess {
             throw new Exception("can only add items to pending changes");
         }
         
-        // FIXME ensure the item is not already in the change.
+        // ensure the item is not already in the change.
+        // NOTE: this is not atomic, so there might be an issue here.  However,
+        // changes are intended to be associated with a single user, so this
+        // situation is very unlikely.  Famous last words...
+        if (DataAccess::getItemVersionFromChange(
+                $db, $changeId, $itemId) !== false) {
+            throw new Base\ValidationException(array(
+                "change" => "change already contains this item"
+            ));
+        }
         
         $alive = (!! $deleted) ? 0 : 1;
         
@@ -206,6 +253,36 @@ class DataAccess {
             )));
         $cvId = intval($data['result']);
         return array($ivId, $cvId);
+    }
+    
+    
+    public static function getItemVersionFromChange($db, $changeId, $itemId) {
+        $data = GvItemVersion::$INSTANCE->readBy_Gv_Change_Id_x_Gv_Item_Id($db,
+                $changeId, $itemId);
+        DataAccess::checkError($data,
+            new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem finding the version'
+            )));
+        if (sizeof($data['result']) <= 0) {
+            return false;
+        }
+        if (sizeof($data['result']) > 1) {
+            error_log("WARNING: Found more than 1 version of item ".$itemId.
+                " in change ".$changeId);
+            // but keep going...
+        }
+        return intval($data['result'][0]['Gv_Item_Version_Id']);
+    }
+    
+    
+    public static function removeItemFromChange($db, $changeId, $itemId) {
+        if (DataAccess::isChangeCommitted($db, $changeId)) {
+            throw new Exception("can only add items to pending changes");
+        }
+        
+        // Find the version to remove
+        $data = GvItemVersion::$INSTANCE->readBy_Gv_Change_Id_x_Gv_Item_Id($db,
+            $changeId, $itemId);
     }
     
     
@@ -261,15 +338,15 @@ class DataAccess {
     /**
      * Returns all the items in the change.
      *
-     * @param unknown $db
-     * @param unknown $changeId
+     * @param PBO $db
+     * @param int $changeId
      * @return array() of rows, with each row containing elements
      *      Gv_Change_Version_Id,
      *      Gv_Item_Version_Id, Gv_Change_Id, Created_On, Last_Updated_On
      */
     public static function getItemsInChange($db, $changeId, $rowStart, $rowEnd) {
         $data = GvChangeVersion::$INSTANCE->readBy_Gv_Change_Id($db, $changeId,
-                $rowStart, $rowEnd);
+                false, $rowStart, $rowEnd);
         DataAccess::checkError($data,
             new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem searching the change'
@@ -301,7 +378,7 @@ class DataAccess {
     public static function getPendingChangesForUser($db, $gaUserId, $branchId,
             $rowStart, $rowEnd) {
         $data = VGvPendingChange::$INSTANCE->readBy_Gv_Branch_Id_x_Ga_User_Id(
-                $db, $branchId, $gaUserId, $rowStart, $rowEnd);
+                $db, $branchId, $gaUserId, false, $rowStart, $rowEnd);
         DataAccess::checkError($data,
             new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem searching the changes'
@@ -324,42 +401,75 @@ class DataAccess {
     }
     
     
+    public static function countChangeHistory($db, $branchId) {
+        $data = GvChange::$INSTANCE->countBy_Gv_Branch_Id($db, $branchId);
+        DataAccess::checkError($data,
+            new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem searching the changes'
+            )));
+        return $data['result'];
+    }
+    
+    
     public static function getChangeHistory($db, $branchId, $start, $end) {
-        // FIXME
+        // order descending
+        $data = GvChange::$INSTANCE->readBy_Gv_Branch_Id($db, $branchId,
+                "Gv_Change_Id DESC", $start, $end);
+        DataAccess::checkError($data,
+            new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem searching the changes'
+            )));
+        return $data['result'];
+    }
+
+
+    public static function countItemsInChange($db, $changeId) {
+        $data = VGvChangeItem::$INSTANCE->countBy_Gv_Change_Id($db, $changeId);
+        DataAccess::checkError($data,
+            new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem searching the changes'
+            )));
+        return $data['result'];
     }
     
     
     public static function getItemsInChange($db, $changeId, $start, $end) {
-        // FIXME
+        $data = VGvChangeItem::$INSTANCE->readBy_Gv_Change_Id($db, $changeId,
+            false, $start, $end);
+        DataAccess::checkError($data,
+            new Base\ValidationException(array(
+                'unknown' => 'there was an unknown problem searching the changes'
+            )));
+        return $data['result'];
     }
     
     
     
     
     // ----------------------------------------------------------------------
-    
-    
-    private static function checkError($errorSource, $exception) {
-        if (sizeof($errorSource->errors) > 0) {
-            $backtrace = 'Database access error (['.
-                implode('], [', $errorSource->errors).']):';
+
+
+    private static function checkError($returned, $exception) {
+        if ($returned["haserror"]) {
+            $backtrace = 'Database access error ('.
+                    $returned["errorcode"].' '.$returned["error"].'):';
             foreach (debug_backtrace() as $stack) {
                 $backtrace .= '\n    '.$stack['function'].'('.
-                    implode(', ', $stack['args']).') ['.
-                    $stack['file'].' @ '.$stack['line'].']';
+                        implode(', ', $stack['args']).') ['.
+                        $stack['file'].' @ '.$stack['line'].']';
             }
             error_log($backtrace);
-            
+    
             // TODO make the error messages language agnostic.
-            
+    
             // can have special logic for the $errorSource->errnos
             // error codes, to have friendlier messages.
-            
+    
             // 1062: already in use.
-            
+    
             throw $exception;
         }
     }
-}
+    }
 
 

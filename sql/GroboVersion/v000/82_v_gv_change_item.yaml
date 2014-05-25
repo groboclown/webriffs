@@ -93,3 +93,8 @@ view:
             constraints:
                 - constraint:
                     type: not null
+    constraints:
+        - constraint:
+            name: change_item
+            type: index
+            columns: Gv_Change_Id, Gv_Item_Id

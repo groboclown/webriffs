@@ -67,3 +67,12 @@ table:
                 - constraint:
                     type: initial value
                     value: "NULL"
+    whereClauses:
+        - where:
+            name: Restrict_Year
+            sql: (Release_Year >= {min_year} AND Release_Year <= (max_year))
+            arguments: min_year, max_year
+        - where:
+            name: Fuzzy_Name
+            sql: NAME LIKE {fuzzy_name}
+            argument: fuzzy_name
