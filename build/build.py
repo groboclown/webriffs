@@ -187,19 +187,4 @@ def all(config):
 
 #--------------------------------------------------------------------------
 if __name__ == '__main__':
-    run = []
-    for n in sys.argv[1:]:
-        if n in TARGETS:
-            run.append(TARGETS[n])
-        if n == '-h':
-            print("Targets: " + str(TARGETS.keys()))
-            sys.exit(0)
-    if len(run) <= 0:
-        print("Running default target 'all'")
-        run.append(all)
-    if len(run) > 1:
-        print("For some reason, running 2 or more targets at once causes " +
-            "issues. Try running them one at a time until this is fixed.")
-        sys.exit(1)
-    for t in run:
-        build(t, globals())
+    build(all, globals())
