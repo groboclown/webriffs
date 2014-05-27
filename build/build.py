@@ -128,7 +128,7 @@ def generate_sql(config):
 def generate_dbo(config):
     for d in config['sql-categories.dirs']:
         dn = os.path.basename(d)
-        outdir = clean_dir(config['exports.dir'], 'php', 'dbo', dn)
+        outdir = clean_dir(config['exports.dir'], 'dbo', dn)
         run_sqlmigrate(config, 'genPhpDboLayer.py', 'Base\\DboParent',
             dn, d, outdir)
 
@@ -166,6 +166,16 @@ def copy_client(config):
 
 
 @depends(setup)
+def copy_dart(config):
+    distutils.dir_util.copy_tree(
+         todir(config['client.dir'], "web"),
+         todir(config['exports.dir'], "web"),
+         preserve_symlinks = False,
+         update = True,
+         verbose = True,
+         dry_run = False)
+
+@depends(setup)
 def copy_php(config):
     for i in ['conf', 'lib', 'src', 'web']:
         distutils.dir_util.copy_tree(
@@ -178,10 +188,14 @@ def copy_php(config):
 
 
 @depends(clean, generate_sql, generate_dbo,
-         lint_client, generate_client_js, copy_client, copy_php)
+         lint_client, generate_client_js, copy_client, copy_dart, copy_php)
 def all(config):
     pass
 
+
+@depends(clean, generate_sql, generate_dbo, copy_dart, copy_php)
+def dart(config):
+    pass
 
 
 

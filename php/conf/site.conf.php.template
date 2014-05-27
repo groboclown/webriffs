@@ -12,13 +12,7 @@ $siteConfig = array(
      * - eg. if WebRiffs is reached via http://example.org/webriffs/, path is '/webriffs/'
      * - if WebRiffs is reached via http://auth.example.org/, path is '/'
      */
-    'path' => '/',
-
-    /**
-     * A random string used for signing of $auth response.  Change for your
-     * site.
-     */
-    'security_salt' => 'L:jklasljkdfklj3dfl;j34%dlkjop9qj3lk3jLJAS;DLKJ3L;KJ34;LKJFfj34',
+    'path' => '@path@',
 
 
     /**
@@ -26,9 +20,9 @@ $siteConfig = array(
      */
     'db_config' => array(
         // Uses the PDO format (http://???)
-        'dsn' => 'mysql:host=localhost;dbname=webriffs',
-        'username' => 'root',
-        'password' => ''
+        'dsn' => '@dsn@',
+        'username' => '@dbuser@',
+        'password' => '@dbpassword@'
     ),
 
     /**
@@ -37,9 +31,9 @@ $siteConfig = array(
     'sources' => array(
         'local' => array(
             // The internal GA_SOURCE ID.
-            'id' => 1
+            'id' => @gasourceid@
             
-            // FIXME the method for authenticating the user / key
+            // TODO the method for authenticating the user / key
         ),
     ),
 

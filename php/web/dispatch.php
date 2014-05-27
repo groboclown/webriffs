@@ -2,6 +2,16 @@
 
 header('Content-Type: application/json');
 
+// Before anything else is done, ensure that the site is setup.
+if (is_file(__DIR__.'/admin.php')) {
+    error_log("Client used when admin page exists");
+    http_response_code(500);
+    echo '{"message":"Site not setup."}';
+    die;
+}
+
+
+
 // load autoloader (delete as appropriate)
 require_once '../lib/Tonic/Autoloader.php';
 require_once '../lib/Pimple/Container.php';
