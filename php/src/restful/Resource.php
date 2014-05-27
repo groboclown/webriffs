@@ -97,6 +97,120 @@ class Resource extends Base\Resource {
         }
         return false;
     }
+    
+    
+    /**
+     * Processes a get request for paged data.
+     *
+     * @param string $defaultSortBy
+     * @param int $defaultSortOrder
+     * @param int $defaultSize
+     * @param int $minSize
+     * @param int $maxSize
+     * @return multitype:number Ambigous <string, unknown> Ambigous <number, unknown>
+     */
+    function getPageRequest(mixed $filters, string $defaultSortBy,
+            int $defaultSortOrder = null, int $defaultSize = null,
+            int $minSize = null, int $maxSize = null) {
+        if ($defaultSortOrder === null) {
+            $defaultSortOrder = 1;
+        }
+        if ($defaultSize === null) {
+            $defaultSize = 25;
+        }
+        if ($minSize === null) {
+            $minSize = 5;
+        }
+        if ($maxSize === null) {
+            $maxSize = 100;
+        }
+        
+        $page = 0;
+        $perPage = $defaultSize;
+        $sortBy = $defaultSortBy;
+        $sortOrder = $defaultSortOrder;
+        if (array_key_exists("page", $_GET) &&
+                is_numeric($_GET["page"]) &&
+                ($_GET["page"]*1 == (int)($_GET["page"]*1))) {
+            $page = intval($_GET["page"]);
+        }
+        if (array_key_exists("per_page", $_GET) &&
+                is_numeric($_GET["per_page"]) &&
+                ($_GET["per_page"]*1 == (int)($_GET["per_page"]*1))) {
+            $perPage = intval($_GET["per_page"]);
+        }
+        if ($perPage > $maxSize) {
+            $perPage = $maxSize;
+        }
+        if ($perPage < $minSize) {
+            $perPage = $minSize;
+        }
+        
+        if (array_key_exists("sort_order", $_GET) &&
+                is_numeric($_GET["sort_order"]) &&
+                ($_GET["sort_order"]*1 == (int)($_GET["sort_order"]*1))) {
+            $so = intval($_GET["sort_order"]);
+            if ($so >= 0 && $so <= 2) {
+                $sortOrder = $so;
+            }
+            // else it's ignored
+        }
+        
+        if (array_key_exists("sort_by", $_GET)) {
+            $sortBy = $_GET["sort_by"];
+        }
+        
+        $startRow = $page * $perPage;
+
+        $filterSet = array();
+        foreach ($filters as $filter) {
+            if (array_key_exists($filter, $_GET)) {
+                $filterSet[$filter] = $_GET[$filter];
+            } else {
+                $filterSet[$filter] = null;
+            }
+        }
+        
+        $ret = array(
+            "sort_by" => $sortBy,
+            "sort_order" => $sortOrder,
+            "start_row" => $startRow,
+            "row_count" => $perPage,
+            "filters" => $filterSet,
+        );
+        return $ret;
+    }
+    
+    
+    /**
+     * Creates the response for paged data.
+     *
+     * @param int $start
+     * @param int $perPage
+     * @param int $totalCount
+     * @param mixed $data
+     */
+    function createPageResponse(string $sortedBy, int $sortOrder, int $start,
+            int $perPage, int $totalCount, mixed $data) {
+        if ($perPage == 0) {
+            throw new \Exception("per-page value was zero");
+        }
+        $page = (int) floor($start / $perPage);
+        $pageCount = (int) ceil($totalCount / $perPage);
+        $ret = array(
+            "_metadata" => array(
+                "page" => $page,
+                "per_page" => $perPage,
+                "page_count" => $pageCount,
+                "record_count" => $totalCount,
+                "sorted_by" => $sortedBy,
+                "sort_order" => $sortOrder,
+                // TODO add filter information?
+            ),
+            "result" => $data
+        );
+        return $ret;
+    }
 
     
     

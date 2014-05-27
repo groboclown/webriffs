@@ -2,57 +2,9 @@
 
 namespace WebRiffs;
 
+require_once(__DIR__.'/Resource.php');
+
 use Tonic;
-
-
-class FilmResource extends Resource {
-    protected function getRequestData() {
-        $data = $this->request->data;
-        return array(
-            'Name' => validateFilmName($data['Name']),
-            'Release_Year' => validateReleaseYear($data['Release_Year']),
-            'Imdb_Url' => validateUrl($data['Imdb_Url']),
-            'Wikipedia_Url' => validateUrl($data['Wikipedia_Url']),
-        );
-    }
-
-
-    private function validateFilmName($name) {
-        if ($name == null || !is_string($name)) {
-            throw new Tonic\NotAcceptableException;
-        }
-
-        $name = trim($name);
-
-        if (strlen($name) <= 0) {
-            throw new Tonic\NotAcceptableException;
-        }
-
-        return $name;
-    }
-
-    private function validateReleaseYear($year) {
-        if ($year == null || !is_int($year)) {
-            throw new Tonic\NotAcceptableException;
-        }
-        if ($year < 1830 || year > 3000) {
-            throw new Tonic\NotAcceptableException;
-        }
-        return $year;
-    }
-
-    /**
-     * Validates that the given url is a url path.
-     */
-    private function validateUrl($url) {
-        if (ereg(":?&\\s", $url)) {
-            throw new Tonic\NotAcceptableException;
-        }
-    }
-
-
-}
-
 
 
 /**
@@ -60,11 +12,17 @@ class FilmResource extends Resource {
  *
  * @uri /film
  */
-class FilmCollection extends FilmResource {
+class FilmCollection extends Resource {
     /**
+     * "GET" returns the records, and includes paging.  All films are public,
+     * while the individual branches are not.
+     *
      * @method GET
      */
-    public function fetch() {
+    public function fetchCount() {
+        
+        
+        
         $db = getDB();
         $stmt = $db->prepare('SELECT Film_Id, Name, Release_Year, Imdb_Url, Wikipedia_Url, Created_On, Last_Updated_On FROM FILM');
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
@@ -84,6 +42,7 @@ class FilmCollection extends FilmResource {
         $db = getDB();
 
         // validate that the name/year do not already exist
+        // This should be part of the SQL constraints.
         $stmt = $db->prepare('SELECT COUNT(*) FROM FILM WHERE Name = :Name AND Release_Year = :Release_Year');
         $stmt->execute($data);
         if ($stmt->fetchColumn() > 0) {
