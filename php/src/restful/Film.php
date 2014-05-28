@@ -13,20 +13,30 @@ use Tonic;
  * @uri /film
  */
 class FilmCollection extends Resource {
+    public static $FILM_FILTERS = array("name", "yearMin", "yearMax");
+    
+    
     /**
      * "GET" returns the records, and includes paging.  All films are public,
      * while the individual branches are not.
      *
      * @method GET
      */
-    public function fetchCount() {
+    public function fetch() {
+        $paging = $this->getPageRequest(FilmCollection::$FILM_FILTERS,
+            FilmLayer::$DEFAULT_SORT_COLUMN);
+        
+        $db = $this->getDB();
+        
+        $totalCount = FilmLayer::getFilmCount($db, $paging['filters']['name'],
+            $paging['filters']['yearMin'], $paging['filters']['yearMax']);
+        
+        $result = FilmLayer::findFilms($db, $paging['sort_by'],
+            $paging['sort_order'], $paging['row_count'],
+            $paging['start_row'], $paging['filters']['name'],
+            $paging['filters']['yearMin'], $paging['filters']['yearMax'])
         
         
-        
-        $db = getDB();
-        $stmt = $db->prepare('SELECT Film_Id, Name, Release_Year, Imdb_Url, Wikipedia_Url, Created_On, Last_Updated_On FROM FILM');
-        $stmt->setFetchMode(PDO::FETCH_ASSOC);
-        $stmt->execute();
         return new Tonic\Response(200, $stmt->fetchAll());
     }
 

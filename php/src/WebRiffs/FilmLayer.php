@@ -25,57 +25,37 @@ class FilmLayer {
 
     
     
-    public static $FILM_SORT_COLUMNS = array(
-        "name" => "Name",
-        "year" => "Release_Year",
-        "created" => "Created_On",
-        "updated" => "Last_Updated_On"
-    );
-
+    public static $FILM_SORT_COLUMNS;
+    
+    public static $DEFAULT_SORT_COLUMN = "name";
+    
+    public static $MIN_YEAR_SEARCH_FILTER;
+    public static $MAX_YEAR_SEARCH_FILTER;
+    
+    public static $NAME_SEARCH_FILTER;
+    
+    public static $FILTERS;
+    
+    
     /**
      * Returns all the films.  It includes optional filters.
+     * The Paging object should be trusted, as it performs all the input
+     * validation.
+     *
+     * @param PBO $db
+     * @param Base\PageRequest $paging
+     * @return array a page response json array.
      */
-    public static function findFilms($db, $sortBy, $sortOrder,
-            $rowCount, $startRow = 0, $nameFilter = null, $minYear = 0,
-            $maxYear = 9999) {
-        $order = false;
-        if (!! $sortBy) {
-            if (! array_key_exists($sortBy, FilmLayer::$FILM_SORT_COLUMNS)) {
-                throw new Base\ValidationException(array(
-                                "sortBy" => "invalid column sort"
-                ));
-            }
-            $order = FilmLayer::$FILM_SORT_COLUMNS[$sortBy];
-            if ($sortOrder == 1) {
-                $order .= " ASC";
-            } elseif ($sortOrder == 2) {
-                $order .= " DESC";
-            }
-        }
-        if (! is_integer($rowCount) || ! is_integer($startRow) ||
-                $rowCount <= 0 || $startRow < 0) {
-            throw new Base\ValidationException(array(
-                "rows" => "invalid row selection"
-            ));
-        }
-        if (! is_integer($minYear) || ! is_integer($maxYear)) {
-            throw new Base\ValidationException(array(
-                            "years" => "invalid year range"
-            ));
-        }
-        if ($minYear > $maxYear) {
-            $x = $minYear;
-            $minYear = $maxYear;
-            $maxYear = $x;
-        }
-        
-        $endRow = $startRow + $rowCount;
-        
+    public static function pageFilms($db, Base\PageRequest $paging) {
         $wheres = array(
-            new Film\Film_Film_RestrictYear($minYear, $maxYear)
+            new Film\Film_Film_RestrictYear(
+                $paging->filters[FilmLayers::$MIN_YEAR_SEARCH_FILTER->name],
+                $paging->filters[FilmLayers::$MAX_YEAR_SEARCH_FILTER->name])
         );
-        if ($nameFilter !== null) {
-            $wheres[] = new Film\Film_FuzzyName('%'.$nameFilter.'%');
+        if ($paging->filters[FilmLayers::$NAME_SEARCH_FILTER->name] !== null) {
+            $wheres[] = new Film\Film_FuzzyName('%'.
+                    $paging->filters[FilmLayers::$NAME_SEARCH_FILTER->name].
+                    '%');
         }
         
         
@@ -84,43 +64,15 @@ class FilmLayer {
         FilmLayer::checkError($data, new Base\ValidationException(array(
                 'unknown' => 'there was an unknown problem finding the films'
             )));
-        return $data['result'];
-    }
-    
-    
-    public static function getFilmCount($db, $nameFilter = null, $minYear = 0,
-            $maxYear = 9999) {
-        if (! is_integer($rowCount) || ! is_integer($startRow) ||
-                $rowCount <= 0 || $startRow < 0) {
-            throw new Base\ValidationException(array(
-                "rows" => "invalid row selection"
-            ));
-        }
-        if (! is_integer($minYear) || ! is_integer($maxYear)) {
-            throw new Base\ValidationException(array(
-                            "years" => "invalid year range"
-            ));
-        }
-        if ($minYear > $maxYear) {
-            $x = $minYear;
-            $minYear = $maxYear;
-            $maxYear = $x;
-        }
-        
-        $endRow = $startRow + $rowCount;
-        
-        $wheres = array(
-            new Film\Film_Film_RestrictYear($minYear, $maxYear)
-        );
-        if ($nameFilter !== null) {
-            $wheres[] = new Film\Film_FuzzyName('%'.$nameFilter.'%');
-        }
+        $rows = $data['result'];
         
         $data = Film::$INSTANCE->countAll($db, $wheres);
         FilmLayer::checkError($data, new Base\ValidationException(array(
-                'unknown' => 'there was an unknown problem finding the films'
+                'unknown' => 'there was an unknown problem counting the films'
             )));
-        return $data['result'];
+        $count = $data['result'];
+        
+        return Base\PageResponse::createPageResponse($paging, $count, $rows);
     }
     
     
@@ -161,3 +113,25 @@ class FilmLayer {
         }
     }
 }
+FilmLayer::$FILM_SORT_COLUMNS = array(
+                "name" => "Name",
+                "year" => "Release_Year",
+                "created" => "Created_On",
+                "updated" => "Last_Updated_On"
+);
+
+FilmLayer::$DEFAULT_SORT_COLUMN = "name";
+
+FilmLayer::$MIN_YEAR_SEARCH_FILTER = new Base\SearchFilterInt("yearMin",
+        0, 0, 9999);
+FilmLayer::$MAX_YEAR_SEARCH_FILTER = new Base\SearchFilterInt("yearMax",
+        9999, 0, 9999);
+
+FilmLayer::$NAME_SEARCH_FILTER = new Base\SearchFilterString("name",
+        null);
+
+FilmLayer::$FILTERS = array(
+                FilmLayers::$MIN_YEAR_SEARCH_FILTER,
+                FilmLayers::$MAX_YEAR_SEARCH_FILTER,
+                FilmLayers::$NAME_SEARCH_FILTER
+);
