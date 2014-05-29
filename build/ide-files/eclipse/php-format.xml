@@ -7,16 +7,16 @@
 <setting id="insert_space_before_opening_paren_in_declare" value="false"/>
 <setting id="org.eclipse.php.core.formatter.insert_new_line_in_function_invoke" value="0"/>
 <setting id="org.eclipse.php.formatter.core.formatter.alignment_for_arguments_in_allocation_expression_force_split" value="false"/>
-<setting id="org.eclipse.php.formatter.core.formatter.alignment_for_arguments_in_allocation_expression_indent_policy" value="0"/>
+<setting id="org.eclipse.php.formatter.core.formatter.alignment_for_arguments_in_allocation_expression_indent_policy" value="2"/>
 <setting id="org.eclipse.php.formatter.core.formatter.alignment_for_arguments_in_allocation_expression_line_wrap_policy" value="1"/>
 <setting id="org.eclipse.php.formatter.core.formatter.alignment_for_arguments_in_method_invocation_force_split" value="false"/>
-<setting id="org.eclipse.php.formatter.core.formatter.alignment_for_arguments_in_method_invocation_indent_policy" value="0"/>
+<setting id="org.eclipse.php.formatter.core.formatter.alignment_for_arguments_in_method_invocation_indent_policy" value="2"/>
 <setting id="org.eclipse.php.formatter.core.formatter.alignment_for_arguments_in_method_invocation_line_wrap_policy" value="1"/>
 <setting id="org.eclipse.php.formatter.core.formatter.alignment_for_assignment_force_split" value="false"/>
 <setting id="org.eclipse.php.formatter.core.formatter.alignment_for_assignment_indent_policy" value="0"/>
 <setting id="org.eclipse.php.formatter.core.formatter.alignment_for_assignment_line_wrap_policy" value="0"/>
 <setting id="org.eclipse.php.formatter.core.formatter.alignment_for_binary_expression_force_split" value="false"/>
-<setting id="org.eclipse.php.formatter.core.formatter.alignment_for_binary_expression_indent_policy" value="0"/>
+<setting id="org.eclipse.php.formatter.core.formatter.alignment_for_binary_expression_indent_policy" value="2"/>
 <setting id="org.eclipse.php.formatter.core.formatter.alignment_for_binary_expression_line_wrap_policy" value="1"/>
 <setting id="org.eclipse.php.formatter.core.formatter.alignment_for_compact_if_force_split" value="false"/>
 <setting id="org.eclipse.php.formatter.core.formatter.alignment_for_compact_if_indent_policy" value="0"/>
@@ -35,7 +35,7 @@
 <setting id="org.eclipse.php.formatter.core.formatter.alignment_for_superclass_in_type_declaration_line_wrap_policy" value="0"/>
 <setting id="org.eclipse.php.formatter.core.formatter.alignment_for_superinterfaces_in_type_declaration_force_split" value="false"/>
 <setting id="org.eclipse.php.formatter.core.formatter.alignment_for_superinterfaces_in_type_declaration_indent_policy" value="0"/>
-<setting id="org.eclipse.php.formatter.core.formatter.alignment_for_superinterfaces_in_type_declaration_line_wrap_policy" value="0"/>
+<setting id="org.eclipse.php.formatter.core.formatter.alignment_for_superinterfaces_in_type_declaration_line_wrap_policy" value="1"/>
 <setting id="org.eclipse.php.formatter.core.formatter.blank_lines_before_field" value="0"/>
 <setting id="org.eclipse.php.formatter.core.formatter.blank_lines_before_member_type" value="0"/>
 <setting id="org.eclipse.php.formatter.core.formatter.blank_lines_before_method" value="2"/>
@@ -60,7 +60,7 @@
 <setting id="org.eclipse.php.formatter.core.formatter.comment.new_lines_at_block_boundaries" value="true"/>
 <setting id="org.eclipse.php.formatter.core.formatter.comment.new_lines_at_javadoc_boundaries" value="true"/>
 <setting id="org.eclipse.php.formatter.core.formatter.comment.preserve_white_space_between_code_and_line_comments" value="false"/>
-<setting id="org.eclipse.php.formatter.core.formatter.continuation_indentation" value="1"/>
+<setting id="org.eclipse.php.formatter.core.formatter.continuation_indentation" value="2"/>
 <setting id="org.eclipse.php.formatter.core.formatter.continuation_indentation_for_array_initializer" value="4"/>
 <setting id="org.eclipse.php.formatter.core.formatter.disabling_tag" value="@formatter:off"/>
 <setting id="org.eclipse.php.formatter.core.formatter.enabling_tag" value="@formatter:on"/>
