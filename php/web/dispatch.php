@@ -1,6 +1,9 @@
 <?php
 
 header('Content-Type: application/json');
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: deny');
+// FIXME look into how to mandate TLS connections.
 
 // Before anything else is done, ensure that the site is setup.
 if (is_file(__DIR__.'/admin.php')) {
