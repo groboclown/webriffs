@@ -1,0 +1,73 @@
+# synchronizer token pattern
+# http://www.corej2eepatterns.com/Design/PresoDesign.htm
+
+
+table:
+    tableName: GA_CSRF_TOKEN
+    columns:
+        - column:
+            name: Ga_Csrf_Token_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: primary key
+                    name: Ga_Csrf_Token_Id_Key
+        - column:
+            name: Ga_Session_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    table: GA_SESSION
+                    column: Ga_Session_Id
+                    name: Ga_Csrf_Token__Ga_Session_Id__FK
+                - constraint:
+                    type: no update
+        - column:
+            name: Token
+            type: nvarchar(700)
+            constraints:
+                - constraint:
+                    type: unique index
+                    name: Ga_Csrf_Token__Token_IDX
+                - constraint:
+                    type: not null
+        - column:
+            name: Expires_On
+            type: timestamp
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: constant query
+                    dialects:
+                        - dialect:
+                            platforms: mysql
+                            sql: Expires_on > NOW()
+                - constraint:
+                    type: initial value
+                    dialects:
+                        - dialect:
+                            platforms: mysql
+                            sql: TIMESTAMPADD(MINUTE, {Minutes_From_Now}, NOW())
+                    argument: Minutes_From_Now
+                - constraint:
+                    type: update value
+                    dialects:
+                        - dialect:
+                            platforms: mysql
+                            sql: TIMESTAMPADD(MINUTE, {Minutes_From_Now}, NOW())
+                    argument: Minutes_From_Now
+        - column:
+            name: Forwarded_For
+            type: nvarchar(2048)
+        - column:
+            name: Authorization_Challenge
+            type: nvarchar(2048)
+            constraints:
+                - constraint:
+                    type: not null

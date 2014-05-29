@@ -300,7 +300,7 @@ class DataAccess {
      * TODO pending password requests should prevent normal log ins?
      */
     public static function createPasswordRequest($db, $userSourceId,
-        $expirationMinutes) {
+            $expirationMinutes) {
         $secretKey = createSecretKey();
         // ensure the secret key is not already used.
         while (hasPasswordSecretKey($db, $secretKey)) {
@@ -335,7 +335,7 @@ class DataAccess {
 
 
     public static function getUserSourceForPasswordRequestSecretKey($db,
-        $secretKey) {
+            $secretKey) {
         $data = GaPasswordRequest::$INSTANCE->readBy_Secret_Key($db, $secretKey);
         DataAccess::checkError($data,
             new Base\ValidationException(
