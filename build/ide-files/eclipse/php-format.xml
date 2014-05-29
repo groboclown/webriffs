@@ -60,7 +60,7 @@
 <setting id="org.eclipse.php.formatter.core.formatter.comment.new_lines_at_block_boundaries" value="true"/>
 <setting id="org.eclipse.php.formatter.core.formatter.comment.new_lines_at_javadoc_boundaries" value="true"/>
 <setting id="org.eclipse.php.formatter.core.formatter.comment.preserve_white_space_between_code_and_line_comments" value="false"/>
-<setting id="org.eclipse.php.formatter.core.formatter.continuation_indentation" value="4"/>
+<setting id="org.eclipse.php.formatter.core.formatter.continuation_indentation" value="1"/>
 <setting id="org.eclipse.php.formatter.core.formatter.continuation_indentation_for_array_initializer" value="4"/>
 <setting id="org.eclipse.php.formatter.core.formatter.disabling_tag" value="@formatter:off"/>
 <setting id="org.eclipse.php.formatter.core.formatter.enabling_tag" value="@formatter:on"/>
@@ -73,7 +73,7 @@
 <setting id="org.eclipse.php.formatter.core.formatter.indent_statements_compare_to_body" value="true"/>
 <setting id="org.eclipse.php.formatter.core.formatter.indent_switchstatements_compare_to_cases" value="true"/>
 <setting id="org.eclipse.php.formatter.core.formatter.indent_switchstatements_compare_to_switch" value="true"/>
-<setting id="org.eclipse.php.formatter.core.formatter.indentation.size" value="1"/>
+<setting id="org.eclipse.php.formatter.core.formatter.indentation.size" value="4"/>
 <setting id="org.eclipse.php.formatter.core.formatter.insert_new_line_after_opening_brace_in_array_initializer" value="false"/>
 <setting id="org.eclipse.php.formatter.core.formatter.insert_new_line_before_catch_in_try_statement" value="false"/>
 <setting id="org.eclipse.php.formatter.core.formatter.insert_new_line_before_closing_brace_in_array_initializer" value="true"/>

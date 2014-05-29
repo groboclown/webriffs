@@ -67,6 +67,11 @@ table:
                 - constraint:
                     type: initial value
                     value: "NULL"
+    constraints:
+        - constraint:
+            type: unique index
+            columns: Name, Release_Year
+            name: FILM_Name__Release_Year_IDX
     whereClauses:
         - where:
             name: Restrict_Year

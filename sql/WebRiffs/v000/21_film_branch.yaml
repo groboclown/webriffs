@@ -38,6 +38,12 @@ table:
                     type: not null
                 - constraint:
                     type: no update
+                - constraint:
+                    type: initial value
+                    dialects:
+                        - dialect:
+                            platforms: mysql
+                            sql: NOW()
         - column:
             name: Last_Updated_On
             type: timestamp
@@ -45,4 +51,11 @@ table:
                 - constraint:
                     type: nullable
                 - constraint:
-                    type: no update
+                    type: constant update
+                    dialects:
+                        - dialect:
+                            platforms: mysql
+                            sql: NOW()
+                - constraint:
+                    type: initial value
+                    value: "NULL"
