@@ -23,6 +23,7 @@ table:
                     type: not null
                 - constraint:
                     type: unique index
+                    name: Link_Type__Name_IDX
         - column:
             name: Description
             type: nvarchar(2048)
