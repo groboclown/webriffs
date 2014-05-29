@@ -1,37 +1,46 @@
-# A film branch relates to a branch.
+# Defines the allowable external link categories.  Each link has a name,
+# a description, a url prefix, and a validation regex.  The system will check
+# any inputs on a type against the regex, and if it passes, it will be allowed
+# to be stored.  The returned link will be a join between the link type
+# URL prefix and the value stored.
 
 table:
-    tableName: FILM_BRANCH
+    tableName: LINK_TYPE
     columns:
         - column:
-            name: Film_Branch_Id
+            name: Link_Type_Id
             type: int
             autoIncrement: true
             constraints:
                 - constraint:
                     type: primary key
-                    name: Film_Branch_Id_Key
+                    name: Link_Type_Id_Key
         - column:
-            name: Gv_Branch_Id
-            type: int
-            constraints:
-                - constraint:
-                    type: foreign key
-                    name: Film_Branch__Gv_Branch_Id_FK
-                    table: GV_BRANCH
-                    column: Gv_Branch_Id
-                - constraint:
-                    type: no update
-                - constraint:
-                    type: not null
-        - column:
-            name: Branch_Name
-            type: nvarchar(255)
+            name: Name
+            type: nvarchar(200)
             constraints:
                 - constraint:
                     type: not null
                 - constraint:
-                    type: no update
+                    type: unique index
+        - column:
+            name: Description
+            type: nvarchar(2048)
+            constraints:
+                - constraint:
+                    type: not null
+        - column:
+            name: Url_Prefix
+            type: nvarchar(200)
+            constraints:
+                - constraint:
+                    type: not null
+        - column:
+            name: Validation_Regex
+            type: nvarchar(200)
+            constraints:
+                - constraint:
+                    type: not null
         - column:
             name: Created_On
             type: timestamp

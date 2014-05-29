@@ -1,10 +1,10 @@
-# A film branch relates to a branch.
+# Defines links related to the film.  These are global for a film.
 
 table:
-    tableName: FILM_BRANCH
+    tableName: FILM_LINK
     columns:
         - column:
-            name: Film_Branch_Id
+            name: Film_Link_Id
             type: int
             autoIncrement: true
             constraints:
@@ -12,21 +12,34 @@ table:
                     type: primary key
                     name: Film_Branch_Id_Key
         - column:
-            name: Gv_Branch_Id
+            name: Film_Id
             type: int
             constraints:
                 - constraint:
                     type: foreign key
-                    name: Film_Branch__Gv_Branch_Id_FK
-                    table: GV_BRANCH
-                    column: Gv_Branch_Id
+                    name: Film_Link__Film_Id_FK
+                    table: FILM
+                    column: Film_Id
                 - constraint:
                     type: no update
                 - constraint:
                     type: not null
         - column:
-            name: Branch_Name
-            type: nvarchar(255)
+            name: Link_Type_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Film_Link__Link_Type_Id_FK
+                    table: LINK_TYPE
+                    column: Link_Type_Id
+                - constraint:
+                    type: no update
+                - constraint:
+                    type: not null
+        - column:
+            name: Uri
+            type: nvarchar(300)
             constraints:
                 - constraint:
                     type: not null
