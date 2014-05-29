@@ -4,14 +4,14 @@
 view:
     viewName: V_GA_VALID_SESSION
     query: "SELECT
-                s.Ga_Session_Id
-                , s.Ga_User_Source_Id
-                , us.Ga_User_Id
-                , us.Ga_Source_Id
-                , s.User_Agent
-                , s.Remote_Address
-                , s.Forwarded_For
-                , s.Authorization_Challenge
+                s.Ga_Session_Id Ga_Session_Id
+                , s.Ga_User_Source_Id Ga_User_Source_Id
+                , us.Ga_User_Id Ga_User_Id
+                , us.Ga_Source_Id Ga_Source_Id
+                , s.User_Agent User_Agent
+                , s.Remote_Address Remote_Address
+                , s.Forwarded_For Forwarded_For
+                , s.Authorization_Challenge Authorization_Challenge
         FROM GA_SESSION s
             INNER JOIN GA_USER_SOURCE us
                 ON s.Ga_User_Source_Id = us.Ga_User_Source_Id
@@ -25,7 +25,9 @@ view:
                 - constraint:
                     type: not null
                 - constraint:
-                    type: primary key
+                    type: foreign key
+                    table: GA_SESSION
+                    column: Ga_Session_Id
         - column:
             name: Ga_User_Source_Id
             type: int

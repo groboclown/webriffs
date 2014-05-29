@@ -129,7 +129,7 @@ class DataAccess {
      * @return s the id of the user source
      */
     public static function setUserSource($db, $userId, $sourceId, $username,
-        $authenticationCode) {
+            $authenticationCode) {
         if (strlen($username) > 2046) {
             throw new Base\ValidationException(
                 array(
@@ -384,7 +384,7 @@ class DataAccess {
     /**
      */
     public static function getActivePasswordRequestsForUserSource($db,
-        $userSourceId) {
+            $userSourceId) {
         $data = VGaPasswordRequest::$INSTANCE->readBy_Ga_User_Source_Id($db,
             $userSourceId);
         DataAccess::checkError($data,
@@ -444,7 +444,7 @@ class DataAccess {
      * it was handled or not, ordered by most recent first.
      */
     public static function getPasswordChangeRequests($db, $userSourceId, $start,
-        $end) {
+            $end) {
         $data = GaPasswordRequest::$INSTANCE->readBy_Ga_User_Source_Id($db,
             "Expires_On DESC", $start, $end);
         DataAccess::checkError($data,
@@ -458,7 +458,7 @@ class DataAccess {
 
     // FIXME include the user agent, remote address, forwarded for information
     public static function recordLoginAttempt($db, $userSourceId,
-        $User_Agent, $Remote_Address, $Forwarded_For, $wasSuccessful) {
+            $User_Agent, $Remote_Address, $Forwarded_For, $wasSuccessful) {
         // sanitize data
         if (!is_string($User_Agent) || !is_string($Remote_Address) ||
              !is_string($Forwarded_For)) {
@@ -493,12 +493,14 @@ class DataAccess {
 
 
     public static function getLoginAttemptsFor($db, $userSourceId,
-        $timeLimitMinutes = -1) {
+            $timeLimitMinutes = -1) {
         // FIXME
         // limited paging support.  Pull in all the attempts (-1), or the
         // N most recent attempts, which means sorting in reverse order.
         // This allows checking if the M most recent attempts were invalid,
         // forcing a temporary login ban.
+        
+        // This should use the V_GA_LOGIN_USER_FREQUENCY view.
     }
 
 
@@ -513,8 +515,8 @@ class DataAccess {
      * then false is returned.
      */
     public static function getUserForSession($db, $userAgent, $remoteAddress,
-        $forwardedFor, $authorizationChallenge, $sessionRenewalMinutes,
-        $loginAttemptsMinutes) {
+            $forwardedFor, $authorizationChallenge, $sessionRenewalMinutes,
+            $loginAttemptsMinutes) {
         // sanitize data
         if (!is_string($userAgent) || !is_string($remoteAddress) ||
              !is_string($forwardedFor) || !is_string($authorizationChallenge)) {
@@ -638,8 +640,8 @@ class DataAccess {
      * authorization challenge, then "false" is returned.
      */
     public static function createSession($db, $userSourceId, $userAgent,
-        $remoteAddress, $forwardedFor, $authorizationChallenge,
-        $expirationInMinutes) {
+            $remoteAddress, $forwardedFor, $authorizationChallenge,
+            $expirationInMinutes) {
         if (!is_int($expirationInMinutes) || $expirationInMinutes < 1) {
             throw new Base\ValidationException(
                 array(
@@ -698,6 +700,100 @@ class DataAccess {
         return intval($data);
     }
     
+    
+    /**
+     * Generates a CSRF token that the website must pass to the server in order
+     * to properly validate the request.  These should only be used for
+     * POST requests (so that they are not revealed in the URL of the client
+     * request).  Once a token is used, it should be expired.
+     *
+     * @param PBO $db
+     * @param int $sessionId
+     * @param int $activeMinutes
+     * @return string the CSRF token
+     * @throws Base\ValidationException
+     */
+    public static function createCsrfToken($db, int $sessionId, string $action,
+            int $activeMinutes = 10) {
+        $tokenId = null;
+        $tokenValue = null;
+        while ($tokenId === null) {
+            $tokenValue = DataAccess::createSecretKey();
+            try {
+                $data = GaCsrfToken::$INSTANCE->create($db,
+                        $sessionId, $tokenValue, $action, $activeMinutes);
+                DataAccess::checkError($data,
+                    new Base\ValidationException(
+                        array(
+                            'unknown' => 'there was an unknown problem with the token creation'
+                        )));
+            } catch (PDO\PDOException $e) {
+                if ($e->errorInfo[1] == 1062) {
+                    // duplicate entry
+                } else {
+                    // some other error
+                    error_log("Creation of csrf token failed: " .
+                            $e->getMessage());
+                    throw new Base\ValidationException(
+                            array('unknown' => 'there was an unknown problem with the token generation')
+                    );
+                }
+            }
+        }
+        return $tokenValue;
+    }
+    
+    
+    /**
+     * Validates whether the given token is valid for the session.  If it is
+     * valid, then it is automatically expired.
+     *
+     * The tokens are expired automatically in order to prevent the request
+     * from being accidentally performed again, and to prevent attackers from
+     * capturing the token and reusing it.  Because the CSRF token is only used
+     * in POST requests, it means we should disallow users from reusing it
+     * (back button, etc) because it's used for requesting a data change.
+     * For the attacker scenario, there is a brief window in which a user can
+     * pass in the token, then the attacker captures it and posts their own
+     * request, but that should be a small window.
+     *
+     * @param PDO $db
+     * @param int $sessionId
+     * @param string $token
+     * @return bool true if valid (and expired), false if not valid.
+     */
+    public static function validateCsrfToken($db, int $sessionId,
+            string $token, string $action) {
+        // TODO associate the token with an action.
+        
+        $data = VGaActiveCsrfToken::$INSTANCE->readBy_Ga_Session_Id_x_Token_x_Action(
+                     $db, $sessionId, $token, $action);
+        DataAccess::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem with token access'
+                )));
+        if (sizeof($data['result']) <= 0) {
+            return false;
+        }
+        if (sizeof($data['result']) > 1) {
+            // TODO record to the log which tokens (id only) are duplicates
+            error_log("CSRF Token duplicates");
+            throw new Base\ValidationException(
+                 array('unknown' => 'the token table has integrety issues')
+            );
+        }
+        $tokenId = $data['result'][0]['Ga_Csrf_Token_Id'];
+        // expire by setting expires_on minutes to 30 minutes in the past.
+        $data = GaCsrfToken::$INSTANCE->update($db, $tokenId, -30);
+        DataAccess::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem with token expiration'
+                )));
+        return true;
+    }
+    
 
     // -----------------------------------------------------------------------
     // Helper Functions
@@ -746,7 +842,7 @@ class DataAccess {
      * $iterations is an integer between 4 and 1000. 8 is a good number to use.
      */
     public static function hashPassword($password, $iterations,
-        $portable = FALSE) {
+            $portable = FALSE) {
         $t_hasher = new \PasswordHash($iterations, $portable);
         $hash = $t_hasher->HashPassword($password);
         return $hash;
@@ -766,7 +862,7 @@ class DataAccess {
      * @return s TRUE if valid, FALSE if not.
      */
     public static function checkPassword($passwordToCheck, $hash, $iterations,
-        $portable = FALSE) {
+            $portable = FALSE) {
         $t_hasher = new \PasswordHash($iterations, $portable);
         $check = $t_hasher->CheckPassword($passwordToCheck, $hash);
         return $check;

@@ -1,0 +1,35 @@
+# Reports the number of login attempts per user within a time frame.
+
+view:
+    viewName: V_GA_LOGIN_USER_FREQUENCY
+    query: "SELECT
+                us.Ga_User_Id Ga_User_Id
+                , COUNT(*) Attempts
+            FROM GA_LOGIN_ATTEMPT la
+            INNER JOIN GA_USER_SOURCE us
+                ON us.Ga_User_Source_Id = la.Ga_User_Source_Id
+            GROUP BY us.Ga_User_Id
+        "
+    columns:
+        - column:
+            name: Ga_User_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    table: GA_USER
+                    column: Ga_User_Id
+        - column:
+            name: Attempts
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+    whereClauses:
+        - where:
+            name: Seconds
+            sql: TIMESTAMPDIFF(SECOND, la.Created_On, NOW()) < {seconds}
+            argument: seconds
+

@@ -238,22 +238,25 @@ class AuthenticationLayer {
         if (sizeof($data['result']) != 1) {
             // TODO should remove the GroboAuth data corresponding to this
             // user session.
-            
-
-
             throw new Tonic\UnauthorizedException();
         }
         $userData = $data['result'][0];
+        // $retData already has:
+        //'Ga_Session_Id'
+        //'Ga_User_Id'
+        //'Ga_Source_Id'
+        //'Login_Attempts'
+        //'Authentication_Challenge'
+        
         $retData['User_Id'] = intval($userData['User_Id']);
         $retData['Username'] = $userData['Username'];
         $retData['Contact'] = $userData['Contact'];
         $retData['Is_Admin'] = (intval($userData['Is_Site_Admin']) == 0 ? false : true);
-        $retData['Ga_User_Id'] = intval($userData['Ga_User_Id']);
         $retData['Created_On'] = $userData['Created_On'];
         $retData['Last_Updated_On'] = $userData['Last_Updated_On'];
         
         // FIXME pull in the other user authentication data.
-        
+        // such as user_attribute, film_branch_user
 
 
         return $retData;

@@ -53,36 +53,124 @@ class Resource extends Base\Resource {
     
     
     /**
+     * Tonic Annotation
+     *
      * Ensures the request is authenticated, and stores the user authentication
      * data in the container['user'].
      */
     function authenticated() {
-        // FIXME this line causes a warning if the cookie isn't in the
-        // request.  Need to find the correct way to check if the key exists.
+        // First, check if we've actually been authenticated.
+        if (array_key_exists('authenticated', $this->container) &&
+                $this->container['authenticated'] &&
+                array_key_exists('user', $this->container)) {
+            // already authenticated.  Don't run this again.
+            return;
+        }
+        if (array_key_exists('authenticated', $this->container) &&
+                ! $this->container['authenticated']) {
+            // Already tried, and we aren't authenticated
+            throw new Tonic\UnauthorizedException();
+        }
+        
+        // Prevent extra DB hits on this request.
+        $this->container['authenticated'] = false;
+        
         if (! array_key_exists(Resource::COOKIE_NAME, $_COOKIE)) {
             throw new Tonic\UnauthorizedException;
         }
         $cookie = $_COOKIE[Resource::COOKIE_NAME];
         
         $db = $this->getDB();
+        
+        // This call will either return the session object, or throw an
+        // exception.  It will never return null.
         $data = AuthenticationLayer::getUserSession($db, $cookie,
             $this->request->userAgent, $this->request->remoteAddr,
             null,
             Resource::DEFAULT_SESSION_TIMEOUT);
         
         $this->container['user'] = $data;
+        
+        // This may not be needed, but it's a bit of extra protection for
+        // calls back into this method.
+        $this->container['authenticated'] = true;
+        
+        return true;
     }
 
-
+    /**
+     * Tonic Annotation
+     *
+     * @param string $role
+     * @param int $minLevel
+     * @throws Tonic\UnauthorizedException
+     * @return boolean
+     */
     function secure(string $role, int $minLevel) {
         $this->authenticated();
-        $db =& $this->getDB();
+        $db = $this->getDB();
 
         $auth =& $this->container['user'];
         if (! isUserAuthSecureForRole($auth, $role)) {
-            throw new Tonic\UnauthorizedException;
+            throw new Tonic\UnauthorizedException();
         }
         return true;
+    }
+    
+    
+    /**
+     * Tonic Annotation
+     *
+     * Requires that the JSON request contains the key "_csrf" with a valid
+     * CSRF token.
+     *
+     * The token should be passed to the client initially with a call to
+     * createCsrfToken().
+     */
+    function csrf(string $action) {
+        // CSRF tokens require authentication, so in case of an ordering issue,
+        // trigger the authenticaiton to run first.
+        $this->authenticated();
+        
+        // Check to see if the CSRF token was passed in.
+        
+        // FIXME may want to put this as a custom header instead of request
+        // data.
+        
+        $request = $this->getRequestData();
+        if (! property_exists($request, "_csrf")) {
+            throw new Tonic\UnauthorizedException();
+        }
+        $db = $this->getDB();
+        $token = $request->{'_csrf'};
+        $sessionId = $this->container['user']['Ga_Session_Id'];
+        
+        // "action" should be internal, so we're not checking its data
+        
+        if (! GroboAuth\DataAccess::validateCsrfToken($db,
+                $sessionId, $token, $action)) {
+            throw new Tonic\UnauthorizedException();
+        }
+        
+        return true;
+    }
+    
+    
+    /**
+     * Create a CSRF token for an action, that can be validated with the
+     * "@csrf <action>" Tonic annotation.  This should be sent back from the
+     * client in the JSON field '_csrf'.
+     *
+     * Only use this for requests that use non-GET methods.
+     *
+     * @param string $action
+     */
+    function createCsrfToken(string $action) {
+        $this->authenticated();
+        
+        $db = $this->getDB();
+        $sessionId = $this->container['user']['Ga_Session_Id'];
+        return GroboAuth\DataAccess::createCsrfToken($db, $sessionId, $action);
     }
 
 

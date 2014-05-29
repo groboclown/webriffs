@@ -8,6 +8,7 @@ table:
         - column:
             name: Ga_Csrf_Token_Id
             type: int
+            autoIncrement: true
             constraints:
                 - constraint:
                     type: not null
@@ -36,6 +37,16 @@ table:
                     name: Ga_Csrf_Token__Token_IDX
                 - constraint:
                     type: not null
+                - constraint:
+                    type: no update
+        - column:
+            name: Action
+            type: nvarchar(60)
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: no update
         - column:
             name: Expires_On
             type: timestamp
@@ -63,11 +74,31 @@ table:
                             sql: TIMESTAMPADD(MINUTE, {Minutes_From_Now}, NOW())
                     argument: Minutes_From_Now
         - column:
-            name: Forwarded_For
-            type: nvarchar(2048)
-        - column:
-            name: Authorization_Challenge
-            type: nvarchar(2048)
+            name: Created_On
+            type: timestamp
             constraints:
                 - constraint:
                     type: not null
+                - constraint:
+                    type: no update
+                - constraint:
+                    type: initial value
+                    dialects:
+                        - dialect:
+                            platforms: mysql
+                            sql: NOW()
+        - column:
+            name: Last_Updated_On
+            type: timestamp
+            constraints:
+                - constraint:
+                    type: nullable
+                - constraint:
+                    type: constant update
+                    dialects:
+                        - dialect:
+                            platforms: mysql
+                            sql: NOW()
+                - constraint:
+                    type: initial value
+                    value: "NULL"

@@ -1,0 +1,42 @@
+# Keeps a record of each active login session.  This maintains all the information
+# necessary to validate a user request.
+
+view:
+    viewName: V_GA_LOGIN_SIGNATURE
+    query: "SELECT
+                la.User_Agent User_Agent
+                , la.Remote_Address Remote_Address
+                , la.Forwarded_For Forwarded_For
+                , COUNT(*) Attempts
+            FROM GA_LOGIN_ATTEMPT la
+            GROUP BY la.User_Agent, la.Remote_Address, la.Forwarded_For
+        "
+    columns:
+        - column:
+            name: User_Agent
+            type: nvarchar(64)
+            constraints:
+                - constraint:
+                    type: not null
+        - column:
+            name: Remote_Address
+            type: nvarchar(2048)
+        - column:
+            name: Forwarded_For
+            type: nvarchar(2048)
+        - column:
+            name: Attempts
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+    constraints:
+        - constraint:
+            type: fake index
+            columns: User_Agent, Remote_Address, Forwarded_For
+    whereClauses:
+        - where:
+            name: Seconds
+            sql: TIMESTAMPDIFF(SECOND, la.Created_On, NOW()) < {seconds}
+            argument: seconds
+

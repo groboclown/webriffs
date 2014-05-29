@@ -1,0 +1,52 @@
+# Keeps a record of each active login session.  This maintains all the information
+# necessary to validate a user request.
+
+view:
+    viewName: V_GA_ACTIVE_CSRF_TOKEN
+    query: "SELECT
+                Ga_Csrf_Token_Id
+                , Ga_Session_Id
+                , Token
+                , Action
+        FROM GA_CSRF_TOKEN t
+        WHERE Expires_On > NOW()
+        "
+    columns:
+        - column:
+            name: Ga_Csrf_Token_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    table: GA_CSRF_TOKEN
+                    column: Ga_Csrf_Token_Id
+        - column:
+            name: Ga_Session_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    table: GA_SESSION
+                    column: Ga_Session_Id
+        - column:
+            name: Token
+            type: nvarchar(700)
+            constraints:
+                - constraint:
+                    type: not null
+        - column:
+            name: Action
+            type: nvarchar(60)
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: no update
+    constraints:
+        - constraint:
+            type: fake index
+            columns: Ga_Session_Id, Token, Action
