@@ -46,6 +46,7 @@ class AuthenticationLayer {
         // creating a new ga_user record.
         
 
+
         $data = User::$INSTANCE->countBy_Username($db, $username);
         AuthenticationLayer::checkError($data,
             new Base\ValidationException(
@@ -115,6 +116,7 @@ class AuthenticationLayer {
             // check.
             
 
+
             throw new Base\ValidationException(
                 array(
                     // DO NOT let the caller know that the user doesn't exist.
@@ -155,6 +157,7 @@ class AuthenticationLayer {
         // we won't record it.
         
 
+
         GroboAuth\DataAccess::recordLoginAttempt($db, $userSourceId,
             $User_Agent, $Remote_Address, $Forwarded_For,
             (!!$loginValid) ? 1 : 0);
@@ -162,8 +165,10 @@ class AuthenticationLayer {
         // FIXME check for login attempts to see if the user is locked out
         
 
+
         // FIXME check if the user is banned
         
+
 
         if (!$loginValid) {
             throw new Base\ValidationException(
@@ -178,6 +183,7 @@ class AuthenticationLayer {
             $authenticationChallenge = GroboAuth\DataAccess::createSecretKey();
             //error_log("Generated auth key ".$authenticationChallenge);
             
+
 
             $sessionId = GroboAuth\DataAccess::createSession($db, $userSourceId,
                 $User_Agent, $Remote_Address, $Forwarded_For,
@@ -234,6 +240,7 @@ class AuthenticationLayer {
             // user session.
             
 
+
             throw new Tonic\UnauthorizedException();
         }
         $userData = $data['result'][0];
@@ -247,6 +254,7 @@ class AuthenticationLayer {
         
         // FIXME pull in the other user authentication data.
         
+
 
         return $retData;
     }
@@ -324,27 +332,6 @@ class AuthenticationLayer {
     // ----------------------------------------------------------------------
     // Private Functions
     private static function checkError($returned, $exception) {
-        if ($returned["haserror"]) {
-            $backtrace = 'Database access error (' . $returned["errorcode"] . ' ' .
-                 $returned["error"] . '):';
-            foreach (debug_backtrace() as $stack) {
-                $backtrace .= '\n    ' . $stack['function'] . '(' .
-                     implode(', ', $stack['args']) . ') [' . $stack['file'] .
-                     ' @ ' . $stack['line'] . ']';
-            }
-            error_log($backtrace);
-            
-            // TODO make the error messages language agnostic.
-            
-
-            // can have special logic for the $errorSource->errnos
-            // error codes, to have friendlier messages.
-            
-
-            // 1062: already in use.
-            
-
-            throw $exception;
-        }
+        Base\BaseDataAccess::checkError($returned, $exception);
     }
 }
