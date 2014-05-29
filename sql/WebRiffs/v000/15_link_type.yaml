@@ -38,7 +38,7 @@ table:
                     type: not null
         - column:
             name: Validation_Regex
-            type: nvarchar(200)
+            type: nvarchar(500)
             constraints:
                 - constraint:
                     type: not null

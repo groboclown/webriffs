@@ -152,9 +152,10 @@ class FilmLayer {
      * @return multitype:number
      */
     public static function createBranchById($db, int $projectId, int $filmId,
-        int $gaUserId, string $branchName) {
+            int $gaUserId, string $branchName) {
         // FIXME ensure the branch name does not exist for that film id.
         // FIXME ensure the branch name is valid
+        // FIXME validate branch name length is valid
         
         $data = GvBranch::$INSTANCE->create($db, $projectId);
         FilmLayer::checkError($data,
@@ -211,8 +212,8 @@ class FilmLayer {
         }
         
 
-        $data = Film::$INSTANCE->readAll($db, $wheres, $order, $startRow,
-            $endRow);
+        $data = Film::$INSTANCE->readAll($db, $wheres, $paging->order,
+            $paging->startRow, $paging->endRow);
         FilmLayer::checkError($data,
             new Base\ValidationException(
                 array(
