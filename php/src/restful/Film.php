@@ -1,10 +1,11 @@
 <?php
 
-namespace WebRiffs;
+namespace WebRiffsRest;
 
 require_once(__DIR__.'/Resource.php');
 
 use Tonic;
+use WebRiffs;
 
 
 /**
@@ -28,47 +29,31 @@ class FilmCollection extends Resource {
         
         $db = $this->getDB();
         
-        $totalCount = FilmLayer::getFilmCount($db, $paging['filters']['name'],
-            $paging['filters']['yearMin'], $paging['filters']['yearMax']);
+        $result = FilmLayer::pageFilms($db);
         
-        $result = FilmLayer::findFilms($db, $paging['sort_by'],
-            $paging['sort_order'], $paging['row_count'],
-            $paging['start_row'], $paging['filters']['name'],
-            $paging['filters']['yearMin'], $paging['filters']['yearMax'])
-        
-        
-        return new Tonic\Response(200, $stmt->fetchAll());
+        return array(200, $result);
     }
 
 
 
     /**
-     * @method POST
+     * @method PUT
      * @security create
+     * @csrf create_film
      */
     public function create() {
         $data = getRequestData();
 
         $db = getDB();
+        
+        $idList = FilmLayer::createFilm($db, $this->container['user'],
+            $data['name'], $data['year']);
 
-        // validate that the name/year do not already exist
-        // This should be part of the SQL constraints.
-        $stmt = $db->prepare('SELECT COUNT(*) FROM FILM WHERE Name = :Name AND Release_Year = :Release_Year');
-        $stmt->execute($data);
-        if ($stmt->fetchColumn() > 0) {
-            throw new Tonic\ConditionException;
-        }
-
-
-        $stmt = $db->prepare('INSERT INTO FILM (Name, Release_Year, Imdb_Url, Wikipedia_Url, Created_On, Last_Updated_On) VALUES (:Name, :Release_Year, :Imdb_Url, :Wikipedia_Url, NOW(), NULL)');
-        $stmt->execute($data);
-        $filmId = $db->lastInsertId();
-        $data['Film_Id'] = $filmId;
-
-
-        // FIXME create initial version
-
-
+        $data = array(
+            'film_id' => $data[1],
+            'branch_id' => $data[2],
+            'change_id' => $data[3]
+        );
 
         return new Tonic\Response(Tonic\Response::CREATED, $data);
     }
@@ -77,23 +62,19 @@ class FilmCollection extends Resource {
 
 
 /**
- * FIXME include validation of input values
  *
  * @uri /film/:filmid
  */
-class FilmObj extends Tonic\Resource {
+class FilmObj extends Resource {
     /**
      * @method GET
      */
     public function display() {
         $filmid = $this->filmid;
         $db = getDB();
-        $stmt = $db->prepare('SELECT Film_Id, Name, Release_Year, Imdb_Url, Wikipedia_Url, Created_On, Last_Updated_On FROM FILM WHERE Film_Id = ?');
-        $stmt->setFetchMode(PDO::FETCH_ASSOC);
-        $stmt->execute(array($filmid));
-
-        $row = $stmt->fetch();
-
+        
+        
+        
         if (!$row) {
             throw new Tonic\NotFoundException;
         }
@@ -106,6 +87,7 @@ class FilmObj extends Tonic\Resource {
     /**
      * @method POST
      * @secure create
+     * @csrf update_film
      */
     public function update() {
         $filmid = $this->filmid;
@@ -130,6 +112,7 @@ class FilmObj extends Tonic\Resource {
     /**
      * @method DELETE
      * @secure delete
+     * @csrf delete_film
      */
     function remove() {
         $filmid = $this->filmid;
@@ -139,5 +122,15 @@ class FilmObj extends Tonic\Resource {
         $stmt->execute(array($filmid));
 
         return new Tonic\Response(Tonic\Response::NOCONTENT);
+    }
+    
+    
+    /**
+     * @method PUT
+     * @secure branch
+     * @csrf branch_film
+     */
+    function createBranch() {
+        // FIXME
     }
 }

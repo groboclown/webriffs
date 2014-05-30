@@ -526,7 +526,47 @@ if there's any other problems.
 
 // ===========================================================================
 // ===========================================================================
-// Step 7: Create an admin user
+// Step 7: Create some initial data
+
+
+require_once(__DIR__."/../lib/Tonic/Exception.php");
+//require_once(__DIR__."/../lib/Tonic/Resource.php");
+require_once(__DIR__."/../src/Base/DboBase.php");
+require_once(__DIR__."/../src/Base/ValidationException.php");
+require_once(__DIR__."/../src/WebRiffs/AdminLayer.php");
+
+try {
+    $data = WebRiffs\AdminLayer::getLinkNamed($userDb, 'wikipedia-en');
+    if ($data === null) {
+        WebRiffs\AdminLayer::createLink($userDb, 'wikipedia-en',
+            'Open Encyclopedia (English)', 'http://en.wikipedia.org/wiki/',
+            // Note: this leaves out articles in international characters.
+            '^[a-zA-Z0-9\\$_-\\(\\)]+$');
+    }
+    
+    $data = WebRiffs\AdminLayer::getLinkNamed($userDb, 'imdb.com');
+    if ($data === null) {
+        WebRiffs\AdminLayer::createLink($userDb, 'imdb.com',
+            'International Movie Database', 'http://imdb.com/title/',
+            '^[a-zA-Z0-9]+$');
+    }
+} catch (\Exception $e) {
+    error_log("Database create link Exception: ".$e->getMessage());
+    error_log($e->getTraceAsString());
+?>
+<p>
+There was a problem when creating some initial data.  Check your webserver
+error logs, correct the issues, and retry the operation.
+</p></body></html>
+<?php
+        die;
+}
+
+
+
+// ===========================================================================
+// ===========================================================================
+// Step 8: Create an admin user
 
 if (! array_key_exists("x", $_POST)) {
 ?>
@@ -602,7 +642,7 @@ fixes things.
 
 // ===========================================================================
 // ===========================================================================
-// Step 8: Rename the admin.php file.
+// Step 9: Rename the admin.php file.
 
 
 if (rename(__FILE__, __DIR__.'/.ht_admin.php')) {
@@ -641,90 +681,10 @@ You reached this spot in error.  Something went horribly wrong with the
 installer, Great Cthulhu was released from his eternal sleep,
 Narlyhotep isn't far behind, and you are now seeing this message.
 </p>
-
-<?php
-
-
-
-
-
-
-
-
-// ---------------------------------------------------------------------------
-// Step 4: Create an admin user
-
-// If the user made it to this point, then the site is correctly configured.
-// but we still need an administration user.
-
-
-if (array_key_exists("x", $_POST)) {
-    if ($_POST["x"] == "user") {
-        $username = $_POST["username"];
-        $password = $_POST["password"];
-        $email = $_POST["email"];
-        
-        //require_once(__DIR__."/../lib/Tonic/Resource.php");
-        require_once(__DIR__."/../src/Base/DboBase.php");
-        require_once(__DIR__."/../src/Base/ValidationException.php");
-        require_once(__DIR__."/../src/dbo/GroboAuth/GaUser.php");
-        //require_once(__DIR__."/../src/dbo/GroboAuth/GaSource.php");
-        require_once(__DIR__."/../src/dbo/GroboAuth/GaUserSource.php");
-        require_once(__DIR__."/../src/dbo/WebRiffs/User.php");
-        require_once(__DIR__."/../src/dbo/WebRiffs/UserAccess.php");
-        require_once(__DIR__."/../src/dbo/WebRiffs/UserAttribute.php");
-        require_once(__DIR__."/../src/GroboAuth/DataAccess.php");
-        require_once(__DIR__."/../src/WebRiffs/AuthenticationLayer.php");
-        
-        $encPassword = WebRiffs\AuthenticationLayer::hashPassword($password);
-        
-        try {
-            $userId = WebRiffs\AuthenticationLayer::createUser($db, $username,
-                $siteConfig['sources']['local']['id'], $username, $encPassword,
-                $email, true);
-            
-            
-            // Creation of the user was successful.
-            // ----------------------------------------------------------------
-            // Step 5: Rename the admin page
-            if (rename(__FILE__, __DIR__.'/.ht_admin.php')) {
-                echo "<p>The user successfully renamed this page so that it shouldn't be ".
-                        "accessible anymore.  To rerun any admin task, rename the ".
-                        "file <code>".__DIR__."/.ht_admin.php</code> to <code>".
-                        __FILE__."</code> and reload the page.</p></body></html>";
-                die;
-            } else {
-                echo "<h3>Failed to rename the file. DO THIS MANUALLY.</h3></body></html>";
-                die;
-            }
-?>
-<h1>CONGRATULATIONS</h1>
-<p>This site is now configured.  You will not be able to revisit this page,
-because it was renamed for security purposes.  If you need to rerun the
-administrative scripts, you'll need to refresh everything.
-</p>
-<p>
-<a href="index.html">Click here to visit your new site!</a>
-</p>
-<?php
-        } catch (Exception $e) {
-            error_log("Exception: ".$e->getMessage());
-            error_log($e->getTraceAsString());
-            echo "<p>Problem creating the user.  Check your server logs for more information.</p>";
-            die;
-        }
-    }
-}
-
-
-// ---------------------------------------------------------------------------
-// Create the user form.
-?>
-
-<p>
-This next step will create an administration user, and then rename this
-administration web page so it can't be accessed again (for security purposes).
-</p>
-
 </body>
 </html>
+
+<?php
+die;
+
+

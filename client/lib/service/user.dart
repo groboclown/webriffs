@@ -41,7 +41,7 @@ class UserService {
      * to refresh.
      */
     Future<ServerResponse> loadUserDetails() {
-        return _server.post('/authentication/current',
+        return _server.post('/authentication/current', null,
                 isErrorChecker: UNAUTHORIZED_IS_NOT_ERROR)
             .then((ServerResponse response) {
                 if (response.status == 412 || response.wasError) {
@@ -59,7 +59,7 @@ class UserService {
 
     Future<ServerResponse> login(String username, String password) {
         var req = new LoginRequest(username, password);
-        return _server.post('/authentication/login', data: req.toJson())
+        return _server.post('/authentication/login', null, data: req.toJson())
             .then((ServerResponse response) {
                 // Force a check to see if we are indeed logged in.
                 return loadUserDetails();
@@ -68,19 +68,21 @@ class UserService {
 
 
     Future<ServerResponse> logout() {
-        return _server.post('/authentication/logout',
-                isErrorChecker: UNAUTHORIZED_IS_NOT_ERROR)
-            .then((ServerResponse response) {
-                // Force a check to see if we are indeed logged in or not.
-                return loadUserDetails();
-            });
+        return createCsrfToken("logout").then((String csrfToken) {
+            return _server.post('/authentication/logout', csrfToken,
+                    isErrorChecker: UNAUTHORIZED_IS_NOT_ERROR)
+                .then((ServerResponse response) {
+                    // Force a check to see if we are indeed logged in or not.
+                    return loadUserDetails();
+                });
+        });
     }
 
 
     Future<ServerResponse> createUser(String username, String password,
                                       String contact) {
         var req = new UserCreationRequest(username, password, contact);
-        return _server.put('/authentication/create',
+        return _server.put('/authentication/create', null,
                 data: req.toJson())
             .then((ServerResponse response) {
                 if (! response.wasError) {
@@ -88,6 +90,14 @@ class UserService {
                     info = null;
                 }
                 return response;
+            });
+    }
+
+
+    Future<String> createCsrfToken(String action) {
+        return _server.get('/authentication/token/' + action, null)
+            .then((ServerResponse response) {
+                return response.jsonData['csrf'];
             });
     }
 }

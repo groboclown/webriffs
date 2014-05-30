@@ -13,11 +13,15 @@ use GroboVersion;
  */
 class FilmLayer {
     public static $FILM_SORT_COLUMNS;
-    public static $DEFAULT_SORT_COLUMN = "name";
+    public static $DEFAULT_FILM_SORT_COLUMN = "name";
     public static $MIN_YEAR_SEARCH_FILTER;
     public static $MAX_YEAR_SEARCH_FILTER;
     public static $NAME_SEARCH_FILTER;
-    public static $FILTERS;
+    public static $FILM_FILTERS;
+    
+    public static $BRANCH_SORT_COLUMNS;
+    public static $DEFAULT_BRANCH_SORT_COLUMN = 'name';
+    public static $BRANCH_FILTERS;
 
 
     /**
@@ -28,8 +32,7 @@ class FilmLayer {
      *            check its value.
      * @return array contains the (projectId, filmId, branchId, changeId)
      */
-    public static function createFilm($db, $userInfo, $name, $year, $imdbUrl,
-        $wikipediaUrl) {
+    public static function createFilm($db, $userInfo, $name, $year) {
         
         // input validation
         if (!is_string($name) || strlen($name) < 1) {
@@ -47,30 +50,18 @@ class FilmLayer {
                     "name" => "invalid name format"
                 ));
         }
-        if (!is_integer($year) || $year < 0 || $year > 9999) {
+        if (!is_integer($year)) {
             throw new Base\ValidationException(
                 array(
-                    "year" => "invalid year"
+                    "year" => "invalid year format"
                 ));
         }
-        
-        // ensure the URLs are relative (and are valid
-        // urls within that host
-        
-
-
-        if (!preg_match('/^\\/title\\/[a-zA-Z0-9]+\\/?$/', $imdbUrl)) {
+        $year = intval($year);
+        if ($year < 0 || $year > 9999) {
             throw new Base\ValidationException(
-                array(
-                    "imdbUrl" => "invalid format; must be relative and in the form '/title/[id]/'"
-                ));
-        }
-        
-        if (!preg_match('/^\\/wiki\\/[a-zA-Z0-9\\$_-\\(\\)]+$/', $wikipediaUrl)) {
-            throw new Base\ValidationException(
-                array(
-                    "wikipediaUrl" => "invalid format; must be relative and in the form '/wiki/[page_title]'"
-                ));
+                    array(
+                                    "year" => "invalid year"
+                    ));
         }
         
         if (!$userInfo || !is_array($userInfo)) {
@@ -115,8 +106,7 @@ class FilmLayer {
                 )));
         $projectId = intval($data['result']);
         
-        $data = Film::$INSTANCE->create($db, $projectId, $name, $year, $imdbUrl,
-            $wikipediaUrl);
+        $data = Film::$INSTANCE->create($db, $projectId, $name, $year);
         FilmLayer::checkError($data,
             new Base\ValidationException(
                 array(
@@ -199,7 +189,12 @@ class FilmLayer {
      * @param Base\PageRequest $paging
      * @return array a page response json array.
      */
-    public static function pageFilms($db, Base\PageRequest $paging) {
+    public static function pageFilms($db, Base\PageRequest $paging = null) {
+        if ($paging == null) {
+            $paging = Base\PageRequest::parseGetRequest(
+                FilmLayer::$FILM_FILTERS, FilmLayer::$DEFAULT_FILM_SORT_COLUMN,
+                FilmLayer::$FILM_SORT_COLUMNS);
+        }
         $wheres = array(
             new Film\Film_Film_RestrictYear(
                 $paging->filters[FilmLayers::$MIN_YEAR_SEARCH_FILTER->name],
@@ -221,6 +216,8 @@ class FilmLayer {
                 )));
         $rows = $data['result'];
         
+        // FIXME include film_link rows and tags on the films
+        
         $data = Film::$INSTANCE->countAll($db, $wheres);
         FilmLayer::checkError($data,
             new Base\ValidationException(
@@ -231,14 +228,47 @@ class FilmLayer {
         
         return Base\PageResponse::createPageResponse($paging, $count, $rows);
     }
+    
+    
+    /**
+     *
+     * @param PBO $db
+     * @param int $filmId
+     * @return the associative array with the film information, or null if it
+     *      does not exist.
+     */
+    public static function getFilm($db, int $filmId) {
+        if (! is_integer($filmId)) {
+            throw new Base\ValidationException(array(
+                'film_id' => 'invalid film id format'
+            ));
+        }
+        $filmId = intval($filmId);
+        
+        $data = Film::$INSTANCE->readBy_Film_Id($db, $filmId);
+        FilmLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem finding the film'
+                )));
+        if (sizeof($data['result']) <= 0) {
+            return null;
+        }
+        
+        // Load up the links, since these should be limited by the admin
+        // configuration of number of possible links.
+        
+        
+    }
 
 
     /**
-     * Returns all the films with branches that are visible by the user.
+     * Returns all the branches in the film that are visible by the user.
      */
-    public static function findFilmsAndBranches($db, $userId, $sortBy, $rowCount) {
-        
+    public static function findBranches($db, $userId, $filmId, Base\PageRequest $paging = null) {
+    
         // FIXME
+        
     }
     
 
@@ -254,7 +284,7 @@ FilmLayer::$FILM_SORT_COLUMNS = array(
     "updated" => "Last_Updated_On"
 );
 
-FilmLayer::$DEFAULT_SORT_COLUMN = "name";
+FilmLayer::$DEFAULT_FILM_SORT_COLUMN = "name";
 
 FilmLayer::$MIN_YEAR_SEARCH_FILTER = new Base\SearchFilterInt("yearMin", 0, 0,
     9999);
@@ -263,8 +293,16 @@ FilmLayer::$MAX_YEAR_SEARCH_FILTER = new Base\SearchFilterInt("yearMax", 9999, 0
 
 FilmLayer::$NAME_SEARCH_FILTER = new Base\SearchFilterString("name", null);
 
-FilmLayer::$FILTERS = array(
-    FilmLayers::$MIN_YEAR_SEARCH_FILTER,
-    FilmLayers::$MAX_YEAR_SEARCH_FILTER,
-    FilmLayers::$NAME_SEARCH_FILTER
+FilmLayer::$FILM_FILTERS = array(
+    FilmLayer::$MIN_YEAR_SEARCH_FILTER,
+    FilmLayer::$MAX_YEAR_SEARCH_FILTER,
+    FilmLayer::$NAME_SEARCH_FILTER
+);
+
+FilmLayer::$BRANCH_SORT_COLUMNS = array(
+    
+);
+
+FilmLayer::$BRANCH_FILTERS = array(
+    FilmLayer::$NAME_SEARCH_FILTER
 );

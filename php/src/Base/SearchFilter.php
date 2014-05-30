@@ -5,11 +5,16 @@ namespace Base;
 /**
  * Defines a single search filter that the user can pass to the server.
  */
-public class SearchFilter {
-    public final $name; // string
-    public final $defaultValue; // mixed
+abstract class SearchFilter {
+    public $name; // string
+    public $defaultValue; // mixed
     
-    public function __construct(string $name, mixed $defaultValue = null) {
+    /**
+     *
+     * @param string $name
+     * @param mixed $defaultValue
+     */
+    public function __construct($name, $defaultValue = null) {
         //parent::__construct();
         $this->name = $name;
         $this->defaultValue = $defaultValue;
@@ -19,18 +24,17 @@ public class SearchFilter {
     /**
      * @return mixed the parsed value for the filter.
      */
-    public abstract function parseValue($v) {
-        throw new \Exception("not implemented");
-    }
+    public abstract function parseValue($v);
 }
 
 
-public class SearchFilterInt extends SearchFilter {
-    private final int $minValue;
-    private final int $maxValue;
+class SearchFilterInt extends SearchFilter {
+    private $minValue; // int
+    private $maxValue; // int
     
-    public function __construct(string $name, int $defaultValue = null,
-            int $minValue = null, int $maxValue = null) {
+    // FIXME arguemnt type string, int, int, int
+    public function __construct($name, $defaultValue = null,
+            $minValue = null, $maxValue = null) {
         parent::__construct($name, $defaultValue);
         $this->minValue = $minValue;
         $this->maxValue = $maxValue;
@@ -56,8 +60,9 @@ public class SearchFilterInt extends SearchFilter {
 
 
 
-public class SearchFilterString extends SearchFilter {
-    public function __construct(string $name, string $defaultValue) {
+class SearchFilterString extends SearchFilter {
+    // FIXME string, string
+    public function __construct($name, $defaultValue) {
         parent::__construct($name, $defaultValue);
     }
     

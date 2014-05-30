@@ -1,0 +1,62 @@
+# A join between the film link and the link type.
+
+view:
+    viewName: V_FILM_LINK
+    query: "SELECT
+          fl.Film_Id Film_Id
+          , fl.Link_Type_Id Link_Type_Id
+          , fl.Uri Uri
+          , lt.Name Name
+          , lt.Description Description
+          , lt.Url_Prefix Url_Prefix
+        FROM FILM_LINK fl
+        INNER JOIN LINK_TYPE lt
+            ON fl.Link_Type_Id = lt.Link_Type_Id
+        "
+    columns:
+        - column:
+            name: Film_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: FILM
+                    column: Film_Id
+        - column:
+            name: Link_Type_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: LINK_TYPE
+                    column: Link_Type_Id
+        - column:
+            name: Uri
+            type: nvarchar(300)
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: no update
+        - column:
+            name: Name
+            type: nvarchar(200)
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: unique index
+                    name: Link_Type__Name_IDX
+        - column:
+            name: Description
+            type: nvarchar(2048)
+            constraints:
+                - constraint:
+                    type: not null
+        - column:
+            name: Url_Prefix
+            type: nvarchar(200)
+            constraints:
+                - constraint:
+                    type: not null
+                    

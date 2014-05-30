@@ -704,7 +704,7 @@ class DataAccess {
     /**
      * Generates a CSRF token that the website must pass to the server in order
      * to properly validate the request.  These should only be used for
-     * POST requests (so that they are not revealed in the URL of the client
+     * non-GET requests (so that they are not revealed in the URL of the client
      * request).  Once a token is used, it should be expired.
      *
      * @param PBO $db
@@ -713,8 +713,11 @@ class DataAccess {
      * @return string the CSRF token
      * @throws Base\ValidationException
      */
-    public static function createCsrfToken($db, int $sessionId, string $action,
-            int $activeMinutes = 10) {
+    public static function createCsrfToken($db, int $sessionId, \string $action,
+            int $activeMinutes = null) {
+        if ($activeMinutes === null || $activeMinutes < 1) {
+            $activeMinutes = 10;
+        }
         $tokenId = null;
         $tokenValue = null;
         while ($tokenId === null) {

@@ -1,11 +1,12 @@
 <?php
 
 
-namespace WebRiffs;
+namespace WebRiffsRest;
 
 use Tonic;
 use PDO;
 use Base;
+use WebRiffs;
 
 class Resource extends Base\Resource {
     /**
@@ -84,7 +85,7 @@ class Resource extends Base\Resource {
         
         // This call will either return the session object, or throw an
         // exception.  It will never return null.
-        $data = AuthenticationLayer::getUserSession($db, $cookie,
+        $data = WebRiffs\AuthenticationLayer::getUserSession($db, $cookie,
             $this->request->userAgent, $this->request->remoteAddr,
             null,
             Resource::DEFAULT_SESSION_TIMEOUT);
@@ -121,7 +122,7 @@ class Resource extends Base\Resource {
     /**
      * Tonic Annotation
      *
-     * Requires that the JSON request contains the key "_csrf" with a valid
+     * Requires that the header value "csrf-token" is set with a valid
      * CSRF token.
      *
      * The token should be passed to the client initially with a call to
@@ -137,12 +138,11 @@ class Resource extends Base\Resource {
         // FIXME may want to put this as a custom header instead of request
         // data.
         
-        $request = $this->getRequestData();
-        if (! property_exists($request, "_csrf")) {
+        $token = $this->request->csrfToken;
+        if (! $token) {
             throw new Tonic\UnauthorizedException();
         }
         $db = $this->getDB();
-        $token = $request->{'_csrf'};
         $sessionId = $this->container['user']['Ga_Session_Id'];
         
         // "action" should be internal, so we're not checking its data

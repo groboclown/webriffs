@@ -105,13 +105,13 @@ class PageRequest {
     }
 
 
-    public final $order; // string
-    public final $sortby; // string
-    public final $sortOrder; // char
-    public final $startRow; // int
-    public final $endRow; // int
-    public final $perPage; // int
-    public final $filters; // array(string -> value)
+    public $order; // string
+    public $sortby; // string
+    public $sortOrder; // char
+    public $startRow; // int
+    public $endRow; // int
+    public $perPage; // int
+    public $filters; // array(string -> value)
     
     
     protected function __construct(string $order, string $sortBy,

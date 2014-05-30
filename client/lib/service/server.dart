@@ -24,11 +24,11 @@ class ServerStatusService {
     static final Map<String, dynamic> _headers = {
       'Content-Type': 'application/json'
     };
-    
+
     final Http _http;
-    
+
     bool _canConnectToServer;
-    
+
     int _activeRequests = 0;
 
     /**
@@ -51,15 +51,19 @@ class ServerStatusService {
     int get activeRequests => _activeRequests;
 
     bool get isLoading => _activeRequests > 0;
-    
+
     ServerStatusService(this._http);
 
-    Future<ServerResponse> get(String url, {
-            IsErrorCheckerFunc isErrorChecker : null }) {
+    Future<ServerResponse> get(String url, String csrfToken,
+            { IsErrorCheckerFunc isErrorChecker : null }) {
         String fullUrl = _fullUrl(url);
         try {
             _activeRequests++;
-            return _http.get(fullUrl, headers: _headers)
+            Map<String, dynamic> headers = new Map.from(_headers);
+            if (csrfToken != null) {
+                headers['csrf-token'] = csrfToken;
+            }
+            return _http.get(fullUrl, headers: headers)
                 .then((HttpResponse response) {
                     _activeRequests--;
                     return _processResponse("GET", fullUrl, null, response,
@@ -78,7 +82,7 @@ class ServerStatusService {
         }
     }
 
-    Future<ServerResponse> put(String url,
+    Future<ServerResponse> put(String url, String csrfToken,
                                { Map<String, dynamic> data : null,
                                IsErrorCheckerFunc isErrorChecker : null }) {
         String jsonData;
@@ -90,7 +94,11 @@ class ServerStatusService {
         String fullUrl = _fullUrl(url);
         try {
             _activeRequests++;
-            return _http.put(fullUrl, jsonData, headers: _headers).then((HttpResponse response) {
+            Map<String, dynamic> headers = new Map.from(_headers);
+            if (csrfToken != null) {
+                headers['csrf-token'] = csrfToken;
+            }
+            return _http.put(fullUrl, jsonData, headers: headers).then((HttpResponse response) {
                 _activeRequests--;
                 return _processResponse("PUT", fullUrl, jsonData, response, isErrorChecker);
             }, onError: (HttpResponse response) {
@@ -106,7 +114,7 @@ class ServerStatusService {
         }
     }
 
-    Future<ServerResponse> post(String url,
+    Future<ServerResponse> post(String url, String csrfToken,
                                 { Map<String, dynamic> data : null,
                                 IsErrorCheckerFunc isErrorChecker: null }) {
         String jsonData;
@@ -118,7 +126,11 @@ class ServerStatusService {
         String fullUrl = _fullUrl(url);
         try {
             _activeRequests++;
-            return _http.post(fullUrl, jsonData, headers: _headers)
+            Map<String, dynamic> headers = new Map.from(_headers);
+            if (csrfToken != null) {
+                headers['csrf-token'] = csrfToken;
+            }
+            return _http.post(fullUrl, jsonData, headers: headers)
             .then((HttpResponse response) {
                 _activeRequests--;
                 return _processResponse("POST", fullUrl, jsonData, response,
@@ -137,12 +149,16 @@ class ServerStatusService {
         }
     }
 
-    Future<ServerResponse> delete(String url, {
-            IsErrorCheckerFunc isErrorChecker : null }) {
+    Future<ServerResponse> delete(String url,  String csrfToken,
+            { IsErrorCheckerFunc isErrorChecker : null }) {
         String fullUrl = _fullUrl(url);
         try {
             _activeRequests++;
-            return _http.delete(fullUrl, headers: _headers)
+            Map<String, dynamic> headers = new Map.from(_headers);
+            if (csrfToken != null) {
+                headers['csrf-token'] = csrfToken;
+            }
+            return _http.delete(fullUrl, headers: headers)
             .then((HttpResponse response) {
                 _activeRequests--;
                 return _processResponse("DELETE", fullUrl, null, response,
@@ -168,7 +184,7 @@ class ServerStatusService {
         }
         return 'api' + url;
     }
-    
+
 
 
     /**
