@@ -68,7 +68,7 @@ class UserService {
 
 
     Future<ServerResponse> logout() {
-        return createCsrfToken("logout").then((String csrfToken) {
+        return _server.createCsrfToken("logout").then((String csrfToken) {
             return _server.post('/authentication/logout', csrfToken,
                     isErrorChecker: UNAUTHORIZED_IS_NOT_ERROR)
                 .then((ServerResponse response) {
@@ -90,14 +90,6 @@ class UserService {
                     info = null;
                 }
                 return response;
-            });
-    }
-
-
-    Future<String> createCsrfToken(String action) {
-        return _server.get('/authentication/token/' + action, null)
-            .then((ServerResponse response) {
-                return response.jsonData['csrf'];
             });
     }
 }

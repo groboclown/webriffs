@@ -178,6 +178,15 @@ class ServerStatusService {
     }
 
 
+    Future<String> createCsrfToken(String action) {
+        return get('/authentication/token/' + action, null)
+            .then((ServerResponse response) {
+                return response.jsonData['csrf'];
+            });
+    }
+
+
+
     String _fullUrl(String url) {
         if (! url.startsWith('/')) {
             url = '/' + url;
