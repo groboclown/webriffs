@@ -1,0 +1,33 @@
+<div>
+
+<!-- paging control head -->
+<div>
+<span ng-if="! cmp.isFirstPage"><span ng-click="cmp.gotoFirstPage()">First</span></span>
+<span ng-if="cmp.hasTwoPrev"><span ng-click="cmp.gotoPreviousPage()">Prev</span></span>
+
+<span ng-repeat="page in cmp.getDisplayPages()">
+<span ng-if="page != null" ng-click="cmp.gotoDisplayPage(page)">{{page}}</span>
+<span ng-if="page == null" >...</span>
+</span>
+
+
+<span ng-if="cmp.hasTwoNext"><span ng-click="cmp.gotoNextPage()">Next</span></span>
+<span ng-if="! cmp.isLastPage"><span ng-click="cmp.gotoLastPage()">Last</span></span>
+</div>
+
+<!-- The content is where you'd add the table controls, or filters (or they
+could be put elsewhere), and so on. -->
+<content></content>
+
+<!-- paging control tail -->
+<div>
+<span ng-if="! cmp.isFirstPage"><span ng-click="cmp.gotoFirstPage()">First</span></span>
+<span ng-if="cmp.hasTwoPrev"><span ng-click="cmp.gotoPreviousPage()">Prev</span></span>
+
+<!-- No intermediate page request here -->
+
+<span ng-if="cmp.hasTwoNext"><span ng-click="cmp.gotoNextPage()">Next</span></span>
+<span ng-if="! cmp.isLastPage"><span ng-click="cmp.gotoLastPage()">Last</span></span>
+</div>
+
+</div>

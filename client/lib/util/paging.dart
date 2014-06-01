@@ -61,11 +61,13 @@ class PageState {
 
     bool get loadedFromServer => _loadedFromServer;
 
+    bool get isDescSort => _sortOrder == 'D';
 
-    Future<ServerResponse> updateFromServer([int nextPage = null,
-            int newRecordsPerPage = null, String newSortedBy = null,
-            String newSortOrder = null,
-            Map<String, dynamic> newFilters = null]) {
+
+    Future<ServerResponse> updateFromServer({ int nextPage: null,
+            int newRecordsPerPage: null, String newSortedBy: null,
+            String newSortOrder: null,
+            Map<String, dynamic> newFilters: null}) {
         if (nextPage == null) {
             nextPage = currentPage;
         }
@@ -113,7 +115,7 @@ class PageState {
             }
         });
 
-        return _server.get(_makePath(), null).then((ServerResponse response) {
+        return _server.get(path, null).then((ServerResponse response) {
             _loadedFromServer = true;
             List<dynamic> data = _fromJson(response.jsonData);
             _on_load(this, data);

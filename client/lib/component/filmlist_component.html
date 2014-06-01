@@ -2,15 +2,25 @@
     <div>
         <!-- filter controls -->
     </div>
-    <table>
-        <thead>
-            <tr>
-	            <th>Film</th>
-	            <th>Release Year</th>
-	            <th>Branches</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
+    <page-control page-state="cmp.pageState">
+        <table>
+            <thead>
+                <tr>
+                    <!-- FIXME add sorting controls -->
+                    <th>Film</th>
+                    <th>Release Year</th>
+                    <th>Branches</th>
+                    <th>Tags</th>
+                </tr>
+            </thead>
+            <tbody ng-if="cmp.pageState.loadedFromServer">
+                <tr ng-repeat="film in cmp.films">
+                    <td>{{film.name}}</td>
+                    <td>{{film.releaseYear}}</td>
+                    <td><span ng-repeat="branch in cmp.branches">{{branch}}</span></td>
+                    <td><span ng-repeat="tag in cmp.tags">{{tag}}</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </page-control>
 </div>
