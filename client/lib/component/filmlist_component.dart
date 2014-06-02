@@ -23,6 +23,8 @@ class FilmListComponent {
 
     final List<FilmRecord> films = [];
 
+    bool get noFilms => films.length <= 0;
+
     FilmListComponent(this._server) {
         pageState = new PageState(this._server, '/film',
             (PageState ps, Iterable<dynamic> fl) {

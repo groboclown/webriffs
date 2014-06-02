@@ -9,15 +9,15 @@
         <div>
             <div>
                 <span>
-                    <label>Username: </label>
-                    <input type="text" ng-model="cmp.username">
+                    <label for="login.username">Username: </label>
+                    <input id="login.username" type="text" ng-model="cmp.username">
                     <span ng-if="cmp.usernameError != null">{{ cmp.usernameError }}</span>
                 </span>
             </div>
             <div>
                 <span>
-                    <label>Password: </label>
-                    <input type="password" ng-model="cmp.password">
+                    <label for="login.password">Password: </label>
+                    <input id="login.password" type="password" ng-model="cmp.password">
                     <span ng-if="cmp.passwordError != null">{{ cmp.passwordError }}</span>
                 </span>
             </div>

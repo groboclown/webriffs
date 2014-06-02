@@ -1,5 +1,22 @@
-<div>
+<div ng-if="cmp.isLoggedIn">
+
+  <div>
     <div>
-    This is the place where you create new film entries.
+        <label for="film.name">Film Title</label><input id="film.name' type="text" ng-model="cmp.filmName">
     </div>
+    <div>
+        <label for="film.year">Release Year</label><input id="film.year' type="text" ng-model="cmp.releaseYear">
+    </div>
+    <div ng-if="cmp.filmInUse">
+    That title and year already exist.
+    </div>
+    <div ng-if="! cmp.filmInUse">
+        <span ng-click="cmp.submit()">Submit</span>
+    </div>
+  </div>
+
+</div>
+<div ng-if="cmp.notLoggedIn">
+Only logged in users can create new film entries.  Use the forms at the
+top of the page to create a new account or log into an existing account.
 </div>

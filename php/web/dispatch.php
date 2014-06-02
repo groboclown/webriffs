@@ -78,6 +78,9 @@ try {
     if ($request->contentType == 'application/json' ||
             $request->contentType == 'text/json') {
         $request->data = json_decode($request->data);
+    } elseif (! $request->contentType) {
+        // no data passed to server
+        $request->data = array();
     } else {
         error_log("Invalid content type: " + $request->contentType);
         throw new Tonic\NotAcceptableException();

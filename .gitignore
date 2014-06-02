@@ -5,6 +5,8 @@ client/web/packages
 client/web/packages/
 client/web/css/packages
 client/web/css/packages/
+client/web/view/packages
+client/web/view/packages/
 
 # Or the files created by dart2js.
 *.dart.js
