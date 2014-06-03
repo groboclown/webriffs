@@ -21,23 +21,10 @@ class PageRequest {
      * @param int $maxSize
      * @return PageRequest
      */
-    public static function parseGetRequest(array $filters,
-            string $defaultSortBy, array $sortColumnMap,
-            string $defaultSortOrder = null, int $defaultSize = null,
-            int $minSize = null, int $maxSize = null) {
-        if ($defaultSortOrder === null) {
-            $defaultSortOrder = "";
-        }
-        if ($defaultSize === null) {
-            $defaultSize = 25;
-        }
-        if ($minSize === null) {
-            $minSize = 5;
-        }
-        if ($maxSize === null) {
-            $maxSize = 100;
-        }
-        
+    public static function parseGetRequest($filters,
+            $defaultSortBy, $sortColumnMap,
+            $defaultSortOrder = "", $defaultSize = 25,
+            $minSize = 5, $maxSize = 100) {
         $page = 0;
         $perPage = $defaultSize;
         $sortBy = $defaultSortBy;
@@ -87,7 +74,7 @@ class PageRequest {
         foreach ($filters as $filter) {
             $v = null;
             if (array_key_exists($filter->name, $_GET)) {
-                $v = $_GET[$filter];
+                $v = $_GET[$filter->name];
             }
             $filterSet[$filter->name] = $filter->parseValue($v);
         }
@@ -100,7 +87,7 @@ class PageRequest {
             }
         }
         
-        return new Paging($order, $sortBy, $sortOrder, $startRow, $endRow,
+        return new PageRequest($order, $sortBy, $sortOrder, $startRow, $endRow,
                 $perPage, $filterSet);
     }
 
@@ -114,9 +101,9 @@ class PageRequest {
     public $filters; // array(string -> value)
     
     
-    protected function __construct(string $order, string $sortBy,
-            string $sortOrder, int $startRow,
-            int $endRow, int $perPage, array $filters) {
+    protected function __construct($order, $sortBy,
+            $sortOrder, $startRow,
+            $endRow, $perPage, $filters) {
         //parent::__construct();
         
         $this->order = $order;

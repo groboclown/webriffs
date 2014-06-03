@@ -69,7 +69,7 @@ table:
     whereClauses:
         - where:
             name: Restrict_Year
-            sql: (Release_Year >= {min_year} AND Release_Year <= (max_year))
+            sql: (Release_Year >= {min_year} AND Release_Year <= {max_year})
             arguments: min_year, max_year
         - where:
             name: Fuzzy_Name

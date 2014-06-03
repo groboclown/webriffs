@@ -7,11 +7,12 @@
     <div>
         <label for="film.year">Release Year</label><input id="film.year' type="text" ng-model="cmp.releaseYear">
     </div>
-    <div ng-if="cmp.filmInUse">
-    That title and year already exist.
+    <div ng-if="cmp.hasError">
+    <!-- actually more of a status message -->
+    {{cmp.errorMessage}}
     </div>
-    <div ng-if="! cmp.filmInUse">
-        <span ng-click="cmp.submit()">Submit</span>
+    <div ng-if="! cmp.hasError">
+        <span ng-click="print('createFilm'); cmp.createFilm()">Submit</span>
     </div>
   </div>
 

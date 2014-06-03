@@ -19,15 +19,21 @@ import '../service/user.dart';
 class CreateFilmComponent {
     final ServerStatusService _server;
 
+    final RouteProvider _route;
+
     final UserService _user;
 
-    CreateFilmComponent(this._server, this._user);
+    CreateFilmComponent(this._server, this._user, this._route);
 
     String _filmName;
 
     int _releaseYear = null;
 
     bool filmInUse = false;
+
+    String errorMessage = "Must define a film name and release year";
+
+    bool get hasError => errorMessage != null;
 
     String get filmName => _filmName;
 
@@ -45,10 +51,29 @@ class CreateFilmComponent {
     }
 
 
-    set releaseYear(int year) {
-        if (_releaseYear != year) {
+    set releaseYear(year) {
+        print("Set year value");
+        if (year is String) {
+            try {
+                year = int.parse(year);
+            } catch (FormatException) {
+                errorMessage = "Year must be a number";
+                return;
+            }
+        } else if (! (year is int)) {
+            errorMessage = "Invalid year format";
+            return;
+        }
+        if (_releaseYear != year && year >= 1800 && year < 9999) {
             _releaseYear = year;
             checkIfFilmNameAndYearInUse(_filmName, year);
+        } else {
+            if (_filmName == null) {
+                // FIXME common place for errors
+                errorMessage = "Must define a film name and release year";
+            } else {
+                errorMessage = "Must define a valid release year";
+            }
         }
     }
 
@@ -57,8 +82,10 @@ class CreateFilmComponent {
         filmInUse = false;
         if (name == null && year == null) {
             // Nothing to do
+            errorMessage = "Must define a film name and release year";
             return;
         }
+        errorMessage = null;
 
         String path = "/film?";
 
@@ -84,7 +111,39 @@ class CreateFilmComponent {
                 } else {
                     filmInUse = false;
                 }
+                if (filmInUse) {
+                    errorMessage =
+                        "A film with that name and year already exists in the system";
+                }
             });
+    }
+
+
+    void createFilm() {
+        print("Inside film");
+        if (_filmName != null && _releaseYear != null) {
+            // FIXME notify that the form is being submitted.
+            // This will do for now...
+            errorMessage = "Creating new film...";
+
+            _server.createCsrfToken('create_film').then((String token) {
+                errorMessage = "Completing the creation...";
+                return _server.put('/film', token, data: {
+                            'name': _filmName,
+                            'year': _releaseYear
+                    }).
+                    then((ServerResponse response) {
+                        int filmId = response.jsonData['film_id'];
+                        int branchId = response.jsonData['branch_id'];
+                        int changeId = response.jsonData['change_id'];
+
+
+                        // FIXME redirect to the edit page
+                        // _route.route.findRoute(routePath);
+                    });
+
+            });
+        }
     }
 }
 

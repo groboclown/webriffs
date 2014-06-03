@@ -6,6 +6,7 @@ require_once(__DIR__.'/Resource.php');
 
 use Tonic;
 use WebRiffs;
+use Base;
 
 
 /**
@@ -14,7 +15,6 @@ use WebRiffs;
  * @uri /film
  */
 class FilmCollection extends Resource {
-    public static $FILM_FILTERS = array("name", "yearMin", "yearMax");
     
     
     /**
@@ -24,12 +24,14 @@ class FilmCollection extends Resource {
      * @method GET
      */
     public function fetch() {
-        $paging = $this->getPageRequest(FilmCollection::$FILM_FILTERS,
-            FilmLayer::$DEFAULT_SORT_COLUMN);
-        
+        $paging = Base\PageRequest::parseGetRequest(
+                WebRiffs\FilmLayer::$FILM_FILTERS,
+                WebRiffs\FilmLayer::$DEFAULT_FILM_SORT_COLUMN,
+                WebRiffs\FilmLayer::$FILM_SORT_COLUMNS
+            );
         $db = $this->getDB();
         
-        $result = FilmLayer::pageFilms($db);
+        $result = WebRiffs\FilmLayer::pageFilms($db);
         
         return array(200, $result);
     }

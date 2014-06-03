@@ -14,15 +14,16 @@ use GroboVersion;
 class FilmLayer {
     public static $FILM_SORT_COLUMNS;
     public static $DEFAULT_FILM_SORT_COLUMN = "name";
-    public static $MIN_YEAR_SEARCH_FILTER;
-    public static $MAX_YEAR_SEARCH_FILTER;
-    public static $NAME_SEARCH_FILTER;
     public static $FILM_FILTERS;
     
     public static $BRANCH_SORT_COLUMNS;
     public static $DEFAULT_BRANCH_SORT_COLUMN = 'name';
     public static $BRANCH_FILTERS;
 
+    public static $MIN_YEAR_SEARCH_FILTER;
+    public static $MAX_YEAR_SEARCH_FILTER;
+    public static $NAME_SEARCH_FILTER;
+    
 
     /**
      * Creates the film, and adds a new, empty film version.
@@ -196,13 +197,13 @@ class FilmLayer {
                 FilmLayer::$FILM_SORT_COLUMNS);
         }
         $wheres = array(
-            new Film\Film_Film_RestrictYear(
-                $paging->filters[FilmLayers::$MIN_YEAR_SEARCH_FILTER->name],
-                $paging->filters[FilmLayers::$MAX_YEAR_SEARCH_FILTER->name])
+            new Film_RestrictYear(
+                $paging->filters[FilmLayer::$MIN_YEAR_SEARCH_FILTER->name],
+                $paging->filters[FilmLayer::$MAX_YEAR_SEARCH_FILTER->name])
         );
-        if ($paging->filters[FilmLayers::$NAME_SEARCH_FILTER->name] !== null) {
-            $wheres[] = new Film\Film_FuzzyName(
-                '%' . $paging->filters[FilmLayers::$NAME_SEARCH_FILTER->name] .
+        if ($paging->filters[FilmLayer::$NAME_SEARCH_FILTER->name] !== null) {
+            $wheres[] = new Film_FuzzyName(
+                '%' . $paging->filters[FilmLayer::$NAME_SEARCH_FILTER->name] .
                      '%');
         }
         
@@ -284,14 +285,14 @@ FilmLayer::$FILM_SORT_COLUMNS = array(
     "updated" => "Last_Updated_On"
 );
 
+FilmLayer::$MIN_YEAR_SEARCH_FILTER =
+    new Base\SearchFilterInt("yearMin", 1800, 1800, 9999);
+FilmLayer::$MAX_YEAR_SEARCH_FILTER =
+    new Base\SearchFilterInt("yearMax", 9999, 1800, 9999);
+FilmLayer::$NAME_SEARCH_FILTER =
+    new Base\SearchFilterString("name", null);
+
 FilmLayer::$DEFAULT_FILM_SORT_COLUMN = "name";
-
-FilmLayer::$MIN_YEAR_SEARCH_FILTER = new Base\SearchFilterInt("yearMin", 0, 0,
-    9999);
-FilmLayer::$MAX_YEAR_SEARCH_FILTER = new Base\SearchFilterInt("yearMax", 9999, 0,
-    9999);
-
-FilmLayer::$NAME_SEARCH_FILTER = new Base\SearchFilterString("name", null);
 
 FilmLayer::$FILM_FILTERS = array(
     FilmLayer::$MIN_YEAR_SEARCH_FILTER,
