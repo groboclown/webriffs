@@ -30,7 +30,7 @@ table:
                     type: no update
         - column:
             name: Token
-            type: nvarchar(700)
+            type: varchar(700)
             constraints:
                 - constraint:
                     type: unique index

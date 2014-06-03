@@ -544,7 +544,7 @@ class DataAccess {
                     'unknown' => 'there was an unknown problem finding the user session'
                 )));
         $data = $data['result'];
-        if (sizeof($data) < 0) {
+        if (sizeof($data) <= 0) {
             error_log(
                 "no rows for [" . $userAgent . "] [" . $remoteAddress . "] [" .
                      $forwardedFor . "] [" . $authorizationChallenge . "]");
@@ -713,9 +713,9 @@ class DataAccess {
      * @return string the CSRF token
      * @throws Base\ValidationException
      */
-    public static function createCsrfToken($db, int $sessionId, \string $action,
-            int $activeMinutes = null) {
-        if ($activeMinutes === null || $activeMinutes < 1) {
+    public static function createCsrfToken($db, $sessionId, $action,
+            $activeMinutes = 10) {
+        if ($activeMinutes < 1) {
             $activeMinutes = 10;
         }
         $tokenId = null;
@@ -765,8 +765,8 @@ class DataAccess {
      * @param string $token
      * @return bool true if valid (and expired), false if not valid.
      */
-    public static function validateCsrfToken($db, int $sessionId,
-            string $token, string $action) {
+    public static function validateCsrfToken($db, $sessionId,
+            $token, $action) {
         // TODO associate the token with an action.
         
         $data = VGaActiveCsrfToken::$INSTANCE->readBy_Ga_Session_Id_x_Token_x_Action(

@@ -175,6 +175,7 @@ def copy_dart(config):
          verbose = True,
          dry_run = False)
 
+
 @depends(setup)
 def copy_php(config):
     for i in ['conf', 'lib', 'src', 'web']:
@@ -187,9 +188,28 @@ def copy_php(config):
              dry_run = False)
 
 
+@depends(init)
+def fake_setup(config):
+    """
+    Make the system look like it's been setup already.  This requires the
+    config dir to contain a proper site.conf.php file.
+    """
+    src_admin_page = os.path.join(config['exports.dir'], 'web', 'admin.php')
+    dest_admin_page = os.path.join(config['exports.dir'], 'web', '.htadmin.php')
+    if os.path.isfile(src_admin_page):
+        if os.path.isfile(dest_admin_page):
+            os.unlink(dest_admin_page)
+        os.rename(src_admin_page, dest_admin_page)
+
+
 @depends(clean, generate_sql, generate_dbo,
          lint_client, generate_client_js, copy_client, copy_dart, copy_php)
 def all(config):
+    pass
+
+
+@depends(clean, generate_sql, generate_dbo, copy_dart, copy_php, fake_setup)
+def test_setup(config):
     pass
 
 

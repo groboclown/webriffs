@@ -209,7 +209,7 @@ class AuthenticationLayer {
     /**
      * Returns the current user session.
      * If the user is not logged in, then
-     * an UnauthorizedException is thrown.
+     * this returns false.
      */
     public static function getUserSession($db, $authenticationChallenge,
         $User_Agent, $Remote_Address, $Forwarded_For, $sessionRenewalMinutes) {
@@ -222,11 +222,13 @@ class AuthenticationLayer {
             $Forwarded_For = "";
         }
         
+        // Note: do not catch exceptions here; that represents a really bad
+        // situation.
         $retData = GroboAuth\DataAccess::getUserForSession($db, $User_Agent,
             $Remote_Address, $Forwarded_For, $authenticationChallenge,
             $sessionRenewalMinutes, 10);
         if ($retData === false) {
-            throw new Tonic\UnauthorizedException();
+            return false;
         }
         
         $data = User::$INSTANCE->readBy_Ga_User_Id($db, $retData['Ga_User_Id']);
@@ -238,7 +240,7 @@ class AuthenticationLayer {
         if (sizeof($data['result']) != 1) {
             // TODO should remove the GroboAuth data corresponding to this
             // user session.
-            throw new Tonic\UnauthorizedException();
+            return false;
         }
         $userData = $data['result'][0];
         // $retData already has:

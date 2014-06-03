@@ -15,14 +15,6 @@ class UserCollection extends Tonic\Resource {
     public function fetch() {
         // FIXME
     }
-
-
-    /**
-     * @method POST
-     */
-    public function create() {
-        // FIXME
-    }
 }
 
 

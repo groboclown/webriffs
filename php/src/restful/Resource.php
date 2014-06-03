@@ -60,42 +60,9 @@ class Resource extends Base\Resource {
      * data in the container['user'].
      */
     function authenticated() {
-        // First, check if we've actually been authenticated.
-        if (array_key_exists('authenticated', $this->container) &&
-                $this->container['authenticated'] &&
-                array_key_exists('user', $this->container)) {
-            // already authenticated.  Don't run this again.
-            return;
-        }
-        if (array_key_exists('authenticated', $this->container) &&
-                ! $this->container['authenticated']) {
-            // Already tried, and we aren't authenticated
+        if (! $this->isUserAuthenticated()) {
             throw new Tonic\UnauthorizedException();
         }
-        
-        // Prevent extra DB hits on this request.
-        $this->container['authenticated'] = false;
-        
-        if (! array_key_exists(Resource::COOKIE_NAME, $_COOKIE)) {
-            throw new Tonic\UnauthorizedException;
-        }
-        $cookie = $_COOKIE[Resource::COOKIE_NAME];
-        
-        $db = $this->getDB();
-        
-        // This call will either return the session object, or throw an
-        // exception.  It will never return null.
-        $data = WebRiffs\AuthenticationLayer::getUserSession($db, $cookie,
-            $this->request->userAgent, $this->request->remoteAddr,
-            null,
-            Resource::DEFAULT_SESSION_TIMEOUT);
-        
-        $this->container['user'] = $data;
-        
-        // This may not be needed, but it's a bit of extra protection for
-        // calls back into this method.
-        $this->container['authenticated'] = true;
-        
         return true;
     }
 
@@ -107,12 +74,12 @@ class Resource extends Base\Resource {
      * @throws Tonic\UnauthorizedException
      * @return boolean
      */
-    function secure(string $role, int $minLevel) {
+    function secure($role, $minLevel) {
         $this->authenticated();
         $db = $this->getDB();
 
         $auth =& $this->container['user'];
-        if (! isUserAuthSecureForRole($auth, $role)) {
+        if (! $this->isUserAuthSecureForRole($auth, $role)) {
             throw new Tonic\UnauthorizedException();
         }
         return true;
@@ -128,7 +95,7 @@ class Resource extends Base\Resource {
      * The token should be passed to the client initially with a call to
      * createCsrfToken().
      */
-    function csrf(string $action) {
+    function csrf($action) {
         // CSRF tokens require authentication, so in case of an ordering issue,
         // trigger the authenticaiton to run first.
         $this->authenticated();
@@ -165,11 +132,16 @@ class Resource extends Base\Resource {
      *
      * @param string $action
      */
-    function createCsrfToken(string $action) {
+    function createCsrfToken($action) {
         $this->authenticated();
         
         $db = $this->getDB();
         $sessionId = $this->container['user']['Ga_Session_Id'];
+        
+        // FIXME TEST
+        //throw new Exception("ensure failures are checked");
+        
+        
         return GroboAuth\DataAccess::createCsrfToken($db, $sessionId, $action);
     }
 
@@ -184,6 +156,60 @@ class Resource extends Base\Resource {
             }
         }
         return false;
+    }
+
+
+    /**
+     * Checks if the request is authenticated, and returns true or false.
+     * Also, the <code>$this->container['user']</code> will be set to the
+     * user data associative array.
+     */
+    function isUserAuthenticated() {
+        // First, check if we've already been authenticated.  This avoids an
+        // extra db hit.
+        if (array_key_exists('authenticated', $this->container) &&
+                $this->container['authenticated'] &&
+                array_key_exists('user', $this->container)) {
+            // already authenticated.  Don't run this again.
+            return true;
+        }
+        if (array_key_exists('authenticated', $this->container) &&
+                ! $this->container['authenticated']) {
+            return false;
+        }
+    
+        // Since we haven't been authenticated yet, default to "false" in case
+        // an exception occurs.
+        $this->container['authenticated'] = false;
+    
+        if (! array_key_exists(Resource::COOKIE_NAME, $_COOKIE)) {
+            // No authentication cookie was sent.
+            return false;
+        }
+        $cookie = $_COOKIE[Resource::COOKIE_NAME];
+    
+        $db = $this->getDB();
+    
+        // This call will either return the session object or false.
+        $data = WebRiffs\AuthenticationLayer::getUserSession($db, $cookie,
+                $this->request->userAgent, $this->request->remoteAddr,
+                null,
+                Resource::DEFAULT_SESSION_TIMEOUT);
+        if (! $data) {
+            // We have an invalid cookie.  Clear it out.  Something else may
+            // reset it, though.
+            setcookie(Resource::COOKIE_NAME,
+                $userAuth['Authentication_Challenge'], time() - 3600);
+            return false;
+        }
+    
+        $this->container['user'] = $data;
+    
+        // This may not be needed, but it's a bit of extra protection for
+        // calls back into this method.
+        $this->container['authenticated'] = true;
+    
+        return true;
     }
     
     

@@ -10,6 +10,10 @@ import '../service/user.dart';
 /**
  * The UI component view of the list of films.  This model stores the
  * current information about what the user is entering into the UI.
+ *
+ * Note that the setters can be called on "submit" by Angular even if the
+ * value wasn't directly set.  Therefore, they need proper protection against
+ * setting to the current value.
  */
 @Component(
     selector: 'create-film',
@@ -50,9 +54,7 @@ class CreateFilmComponent {
         }
     }
 
-
     set releaseYear(year) {
-        print("Set year value");
         if (year is String) {
             try {
                 year = int.parse(year);
@@ -64,7 +66,10 @@ class CreateFilmComponent {
             errorMessage = "Invalid year format";
             return;
         }
-        if (_releaseYear != year && year >= 1800 && year < 9999) {
+        if (year == _releaseYear) {
+            return;
+        }
+        if (year >= 1800 && year < 9999) {
             _releaseYear = year;
             checkIfFilmNameAndYearInUse(_filmName, year);
         } else {
@@ -72,7 +77,8 @@ class CreateFilmComponent {
                 // FIXME common place for errors
                 errorMessage = "Must define a film name and release year";
             } else {
-                errorMessage = "Must define a valid release year";
+                // FIXME Extra debugging info
+                errorMessage = "Must define a valid release year (current year: [${_releaseYear}], input year: [${year}]) ${year.runtimeType}";
             }
         }
     }
@@ -137,9 +143,16 @@ class CreateFilmComponent {
                         int branchId = response.jsonData['branch_id'];
                         int changeId = response.jsonData['change_id'];
 
+                        // Reset the fields
+                        _filmName = null;
+                        _releaseYear = null;
+                        errorMessage = "Must define a film name and release year";
 
                         // FIXME redirect to the edit page
                         // _route.route.findRoute(routePath);
+                    }).
+                    catchError((Exception e) {
+                        errorMessage = null;
                     });
 
             });

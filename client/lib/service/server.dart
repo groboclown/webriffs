@@ -21,9 +21,10 @@ final IsErrorCheckerFunc DEFAULT_IS_ERROR_CHECKER_FUNC = (int statusCode) {
 @Injectable()
 class ServerStatusService {
     static final Logger _log = new Logger('service.ServerStatusService');
-    static final Map<String, dynamic> _headers = {
+    static final Map<String, String> _json_headers = {
       'Content-Type': 'application/json'
     };
+    static final Map<String, String> _get_headers = {};
 
     final Http _http;
 
@@ -59,12 +60,14 @@ class ServerStatusService {
         String fullUrl = _fullUrl(url);
         try {
             _activeRequests++;
-            Map<String, dynamic> headers = new Map.from(_headers);
+            Map<String, dynamic> headers = new Map.from(_get_headers);
             if (csrfToken != null) {
                 headers['csrf-token'] = csrfToken;
             }
+            print("Running get on ${fullUrl}");
             return _http.get(fullUrl, headers: headers)
                 .then((HttpResponse response) {
+                    print("Processing get response from ${fullUrl}");
                     _activeRequests--;
                     return _processResponse("GET", fullUrl, null, response,
                         isErrorChecker);
@@ -94,7 +97,7 @@ class ServerStatusService {
         String fullUrl = _fullUrl(url);
         try {
             _activeRequests++;
-            Map<String, dynamic> headers = new Map.from(_headers);
+            Map<String, dynamic> headers = new Map.from(_json_headers);
             if (csrfToken != null) {
                 headers['csrf-token'] = csrfToken;
             }
@@ -126,7 +129,7 @@ class ServerStatusService {
         String fullUrl = _fullUrl(url);
         try {
             _activeRequests++;
-            Map<String, dynamic> headers = new Map.from(_headers);
+            Map<String, dynamic> headers = new Map.from(_json_headers);
             if (csrfToken != null) {
                 headers['csrf-token'] = csrfToken;
             }
@@ -154,7 +157,7 @@ class ServerStatusService {
         String fullUrl = _fullUrl(url);
         try {
             _activeRequests++;
-            Map<String, dynamic> headers = new Map.from(_headers);
+            Map<String, dynamic> headers = new Map.from(_json_headers);
             if (csrfToken != null) {
                 headers['csrf-token'] = csrfToken;
             }
@@ -179,8 +182,10 @@ class ServerStatusService {
 
 
     Future<String> createCsrfToken(String action) {
+        print("Fetching the authentication token...");
         return get('/authentication/token/' + action, null)
             .then((ServerResponse response) {
+                print("Received the authentication token (${response.jsonData['csrf']})");
                 return response.jsonData['csrf'];
             });
     }

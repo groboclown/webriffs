@@ -187,7 +187,7 @@ class AuthenticationCreate extends Resource {
      */
     public function createUser() {
         // make sure the user is not currently logged in.
-        if (array_key_exists(Resource::COOKIE_NAME, $_COOKIE)) {
+        if ($this->isUserAuthenticated()) {
             throw new Base\ValidationException(
                 array(
                     'session' => 'already logged in as a user'

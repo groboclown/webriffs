@@ -11,8 +11,8 @@
     <!-- actually more of a status message -->
     {{cmp.errorMessage}}
     </div>
-    <div ng-if="! cmp.hasError">
-        <span ng-click="print('createFilm'); cmp.createFilm()">Submit</span>
+    <div ng-if="! cmp.hasError" style="border: 1px solid black;">
+        <span ng-click="cmp.createFilm()">Submit</span>
     </div>
   </div>
 
