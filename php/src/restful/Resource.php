@@ -202,6 +202,8 @@ class Resource extends Base\Resource {
         if (! $data) {
             // We have an invalid cookie.  Clear it out.  Something else may
             // reset it, though.
+            // FIXME set path $this->container['path']; and domain.
+            // Domain comes from the REQUEST_URL I believe.
             setcookie(Resource::COOKIE_NAME,
                 $userAuth['Authentication_Challenge'], time() - 3600);
             return false;

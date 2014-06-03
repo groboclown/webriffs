@@ -98,6 +98,10 @@ class AuthenticationLogin extends Resource {
                 ));
         }
         
+        // TODO make the session minutes settable by the user,
+        // within reason
+        $timeout = Resource::DEFAULT_SESSION_TIMEOUT;
+        
         $userData = WebRiffs\AuthenticationLayer::login($db,
             $data->{'username'}, $this->getSourceId($data->{'source'}),
             $data->{'password'},
@@ -108,10 +112,12 @@ class AuthenticationLogin extends Resource {
             },
 
             $this->request->userAgent, $this->request->remoteAddr, null,
-            // TODO make the session minutes settable by the user,
-            // within reason
-            Resource::DEFAULT_SESSION_TIMEOUT);
+            $timeout);
         
+        
+        // FIXME this needs to set the expiration to $timeout*60 + time().
+        // FIXME set the path $this->container['path']; and domain
+        // Domain comes from the REQUEST_URL I believe.
         setcookie(Resource::COOKIE_NAME, $userData['Authentication_Challenge']);
         
         $userData['message'] = 'okay';
@@ -143,6 +149,8 @@ class AuthenticationLogout extends Resource {
         
         // Some old browsers will only delete the cookie if you pass in an
         // old expiration date
+        // FIXME set the path $this->container['path']; and domain
+        // Domain comes from the REQUEST_URL I believe.
         setcookie(Resource::COOKIE_NAME,
             $userAuth['Authentication_Challenge'], time() - 3600);
         

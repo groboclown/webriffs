@@ -71,6 +71,8 @@ try {
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         return $conn;
     };
+    
+    $container['path'] = $siteConfig['path'];
 
 
 
