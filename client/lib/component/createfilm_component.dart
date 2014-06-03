@@ -126,7 +126,6 @@ class CreateFilmComponent {
 
 
     void createFilm() {
-        print("Inside film");
         if (_filmName != null && _releaseYear != null) {
             // FIXME notify that the form is being submitted.
             // This will do for now...
@@ -139,14 +138,17 @@ class CreateFilmComponent {
                             'year': _releaseYear
                     }).
                     then((ServerResponse response) {
-                        int filmId = response.jsonData['film_id'];
-                        int branchId = response.jsonData['branch_id'];
-                        int changeId = response.jsonData['change_id'];
-
                         // Reset the fields
                         _filmName = null;
                         _releaseYear = null;
                         errorMessage = "Must define a film name and release year";
+                        if (response == null) {
+                            errorMessage = "Unknown server connection problem.";
+                            return;
+                        }
+                        int filmId = response.jsonData['film_id'];
+                        int branchId = response.jsonData['branch_id'];
+                        int changeId = response.jsonData['change_id'];
 
                         // FIXME redirect to the edit page
                         // _route.route.findRoute(routePath);

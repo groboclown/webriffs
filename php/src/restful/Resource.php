@@ -7,6 +7,7 @@ use Tonic;
 use PDO;
 use Base;
 use WebRiffs;
+use GroboAuth;
 
 class Resource extends Base\Resource {
     /**
@@ -61,6 +62,7 @@ class Resource extends Base\Resource {
      */
     function authenticated() {
         if (! $this->isUserAuthenticated()) {
+            //error_log("User not authenticated; ".print_r($this->request, true)." cookie ".$_COOKIE[Resource::COOKIE_NAME]);
             throw new Tonic\UnauthorizedException();
         }
         return true;
@@ -107,6 +109,7 @@ class Resource extends Base\Resource {
         
         $token = $this->request->csrfToken;
         if (! $token) {
+            error_log("Request for action ".$action." with no token; ".print_r($this->request, true));
             throw new Tonic\UnauthorizedException();
         }
         $db = $this->getDB();
@@ -116,6 +119,7 @@ class Resource extends Base\Resource {
         
         if (! GroboAuth\DataAccess::validateCsrfToken($db,
                 $sessionId, $token, $action)) {
+            error_log("Invalid token ".$token." for action ".$action." in session ".$sessionId);
             throw new Tonic\UnauthorizedException();
         }
         

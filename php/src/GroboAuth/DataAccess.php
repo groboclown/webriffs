@@ -563,7 +563,12 @@ class DataAccess {
         }
         $sessionId = intval($data[0]['Ga_Session_Id']);
         $userSourceId = intval($data[0]['Ga_User_Source_Id']);
+        
+        // This returns true or false, depending on whether 1 row or 0 were
+        // updated.  It's fine in either case, because 0 rows means that the
+        // database row expiration time is exactly what it already was.
         DataAccess::renewSession($db, $sessionId, $sessionRenewalMinutes);
+        
         $loginAttempts = DataAccess::getLoginAttemptsFor($db, $userSourceId,
             $loginAttemptsMinutes);
         if (!$loginAttempts) {
@@ -616,6 +621,17 @@ class DataAccess {
     }
 
 
+    /**
+     *
+     * @param unknown $db
+     * @param unknown $sessionId
+     * @param unknown $sessionRenewalMinutes
+     * @throws Base\ValidationException thrown on database errors or more than
+     *      1 row updated.
+     * @return boolean true if 1 row was updated, false if 0 were updated.
+     *      0 rows can be updated when the row with the ID exists if the
+     *      dates were the same (i.e. nothing was actually updated on the db).
+     */
     public static function renewSession($db, $sessionId, $sessionRenewalMinutes) {
         $data = GaSession::$INSTANCE->update($db, $sessionId,
             $sessionRenewalMinutes);
@@ -624,12 +640,13 @@ class DataAccess {
                 array(
                     'unknown' => 'there was an unknown problem with the user session'
                 )));
-        if ($data['rowcount'] != 1) {
+        if ($data['rowcount'] > 1) {
             throw new Base\ValidationException(
                 array(
-                    'unknown' => 'there was an unknown problem with the user session'
+                    'unknown' => 'there was an unknown problem with the user session (update count = '.$data['rowcount'].')'
                 ));
         }
+        return $data['rowcount'] == 1;
     }
 
 
@@ -730,6 +747,7 @@ class DataAccess {
                         array(
                             'unknown' => 'there was an unknown problem with the token creation'
                         )));
+                $tokenId = intval($data['result']);
             } catch (PDO\PDOException $e) {
                 if ($e->errorInfo[1] == 1062) {
                     // duplicate entry

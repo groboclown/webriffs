@@ -54,7 +54,7 @@ class AuthenticationToken extends Resource {
     public function data() {
         $action = $this->actionname;
         $user = $this->container['user'];
-        $sessionId = $user['Ga_Source_Id'];
+        $sessionId = $user['Ga_Session_Id'];
         $db = $this->getDB();
         $token = GroboAuth\DataAccess::createCsrfToken($db, $sessionId,
                 $action);
@@ -129,16 +129,6 @@ class AuthenticationLogin extends Resource {
  */
 class AuthenticationLogout extends Resource {
 
-
-    /**
-     *
-     * @method GET
-     */
-    public function fetch() {
-        throw new Tonic\MethodNotAllowedException();
-    }
-
-
     /**
      *
      * @csrf logout
@@ -147,7 +137,7 @@ class AuthenticationLogout extends Resource {
     public function logout() {
         $db = $this->getDB();
         $userAuth = $this->container['user'];
-        //error_log('User auth value: '.print_r($userAuth, true));
+        error_log('User auth value: '.print_r($userAuth, true));
         WebRiffs\AuthenticationLayer::logout($db, $userAuth['User_Id'],
             $userAuth['Ga_Session_Id']);
         

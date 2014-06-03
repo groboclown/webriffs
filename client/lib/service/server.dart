@@ -67,15 +67,17 @@ class ServerStatusService {
             print("Running get on ${fullUrl}");
             return _http.get(fullUrl, headers: headers)
                 .then((HttpResponse response) {
-                    print("Processing get response from ${fullUrl}");
+                    //print("Processing get response from ${fullUrl}");
                     _activeRequests--;
                     return _processResponse("GET", fullUrl, null, response,
                         isErrorChecker);
                 }, onError: (HttpResponse response) {
+                    //print("HTTP error on get: " + response.toString());
                     _activeRequests--;
                     return _processResponse("GET", fullUrl, null, response,
                         isErrorChecker);
                 }).catchError((Exception e) {
+                    //print("Found error on get: " + e.toString());
                     _activeRequests--;
                     return _addHttpRequestException("GET", fullUrl, null, e);
                 });
@@ -182,10 +184,10 @@ class ServerStatusService {
 
 
     Future<String> createCsrfToken(String action) {
-        print("Fetching the authentication token...");
+        //print("Fetching the authentication token...");
         return get('/authentication/token/' + action, null)
             .then((ServerResponse response) {
-                print("Received the authentication token (${response.jsonData['csrf']})");
+                //print("Received the authentication token (${response.jsonData['csrf']})");
                 return response.jsonData['csrf'];
             });
     }
