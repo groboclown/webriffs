@@ -44,17 +44,17 @@ class FilmCollection extends Resource {
      * @csrf create_film
      */
     public function create() {
-        $data = getRequestData();
+        $data = $this->getRequestData();
 
-        $db = getDB();
+        $db = $this->getDB();
         
-        $idList = FilmLayer::createFilm($db, $this->container['user'],
-            $data['name'], $data['year']);
+        $idList = WebRiffs\FilmLayer::createFilm($db, $this->container['user'],
+            $data->name, $data->year);
 
         $data = array(
-            'film_id' => $data[1],
-            'branch_id' => $data[2],
-            'change_id' => $data[3]
+            'film_id' => $idList[1],
+            'branch_id' => $idList[2],
+            'change_id' => $idList[3]
         );
 
         return new Tonic\Response(Tonic\Response::CREATED, $data);

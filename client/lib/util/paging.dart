@@ -96,8 +96,10 @@ class PageState {
         }
 
         String path = _path + '?page=${nextPage}&per_page=' +
-                '${newRecordsPerPage}&sort_order=${newSortOrder}&sort_by=' +
-                Uri.encodeQueryComponent(newSortedBy);
+                '${newRecordsPerPage}&sort_order=${newSortOrder}';
+        if (newSortedBy != null) {
+            path += '&sort_by=' + Uri.encodeQueryComponent(newSortedBy);
+        }
 
         // filters - only add a filter if the page state allows for that filter
         if (newFilters == null) {
@@ -147,7 +149,8 @@ class PageState {
             }
             if (md.containsKey('filters') && md['filters'] is Map) {
                 _filters.clear();
-                md['filters'].foreach((String key, dynamic value) {
+                Map<String, dynamic> filters = md['filters'];
+                filters.forEach((String key, dynamic value) {
                     _filters[key] = value;
                 });
             }

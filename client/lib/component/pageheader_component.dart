@@ -40,13 +40,24 @@ class PageHeaderComponent implements DetachAware {
 
 
     void _onEnter(Route route) {
+        String n;
+        String t;
         if (route.name == null) {
-            name = '';
-            title = defaultTitle;
+            t = defaultTitle;
+            n = '';
         } else {
-            title = route.name + titleSuffix;
-            name = route.name;
+            t = route.name + titleSuffix;
+            n = route.name;
         }
+
+        // Allow for parameterized names
+        route.parameters.forEach((String k, dynamic v) {
+            n = n.replaceAll('<${k}>', v.toString());
+            t = t.replaceAll('<${k}>', v.toString());
+        });
+
+        title = t;
+        name = n;
 
         // Major, major hack
         // Can't find another way to set the document title.

@@ -33,6 +33,7 @@ class FilmListComponent {
                     films.add(new FilmRecord.fromJson(json));
                 });
             });
+        pageState.updateFromServer();
     }
 }
 
@@ -47,12 +48,23 @@ class FilmRecord {
 
     factory FilmRecord.fromJson(Map<String, dynamic> json) {
         // FIXME
+        int filmId = json['Film_Id'];
+        int projectId = json['Gv_Project_Id'];
+        String name = json['Name'];
+        int releaseYear = json['Release_Year'];
+        dynamic createdOn = json['Created_On']; // datetime -> ?
+        dynamic lastUpdatedOn = json['Last_Updated_On']; // datetime -> ?
 
-        return new FilmRecord._();
+        return new FilmRecord._(filmId, projectId, name, releaseYear,
+                createdOn, lastUpdatedOn);
     }
 
 
-    FilmRecord._() {
-        // FIXME
+    FilmRecord._(int filmId, int projectId, String name, int releaseYear,
+            dynamic createdOn, dynamic lastUpdatedOn) {
+        this.name = name;
+        this.releaseYear = releaseYear;
+        this.branches = [];
+        this.tags = [];
     }
 }

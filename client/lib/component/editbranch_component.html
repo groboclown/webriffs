@@ -17,8 +17,8 @@
                 <tr ng-repeat="film in cmp.films">
                     <td>{{film.name}}</td>
                     <td>{{film.releaseYear}}</td>
-                    <td><span ng-repeat="branch in film.branches">{{branch}}</span></td>
-                    <td><span ng-repeat="tag in film.tags">{{tag}}</span></td>
+                    <td><span ng-repeat="branch in cmp.branches">{{branch}}</span></td>
+                    <td><span ng-repeat="tag in cmp.tags">{{tag}}</span></td>
                 </tr>
                 <tr ng-if="cmp.noFilms">
                     <td colspan="4">No relevant results.</td>

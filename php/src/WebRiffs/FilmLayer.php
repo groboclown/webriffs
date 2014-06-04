@@ -73,7 +73,14 @@ class FilmLayer {
         }
         
         $userId = $userInfo['User_Id'];
-        $gaUserId = $userId['Ga_User_Id'];
+        $gaUserId = $userInfo['Ga_User_Id'];
+        if ($userId === null || $gaUserId === null) {
+            error_log("found bad user info array ".print_r($userInfo, true));
+            throw new Base\ValidationException(
+                array(
+                    'user' => 'invalid setup of the user data'
+                ));
+        }
         // FIXME need better permission checks.
         
 
@@ -99,7 +106,7 @@ class FilmLayer {
                 ));
         }
         
-        $data = GvProject::$INSTANCE->create($db);
+        $data = GroboVersion\GvProject::$INSTANCE->create($db);
         FilmLayer::checkError($data,
             new Base\ValidationException(
                 array(
@@ -116,7 +123,7 @@ class FilmLayer {
         $filmId = intval($data['result']);
         
         $branchData = FilmLayer::createBranchById($db, $projectId, $filmId,
-            "Initial");
+            $gaUserId, "Initial");
         $branchId = $branchData[0];
         $filmBranchId = $branchData[1];
         $changeId = $branchData[2];
@@ -142,13 +149,13 @@ class FilmLayer {
      * @param string $branchName
      * @return multitype:number
      */
-    public static function createBranchById($db, int $projectId, int $filmId,
-            int $gaUserId, string $branchName) {
+    public static function createBranchById($db, $projectId, $filmId,
+            $gaUserId, $branchName) {
         // FIXME ensure the branch name does not exist for that film id.
         // FIXME ensure the branch name is valid
         // FIXME validate branch name length is valid
         
-        $data = GvBranch::$INSTANCE->create($db, $projectId);
+        $data = GroboVersion\GvBranch::$INSTANCE->create($db, $projectId);
         FilmLayer::checkError($data,
             new Base\ValidationException(
                 array(
@@ -166,7 +173,8 @@ class FilmLayer {
         $filmBranchId = intval($data['result']);
         
         
-        $data = GvChange::$INSTANCE->create($db, $branchId, 0, $gaUserId);
+        $data = GroboVersion\GvChange::$INSTANCE->create(
+                $db, $branchId, 0, $gaUserId);
         FilmLayer::checkError($data,
             new Base\ValidationException(
                 array(
@@ -238,7 +246,7 @@ class FilmLayer {
      * @return the associative array with the film information, or null if it
      *      does not exist.
      */
-    public static function getFilm($db, int $filmId) {
+    public static function getFilm($db, $filmId) {
         if (! is_integer($filmId)) {
             throw new Base\ValidationException(array(
                 'film_id' => 'invalid film id format'

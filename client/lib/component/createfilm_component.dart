@@ -23,7 +23,7 @@ import '../service/user.dart';
 class CreateFilmComponent {
     final ServerStatusService _server;
 
-    final RouteProvider _route;
+    final Router _route;
 
     final UserService _user;
 
@@ -150,8 +150,11 @@ class CreateFilmComponent {
                         int branchId = response.jsonData['branch_id'];
                         int changeId = response.jsonData['change_id'];
 
-                        // FIXME redirect to the edit page
-                        // _route.route.findRoute(routePath);
+                        // redirect to the edit page
+                        _route.go('Edit <branchId>', {
+                            'branchId': branchId,
+                            'changeId': changeId
+                        });
                     }).
                     catchError((Exception e) {
                         errorMessage = null;
