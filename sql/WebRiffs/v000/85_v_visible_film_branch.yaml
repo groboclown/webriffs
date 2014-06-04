@@ -1,0 +1,123 @@
+
+# A join between the film_branch view and the permissions.  This will, however,
+# not show films if the user cannot see any of its branches.
+
+view:
+    viewName: V_FILM_BRANCH
+    
+    # Public access union to branch-specific access
+    query: "SELECT
+          fb.Film_Id Film_Id
+          , fb.Gv_Project_Id Gv_Project_Id
+          , fb.Name Film_Name
+          , fb.Release_Year Release_Year
+          , fb.Created_On Film_Created_On
+          , fb.Last_Updated_On Film_Last_Updated_On
+          
+          , fb.Film_Branch_Id Film_Branch_Id
+          , fb.Gv_Branch_Id Gv_Branch_Id
+          , fb.Branch_Name Branch_Name
+          , fb.Created_On Branch_Created_On
+          , fb.Last_Updated_On Last_Updated_On
+          , ua.User_Id User_Id
+          , ua.Access Access
+          , ua.Privilege_Level
+        FROM V_FILM_BRANCH fv
+        INNER JOIN FILM_BRANCH_PUBLIC p
+            ON fb.Film_Branch_Id = p.Film_Branch_Id
+        INNER JOIN USER_ACCESS ua
+            ON ua.Access = p.Access
+            AND ua.Privilege_Level >= p.Minimum_Privilege_Level
+        
+        UNION
+        
+        SELECT
+          fb.Film_Id Film_Id
+          , fb.Gv_Project_Id Gv_Project_Id
+          , fb.Name Film_Name
+          , fb.Release_Year Release_Year
+          , fb.Created_On Film_Created_On
+          , fb.Last_Updated_On Film_Last_Updated_On
+          
+          , fb.Film_Branch_Id Film_Branch_Id
+          , fb.Gv_Branch_Id Gv_Branch_Id
+          , fb.Branch_Name Branch_Name
+          , fb.Created_On Branch_Created_On
+          , fb.Last_Updated_On Last_Updated_On
+          , u.User_Id User_Id
+          , u.Access Access
+          , u.Privilege_Level
+        FROM V_FILM_BRANCH fv
+        INNER JOIN FILM_BRANCH_USER u
+            ON fb.Film_Branch_Id = u.Film_Branch_Id
+        "
+    columns:
+        - column:
+            name: Film_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: FILM
+                    column: Film_Id
+        - column:
+            name: Gv_Project_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_PROJECT
+                    column: Gv_Project_Id
+        - column:
+            name: Film_Name
+            type: nvarchar(200)
+        - column:
+            name: Release_Year
+            type: int
+        - column:
+            name: Created_On
+            type: timestamp
+        - column:
+            name: Film_Last_Updated_On
+            type: timestamp
+        - column:
+            name: Film_Branch_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: FILM_BRANCH
+                    column: Film_Branch_Id
+        - column:
+            name: Gv_Branch_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_BRANCH
+                    column: Gv_Branch_Id
+        - column:
+            name: Branch_Name
+            type: nvarchar(255)
+        - column:
+            name: Branch_Created_On
+            type: timestamp
+        - column:
+            name: Branch_Last_Updated_On
+            type: timestamp
+        - column:
+            name: Access
+            type: varchar(64)
+            constraints:
+                - constraint:
+                    type: not null
+        - column:
+            name: Privilege_Level
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+    constraints:
+        - constraint:
+            type: fake index
+            columns: Film_Id, Film_Branch_Id, User_Id
