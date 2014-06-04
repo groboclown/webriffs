@@ -115,10 +115,10 @@ class AuthenticationLogin extends Resource {
             $timeout);
         
         
-        // FIXME this needs to set the expiration to $timeout*60 + time().
-        // FIXME set the path $this->container['path']; and domain
-        // Domain comes from the REQUEST_URL I believe.
-        setcookie(Resource::COOKIE_NAME, $userData['Authentication_Challenge']);
+        // Note that by setting the domain to an empty string, PHP will restrict
+        // the cookie to a single domain.  May need to try getenv('HTTP_HOST')
+        setcookie(Resource::COOKIE_NAME, $userData['Authentication_Challenge'],
+            time() + ($timeout*60), $this->container['path'], '', false, true);
         
         $userData['message'] = 'okay';
         
@@ -149,10 +149,9 @@ class AuthenticationLogout extends Resource {
         
         // Some old browsers will only delete the cookie if you pass in an
         // old expiration date
-        // FIXME set the path $this->container['path']; and domain
-        // Domain comes from the REQUEST_URL I believe.
         setcookie(Resource::COOKIE_NAME,
-            $userAuth['Authentication_Challenge'], time() - 3600);
+            $userAuth['Authentication_Challenge'], time() - 3600,
+            $this->container['path'], '', false, true);
         
         return array(
             200,
