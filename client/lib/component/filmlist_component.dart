@@ -1,6 +1,7 @@
 
 library filmlist_component;
 
+import 'dart:async';
 
 import 'package:angular/angular.dart';
 
@@ -30,7 +31,7 @@ class FilmListComponent {
             (PageState ps, Iterable<dynamic> fl) {
                 films.clear();
                 fl.forEach((Map<String, dynamic> json) {
-                    films.add(new FilmRecord.fromJson(json));
+                    films.add(new FilmRecord.fromJson(_server, json));
                 });
             });
         pageState.updateFromServer();
@@ -41,13 +42,31 @@ class FilmListComponent {
 
 
 class FilmRecord {
-    String name;
-    int releaseYear;
-    List<String> branches;
-    List<String> tags;
+    final ServerStatusService _server;
 
-    factory FilmRecord.fromJson(Map<String, dynamic> json) {
-        // FIXME
+    final String name;
+    final int releaseYear;
+    final int filmId;
+    final List<BranchRecord> _branches;
+
+    Future<ServerResponse> _loader;
+
+    bool _expanded = false;
+
+    bool get expanded => _expanded;
+    set expanded(bool expand) {
+        if (expand && _loader == null) {
+            _loader = _createBranchTagLoader();
+        }
+        _expanded = expand;
+    }
+    bool get areBranchesLoaded => _branches != null;
+
+    Future<List<BranchRecord>> get branches => _getPendingList(_branches);
+
+
+    factory FilmRecord.fromJson(ServerStatusService server,
+            Map<String, dynamic> json) {
         int filmId = json['Film_Id'];
         int projectId = json['Gv_Project_Id'];
         String name = json['Name'];
@@ -55,16 +74,63 @@ class FilmRecord {
         dynamic createdOn = json['Created_On']; // datetime -> ?
         dynamic lastUpdatedOn = json['Last_Updated_On']; // datetime -> ?
 
-        return new FilmRecord._(filmId, projectId, name, releaseYear,
+        return new FilmRecord._(server, filmId, projectId, name, releaseYear,
                 createdOn, lastUpdatedOn);
     }
 
 
-    FilmRecord._(int filmId, int projectId, String name, int releaseYear,
-            dynamic createdOn, dynamic lastUpdatedOn) {
-        this.name = name;
-        this.releaseYear = releaseYear;
-        this.branches = [];
-        this.tags = [];
+    FilmRecord._(this._server, this.filmId, int projectId, this.name,
+            this.releaseYear,
+            dynamic createdOn, dynamic lastUpdatedOn) :
+        this._branches = [];
+
+
+    Future<ServerResponse> _createBranchTagLoader() {
+        return _server.get('/film/${filmId}/branchtags', null)
+            .then((ServerResponse resp) {
+                // FIXME parse the JSon data
+            });
+    }
+
+
+    Future<List<BranchRecord>> _getPendingList(List<BranchRecord> ref) {
+        if (_loader == null) {
+            _loader = _createBranchTagLoader();
+        }
+        return _loader.then((_) => ref);
     }
 }
+
+
+
+class BranchRecord {
+    final String name;
+    final int id;
+    final List<TagRecord> tags;
+
+    BranchRecord._(this.name, this.id, this.tags);
+
+    factory BranchRecord.fromJson(Map<String, dynamic> json) {
+        String name = json['name'];
+        int id = json['id'];
+        List<TagRecord> tags = [];
+        json['tags'].forEach((Map<String, dynamic> tagj) {
+            tags.add(new TagRecord.fromJson(tagj));
+        });
+        return new BranchRecord._(name, id, tags);
+    }
+
+}
+
+
+class TagRecord {
+    final String name;
+    final int id;
+
+    TagRecord._(this.name, this.id);
+
+    factory TagRecord.fromJson(Map<String, dynamic> json) {
+        return new TagRecord._(json['name'], json['id']);
+    }
+}
+

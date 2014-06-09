@@ -9,6 +9,13 @@ use WebRiffs;
 use Base;
 
 
+/*
+ * For all changes that are requested by a user, they occur in the user's
+ * pending change for the branch.  The user's visible details is the
+ * head active change for the branch + the user's pending change.
+ */
+
+
 /**
  * FIXME include validation of input values
  *
@@ -24,11 +31,6 @@ class FilmCollection extends Resource {
      * @method GET
      */
     public function fetch() {
-        $paging = Base\PageRequest::parseGetRequest(
-                WebRiffs\FilmLayer::$FILM_FILTERS,
-                WebRiffs\FilmLayer::$DEFAULT_FILM_SORT_COLUMN,
-                WebRiffs\FilmLayer::$FILM_SORT_COLUMNS
-            );
         $db = $this->getDB();
         
         $result = WebRiffs\FilmLayer::pageFilms($db);
@@ -75,13 +77,14 @@ class FilmObj extends Resource {
         $filmid = $this->filmid;
         $db = getDB();
         
-        
+        // FIXME get the row data
+        $row = null;
         
         if (!$row) {
             throw new Tonic\NotFoundException;
         }
 
-        return new Tonic\Response(200, $stmt->fetch());
+        return new Tonic\Response(200, $row);
     }
 
 
@@ -103,8 +106,8 @@ class FilmObj extends Resource {
 
         // FIXME validate data
 
-        $stmt = $db->prepare('UPDATE FILM SET Name = ?, Release_Year = ?, Imdb_Url = ?, Wikipedia_Url = ? WHERE Film_Id = ?');
-        $stmt->execute(array($name, $releaseYear, $imdbUrl, $wikiUrl, $filmid));
+        //$stmt = $db->prepare('UPDATE FILM SET Name = ?, Release_Year = ?, Imdb_Url = ?, Wikipedia_Url = ? WHERE Film_Id = ?');
+        //$stmt->execute(array($name, $releaseYear, $imdbUrl, $wikiUrl, $filmid));
 
         return $this->display();
     }
@@ -120,19 +123,90 @@ class FilmObj extends Resource {
         $filmid = $this->filmid;
         $db = getDB();
 
-        $stmt = $db->prepare('DELETE FROM FILM WHERE Film_Id = ?');
-        $stmt->execute(array($filmid));
+        //$stmt = $db->prepare('DELETE FROM FILM WHERE Film_Id = ?');
+        //$stmt->execute(array($filmid));
 
         return new Tonic\Response(Tonic\Response::NOCONTENT);
     }
+}
+
+
+/**
+ * Returns all the branches visible to the user (or that are
+ * publicly visible for those not logged in).
+ *
+ * @uri /film/:filmid/branch
+ */
+class FilmObjBranch extends Resource {
+    /**
+     * @method GET
+     */
+    function fetch() {
+        $userId = null;
+        if (isUserAuthenticated()) {
+            $userId = $this->container['user']['User_Id'];
+        }
+        
+        $db = $this->getDB();
+        
+        $result = WebRiffs\FilmLayer::pageBranches($db, $userId, $this->filmid);
+        
+        return array(200, $result);
+    }
     
+    
+    // TODO delete - delete a branch.
+    // TODO put - create a branch.
+    // TODO post - update a branch.
+}
+
+
+/**
+ * This needs to include the user's pending changes in the results.
+ *
+ * @uri /film/:filmid/branch/:branchid
+ *
+ */
+class FilmObjBranchObj extends Resource {
     
     /**
-     * @method PUT
-     * @secure branch
-     * @csrf branch_film
+     * Get the details for the branch
+     *
+     * @method GET
      */
-    function createBranch() {
+    function fetch() {
         // FIXME
+        
+        return new Tonic\Response(Tonic\Response::NOCONTENT);
+
     }
+    
+}
+
+
+
+/**
+ * @uri /film/:filmid/branch/:branchid/tag
+ */
+class FilmObjBranchObjTag extends Resource {
+    
+    /**
+     * @method GET
+     */
+    function fetch() {
+        $branchId = $this->branchid;
+        $filmId = $this->filmid;
+        
+        $userId = null;
+        if (isUserAuthenticated()) {
+            $userId = $this->container['user']['User_Id'];
+        }
+        
+        $db = $this->getDB();
+        
+        $result = WebRiffs\FilmLayer::getTagsForBranch($db, $userId, $filmId,
+            $branchId);
+        return array(200, $result);
+    }
+    
 }

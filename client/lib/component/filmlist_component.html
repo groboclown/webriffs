@@ -7,14 +7,18 @@
             <thead>
                 <tr>
                     <!-- FIXME add sorting controls -->
+                    
+                    <th>&nbsp;</th>
                     <th>Film</th>
                     <th>Release Year</th>
-                    <th>Branches</th>
-                    <th>Tags</th>
                 </tr>
             </thead>
             <tbody ng-if="cmp.pageState.loadedFromServer">
                 <tr ng-repeat="film in cmp.films">
+                    <td>
+                        <span ng-if="film.expanded">V</span>
+                        <span ng-if="! film.expanded">&gt;</span>
+                    </td>
                     <td>{{film.name}}</td>
                     <td>{{film.releaseYear}}</td>
                     <td><span ng-repeat="branch in film.branches">{{branch}}</span></td>

@@ -24,6 +24,13 @@ class FilmLayer {
     public static $MAX_YEAR_SEARCH_FILTER;
     public static $NAME_SEARCH_FILTER;
     
+    /**
+     * Maximum number of tags allowable on a quip or branch.
+     *
+     * @var int
+     */
+    public static $MAXIMUM_TAG_COUNT = 40;
+    
 
     /**
      * Creates the film, and adds a new, empty film version.
@@ -225,8 +232,6 @@ class FilmLayer {
                 )));
         $rows = $data['result'];
         
-        // FIXME include film_link rows and tags on the films
-        
         $data = Film::$INSTANCE->countAll($db, $wheres);
         FilmLayer::checkError($data,
             new Base\ValidationException(
@@ -261,23 +266,90 @@ class FilmLayer {
                     'unknown' => 'there was an unknown problem finding the film'
                 )));
         if (sizeof($data['result']) <= 0) {
-            return null;
+            return array();
         }
         
-        // Load up the links, since these should be limited by the admin
-        // configuration of number of possible links.
-        
-        
+        return $data['result'][0];
     }
 
 
     /**
      * Returns all the branches in the film that are visible by the user.
      */
-    public static function findBranches($db, $userId, $filmId, Base\PageRequest $paging = null) {
-    
-        // FIXME
+    public static function pageBranches($db, $userId, $filmId,
+            Base\PageRequest $paging = null) {
+        // userId can be null
         
+        if ($paging == null) {
+            $paging = Base\PageRequest::parseGetRequest(
+                    FilmLayer::$BRANCH_FILTERS, FilmLayer::$DEFAULT_BRANCH_SORT_COLUMN,
+                    FilmLayer::$BRANCH_SORT_COLUMNS);
+        }
+        
+        
+        // FIXME this will return too many rows - duplicate branches will
+        // be returned if the authentication for the user has multiple records.
+        
+        $data = VVisibleFilmBranch::$INSTANCE->readBy_Film_Id_x_User_Id($db,
+                    $filmId, $userId);
+        FilmLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem finding the branches'
+                )));
+        $rows = $data['result'];
+        
+        $data = VVisibleFilmBranch::$INSTANCE->countBy_Film_Id_x_User_Id($db,
+                    $filmId, $userId);
+        FilmLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem counting the branches'
+                )));
+        $count = $data['result'];
+        
+        return Base\PageResponse::createPageResponse($paging, $count, $rows);
+    }
+
+
+    /**
+     * Returns all the tags in the branch.  If the user can't see the branch,
+     * then they can't see any tags.  The number of tags for a branch should be
+     * limited, so this will not perform paging.
+     */
+    public static function getTagsForBranch($db, $userId, $filmId, $branchId) {
+        // userId can be null
+        
+        // Rather than performing a query on a join between the heavy
+        // view "visible_film_branch" and the heavy view for the top changes,
+        // we'll split it into two separate queries.  There's a very slim chance
+        // that the user will have permissions revoked in the middle of these
+        // two queries, but that results in a very minor data leak that the
+        // user should have had permissions to see if they made this query just
+        // a half second earlier.
+    
+        $data = VVisibleFilmBranch::$INSTANCE->countBy_Film_Id_x_Film_Branch_Id_x_User_Id(
+                $db, $filmId, $branchId, $userId);
+        FilmLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem finding the branches'
+                )));
+        if ($data['result'] <= 0) {
+            // not a visible branch
+            return array();
+        }
+    
+        $data = VFilmBranchTag::$INSTANCE->readBy_Film_Id_x_Film_Branch_Id($db,
+                $filmId, $branchId);
+        FilmLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem reading the tags'
+                )));
+        $rows = $data['result'];
+        
+        return $rows;
     }
     
 
@@ -309,8 +381,12 @@ FilmLayer::$FILM_FILTERS = array(
 );
 
 FilmLayer::$BRANCH_SORT_COLUMNS = array(
-    
+    "name" => "Name",
+    "created" => "Created_On",
+    "updated" => "Last_Updated_On"
 );
+
+FilmLayer::$DEFAULT_BRANCH_SORT_COLUMN = "name";
 
 FilmLayer::$BRANCH_FILTERS = array(
     FilmLayer::$NAME_SEARCH_FILTER

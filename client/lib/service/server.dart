@@ -243,6 +243,12 @@ class ServerStatusService {
 }
 
 
+
+
+
+/**
+ * Data returned by a request to the server.
+ */
 class ServerResponse {
 
     final HttpResponse http;
@@ -308,5 +314,3 @@ class ServerResponse {
             jsonData, http.status);
     }
 }
-
-

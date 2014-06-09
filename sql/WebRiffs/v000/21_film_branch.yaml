@@ -33,6 +33,12 @@ table:
                 - constraint:
                     type: no update
         - column:
+            name: Is_Public
+            type: tinyint
+            constraints:
+                - constraint:
+                    type: not null
+        - column:
             name: Created_On
             type: timestamp
             constraints:

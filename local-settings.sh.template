@@ -2,12 +2,17 @@
 # needs.
 
 TEST_MYSQL_HOST=localhost
-TEST_MYSQL_USER=root
-TEST_MYSQL_PASSWD=root
+TEST_MYSQL_USER=user
+TEST_MYSQL_PASSWD=password
 TEST_MYSQL_DBNAME=webriff_test
 
-MYSQL_JDBC_JAR=/path/to/mysql-connector-java-5.1.30-bin.jar
+# Only set these values if you don't mind a potential leak of the local database's root
+# access.  You will not be able to run the 'db_clean' build target, but you can replace
+# that with running the recreate_db.sh script.
+TEST_MYSQL_ROOTUSER=root
+TEST_MYSQL_ROOTPASSWD=root
 
+# This is the directory where your local web server sits.
 DEPLOYMENT_DIR=/path/to/deployment/dir
 
 DART_HOME=/path/to/dart

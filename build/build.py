@@ -60,7 +60,7 @@ def clean_dir(*path):
 
 def run_command(cmd, dir, env):
     print("Executing [" + "] [".join(cmd) + "]")
-    ex = subprocess.Popen(cmd, cwd = dir, env = env, shell=True)
+    ex = subprocess.Popen(cmd, cwd = dir, env = env, shell=False)
     ex.wait()
     return ex.returncode
 
@@ -96,6 +96,31 @@ def init(config):
     smp = [config['sql-migration.src.dir']]
     smp.extend(sys.path)
     config['sql-migration.path'] = os.pathsep.join(smp)
+    if ('TEST_MYSQL_USER' in os.environ and 'TEST_MYSQL_PASSWD' in os.environ):
+        config['sql.cmd'] =  [
+               'mysql', '--user=' + os.environ['TEST_MYSQL_USER'],
+               #'--host=' + os.environ['TEST_MYSQL_HOST'],
+               '--password=' + os.environ['TEST_MYSQL_PASSWD'],
+               '--batch', '--no-beep',
+               os.environ['TEST_MYSQL_DBNAME'] ]
+    else:
+        config['sql.cmd'] = None
+    if ('TEST_MYSQL_RoOTUSER' in os.environ and
+            'TEST_MYSQL_ROOTPASSWD' in os.environ):
+        config['sql.root_cmd'] =  [
+               'mysql', '--user=' + os.environ['TEST_MYSQL_ROOTUSER'],
+               '--host=' + os.environ['TEST_MYSQL_HOST'],
+               '--password=' + os.environ['TEST_MYSQL_ROOTPASSWD'],
+               '--batch', '--no-beep',
+               os.environ['TEST_MYSQL_DBNAME'] ]
+    else:
+        config['sql.root_cmd'] = None
+
+
+@depends(init)
+def setup(config):
+    todir(os.path.exists(config['work.dir']))
+    todir(os.path.exists(config['exports.dir']))
 
 
 @depends(init)
@@ -106,12 +131,6 @@ def clean(config):
     if os.path.exists(config['exports.dir']):
         print("Deleting " + config['exports.dir'])
         shutil.rmtree(config['exports.dir'])
-
-
-@depends(init)
-def setup(config):
-    todir(os.path.exists(config['work.dir']))
-    todir(os.path.exists(config['exports.dir']))
 
 
 @depends(setup)
@@ -174,6 +193,67 @@ def copy_dart(config):
          update = True,
          verbose = True,
          dry_run = False)
+
+
+@depends(setup)
+def db_clean(config):
+    """
+    Deletes and recreates the test database.  This will only run if the root
+    user and password are set in the environment variables (which is not
+    suggested).
+    """
+    if config['sql.root_cmd'] is None:
+        print("Cannot clean the database - you must run 'recreate-db.sh' " +
+              "manually, or set the root user / password environment " +
+              "variables (not suggested)")
+    else:
+        cmd = list(config['sql.root_cmd'])
+        print("Cleaning the database")
+        ex = subprocess.Popen(cmd, shell=True, stdin = subprocess.PIPE)
+        ex.stdin.write('SET FOREIGN_KEY_CHECKS = 0; DROP DATABASE IF EXISTS ' +
+                       os.environ['TEST_MYSQL_DBNAME'] +
+                       ';CREATE DATABASE ' + os.environ['TEST_MYSQL_DBNAME'] +
+                       ';GRANT ALL PRIVILEGES ON ' +
+                       os.environ['TEST_MYSQL_DBNAME'] +
+                       '.* TO ' + os.environ['TEST_MYSQL_USER'] + '@localhost;')
+        ex.stdin.close()
+        ex.wait()
+        if ex.returncode != 0:
+            raise Exception("Failed to recreate database")
+
+
+
+@depends(setup)
+def db_run_sql(config):
+    if 'sq.cmd' not in config:
+        print("Environment not setup for running sql")
+        return
+    
+    i = 0
+    cmd = list(config['sql.cmd'])
+    for d in config['sql-categories.dirs']:
+        print("Running sql for " + str(d))
+        indir = clean_dir(config['exports.dir'], 'sql', "{0:02d}".format(i))
+        files = os.listdir(indir)
+        files.sort()
+        for fn in files:
+            f = os.path.join(indir, fn)
+            with open(f) as fin:
+                data = fn.read()
+                ex = subprocess.Popen(cmd, shell=True, stdin = subprocess.PIPE)
+                ex.stdin.write(data)
+                ex.stdin.close()
+                ex.wait()
+                if ex.returncode != 0:
+                    raise Exception("Failed to process sql for " + f)
+        
+        i += 1
+    
+
+
+@depends(generate_sql, db_clean, db_run_sql)
+def db_recreate(config):
+    pass
 
 
 @depends(setup)
