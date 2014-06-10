@@ -2,6 +2,8 @@
 
 namespace WebRiffs;
 
+require_once __DIR__.'/Access.php';
+
 use PBO;
 use Base;
 use Tonic;
@@ -20,7 +22,7 @@ class AuthenticationLayer {
      * if necessary, based on the sourceId requirements.
      */
     public static function createUser($db, $username, $sourceId, $sourceUser,
-        $authenticationCode, $contact, $isAdmin) {
+        $authenticationCode, $contact, $baseAccess) {
         if (!AuthenticationLayer::isValidUsername($username)) {
             throw new Base\ValidationException(
                 array(
@@ -34,10 +36,9 @@ class AuthenticationLayer {
                 ));
         }
         
-        if (!!$isAdmin) {
+        $isAdmin = 0;
+        if ($baseAccess >= Access::$PRIVILEGE_ADMIN) {
             $isAdmin = 1;
-        } else {
-            $isAdmin = 0;
         }
         
         // First check - does the user already exist?  This is a bit superfluous,
@@ -73,6 +74,17 @@ class AuthenticationLayer {
                     'username' => 'problem creating the user'
                 )));
         $userId = $data['result'];
+        
+        foreach (Access::$USER_RIGHTS as $right) {
+            $data = UserAccess::create($db, $userId, $right, $baseAccess);
+            AuthenticationLayer::checkError($data,
+                new Base\ValidationException(
+                    array(
+                        'username' => 'problem creating the user access'
+                    )));
+        }
+        
+        
         return $userId;
     }
 

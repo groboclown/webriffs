@@ -601,13 +601,14 @@ user.  This is the place where you put the user information.
     require_once(__DIR__."/../dbo/WebRiffs/UserAttribute.php");
     require_once(__DIR__."/../src/GroboAuth/DataAccess.php");
     require_once(__DIR__."/../src/WebRiffs/AuthenticationLayer.php");
+    require_once(__DIR__."/../src/WebRiffs/Access.php");
     
     $encPassword = WebRiffs\AuthenticationLayer::hashPassword($password);
     
     try {
         $userId = WebRiffs\AuthenticationLayer::createUser($userDb, $username,
                 $siteConfig['sources']['local']['id'], $username, $encPassword,
-                $email, true);
+                $email, WebRiffs\Access::$ACCESS_ADMIN);
     } catch (\Exception $e) {
         error_log("Database create user Exception: ".$e->getMessage());
         error_log($e->getTraceAsString());

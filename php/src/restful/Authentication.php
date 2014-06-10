@@ -215,7 +215,8 @@ class AuthenticationCreate extends Resource {
         
         $userId = WebRiffs\AuthenticationLayer::createUser($db,
             $data->{'username'}, $this->getSourceId($data->{'source'}),
-            $data->{'username'}, $password, $data->{'contact'}, false);
+            $data->{'username'}, $password, $data->{'contact'},
+            Access::$PRIVILEGE_USER);
         
         // don't expose the internal ID to the user.
         return array(

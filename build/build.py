@@ -1,6 +1,6 @@
 #/usr/bin/python3
 
-import shutil, subprocess, distutils.dir_util
+import shutil, subprocess, distutils.dir_util, http.client
 
 # -------------------------------------------------------------------------
 # Build library
@@ -266,6 +266,13 @@ def copy_php(config):
              update = True,
              verbose = True,
              dry_run = False)
+
+@depends(copy_php)
+def copy_php_test(config):
+    distutils.dir_util.copy_tree(
+         todir(config['php.dir'], 'test', 'web'),
+         todir(config['exports.dir'], 'web'),
+         update = True, verbose = True, dry_run = False)
 
 
 @depends(init)
