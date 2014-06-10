@@ -74,15 +74,17 @@ class FilmObj extends Resource {
      * @method GET
      */
     public function display() {
-        $filmid = $this->filmid;
+        $filmId = $this->filmid;
         $db = getDB();
         
-        // FIXME get the row data
-        $row = null;
+        $row = WebRiffs\FilmLayer::getFilm($db, $filmId);
         
         if (!$row) {
             throw new Tonic\NotFoundException;
         }
+        
+        $links = WebRiffs\FilmLayer::getLinksForFilm($db, $filmId);
+        $row['links'] = $links;
 
         return new Tonic\Response(200, $row);
     }
@@ -143,7 +145,7 @@ class FilmObjBranch extends Resource {
      */
     function fetch() {
         $userId = null;
-        if (isUserAuthenticated()) {
+        if ($this->isUserAuthenticated()) {
             $userId = $this->container['user']['User_Id'];
         }
         
@@ -170,7 +172,8 @@ class FilmObjBranch extends Resource {
 class FilmObjBranchObj extends Resource {
     
     /**
-     * Get the details for the branch
+     * Get the details for the branch.  If the branch is not visible by the
+     * user, then it
      *
      * @method GET
      */
@@ -186,6 +189,8 @@ class FilmObjBranchObj extends Resource {
 
 
 /**
+ * This needs to include the user's pending changes in the results.
+ *
  * @uri /film/:filmid/branch/:branchid/tag
  */
 class FilmObjBranchObjTag extends Resource {
@@ -198,7 +203,7 @@ class FilmObjBranchObjTag extends Resource {
         $filmId = $this->filmid;
         
         $userId = null;
-        if (isUserAuthenticated()) {
+        if ($this->isUserAuthenticated()) {
             $userId = $this->container['user']['User_Id'];
         }
         
@@ -206,7 +211,7 @@ class FilmObjBranchObjTag extends Resource {
         
         $result = WebRiffs\FilmLayer::getTagsForBranch($db, $userId, $filmId,
             $branchId);
-        return array(200, $result);
+        return array(200, array('tags' => $result));
     }
     
 }

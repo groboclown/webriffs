@@ -151,7 +151,7 @@ class CreateFilmComponent {
                         int changeId = response.jsonData['change_id'];
 
                         // redirect to the edit page
-                        _route.go('Edit <branchId>', {
+                        _route.go('Edit Your Branch', {
                             'branchId': branchId,
                             'changeId': changeId
                         });

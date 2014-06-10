@@ -58,9 +58,9 @@ def clean_dir(*path):
     return p
 
 
-def run_command(cmd, dir, env):
+def run_command(cmd, dir, env, shell = False):
     print("Executing [" + "] [".join(cmd) + "]")
-    ex = subprocess.Popen(cmd, cwd = dir, env = env, shell=False)
+    ex = subprocess.Popen(cmd, cwd = dir, env = env, shell=shell)
     ex.wait()
     return ex.returncode
 
@@ -159,7 +159,7 @@ def lint_client(config):
     # Analyze each main file
     for f in [ 'web/main.dart' ]:
         cmd = [ cmd_file, f ]
-        ret = run_command(cmd, config['client.dir'], os.environ)
+        ret = run_command(cmd, config['client.dir'], os.environ, True)
         if ret != 0:
             raise Exception("Failed to run 'pub build' correctly")
 
@@ -168,7 +168,7 @@ def lint_client(config):
 def generate_client_js(config):
     cmd = [os.path.join(os.environ['DART_HOME'], 'dart-sdk', 'bin', 'pub'),
            'build']
-    ret = run_command(cmd, config['client.dir'], os.environ)
+    ret = run_command(cmd, config['client.dir'], os.environ, True)
     if ret != 0:
         raise Exception("Failed to run 'pub build' correctly")
 

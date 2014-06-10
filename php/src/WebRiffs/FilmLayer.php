@@ -171,7 +171,8 @@ class FilmLayer {
         $branchId = intval($data['result']);
         
         
-        $data = FilmBranch::$INSTANCE->create($db, $branchId, $branchName);
+        // FIXME for now, all branches are public
+        $data = FilmBranch::$INSTANCE->create($db, $branchId, $branchName, 1);
         FilmLayer::checkError($data,
             new Base\ValidationException(
                 array(
@@ -271,6 +272,23 @@ class FilmLayer {
         
         return $data['result'][0];
     }
+    
+    
+    public static function getLinksForFilm($db, $filmId) {
+        if (! is_integer($filmId)) {
+            throw new Base\ValidationException(array(
+                            'film_id' => 'invalid film id format'
+            ));
+        }
+        $filmId = intval($filmId);
+        $data = VFilmLink::$INSTANCE->readBy_Film_Id($db, $filmId);
+        FilmLayer::checkError($data,
+        new Base\ValidationException(
+            array(
+                'unknown' => 'there was an unknown problem finding the film links'
+            )));
+        return $data['result'];
+    }
 
 
     /**
@@ -290,8 +308,8 @@ class FilmLayer {
         // FIXME this will return too many rows - duplicate branches will
         // be returned if the authentication for the user has multiple records.
         
-        $data = VVisibleFilmBranch::$INSTANCE->readBy_Film_Id_x_User_Id($db,
-                    $filmId, $userId);
+        $data = VVisibleFilmBranch::$INSTANCE->runDistinctBranchesByFilmAndUser(
+                $db, $filmId, $userId);
         FilmLayer::checkError($data,
             new Base\ValidationException(
                 array(
@@ -299,14 +317,14 @@ class FilmLayer {
                 )));
         $rows = $data['result'];
         
-        $data = VVisibleFilmBranch::$INSTANCE->countBy_Film_Id_x_User_Id($db,
-                    $filmId, $userId);
+        $data = VVisibleFilmBranch::$INSTANCE->runCountDistinctBranchesByFilmAndUser(
+                $db, $filmId, $userId);
         FilmLayer::checkError($data,
             new Base\ValidationException(
                 array(
                     'unknown' => 'there was an unknown problem counting the branches'
                 )));
-        $count = $data['result'];
+        $count = intval($data['result'][0]);
         
         return Base\PageResponse::createPageResponse($paging, $count, $rows);
     }
@@ -340,6 +358,8 @@ class FilmLayer {
             return array();
         }
     
+        // Film ID + Branch Id for a touch of extra protection; an attacker
+        // would need to guess both.
         $data = VFilmBranchTag::$INSTANCE->readBy_Film_Id_x_Film_Branch_Id($db,
                 $filmId, $branchId);
         FilmLayer::checkError($data,

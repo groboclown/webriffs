@@ -162,3 +162,33 @@ view:
         - constraint:
             type: fake_index
             columns: Film_Id, User_Id
+    extend:
+        - sql:
+            type: query
+            name: Distinct_Branches_By_Film_And_User
+            # Uses a null-safe OR in the clause, and has a null-safe equals
+            # by setting to a never-assigned user id (-1).
+            query: "
+              SELECT DISTINCT
+                  Film_Branch_Id,
+                  Branch_Name,
+                  Branch_Created_On,
+                  Branch_Last_Updated_On
+              FROM V_VISIBLE_FILM_BRANCH
+              WHERE Film_Id = {Film_Id}
+                AND (User_Id = COALESCE({User_Id}, -1) OR User_Id IS NULL)
+              "
+            arguments: User_Id, Film_Id
+        - sql:
+            type: query
+            name: Count_Distinct_Branches_By_Film_And_User
+            # Uses a null-safe OR in the clause, and has a null-safe equals
+            # by setting to a never-assigned user id (-1).
+            query: "
+              SELECT COUNT(DISTINCT Film_Branch_Id)
+              FROM V_VISIBLE_FILM_BRANCH
+              WHERE Film_Id = {Film_Id}
+                AND (User_Id = COALESCE({User_Id}, -1) OR User_Id IS NULL)
+              "
+            arguments: User_Id, Film_Id
+            

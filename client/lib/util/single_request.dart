@@ -99,8 +99,8 @@ class SingleRequest {
         // The current _head is no longer pending, because we're running it.
         _head = null;
 
-        //
-        request.execute(_server).then((ServerResponse resp) {
+        // Run the request
+        _active = request.execute(_server).then((ServerResponse resp) {
             _handleRunEnd(request);
             return resp;
         }, onError: (Exception e) {

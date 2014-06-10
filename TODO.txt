@@ -1,6 +1,24 @@
-Internal TODO list:
+Internal TODO list (in relative order):
 
-Split the authentication parts of the code into its own module.  This includes
-the sql files.
+Create data initialization web page for test setup.  This should only be
+copied into the output directory when the "test_setup" build target
+is used.
 
-Move the sql files so that they are better attached to their functionality.
+Film quip editing, saving, and loading.
+
+Access rules.  The schema support is there, it just needs some code to
+support it.
+
+Add per-user change handling.  The schema is basically there, it just needs
+to have UI coding and the php side support.
+
+Client-side error handling is in a primitive state.  It needs more robust
+handling of issues with  the server.
+
+Access control for branch owners and site admins.  Should be done at a
+global level and at a per-user level.
+
+The whole site needs styling.  That'll come much later on, as right now
+we're concerned about getting the basic functionality first.
+
+

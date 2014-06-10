@@ -8,22 +8,42 @@
                 <tr>
                     <!-- FIXME add sorting controls -->
                     
-                    <th>&nbsp;</th>
                     <th>Film</th>
                     <th>Release Year</th>
+                    <th>Branches</th>
                 </tr>
             </thead>
             <tbody ng-if="cmp.pageState.loadedFromServer">
                 <tr ng-repeat="film in cmp.films">
-                    <td>
-                        <span ng-if="film.expanded">V</span>
-                        <span ng-if="! film.expanded">&gt;</span>
-                    </td>
                     <td>{{film.name}}</td>
                     <td>{{film.releaseYear}}</td>
-                    <td><span ng-repeat="branch in film.branches">{{branch}}</span></td>
-                    <td><span ng-repeat="tag in film.tags">{{tag}}</span></td>
+                    <td>
+                    
+                        <div ng-if="! film.expanded">
+                            <span ng-click="film.toggleExpanded()">|...|</span>
+                        </div>
+                        
+                        
+                        <div ng-if="film.expanded">
+                            <span ng-if="film.loading">
+                            loading...
+                            </span>
+                            <span ng-if="! film.loading">
+                                <div ng-repeat="branch in film.branches">
+                                    <span>{{branch.name}}</span>
+                                    <span ng-if="branch.loading">
+                                    loading...
+                                    </span>
+                                    <span ng-if="! branch.loading">
+                                        <span ng-repeat="tag in branch.tags">{{tag.name}}</span>
+                                    </span>
+                                </div>
+                            </span>
+                        </div>
+                        
+                    </td>
                 </tr>
+                    
                 <tr ng-if="cmp.noFilms">
                     <td colspan="4">No relevant results.</td>
                 </tr>
