@@ -1,60 +1,26 @@
 # The user registration table.  It depends upon the GroboAuth schema.
 
 table:
-    tableName: USER
+    tableName: BAN_HISTORY
     columns:
+        - column:
+            name: Ban_History_Id
+            type: int
+            autoIncrement: true
+            constraints:
+                - constraint:
+                    type: primary key
+                    name: Ban_History_Id_Key
         - column:
             name: User_Id
             type: int
             autoIncrement: true
             constraints:
                 - constraint:
-                    type: primary key
-                    name: User_Id_Key
-        - column:
-            name: Username
-            type: nvarchar(64)
-            constraints:
-                - constraint:
-                    type: not null
-                - constraint:
-                    type: unique index
-                    name: Username__IDX
-        - column:
-            name: Contact
-            type: nvarchar(2048)
-            constraints:
-                - constraint:
-                    type: not null
-        - column:
-            name: Ga_User_Id
-            type: int
-            constraints:
-                - constraint:
-                    type: not null
-                - constraint:
                     type: foreign key
-                    name: User__Ga_User_Id_FK
-                    table: GA_USER
-                    column: Ga_User_Id
-        # The primary source the user uses.
-        - column:
-            name: Primary_Source_Id
-            type: int
-            constraints:
-                - constraint:
-                    type: not null
-                - constraint:
-                    type: foreign key
-                    name: User__Ga_Source_Id_FK
-                    table: GA_SOURCE
-                    column: Ga_Source_Id
-        - column:
-            name: Is_Site_Admin
-            type: tinyint
-            constraints:
-                - constraint:
-                    type: not null
+                    table: USER
+                    column: User_Id
+                    name: Ban_History__User_Id_Key
         - column:
             name: Ban_Start
             type: timestamp

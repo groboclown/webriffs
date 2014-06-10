@@ -1,0 +1,60 @@
+# Banning users by IP address.
+
+table:
+    tableName: IP_BAN
+    columns:
+        - column:
+            name: Ip_Ban_Id
+            type: int
+            autoIncrement: true
+            constraints:
+                - constraint:
+                    type: primary key
+                    name: Ip_Ban_Id_Key
+        - column:
+            name: Ip_Address
+            type: varchar(30)
+            constraints:
+                - constraint:
+                    type: not null
+        - column:
+            name: Ban_Start
+            type: timestamp
+        - column:
+            name: Ban_End
+            type: timestamp
+        - column:
+            name: Is_Perma_Banned
+            type: tinyint
+            constraints:
+                - constraint:
+                    type: not null
+        - column:
+            name: Created_On
+            type: timestamp
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: no update
+                - constraint:
+                    type: initial value
+                    dialects:
+                        - dialect:
+                            platforms: mysql
+                            sql: NOW()
+        - column:
+            name: Last_Updated_On
+            type: timestamp
+            constraints:
+                - constraint:
+                    type: nullable
+                - constraint:
+                    type: constant update
+                    dialects:
+                        - dialect:
+                            platforms: mysql
+                            sql: NOW()
+                - constraint:
+                    type: initial value
+                    value: "NULL"

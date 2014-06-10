@@ -98,6 +98,7 @@ class AuthenticationLogin extends Resource {
                 ));
         }
         
+        
         // TODO make the session minutes settable by the user,
         // within reason
         $timeout = Resource::DEFAULT_SESSION_TIMEOUT;
@@ -113,6 +114,9 @@ class AuthenticationLogin extends Resource {
 
             $this->request->userAgent, $this->request->remoteAddr, null,
             $timeout);
+
+
+        // FIXME add IP and user ban checking
         
         
         // Note that by setting the domain to an empty string, PHP will restrict
