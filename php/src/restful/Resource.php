@@ -167,6 +167,21 @@ class Resource extends Base\Resource {
      * Checks if the request is authenticated, and returns true or false.
      * Also, the <code>$this->container['user']</code> will be set to the
      * user data associative array.
+     *
+     * $this->container['user'] contains:
+     *
+     *  'Ga_Session_Id'
+     *  'Ga_User_Id'
+     *  'Ga_Source_Id'
+     *  'Login_Attempts'
+     *  'Authentication_Challenge'
+     *
+     *  'User_Id'
+     *  'Username'
+     *  'Contact'
+     *  'Is_Admin'
+     *  'Created_On'
+     *  'Last_Updated_On'
      */
     function isUserAuthenticated() {
         // First, check if we've already been authenticated.  This avoids an

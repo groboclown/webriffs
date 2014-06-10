@@ -257,9 +257,7 @@ class AuthenticationLayer {
         $retData['Created_On'] = $userData['Created_On'];
         $retData['Last_Updated_On'] = $userData['Last_Updated_On'];
         
-        // FIXME pull in the other user authentication data.
-        // such as user_attribute, film_branch_user
-
+        // All other user data  should only be pulled in when necessary.
 
         return $retData;
     }

@@ -171,8 +171,7 @@ class FilmLayer {
         $branchId = intval($data['result']);
         
         
-        // FIXME for now, all branches are public
-        $data = FilmBranch::$INSTANCE->create($db, $branchId, $branchName, 1);
+        $data = FilmBranch::$INSTANCE->create($db, $branchId, $branchName);
         FilmLayer::checkError($data,
             new Base\ValidationException(
                 array(

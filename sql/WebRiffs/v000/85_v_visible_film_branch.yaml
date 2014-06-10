@@ -48,32 +48,6 @@ view:
           , fv.Branch_Created_On Branch_Created_On
           , fv.Branch_Last_Updated_On Branch_Last_Updated_On
           
-          , NULL User_Id
-          , NULL Access
-          , NULL Privilege_Level
-        FROM V_FILM_BRANCH fv
-        INNER JOIN FILM_BRANCH_PUBLIC p
-            ON fv.Film_Branch_Id = p.Film_Branch_Id
-        WHERE fv.Is_Public = 1
-        
-        
-        UNION
-        
-        
-        SELECT
-          fv.Film_Id Film_Id
-          , fv.Gv_Project_Id Gv_Project_Id
-          , fv.Film_Name Film_Name
-          , fv.Release_Year Release_Year
-          , fv.Film_Created_On Film_Created_On
-          , fv.Film_Last_Updated_On Film_Last_Updated_On
-          
-          , fv.Film_Branch_Id Film_Branch_Id
-          , fv.Gv_Branch_Id Gv_Branch_Id
-          , fv.Branch_Name Branch_Name
-          , fv.Branch_Created_On Branch_Created_On
-          , fv.Branch_Last_Updated_On Branch_Last_Updated_On
-          
           , u.User_Id User_Id
           , u.Access Access
           , u.Privilege_Level
