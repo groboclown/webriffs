@@ -1,0 +1,42 @@
+
+# The public (e.g. "guest") privilege levels for all users on all the branches.
+
+view:
+    viewName: V_FILM_BRANCH_PUBLIC
+    query: "SELECT
+          , fba.Film_Branch_Id Film_Branch_Id
+          , ua.User_Id User_Id
+          , fba.Access Access
+          , MIN(fba.Privilege_Level, ua.Privilege_Level) Privilege_Level
+        FROM FILM_BRANCH_ACCESS fba
+        INNER JOIN USER_ACCESS ua
+            ON ua.Access = fba.Access
+        WHERE fba.User_Id IS NULL
+        "
+    columns:
+        - column:
+            name: Film_Branch_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: FILM_BRANCH
+                    column: Film_Branch_Id
+        - column:
+            name: User_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: USER
+                    column: User_Id
+        - column:
+            name: Access
+            type: varchar(64)
+        - column:
+            name: Privilege_Level
+            type: int
+    constraints:
+        - constraint:
+            type: fake index
+            columns: Film_Branch_Id, User_Id

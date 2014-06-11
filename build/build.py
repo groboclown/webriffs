@@ -267,13 +267,6 @@ def copy_php(config):
              verbose = True,
              dry_run = False)
 
-@depends(copy_php)
-def copy_php_test(config):
-    distutils.dir_util.copy_tree(
-         todir(config['php.dir'], 'test', 'web'),
-         todir(config['exports.dir'], 'web'),
-         update = True, verbose = True, dry_run = False)
-
 
 @depends(init)
 def fake_setup(config):
@@ -288,6 +281,13 @@ def fake_setup(config):
             os.unlink(dest_admin_page)
         os.rename(src_admin_page, dest_admin_page)
 
+@depends(copy_php, fake_setup)
+def copy_php_test(config):
+    distutils.dir_util.copy_tree(
+         todir(config['php.dir'], 'test', 'web'),
+         todir(config['exports.dir'], 'web'),
+         update = True, verbose = True, dry_run = False)
+
 
 @depends(clean, generate_sql, generate_dbo,
          lint_client, generate_client_js, copy_client, copy_dart, copy_php)
@@ -295,7 +295,7 @@ def all(config):
     pass
 
 
-@depends(clean, generate_sql, generate_dbo, copy_dart, copy_php, fake_setup)
+@depends(clean, generate_sql, generate_dbo, copy_dart, copy_php_test)
 def test_setup(config):
     pass
 

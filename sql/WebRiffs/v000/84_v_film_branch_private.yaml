@@ -1,0 +1,42 @@
+
+# A join between the film and branch, so that all that information can be
+# retrieved in a single query.
+
+view:
+    viewName: V_FILM_BRANCH_PRIVATE
+    query: "SELECT
+          , fba.Film_Branch_Id Film_Branch_Id
+          , fba.User_Id User_Id
+          , fba.Access Access
+          , fba.Privilege_Level Privilege_Level
+        FROM FILM_BRANCH_ACCESS fba
+        WHERE fba.User_Id IS NOT NULL
+        "
+    columns:
+        - column:
+            name: Film_Branch_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: FILM_BRANCH
+                    column: Film_Branch_Id
+        - column:
+            name: User_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: USER
+                    column: User_Id
+        - column:
+            name: Access
+            type: varchar(64)
+        - column:
+            name: Privilege_Level
+            type: int
+    constraints:
+        - constraint:
+            type: fake index
+            columns: Film_Branch_Id, User_Id
+            

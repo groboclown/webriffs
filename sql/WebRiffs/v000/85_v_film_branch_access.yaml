@@ -1,0 +1,100 @@
+
+# A join between the film_branch and the permissions.
+
+view:
+    viewName: V_FILM_BRANCH_ACCESS
+    
+    # There will always be a cross-join between every branch and every user
+    # with the V_FILM_BRANCH_PUBLIC, while the private access will always be
+    # a subset of that.  So, we perform a left outer join from the public to
+    # the private, so that the private will sometimes have "null" values.
+    query: "SELECT
+          f.Film_Id Film_Id
+          , fb.Film_Branch_Id Film_Branch_Id
+          , fb.Gv_Branch_Id Gv_Branch_Id
+          , fb.Branch_Name Branch_Name
+          , fb.Created_On Branch_Created_On
+          , fb.Last_Updated_On Branch_Last_Updated_On
+          
+          , pub.User_Id User_Id
+          , pub.Access Access
+          , MAX(pub.Privilege_Level, COALESCE(pri.Privilege_Level, 0)) Privilege_Level
+        FROM FILM_BRANCH fb
+        INNER JOIN GV_BRANCH gb
+            ON fb.Gv_Branch_Id = gb.Gv_Branch_Id
+        INNER JOIN FILM f
+            ON f.Gv_Project_Id = b.Gv_Project_Id
+        INNER JOIN V_FILM_BRANCH_PUBLIC pub
+            ON pub.Film_Branch_Id = fb.Film_Branch_Id
+        LEFT OUTER JOIN V_FILM_BRANCH_PRIVATE pri
+            ON pri.Film_Branch_Id = fb.Film_Branch_Id
+            AND pri.User_Id = pub.User_Id
+            AND pri.Access = pub.Access
+        "
+    columns:
+        - column:
+            name: Film_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: FILM
+                    column: Film_Id
+        - column:
+            name: Film_Branch_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: FILM_BRANCH
+                    column: Film_Branch_Id
+        - column:
+            name: Gv_Branch_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_BRANCH
+                    column: Gv_Branch_Id
+        - column:
+            name: Branch_Name
+            type: nvarchar(255)
+        - column:
+            name: Branch_Created_On
+            type: timestamp
+        - column:
+            name: Branch_Last_Updated_On
+            type: timestamp
+        - column:
+            name: User_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: USER
+                    column: User_Id
+        - column:
+            name: Access
+            type: varchar(64)
+            constraints:
+                - constraint:
+                    type: not null
+        - column:
+            name: Privilege_Level
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+    constraints:
+        - constraint:
+            type: fake index
+            columns: Film_Id, Film_Branch_Id, User_Id
+        - constraint:
+            type: fake_index
+            columns: Film_Id, User_Id, Access
+    whereClauses:
+        - where:
+            name: Minimum_Privilege
+            sql: Privilege_Level >= {min_privilege}
+            argument: min_privilege
+            

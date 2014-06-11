@@ -58,7 +58,7 @@ class AdminLayer {
      * @return null (no link with that name) or an associative array with the
      *      values.
      */
-    public static function getLinkNamed($db, string $name) {
+    public static function getLinkNamed($db, $name) {
         $data = LinkType::$INSTANCE->readBy_Name($db, $name);
         AdminLayer::checkError($data,
             new Base\ValidationException(
@@ -83,8 +83,8 @@ class AdminLayer {
      *
      * @return int the link_id for the link
      */
-    public static function createLink($db, string $name, string $description,
-            string $urlPrefix, string $validationRegex) {
+    public static function createLink($db, $name, $description,
+            $urlPrefix, $validationRegex) {
         //public function create($db, $Name, $Description, $Url_Prefix, $Validation_Regex) {
         $errors = array();
         if (! is_string($name) || strlen($name) > 200) {
@@ -102,7 +102,7 @@ class AdminLayer {
         if (sizeof($errors) > 0) {
             throw new Base\ValidationException($errors);
         }
-        $data = LinkType::create($db, $name, $description, $urlPrefix,
+        $data = LinkType::$INSTANCE->create($db, $name, $description, $urlPrefix,
             $validationRegex);
         AdminLayer::checkError($data, new Base\ValidationException(array(
             'unknown' => 'problem creating the link.  Is the name already used?'

@@ -1,21 +1,18 @@
-# Public authentication requirements for accessing a film version.
-# The authentication requirement matches the global role on the user
-# (USER_ACCESS).
-# Individual special access (such as "maintainer") is stored in the
-# FILM_BRANCH_USER table.
-
+# Stores individual special access (such as "maintainer") per film branch with
+# a non-null user id.  Guest users (null user id) have a maximum privilege level
+# for the branch.
 
 table:
-    tableName: FILM_BRANCH_PUBLIC
+    tableName: FILM_BRANCH_ACCESS
     columns:
         - column:
-            name: Film_Branch_Public_Id
+            name: Film_Branch_Access_Id
             type: int
             autoIncrement: true
             constraints:
                 - constraint:
                     type: primary key
-                    name: Film_Branch_Public_Id_Key
+                    name: Film_Branch_Access_Id_Key
         - column:
             name: Film_Branch_Id
             type: int
@@ -24,9 +21,20 @@ table:
                     type: not null
                 - constraint:
                     type: foreign key
-                    name: Film_Branch_Public__Film_Branch_Id_FK
+                    name: Film_Branch_Access__Film_Branch_Id_FK
                     table: FILM_BRANCH
                     column: Film_Branch_Id
+        - column:
+            name: User_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: nullable
+                - constraint:
+                    type: foreign key
+                    name: Film_Branch_Access__User_Id_FK
+                    table: USER
+                    column: User_Id
         - column:
             name: Access
             type: varchar(64)
@@ -34,7 +42,7 @@ table:
                 - constraint:
                     type: not null
         - column:
-            name: Minimum_Privilege_Level
+            name: Privilege_Level
             type: int
             constraints:
                 - constraint:
@@ -68,3 +76,7 @@ table:
                 - constraint:
                     type: initial value
                     value: "NULL"
+    constraints:
+        - constraint:
+              type: unique index
+              columns: Film_Branch_Id, User_Id, Access

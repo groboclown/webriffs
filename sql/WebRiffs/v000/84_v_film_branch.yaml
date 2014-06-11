@@ -15,7 +15,6 @@ view:
           , fb.Film_Branch_Id Film_Branch_Id
           , fb.Gv_Branch_Id Gv_Branch_Id
           , fb.Branch_Name Branch_Name
-          , fb.Is_Public Is_Public
           , fb.Created_On Branch_Created_On
           , fb.Last_Updated_On Branch_Last_Updated_On
         FROM FILM f
@@ -59,7 +58,6 @@ view:
             constraints:
                 - constraint:
                     type: foreign key
-                    name: V_Film_Change_Quip__Film_Branch_Id_FK
                     table: FILM_BRANCH
                     column: Film_Branch_Id
         - column:
@@ -68,18 +66,11 @@ view:
             constraints:
                 - constraint:
                     type: foreign key
-                    name: V_Film_Change_Quip__Gv_Branch_Id_FK
                     table: GV_BRANCH
                     column: Gv_Branch_Id
         - column:
             name: Branch_Name
             type: nvarchar(255)
-        - column:
-            name: Is_Public
-            type: tinyint
-            constraints:
-                - constraint:
-                    type: not null
         - column:
             name: Branch_Created_On
             type: timestamp
@@ -90,3 +81,4 @@ view:
         - constraint:
             type: fake index
             columns: Film_Id, Film_Branch_Id
+            
