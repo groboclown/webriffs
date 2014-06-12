@@ -12,6 +12,10 @@ use GroboVersion;
  * Manages the business logic related to the films.
  */
 class FilmLayer {
+    public static $DEFAULT_TEMPLATE_ACCESS_NAME = "standard";
+    public static $INITIAL_BRANCH_NAME = "Initial";
+    
+    
     public static $FILM_SORT_COLUMNS;
     public static $DEFAULT_FILM_SORT_COLUMN = "name";
     public static $FILM_FILTERS;
@@ -40,7 +44,7 @@ class FilmLayer {
      *            check its value.
      * @return array contains the (projectId, filmId, branchId, changeId)
      */
-    public static function createFilm($db, $userInfo, $name, $year) {
+    public static function createFilm($db, $userInfo, $name, $year, $accessTemplate) {
         
         // input validation
         if (!is_string($name) || strlen($name) < 1) {
@@ -130,7 +134,8 @@ class FilmLayer {
         $filmId = intval($data['result']);
         
         $branchData = FilmLayer::createBranchById($db, $projectId, $filmId,
-            $gaUserId, "Initial");
+            $gaUserId, FilmLayer::$INITIAL_BRANCH_NAME,
+            $accessTemplate);
         $branchId = $branchData[0];
         $filmBranchId = $branchData[1];
         $changeId = $branchData[2];
@@ -157,7 +162,7 @@ class FilmLayer {
      * @return multitype:number
      */
     public static function createBranchById($db, $projectId, $filmId,
-            $gaUserId, $branchName) {
+            $gaUserId, $branchName, $accessTemplate) {
         // FIXME ensure the branch name does not exist for that film id.
         // FIXME ensure the branch name is valid
         // FIXME validate branch name length is valid
@@ -182,12 +187,14 @@ class FilmLayer {
         $filmBranchId = intval($data['result']);
         
         
-        // Next all the permissions for guests
-        foreach (Access::$BRANCH_ACCESS as $right) {
-            FilmBranchAccess::$INSTANCE->create($db, $filmBranchId, null,
-                $right, Access::$PRIVILEGE_USER);
-        }
-        
+        // Next set the permissions based on the template
+        $data = FilmBranchAccess::$INSTANCE->runCreateFromTemplate($db,
+                $filmBranchId, $accessTemplate);
+        FilmLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem creating the access permissions'
+                )));
         
         // Finally a change for the user to start using.
         $data = GroboVersion\GvChange::$INSTANCE->create(
@@ -302,6 +309,7 @@ class FilmLayer {
 
     /**
      * Returns all the branches in the film that are visible by the user.
+     * Currently there are no filters on branch names.
      */
     public static function pageBranches($db, $userId, $filmId,
             Base\PageRequest $paging = null) {
@@ -309,33 +317,92 @@ class FilmLayer {
         
         if ($paging == null) {
             $paging = Base\PageRequest::parseGetRequest(
-                    FilmLayer::$BRANCH_FILTERS, FilmLayer::$DEFAULT_BRANCH_SORT_COLUMN,
+                    FilmLayer::$BRANCH_FILTERS,
+                    FilmLayer::$DEFAULT_BRANCH_SORT_COLUMN,
                     FilmLayer::$BRANCH_SORT_COLUMNS);
         }
         
+        // We need a bit of dual logic here for the situation where the
+        // user isn't logged in.
         
-        // FIXME this will return too many rows - duplicate branches will
-        // be returned if the authentication for the user has multiple records.
-        
-        $data = VVisibleFilmBranch::$INSTANCE->runDistinctBranchesByFilmAndUser(
-                $db, $filmId, $userId);
-        FilmLayer::checkError($data,
+        if ($userId === null) {
+            $wheres = array(new VFilmBranchGuestAccess_IsAllowed(
+                    Access::$PRIVILEGE_GUEST, Access::$BRANCH_READ
+                ));
+            
+            $rowData = VFilmBranchGuestAccess::$INSTANCE->readBy_Film_Id(
+                    $db, $filmId, $wheres,
+                    $paging->order, $paging->startRow, $paging->endRow);
+            $countData = VFilmBranchGuestAccess::$INSTANCE->countBy_Film_Id(
+                    $db, $filmId, $wheres);
+        } else {
+            $wheres = array(new VFilmBranchAccess_IsAllowed());
+            
+            $rowData = VFilmBranchAccess::$INSTANCE->readBy_Film_Id_x_User_Id_x_Access(
+                    $db, $filmId, $userId, Access::$BRANCH_READ, $wheres,
+                    $paging->order, $paging->startRow, $paging->endRow);
+            $countData = VFilmBranchAccess::$INSTANCE->countBy_Film_Id_x_User_Id_x_Access(
+                    $db, $filmId, $userId, Access::$BRANCH_READ);
+        }
+        FilmLayer::checkError($rowData,
             new Base\ValidationException(
                 array(
                     'unknown' => 'there was an unknown problem finding the branches'
                 )));
-        $rows = $data['result'];
+        $rows = $rowData['result'];
         
-        $data = VVisibleFilmBranch::$INSTANCE->runCountDistinctBranchesByFilmAndUser(
-                $db, $filmId, $userId);
-        FilmLayer::checkError($data,
+        FilmLayer::checkError($countData,
             new Base\ValidationException(
                 array(
                     'unknown' => 'there was an unknown problem counting the branches'
                 )));
-        $count = intval($data['result'][0]);
+        $count = intval($countData['result'][0]);
         
         return Base\PageResponse::createPageResponse($paging, $count, $rows);
+    }
+    
+    
+    /**
+     * Performs the correct access check for the user on the branch.  Returns
+     * false if the user cannot access the branch, or true if it can.
+     *
+     * It's fine to split up general queries on the branch into two separate
+     * queries.  There's a very slim chance
+     * that the user will have permissions revoked in the middle of these
+     * two queries, but that results in a very minor data leak that the
+     * user should have had permissions to see if they made this query just
+     * a half second earlier.
+     *
+     * @param PBO $db
+     * @param int $userId
+     * @param int $branchId
+     * @param String $access
+     * @return bool true if access is allowed, false if not.
+     */
+    public static function canAccessBranch($db, $userId, $branchId, $access) {
+        
+        // We need to split the query into two types.
+        
+        if ($userId === null) {
+            // guest user
+            $wheres = array(new FilmBranchAccess_IsGuestAllowed(
+                    $access, Access::$PRIVILEGE_GUEST));
+            $data = FilmBranchAccess::$INSTANCE->countBy_Film_Branch_Id(
+                    $db, $branchId, $wheres);
+        } else {
+            // logged-in user
+            $wheres = array(new VFilmBranchAccess_IsAllowed());
+            $data = VFilmBranchAccess::$INSTANCE->countBy_Film_Branch_Id_x_User_Id_x_Access(
+                    $db, $branchId, $userId, $access, $wheres);
+        }
+        
+        FilmLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem checking the branches'
+                )));
+        
+        return $data['result'] > 0;
     }
 
 
@@ -347,30 +414,14 @@ class FilmLayer {
     public static function getTagsForBranch($db, $userId, $filmId, $branchId) {
         // userId can be null
         
-        // Rather than performing a query on a join between the heavy
-        // view "visible_film_branch" and the heavy view for the top changes,
-        // we'll split it into two separate queries.  There's a very slim chance
-        // that the user will have permissions revoked in the middle of these
-        // two queries, but that results in a very minor data leak that the
-        // user should have had permissions to see if they made this query just
-        // a half second earlier.
-    
-        $data = VVisibleFilmBranch::$INSTANCE->countBy_Film_Id_x_Film_Branch_Id_x_User_Id(
-                $db, $filmId, $branchId, $userId);
-        FilmLayer::checkError($data,
-            new Base\ValidationException(
-                array(
-                    'unknown' => 'there was an unknown problem finding the branches'
-                )));
-        if ($data['result'] <= 0) {
+        if (! FilmLayer::canAccessBranch($db, $userId, $branchId,
+                Access::$BRANCH_READ)) {
             // not a visible branch
             return array();
         }
-    
-        // Film ID + Branch Id for a touch of extra protection; an attacker
-        // would need to guess both.
-        $data = VFilmBranchTag::$INSTANCE->readBy_Film_Id_x_Film_Branch_Id($db,
-                $filmId, $branchId);
+        
+        $data = VFilmBranchTag::$INSTANCE->readBy_Film_Branch_Id(
+                $db, $branchId);
         FilmLayer::checkError($data,
             new Base\ValidationException(
                 array(
@@ -410,7 +461,7 @@ FilmLayer::$FILM_FILTERS = array(
 );
 
 FilmLayer::$BRANCH_SORT_COLUMNS = array(
-    "name" => "Name",
+    "name" => "Branch_Name",
     "created" => "Created_On",
     "updated" => "Last_Updated_On"
 );

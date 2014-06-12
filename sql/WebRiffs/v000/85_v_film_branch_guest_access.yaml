@@ -2,7 +2,7 @@
 # A join between the film_branch and the permissions.
 
 view:
-    viewName: V_FILM_BRANCH_ACCESS
+    viewName: V_FILM_BRANCH_GUEST_ACCESS
     
     # There will always be a cross-join between every branch and every user
     # with the V_FILM_BRANCH_PUBLIC, while the private access will always be
@@ -17,21 +17,16 @@ view:
           , fb.Created_On Branch_Created_On
           , fb.Last_Updated_On Branch_Last_Updated_On
           
-          , pub.User_Id User_Id
-          , pub.Access Access
-          
-          , pub.Allowed + COALESCE(pri.Allowed, 0) Allowed
+          , acc.Access Access
+          , acc.Privilege_Level Minimum_Privilege_Level
         FROM FILM_BRANCH fb
         INNER JOIN GV_BRANCH gb
             ON fb.Gv_Branch_Id = gb.Gv_Branch_Id
         INNER JOIN FILM f
             ON f.Gv_Project_Id = gb.Gv_Project_Id
-        INNER JOIN V_FILM_BRANCH_PUBLIC pub
-            ON pub.Film_Branch_Id = fb.Film_Branch_Id
-        LEFT OUTER JOIN V_FILM_BRANCH_PRIVATE pri
-            ON pri.Film_Branch_Id = fb.Film_Branch_Id
-            AND pri.User_Id = pub.User_Id
-            AND pri.Access = pub.Access
+        INNER JOIN FILM_BRANCH_ACCESS acc
+            ON acc.Film_Branch_Id = fb.Film_Branch_Id
+        WHERE acc.User_Id IS NULL
         "
     columns:
         - column:
@@ -68,40 +63,23 @@ view:
             name: Branch_Last_Updated_On
             type: timestamp
         - column:
-            name: User_Id
-            type: int
-            constraints:
-                - constraint:
-                    type: foreign key
-                    table: USER
-                    column: User_Id
-        - column:
             name: Access
             type: varchar(64)
             constraints:
                 - constraint:
                     type: not null
         - column:
-            name: Allowed
-            type: tinyint
+            name: Minimum_Privilege_Level
+            type: int
             constraints:
                 - constraint:
                     type: not null
     constraints:
         - constraint:
-            type: fake index
-            columns: Film_Id, Film_Branch_Id, User_Id
-        - constraint:
             type: fake_index
-            columns: Film_Id, User_Id, Access
-        - constraint:
-            type: fake index
-            columns: Film_Branch_Id, User_Id, Access
+            columns: Film_Id, Access
     whereClauses:
         - where:
             name: Is_Allowed
-            sql: Allowed > 0
-        - where:
-            name: Is_Not_Allowed
-            sql: Allowed <= 0
-            
+            sql: Access = {access} AND Minimum_Privilege_Level <= {privilege}
+            arguments: privilege, access

@@ -1,6 +1,8 @@
 
-# A join between the film and branch, so that all that information can be
-# retrieved in a single query.
+# Contains the explicit user definitions for a branch; in the case where users
+# are deliberately added into a branch, the Privilege_Level is considered a
+# flag - either the user is granted that access (> 0) or removed from that
+# access (<= 0).
 
 view:
     viewName: V_FILM_BRANCH_PRIVATE
@@ -8,7 +10,14 @@ view:
           fba.Film_Branch_Id Film_Branch_Id
           , fba.User_Id User_Id
           , fba.Access Access
-          , fba.Privilege_Level Privilege_Level
+          
+          , CASE
+              WHEN fba.Privilege_Level > 0 THEN
+                1
+              ELSE
+                0
+              END
+              Allowed
         FROM FILM_BRANCH_ACCESS fba
         WHERE fba.User_Id IS NOT NULL
         "
@@ -33,8 +42,8 @@ view:
             name: Access
             type: varchar(64)
         - column:
-            name: Privilege_Level
-            type: int
+            name: Allowed
+            type: tinyint
     constraints:
         - constraint:
             type: fake index

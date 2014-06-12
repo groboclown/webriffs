@@ -22,17 +22,26 @@ class FilmListComponent {
 
     PageState pageState;
 
+    bool _wasError = false;
+
     final List<FilmRecord> films = [];
 
     bool get noFilms => films.length <= 0;
 
+    bool get wasError => _wasError;
+
     FilmListComponent(this._server) {
         pageState = new PageState(this._server, '/film',
             (PageState ps, Iterable<dynamic> fl) {
-                films.clear();
-                fl.forEach((Map<String, dynamic> json) {
-                    films.add(new FilmRecord.fromJson(_server, json));
-                });
+                if (ps.hasError) {
+                    _wasError = true;
+                } else {
+                    _wasError = false;
+                    films.clear();
+                    fl.forEach((Map<String, dynamic> json) {
+                        films.add(new FilmRecord.fromJson(_server, json));
+                    });
+                }
             });
         pageState.updateFromServer();
     }
@@ -54,6 +63,10 @@ class FilmRecord {
 
     bool get loading => _loading;
 
+    bool _hasError = false;
+
+    bool get hasError => _hasError;
+
     bool _expanded = false;
 
     bool get expanded => _expanded;
@@ -65,7 +78,8 @@ class FilmRecord {
     }
     bool get areBranchesLoaded => _branches != null;
 
-    Future<List<BranchRecord>> get branches => _pendingBranches;
+    //Future<List<BranchRecord>> get branches => _pendingBranches;
+    List<BranchRecord> get branches => _branches;
     Future<int> get branchCount => _pendingBranchCount.future;
 
 
@@ -108,11 +122,16 @@ class FilmRecord {
             // Only load the top 10 tags
             PageState pageState = new PageState(_server, '/film/${filmId}/branch',
                     (PageState pageState, Iterable<dynamic> data) {
-                        data.forEach((Map<String, dynamic> row) {
-                            _branches.add(new BranchRecord.fromJson(
-                                    _server, filmId, row));
-                        });
-                        _pendingBranchCount.complete(pageState.recordCount);
+                        if (pageState.hasError) {
+                            _hasError = true;
+                        } else {
+                            _hasError = false;
+                            data.forEach((Map<String, dynamic> row) {
+                                _branches.add(new BranchRecord.fromJson(
+                                        _server, filmId, row));
+                            });
+                            _pendingBranchCount.complete(pageState.recordCount);
+                        }
                         _loading = false;
                     });
             _pendingBranches = pageState.updateFromServer(
@@ -133,6 +152,10 @@ class BranchRecord {
     final List<TagRecord> _tags;
     bool _loading = true;
 
+    bool _hasError = false;
+
+    bool get hasError => _hasError;
+
     bool get loading => _loading;
 
     Future<List<TagRecord>> _pendingTags;
@@ -146,9 +169,14 @@ class BranchRecord {
             this.lastUpdatedOn) : _tags = [] {
         _pendingTags = server.get('/film/${filmId}/branch/${branchId}/tag',
             null).then((ServerResponse result) {
-                result.jsonData['tags'].foreach((Map<String, dynamic> tag) {
-                    _tags.add(new TagRecord.fromJson(tag));
-                });
+                if (result.wasError) {
+                    _hasError = true;
+                } else {
+                    _hasError = false;
+                    result.jsonData['tags'].forEach((Map<String, dynamic> tag) {
+                        _tags.add(new TagRecord.fromJson(tag));
+                    });
+                }
                 _loading = false;
                 return _tags;
             });

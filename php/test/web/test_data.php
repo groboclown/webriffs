@@ -113,18 +113,43 @@ if ($data === null) {
 
 
 // ---------------------------------------------------------------------------
+// Create a default access template
+
+foreach (WebRiffs\Access::$BRANCH_ACCESS as $access) {
+    $level = WebRiffs\Access::$PRIVILEGE_GUEST;
+    if ($access == WebRiffs\Access::$BRANCH_WRITE ||
+            $access == WebRiffs\Access::$BRANCH_USER_MAINTENANCE ||
+            $access == WebRiffs\Access::$BRANCH_DELETE) {
+        $level = WebRiffs\Access::$PRIVILEGE_TRUSTED;
+    }
+    if ($access == WebRiffs\Access::$BRANCH_TAG ||
+            $access == WebRiffs\Access::$QUIP_WRITE ||
+            $access == WebRiffs\Access::$QUIP_TAG) {
+        $level = WebRiffs\Access::$PRIVILEGE_USER;
+    }
+    $data = WebRiffs\TemplateFilmBranchAccess::$INSTANCE->create($db,
+        WebRiffs\FilmLayer::$DEFAULT_TEMPLATE_ACCESS_NAME,
+        $access, $level);
+    Base\BaseDataAccess::checkError($data, new \Exception("create access ".$access));
+    $result['access-'.$access] = $level;
+}
+
+
+// ---------------------------------------------------------------------------
 // Create films + initial branch + initial change
 $data = WebRiffs\User::$INSTANCE->readBy_Username($db, "user0");
 Base\BaseDataAccess::checkError($data, new \Exception("find user0"));
 $userData = $data['result'][0];
-$idList = WebRiffs\FilmLayer::createFilm($db, $userData, "Slacker", 2011);
+$idList = WebRiffs\FilmLayer::createFilm($db, $userData, "Slacker", 2011,
+    WebRiffs\FilmLayer::$DEFAULT_TEMPLATE_ACCESS_NAME);
 $result['create-slacker-2011'] = array(
     'film_id' => $idList[1],
     'branch_id' => $idList[2],
     'change_id' => $idList[3]
 );
 
-$idList = WebRiffs\FilmLayer::createFilm($db, $userData, "Slacker", 1991);
+$idList = WebRiffs\FilmLayer::createFilm($db, $userData, "Slacker", 1991,
+    WebRiffs\FilmLayer::$DEFAULT_TEMPLATE_ACCESS_NAME);
 $result['create-slacker-1991'] = array(
     'film_id' => $idList[1],
     'branch_id' => $idList[2],

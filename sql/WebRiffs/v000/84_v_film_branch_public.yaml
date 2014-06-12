@@ -1,5 +1,6 @@
-
 # The public (e.g. "guest") privilege levels for all users on all the branches.
+# The Allowed flag represents whether the User_Id has sufficient privileges to
+# perform the "Access" action.
 
 view:
     viewName: V_FILM_BRANCH_PUBLIC
@@ -13,14 +14,12 @@ view:
           , fba.Access Access
           
           , CASE
-              WHEN ua.Privilege_Level >= 100 THEN
-                ua.Privilege_Level
-              WHEN fba.Privilege_Level < ua.Privilege_Level THEN
-                fba.Privilege_Level
+              WHEN (fba.Privilege_Level <= ua.Privilege_Level) THEN
+                1
               ELSE
-                ua.Privilege_Level
+                0
               END
-              Privilege_Level
+              Allowed
         FROM FILM_BRANCH_ACCESS fba
         INNER JOIN USER_ACCESS ua
             ON ua.Access = fba.Access
@@ -47,8 +46,8 @@ view:
             name: Access
             type: varchar(64)
         - column:
-            name: Privilege_Level
-            type: int
+            name: Allowed
+            type: tinyint
     constraints:
         - constraint:
             type: fake index

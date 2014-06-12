@@ -1,24 +1,16 @@
 Internal TODO list (in relative order):
 
-Create data initialization web page for test setup.  This should only be
-copied into the output directory when the "test_setup" build target
-is used.
+Client-side error handling is in a primitive state.  It needs more robust
+handling of issues with the server.  This needs to have better high level
+support for all JSon loaded objects.  Perhaps have a parent class to better
+handle it in a common way.
 
 Film quip editing, saving, and loading.
 
 Create new film branches.
 
-Check if the CSRF support is actually helping security, or if it just is
-another server request and database filler.
-
-Access rules.  The schema support is there, it just needs some code to
-support it.
-
 Add per-user change handling.  The schema is basically there, it just needs
 to have UI coding and the php side support.
-
-Client-side error handling is in a primitive state.  It needs more robust
-handling of issues with  the server.
 
 Access control for branch owners and site admins.  Should be done at a
 global level and at a per-user level.

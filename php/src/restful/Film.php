@@ -51,7 +51,8 @@ class FilmCollection extends Resource {
         $db = $this->getDB();
         
         $idList = WebRiffs\FilmLayer::createFilm($db, $this->container['user'],
-            $data->name, $data->year);
+            $data->name, $data->year,
+            WebRiffs\FilmLayer::$DEFAULT_TEMPLATE_ACCESS_NAME);
 
         $data = array(
             'film_id' => $idList[1],

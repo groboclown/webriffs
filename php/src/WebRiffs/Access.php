@@ -29,6 +29,7 @@ class Access {
     static $BRANCH_WRITE = 'branch-write';
     static $BRANCH_USER_MAINTENANCE = 'branch-users';
     static $BRANCH_DELETE = 'branch-del';
+    static $BRANCH_TAG = 'branch-tag';
     
     
     // quips inside a branch
@@ -47,9 +48,10 @@ class Access {
     
     
     
-    // Access permission levels
-    static $PRIVILEGE_NONE = 0;
-    static $PRIVILEGE_GUEST = 1;
+    // Access permission levels; these only apply to the USER_ACCESS table
+    // and the FILM_BRANCH_ACCESS table when User_Id = null.
+    static $PRIVILEGE_NONE = 0; // Blocked access
+    static $PRIVILEGE_GUEST = 1; // A non-logged in user
     static $PRIVILEGE_USER = 2;
     static $PRIVILEGE_AUTHORIZED = 3;
     static $PRIVILEGE_TRUSTED = 4;
@@ -75,6 +77,7 @@ Access::$BRANCH_ACCESS = array(
     Access::$BRANCH_WRITE,
     Access::$BRANCH_USER_MAINTENANCE,
     Access::$BRANCH_DELETE,
+    Access::$BRANCH_TAG,
     Access::$QUIP_READ,
     Access::$QUIP_WRITE,
     Access::$QUIP_TAG,

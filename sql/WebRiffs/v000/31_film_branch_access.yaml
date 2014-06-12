@@ -2,6 +2,18 @@
 # a non-null user id.  Guest users (null user id) have a maximum privilege level
 # for the branch.
 
+# This table takes a bit of work to understand.
+# Essentially, the "Access" key tells the kind of action requested to perform.
+# The Privilege_Level has a dual purpose - for User_Id = null (general access),
+# this value represents the minimum level the user needs in order to have
+# this access.  For User_Id = non null, it can be considered either 0 (no access)
+# or not 1 (has access).  Users who are not logged in are assumed to have
+# a default access privilege level (defined by code).
+
+# The Privilege_Level is transformed into Allowed in the views.  This allows
+# for an unambiguous meaning to the value on queries.
+
+
 table:
     tableName: FILM_BRANCH_ACCESS
     columns:
@@ -81,4 +93,24 @@ table:
               type: unique index
               columns: Film_Branch_Id, User_Id, Access
               name: Film_Branch_Access__Branch_User_Access__IDX
-              
+    whereClauses:
+        - where:
+            name: Is_Guest_Allowed
+            sql: Access = {access} AND Privilege_Level <= {privilege} AND User_Id IS NULL
+            arguments: privilege, access
+    extend:
+        - sql:
+            name: create_from_template
+            type: insert
+            execute: "
+              INSERT INTO FILM_BRANCH_ACCESS (
+                Film_Branch_Id, User_Id, Access, Privilege_Level, Created_On, Last_Updated_On
+              )
+              SELECT
+                {Film_Branch_Id}, NULL, Access, Privilege_Level, NOW(), NULL
+              FROM
+                TEMPLATE_FILM_BRANCH_ACCESS
+              WHERE Template_Name = {Template_Name}
+              "
+            arguments: Film_Branch_Id, Template_Name
+      

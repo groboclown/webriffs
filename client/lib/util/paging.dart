@@ -14,6 +14,9 @@ typedef void PageLoadedFunc(PageState pageState, Iterable<dynamic> data);
  * component should have its own current values for sorting and filters and
  * current page value to represent what the user selects, so that the
  * changing of the UI elements can be separate from the submission.
+ *
+ * TODO this should use the single_request utility to correctly handle
+ * quick clicks from the user.
  */
 class PageState {
     final ServerStatusService _server;
@@ -26,6 +29,9 @@ class PageState {
     String _sortOrder;
     String _sortedBy;
     bool _loadedFromServer;
+    bool _hasError;
+
+    bool get hasError => _hasError;
 
     Map<String, dynamic> _filters;
     // FIXME list of possible sorted_by values
@@ -118,8 +124,14 @@ class PageState {
         });
 
         return _server.get(path, null).then((ServerResponse response) {
+            _hasError = response.wasError;
             _loadedFromServer = true;
-            List<dynamic> data = _fromJson(response.jsonData);
+            List<dynamic> data;
+            if (_hasError) {
+                data = null;
+            } else {
+                data = _fromJson(response.jsonData);
+            }
             _on_load(this, data);
             return response;
         });

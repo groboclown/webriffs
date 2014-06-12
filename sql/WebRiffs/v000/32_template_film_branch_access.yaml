@@ -1,0 +1,66 @@
+# Stores the default access level for new branches as a cookie-cutter.
+
+
+table:
+    tableName: TEMPLATE_FILM_BRANCH_ACCESS
+    columns:
+        - column:
+            name: Template_Film_Branch_Access_Id
+            type: int
+            autoIncrement: true
+            constraints:
+                - constraint:
+                    type: primary key
+                    name: Template_Film_Branch_Access_Id_Key
+        - column:
+            name: Template_Name
+            type: nvarchar(64)
+            constraints:
+                - constraint:
+                    type: not null
+        - column:
+            name: Access
+            type: varchar(64)
+            constraints:
+                - constraint:
+                    type: not null
+        - column:
+            name: Privilege_Level
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+        - column:
+            name: Created_On
+            type: timestamp
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: no update
+                - constraint:
+                    type: initial value
+                    dialects:
+                        - dialect:
+                            platforms: mysql
+                            sql: NOW()
+        - column:
+            name: Last_Updated_On
+            type: timestamp
+            constraints:
+                - constraint:
+                    type: nullable
+                - constraint:
+                    type: constant update
+                    dialects:
+                        - dialect:
+                            platforms: mysql
+                            sql: NOW()
+                - constraint:
+                    type: initial value
+                    value: "NULL"
+    constraints:
+        - constraint:
+              type: unique index
+              columns: Template_Name, Access
+              name: Template_Film_Branch_Access__Template_Name_Access__IDX

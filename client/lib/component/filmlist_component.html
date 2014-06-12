@@ -13,22 +13,25 @@
                     <th>Branches</th>
                 </tr>
             </thead>
+            <tbody ng-if="! cmp.pageState.loadedFromServer">
+                <tr><td colspan="3">Loading...</td></tr>
+            </tbody>
             <tbody ng-if="cmp.pageState.loadedFromServer">
                 <tr ng-repeat="film in cmp.films">
                     <td>{{film.name}}</td>
                     <td>{{film.releaseYear}}</td>
                     <td>
                     
-                        <div ng-if="! film.expanded">
+                        <div ng-if="! film.expanded || film.hasError">
                             <span ng-click="film.toggleExpanded()">|...|</span>
                         </div>
                         
                         
                         <div ng-if="film.expanded">
-                            <span ng-if="film.loading">
+                            <div ng-if="film.loading">
                             loading...
-                            </span>
-                            <span ng-if="! film.loading">
+                            </div>
+                            <div ng-if="! film.loading">
                                 <div ng-repeat="branch in film.branches">
                                     <span>{{branch.name}}</span>
                                     <span ng-if="branch.loading">
@@ -38,7 +41,7 @@
                                         <span ng-repeat="tag in branch.tags">{{tag.name}}</span>
                                     </span>
                                 </div>
-                            </span>
+                            </div>
                         </div>
                         
                     </td>
