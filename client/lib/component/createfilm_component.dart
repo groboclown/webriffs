@@ -152,8 +152,7 @@ class CreateFilmComponent {
 
                         // redirect to the edit page
                         _route.go('Edit Your Branch', {
-                            'branchId': branchId,
-                            'changeId': changeId
+                            'branchId': branchId
                         });
                     }).
                     catchError((Exception e) {

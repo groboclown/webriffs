@@ -4,9 +4,11 @@ library paging;
 import 'dart:async';
 
 import '../service/server.dart';
+import 'single_request.dart';
 
+typedef Future<ServerResponse> PageLoaded(PageState pageState,
+            Iterable<dynamic> data, ServerResponse response);
 
-typedef void PageLoadedFunc(PageState pageState, Iterable<dynamic> data);
 
 
 /**
@@ -19,8 +21,8 @@ typedef void PageLoadedFunc(PageState pageState, Iterable<dynamic> data);
  * quick clicks from the user.
  */
 class PageState {
-    final ServerStatusService _server;
-    final PageLoadedFunc _on_load;
+    final SingleRequest _server;
+    final PageLoaded _on_loaded;
     final String _path;
     int _currentPage;
     int _recordsPerPage;
@@ -30,13 +32,18 @@ class PageState {
     String _sortedBy;
     bool _loadedFromServer;
     bool _hasError;
+    String _errorMessage;
+    Map<String, String> _paramNotes;
+    final Duration _delay;
 
     bool get hasError => _hasError;
 
     Map<String, dynamic> _filters;
     // FIXME list of possible sorted_by values
 
-    PageState(this._server, this._path, this._on_load) :
+    PageState(ServerStatusService server, this._path, this._on_loaded,
+                [ this._delay = null ]) :
+            this._server = new SingleRequest(server),
             this._currentPage = 0,
             this._pageCount = 0,
             this._recordCount = 0,
@@ -68,6 +75,10 @@ class PageState {
     bool get loadedFromServer => _loadedFromServer;
 
     bool get isDescSort => _sortOrder == 'D';
+
+    String get errorMessage => _errorMessage;
+
+
 
 
     Future<ServerResponse> updateFromServer({ int nextPage: null,
@@ -123,18 +134,35 @@ class PageState {
             }
         });
 
-        return _server.get(path, null).then((ServerResponse response) {
-            _hasError = response.wasError;
-            _loadedFromServer = true;
-            List<dynamic> data;
-            if (_hasError) {
-                data = null;
-            } else {
-                data = _fromJson(response.jsonData);
-            }
-            _on_load(this, data);
-            return response;
-        });
+        _hasError = false;
+        return _server.add(
+                (ServerStatusService server) => server.get(path, null),
+                _delay).
+            then((ServerResponse response) {
+                _hasError = response.wasError;
+                _errorMessage = response.message;
+                _paramNotes = response.parameterNotes;
+                _loadedFromServer = true;
+                Iterable<dynamic> data = null;
+                if (! _hasError) {
+                    data = _fromJson(response.jsonData);
+                }
+                return _on_loaded(this, data, response);
+            }, onError: (Exception e) {
+                // TODO add logging
+
+                _hasError = true;
+                _errorMessage = e.toString();
+                _paramNotes = null;
+                _loadedFromServer = true;
+            }).catchError((Exception e) {
+                // TODO add logging
+
+                _hasError = true;
+                _errorMessage = e.toString();
+                _paramNotes = null;
+                _loadedFromServer = true;
+            });
     }
 
 
