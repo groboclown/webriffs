@@ -3,11 +3,24 @@
 
 view:
     viewName: V_FILM_BRANCH_PUBLIC
+    
+    # Note the special case handling for admin users - they always have
+    # their level of access for all branches, regardless of the branch
+    # maintainers' desires.
     query: "SELECT
-          , fba.Film_Branch_Id Film_Branch_Id
+          fba.Film_Branch_Id Film_Branch_Id
           , ua.User_Id User_Id
           , fba.Access Access
-          , MIN(fba.Privilege_Level, ua.Privilege_Level) Privilege_Level
+          
+          , CASE
+              WHEN ua.Privilege_Level >= 100 THEN
+                ua.Privilege_Level
+              WHEN fba.Privilege_Level < ua.Privilege_Level THEN
+                fba.Privilege_Level
+              ELSE
+                ua.Privilege_Level
+              END
+              Privilege_Level
         FROM FILM_BRANCH_ACCESS fba
         INNER JOIN USER_ACCESS ua
             ON ua.Access = fba.Access

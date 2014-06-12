@@ -14,7 +14,6 @@ table:
         - column:
             name: User_Id
             type: int
-            autoIncrement: true
             constraints:
                 - constraint:
                     type: foreign key

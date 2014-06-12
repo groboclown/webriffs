@@ -162,6 +162,7 @@ class FilmLayer {
         // FIXME ensure the branch name is valid
         // FIXME validate branch name length is valid
         
+        // We first need a Gv Branch
         $data = GroboVersion\GvBranch::$INSTANCE->create($db, $projectId);
         FilmLayer::checkError($data,
             new Base\ValidationException(
@@ -171,6 +172,7 @@ class FilmLayer {
         $branchId = intval($data['result']);
         
         
+        // Then the branch itself
         $data = FilmBranch::$INSTANCE->create($db, $branchId, $branchName);
         FilmLayer::checkError($data,
             new Base\ValidationException(
@@ -180,6 +182,14 @@ class FilmLayer {
         $filmBranchId = intval($data['result']);
         
         
+        // Next all the permissions for guests
+        foreach (Access::$BRANCH_ACCESS as $right) {
+            FilmBranchAccess::$INSTANCE->create($db, $filmBranchId, null,
+                $right, Access::$PRIVILEGE_USER);
+        }
+        
+        
+        // Finally a change for the user to start using.
         $data = GroboVersion\GvChange::$INSTANCE->create(
                 $db, $branchId, 0, $gaUserId);
         FilmLayer::checkError($data,

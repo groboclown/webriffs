@@ -166,7 +166,6 @@ view:
         - column:
             name: Gv_Item_Version_Id
             type: int
-            autoIncrement: true
             constraints:
                 - constraint:
                     type: foreign key

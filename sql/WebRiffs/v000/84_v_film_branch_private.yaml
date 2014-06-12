@@ -5,7 +5,7 @@
 view:
     viewName: V_FILM_BRANCH_PRIVATE
     query: "SELECT
-          , fba.Film_Branch_Id Film_Branch_Id
+          fba.Film_Branch_Id Film_Branch_Id
           , fba.User_Id User_Id
           , fba.Access Access
           , fba.Privilege_Level Privilege_Level

@@ -18,12 +18,20 @@ view:
           
           , pub.User_Id User_Id
           , pub.Access Access
-          , MAX(pub.Privilege_Level, COALESCE(pri.Privilege_Level, 0)) Privilege_Level
+          
+          
+          , CASE
+              WHEN pub.Privilege_Level > COALESCE(pri.Privilege_Level, 0) THEN
+                pub.Privilege_Level
+              ELSE
+                COALESCE(pri.Privilege_Level, 0)
+              END
+              Privilege_Level
         FROM FILM_BRANCH fb
         INNER JOIN GV_BRANCH gb
             ON fb.Gv_Branch_Id = gb.Gv_Branch_Id
         INNER JOIN FILM f
-            ON f.Gv_Project_Id = b.Gv_Project_Id
+            ON f.Gv_Project_Id = gb.Gv_Project_Id
         INNER JOIN V_FILM_BRANCH_PUBLIC pub
             ON pub.Film_Branch_Id = fb.Film_Branch_Id
         LEFT OUTER JOIN V_FILM_BRANCH_PRIVATE pri

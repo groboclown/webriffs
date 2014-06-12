@@ -75,7 +75,7 @@ class AuthenticationLayer {
                 )));
         $userId = $data['result'];
         
-        foreach (Access::$USER_RIGHTS as $right) {
+        foreach (Access::$USER_ACCESS as $right) {
             $data = UserAccess::$INSTANCE->create($db, $userId, $right,
                     $baseAccess);
             AuthenticationLayer::checkError($data,

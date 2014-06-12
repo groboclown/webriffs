@@ -80,3 +80,5 @@ table:
         - constraint:
               type: unique index
               columns: Film_Branch_Id, User_Id, Access
+              name: Film_Branch_Access__Branch_User_Access__IDX
+              
