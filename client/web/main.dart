@@ -7,11 +7,18 @@ import 'package:logging/logging.dart';
 import 'package:webriffs_client/routing/webriffs_router.dart';
 import 'package:webriffs_client/component/pageheader_component.dart';
 import 'package:webriffs_client/component/errorstatus_component.dart';
+import 'package:webriffs_client/component/asyncstatus_component.dart';
 import 'package:webriffs_client/component/createuser_component.dart';
 import 'package:webriffs_client/component/forgotpassword_component.dart';
 import 'package:webriffs_client/component/login_component.dart';
 import 'package:webriffs_client/component/filmlist_component.dart';
 import 'package:webriffs_client/component/createfilm_component.dart';
+import 'package:webriffs_client/component/viewfilm_component.dart';
+import 'package:webriffs_client/component/createbranch_component.dart';
+import 'package:webriffs_client/component/editbranch_component.dart';
+import 'package:webriffs_client/component/viewbranch_component.dart';
+import 'package:webriffs_client/component/playbranch_component.dart';
+//import 'package:webriffs_client/component/_component.dart';
 import 'package:webriffs_client/service/server.dart';
 import 'package:webriffs_client/service/user.dart';
 
@@ -19,15 +26,20 @@ import 'package:webriffs_client/service/user.dart';
 class WebRiffsModule extends Module {
     WebRiffsModule() {
         // Components
-        bind(ErrorComponent);
         bind(PageHeaderComponent);
+        bind(ErrorComponent);
+        bind(AsyncStatusComponent);
         bind(CreateUserComponent);
         bind(ForgotPasswordComponent);
         bind(LoginComponent);
         bind(FilmListComponent);
         bind(CreateFilmComponent);
+        bind(ViewFilmComponent);
+        bind(EditBranchComponent);
+        bind(ViewBranchComponent);
+        bind(PlayBranchComponent);
 
-        // Stateful Services - that's why they're value, not type
+        // Stateful Services
         bind(ServerStatusService);
         bind(UserService);
 

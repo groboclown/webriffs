@@ -32,6 +32,10 @@ void webRiffsRouteInitializer(Router router, RouteViewFactory view) {
                 path: '/film/create',
                 enter: view('./view/create_film.html'))
         ..addRoute(
+                name: 'Film Details',
+                path: '/film/view/:filmId',
+                enter: view('./view/view_film.html'))
+        ..addRoute(
                 name: 'Edit Your Branch',
                 path: '/branch/edit/:branchId',
                 enter: view('./view/edit_filmbranch.html'))

@@ -1,30 +1,42 @@
 
-library filmlist_component;
+library viewfilm_component;
 
 import 'dart:async';
 
 import 'package:angular/angular.dart';
 
 import '../service/server.dart';
+import '../service/user.dart';
 
 import '../util/async_component.dart';
+
+// FIXME move the branch and tag common stuff into its own file.
+import 'filmlist_component.dart';
 
 /**
  * The UI component view of the list of films.
  */
 @Component(
-    selector: 'film-list',
-    templateUrl: 'packages/webriffs_client/component/filmlist_component.html',
+    selector: 'view-film',
+    templateUrl: 'packages/webriffs_client/component/viewfilm_component.html',
     //cssUrl: 'packages/webriffs_client/component/errorstatus_component.css',
     publishAs: 'cmp')
-class FilmListComponent extends PagingComponent {
+class ViewFilmComponent extends PagingComponent {
     final ServerStatusService _server;
+    final UserService _user;
 
-    final List<FilmRecord> films = [];
+    final String name;
+    final int releaseYear;
+    final int filmId;
 
-    bool get noFilms => films.length <= 0;
+    bool get canEdit => _user.canEditFilms;
+    bool get cannotEdit => ! canEdit && _user.loggedIn;
+    bool get notLoggedIn => ! _user.loggedIn;
 
-    FilmListComponent(ServerStatusService server) :
+    final List<BranchRecord> branches = [];
+
+
+    ViewFilmComponent(ServerStatusService server) :
             _server = server,
             super(server, '/film') {
         update();

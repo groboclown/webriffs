@@ -280,6 +280,21 @@ class AuthenticationLayer {
         GroboAuth\DataAccess::logoutSession($db, $sessionId);
     }
     
+    
+    public static function getUserAccess($db, $userId) {
+        $data = UserAccess::$INSTANCE->readBy_User_Id($db, $userId);
+        AuthenticationLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'problem accessing user permissions'
+                )));
+        $ret = array();
+        foreach ($data['result'] as $row) {
+            $ret[$row['Access']] = intval($row['Privilege_Level']);
+        }
+        return $ret;
+    }
+    
 
     // ----------------------------------------------------------------------
     // Validation Methods

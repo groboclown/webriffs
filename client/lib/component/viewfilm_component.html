@@ -1,4 +1,17 @@
 <div>
+    <async-status parent="cmp"></async-status>
+    <div>
+    Viewing {{cmp.name}} ({{cmp.releaseYear)}}
+    </div>
+
+
+    <div ng-if="cmp.canEdit">
+    </div>
+    <div ng-if="cmp.cannotEdit">
+    </div>
+    <div ng-if="cmp.notLoggedIn">
+    </div>
+
     <div>
         <!-- filter controls -->
     </div>
@@ -8,9 +21,9 @@
                 <tr>
                     <!-- FIXME add sorting controls -->
                     
-                    <th>Film</th>
-                    <th>Release Year</th>
-                    <th>Branches</th>
+                    <th>Branch Name</th>
+                    <!--  other stuff -->
+                    <th>Tags</th>
                 </tr>
             </thead>
             

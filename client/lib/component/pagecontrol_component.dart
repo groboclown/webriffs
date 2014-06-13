@@ -1,4 +1,4 @@
-library paging_component;
+library pagecontrol_component;
 
 
 import 'dart:html';
@@ -10,7 +10,7 @@ import '../util/paging.dart';
 
 @Component(
     selector: 'page-control',
-    templateUrl: 'packages/webriffs_client/component/paging_component.html',
+    templateUrl: 'packages/webriffs_client/component/pagecontrol_component.html',
     publishAs: 'cmp')
 class PageControlComponent {
     final Logger _log = new Logger('components.PageHeaderComponent');

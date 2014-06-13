@@ -1,0 +1,13 @@
+<span>
+    <span ng-if="cmp.loadedError">
+    {{cmp.error}}
+    </span>
+    <span ng-if="cmp.loadedSuccessful">
+    </span>
+    <span ng-if="cmp.loading">
+    loading...
+    </span>
+    <span ng-if="cmp.notLoaded">
+        <span ng-onclick="cmp.reload()">|...|</span>
+    </span>
+</span>

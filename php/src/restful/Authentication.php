@@ -26,6 +26,32 @@ class AuthenticationCurrent extends Resource {
      */
     public function data() {
         $user = $this->container['user'];
+        
+        $db = $this->getDB();
+        $access = WebRiffs\AuthenticationLayer::getUserAccess(
+                $db, $user['User_Id']);
+        $canEditFilms = false;
+        if (array_key_exists(WebRiffs\Access::$FILM_MODIFICATION, $access) &&
+                $access[WebRiffs\Access::$FILM_MODIFICATION] >=
+                    WebRiffs\Access::$PRIVILEGE_TRUSTED) {
+            $canEditFilms = true;
+        }
+
+        $canCreateFilms = false;
+        if (array_key_exists(WebRiffs\Access::$FILM_CREATE, $access) &&
+                $access[WebRiffs\Access::$FILM_CREATE] >=
+                    WebRiffs\Access::$PRIVILEGE_TRUSTED) {
+            $canCreateFilms = true;
+        }
+
+        $canCreateBranch = false;
+        // NOTE: any logged in user can create a branch.
+        if (array_key_exists(WebRiffs\Access::$FILM_BRANCH, $access) &&
+                $access[WebRiffs\Access::$FILM_BRANCH] >=
+                    WebRiffs\Access::$PRIVILEGE_USER) {
+            $canCreateBranch = true;
+        }
+        
         return array(
             200,
             array(
@@ -33,7 +59,11 @@ class AuthenticationCurrent extends Resource {
                 'contact' => $user['Contact'],
                 'is_admin' => $user['Is_Admin'],
                 'created_on' => $user['Created_On'],
-                'last_updated_on' => $user['Last_Updated_On']
+                'last_updated_on' => $user['Last_Updated_On'],
+                //'access' => $access,
+                'can_edit_films' => $canEditFilms,
+                'can_create_films' => $canCreateFilms,
+                'can_create_branch' => $canCreateBranch,
             )
         );
     }

@@ -17,6 +17,8 @@ abstract class AsyncComponent {
     bool get loading;
     bool get notLoaded;
     String get error;
+
+    void reload();
 }
 
 
@@ -89,15 +91,22 @@ abstract class RequestHandlingComponent implements AsyncComponent {
             } else {
                 _hasError = false;
                 _errorMessage = null;
-                return onSuccess(resp).then((ServerResponse r) {
+                Future<ServerResponse> ret = onSuccess(resp);
+                if (ret == null) {
                     _loaded = true;
                     _loading = false;
-                    return r;
-                }, onError: (Exception e) {
-                    onError(e);
-                }).catchError((Exception e) {
-                    onError(e);
-                });
+                    return resp;
+                } else {
+                    return ret.then((ServerResponse r) {
+                        _loaded = true;
+                        _loading = false;
+                        return r;
+                    }, onError: (Exception e) {
+                        onError(e);
+                    }).catchError((Exception e) {
+                        onError(e);
+                    });
+                }
             }
         }, onError: (Exception e) {
             onError(e);
@@ -226,6 +235,11 @@ abstract class PagingComponent implements AsyncComponent {
                 newSortedBy: newSortedBy,
                 newSortOrder: newSortOrder,
                 newFilters: newFilters);
+    }
+
+
+    void reload() {
+        update();
     }
 
 

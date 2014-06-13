@@ -28,6 +28,10 @@ class UserService {
     UserInfo info;
     bool loggedIn = false;
 
+    bool get canEditFilms => info != null && info.canEditFilms;
+    bool get canCreateFilms => info != null && info.canCreateFilms;
+    bool get canCreateBranch => info != null && info.canCreateBranch;
+
 
     UserService(this._server) {
         _loaded = Future.wait([loadUserDetails()]);
@@ -125,8 +129,14 @@ class UserInfo {
     final String createdOn;
     final String lastUpdatedOn;
 
+    // top level access permissions independent of the branch
+    final bool canEditFilms;
+    final bool canCreateFilms;
+    final bool canCreateBranch;
+
     UserInfo(this.username, this.contact, this.isAdmin, this.createdOn,
-            this.lastUpdatedOn);
+            this.lastUpdatedOn, this.canEditFilms, this.canCreateFilms,
+            this.canCreateBranch);
 
     factory UserInfo.fromJson(Map<String, dynamic> json) {
         return new UserInfo(
@@ -134,7 +144,10 @@ class UserInfo {
             json['contact'],
             json['is_admin'],
             json['created_on'],
-            json['last_updated_on']);
+            json['last_updated_on'],
+            json['can_edit_films'],
+            json['can_create_films'],
+            json['can_create_branch']);
     }
 }
 
