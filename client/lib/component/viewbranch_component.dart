@@ -24,8 +24,8 @@ class ViewBranchComponent {
 
     bool get noQuips => quips.length <= 0;
 
+    int filmId;
     int branchId;
-
     int changeId;
 
     ViewBranchComponent(this._server, RouteProvider routeProvider) {

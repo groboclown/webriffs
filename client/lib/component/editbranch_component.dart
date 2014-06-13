@@ -24,6 +24,7 @@ class EditBranchComponent {
 
     bool get noQuips => quips.length <= 0;
 
+    int filmId;
     int branchId;
 
     EditBranchComponent(this._server, RouteProvider routeProvider) {

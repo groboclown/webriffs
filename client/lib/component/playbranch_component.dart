@@ -18,6 +18,7 @@ import '../util/paging.dart';
 class PlayBranchComponent {
     final ServerStatusService _server;
 
+    int filmId;
     int branchId;
     int changeId;
 
