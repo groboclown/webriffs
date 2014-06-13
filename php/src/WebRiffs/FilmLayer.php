@@ -270,6 +270,7 @@ class FilmLayer {
      */
     public static function getFilm($db, $filmId) {
         if (! is_integer($filmId)) {
+            error_log("Expected integer, found [".$filmId."]");
             throw new Base\ValidationException(array(
                 'film_id' => 'invalid film id format'
             ));

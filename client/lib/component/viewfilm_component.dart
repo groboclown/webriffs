@@ -24,153 +24,129 @@ import 'filmlist_component.dart';
 class ViewFilmComponent extends PagingComponent {
     final ServerStatusService _server;
     final UserService _user;
+    final int _filmId;
+    final String _inputFilmId;
 
-    final String name;
-    final int releaseYear;
-    final int filmId;
+    bool _validFilmId;
+    String name;
+    int releaseYear;
+    String createdOn;
+    String lastUpdatedOn;
+    bool _detailsLoaded;
+
+
+    bool isEditing = false;
+    // FIXME borrow stuff from the CreateFilmComponent
+
+    bool get detailsLoaded => _detailsLoaded;
+    bool get validFilm => _validFilmId;
+    String get inputFilmId => _inputFilmId;
 
     bool get canEdit => _user.canEditFilms;
     bool get cannotEdit => ! canEdit && _user.loggedIn;
     bool get notLoggedIn => ! _user.loggedIn;
+    bool get canCreateBranch => _user.canCreateBranch;
 
     final List<BranchRecord> branches = [];
+    final List<LinkRecord> links = [];
+
+    bool get noBranches => loadedSuccessful && branches.isEmpty;
 
 
-    ViewFilmComponent(ServerStatusService server) :
-            _server = server,
-            super(server, '/film') {
-        update();
-    }
-
-
-    Future<ServerResponse> onSuccess(Iterable<dynamic> data) {
-        films.clear();
-        data.forEach((Map<String, dynamic> json) {
-            films.add(new FilmRecord.fromJson(_server, json));
-        });
-        return null;
-    }
-
-}
-
-
-
-// TODO make the list of top branches returned be the "most popular" branches,
-// sub-sorted by the last update time.
-class FilmRecord extends PagingComponent {
-    final ServerStatusService _server;
-
-    final String name;
-    final int releaseYear;
-    final int filmId;
-
-    final List<BranchRecord> branches = [];
-    int get branchCount => current.recordCount;
-    int get maxShown => current.recordsPerPage;
-    int get remainingBranches => branchCount - maxShown;
-
-    bool _expanded = false;
-    bool get expanded => _expanded;
-
-    set expanded(bool expand) {
-        if (expand && ! loadedSuccessful) {
-            update();
+    factory ViewFilmComponent(ServerStatusService server, UserService user,
+            RouteProvider routeProvider) {
+        String inputFilmId = null;
+        bool validFilmId = false;
+        int filmId = 0;
+        // Error checking for the film id
+        if (routeProvider.parameters.containsKey('filmId')) {
+            inputFilmId = routeProvider.parameters['filmId'];
+            try {
+                filmId = int.parse(inputFilmId);
+                validFilmId = true;
+            } catch (e) {
+                validFilmId = false;
+            }
         }
-        _expanded = expand;
+        String path = "/film/" + filmId.toString() + "/branch";
+        return new ViewFilmComponent._(server, user, path, inputFilmId,
+                filmId, validFilmId);
     }
 
 
-    factory FilmRecord.fromJson(ServerStatusService server,
-            Map<String, dynamic> json) {
-        int filmId = json['Film_Id'];
-        int projectId = json['Gv_Project_Id'];
-        String name = json['Name'];
-        int releaseYear = json['Release_Year'];
-        dynamic createdOn = json['Created_On']; // datetime -> ?
-        dynamic lastUpdatedOn = json['Last_Updated_On']; // datetime -> ?
-
-        return new FilmRecord._(server, filmId, projectId, name, releaseYear,
-                createdOn, lastUpdatedOn);
-    }
-
-
-    FilmRecord._(ServerStatusService server, int filmId, int projectId,
-            this.name, this.releaseYear,
-            dynamic createdOn, dynamic lastUpdatedOn) :
-        _server = server,
-        filmId = filmId,
-        super(server, '/film/' + filmId.toString() + '/branch');
-
-
-    void toggleExpanded() {
-        expanded = ! expanded;
+    ViewFilmComponent._(ServerStatusService server, this._user, String path,
+            this._inputFilmId, this._filmId, this._validFilmId) :
+            _server = server,
+            super(server, path) {
+        _detailsLoaded = false;
+        if (_validFilmId) {
+            loadDetails().then((_) {
+                if (_validFilmId) {
+                    update();
+                }
+            });
+        }
     }
 
 
 
-    void reset() {
-        _expanded = false;
-        branches.clear();
+
+    Future<ServerResponse> loadDetails() {
+        _detailsLoaded = false;
+        return _server.get('/film/' + _filmId.toString(), null).
+            then((ServerResponse resp) {
+                if (resp.wasError) {
+                    _validFilmId = false;
+                } else {
+                    int projectId = resp.jsonData['Gv_Project_Id'];
+                    name = resp.jsonData['Name'];
+                    releaseYear = resp.jsonData['Release_Year'];
+                    createdOn = resp.jsonData['Created_On']; // datetime -> ?
+                    lastUpdatedOn = resp.jsonData['Last_Updated_On']; // datetime -> ?
+                    _detailsLoaded = true;
+
+                    links.clear();
+                    List<Map<String, dynamic>> jsonLinks = resp.jsonData['links'];
+                    jsonLinks.forEach((Map<String, dynamic> row) {
+                        links.add(new LinkRecord.fromJson(row));
+                    });
+                }
+            });
     }
+
 
     Future<ServerResponse> onSuccess(Iterable<dynamic> data) {
         branches.clear();
         data.forEach((Map<String, dynamic> row) {
-            branches.add(new BranchRecord.fromJson(_server, filmId, row));
+            branches.add(new BranchRecord.fromJson(_server, _filmId, row));
         });
         return null;
     }
+
+
+    Future<ServerResponse> save() {
+        // FIXME
+    }
+
 }
 
 
-class BranchRecord extends RequestHandlingComponent {
-    final ServerStatusService _server;
-    final String name;
+
+class LinkRecord {
     final int filmId;
-    final int branchId;
-    final createdOn;
-    final lastUpdatedOn;
-    final List<TagRecord> tags;
-
-    BranchRecord._(this._server, this.name, this.filmId,
-            this.branchId, this.createdOn,
-            this.lastUpdatedOn) : tags = [] {
-        reload();
-    }
-
-    factory BranchRecord.fromJson(ServerStatusService server, int filmId,
-            Map<String, dynamic> json) {
-        String name = json['Branch_Name'];
-        int id = json['Film_Branch_Id'];
-        var created = json['Branch_Created_On'];
-        var updated = json['Branch_Last_Updated_On'];
-        return new BranchRecord._(server, name, filmId, id, created, updated);
-    }
-
-
-    Future<ServerResponse> onSuccess(ServerResponse resp) {
-        tags.clear();
-        resp.jsonData['tags'].forEach((Map<String, dynamic> tag) {
-            tags.add(new TagRecord.fromJson(tag));
-        });
-    }
-
-
-    void reload() {
-        handleRequest(_server.get('/film/${filmId}/branch/${branchId}/tag',
-            null));
-    }
-}
-
-
-
-class TagRecord {
+    final int linkTypeId;
+    final String urlPrefix;
     final String name;
+    final String desc;
+    String uri;
 
-    TagRecord._(this.name);
-
-    factory TagRecord.fromJson(Map<String, dynamic> json) {
-        return new TagRecord._(json['Tag_Name']);
+    factory LinkRecord.fromJson(Map<String, dynamic> row) {
+        return new LinkRecord(row['Film_Id'], row['Link_Type_Id'],
+                row['Url_Prefix'], row['Name'], row['Description'],
+                row['Uri']);
     }
-}
 
+
+    LinkRecord(this.filmId, this.linkTypeId, this.urlPrefix, this.name,
+                       this.desc, this.uri);
+}

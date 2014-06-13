@@ -21,7 +21,7 @@
             </tbody>
             <tbody ng-if="cmp.loadedSuccessful">
                 <tr ng-repeat="film in cmp.films">
-                    <td>{{film.name}}</td>
+                    <td><a href="#/film/view/{{film.filmId}}">{{film.name}}</a></td>
                     <td>{{film.releaseYear}}</td>
                     <td>
                         <div>

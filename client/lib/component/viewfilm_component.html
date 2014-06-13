@@ -1,15 +1,39 @@
-<div>
+<div ng-if="! cmp.detailsLoaded">
+    <div ng-if="! cmp.validFilm">
+    Invalid film ID {{cmp.inputFilmId}}.
+    </div>
+    <div ng-if="cmp.validFilm">
+    Loading film details from the server...
+    </div>
+</div>
+<div ng-if="cmp.detailsLoaded">
     <async-status parent="cmp"></async-status>
     <div>
-    Viewing {{cmp.name}} ({{cmp.releaseYear)}}
+    Viewing {{cmp.name}} ({{cmp.releaseYear}})
     </div>
 
 
     <div ng-if="cmp.canEdit">
+        <div ng-if="cmp.isEditing">
+            <div>
+            <label for="film_name">Name:</label><input id="film_name" type="text" value="{{cmp.name}}">
+            </div>
+            <div>
+            <label for="film_year">Release Year:</label><input id="film_year" type="text" value="{{cmp.releaseYear}}">
+            </div>
+            <div>
+            <span ng-click="cmp.save()">Update film</span>
+            </div>
+        </div>
+        <div ng-if="! cmp.isEditing">
+            <span ng-click="cmp.isEditing = true">Edit</span>
+        </div>
     </div>
     <div ng-if="cmp.cannotEdit">
+    You don't have permissions to edit films.
     </div>
     <div ng-if="cmp.notLoggedIn">
+    You must log in to edit a film.
     </div>
 
     <div>
@@ -33,34 +57,15 @@
                 </td></tr>
             </tbody>
             <tbody ng-if="cmp.loadedSuccessful">
-                <tr ng-repeat="film in cmp.films">
-                    <td>{{film.name}}</td>
-                    <td>{{film.releaseYear}}</td>
-                    <td>
-                        <div>
-                            <async-status parent="film"></async-status>
-                            <span ng-click="film.toggleExpanded()">
-                                <span ng-if="film.expanded">---</span>
-                                <span ng-if="! film.expanded">|||</span>
-                            </span>
-                        </div>
-                        
-                        <div ng-if="film.expanded">
-                            <div ng-repeat="branch in film.branches">
-                                <async-status parent="branch"></async-status>
-                                <span><a href="#/branch/view/{{branch.branchId}}/0">{{branch.name}}</a></span>
-                                <span ng-repeat="tag in branch.tags">{{tag.name}}</span>
-                            </div>
-                            <div ng-if="film.remainingBranches > 0">
-                            ({{film.remainingBranches}} more)
-                            </div>
-                        </div>
-                        
-                    </td>
+                <tr ng-repeat="branch in cmp.branches">
+                     <td><a href="#/branch/view/{{branch.branchId}}/0">{{branch.name}}</a></span>
+                     <td><async-status parent="branch"></async-status>
+                     <span ng-repeat="tag in branch.tags">{{tag.name}}</span>
+                     </td>
                 </tr>
-                    
-                <tr ng-if="cmp.noFilms">
-                    <td colspan="4">No relevant results.</td>
+                
+                <tr ng-if="cmp.noBranches">
+                    <td colspan="4">No viewable branches exist.</td>
                 </tr>
             </tbody>
         </table>

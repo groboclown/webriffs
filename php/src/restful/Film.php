@@ -76,7 +76,11 @@ class FilmObj extends Resource {
      */
     public function display() {
         $filmId = $this->filmid;
-        $db = getDB();
+        
+        // FIXME convert filmId to an integer with correct error checking
+        $filmId = intval($filmId);
+        
+        $db = $this->getDB();
         
         $row = WebRiffs\FilmLayer::getFilm($db, $filmId);
         
@@ -99,7 +103,11 @@ class FilmObj extends Resource {
      */
     public function update() {
         $filmid = $this->filmid;
-        $db = getDB();
+        
+        // FIXME convert filmId to an integer with correct error checking
+        $filmId = intval($filmId);
+        
+        $db = $this->getDB();
 
         $data = $this->request->data;
         $name = $data['Name'];
@@ -124,7 +132,7 @@ class FilmObj extends Resource {
      */
     function remove() {
         $filmid = $this->filmid;
-        $db = getDB();
+        $db = $this->getDB();
 
         //$stmt = $db->prepare('DELETE FROM FILM WHERE Film_Id = ?');
         //$stmt->execute(array($filmid));
@@ -202,6 +210,10 @@ class FilmObjBranchObjTag extends Resource {
     function fetch() {
         $branchId = $this->branchid;
         $filmId = $this->filmid;
+
+        // FIXME convert filmId to an integer with correct error checking
+        $filmId = intval($filmId);
+        $branchId = intval($branchId);
         
         $userId = null;
         if ($this->isUserAuthenticated()) {
