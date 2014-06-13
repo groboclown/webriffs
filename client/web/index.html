@@ -7,9 +7,13 @@
     <script src="packages/web_components/platform.js"></script>
     <script src="packages/web_components/dart_support.js"></script>
 </head>
-<body ng-cloak>
+<body>
+<!-- mark this so that it only shows while the page loads. -->
+<div ng-class="'beforeload'">
+Hold onto your cap - we're loading the app.
+</div>
 
-<ng-view></ng-view>
+<ng-view ng-cloak></ng-view>
 
 
 <div class="footer">
