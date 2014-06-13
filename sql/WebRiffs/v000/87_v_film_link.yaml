@@ -3,14 +3,15 @@
 view:
     viewName: V_FILM_LINK
     query: "SELECT
-          fl.Film_Id Film_Id
+          f.Film_Id Film_Id
           , fl.Link_Type_Id Link_Type_Id
           , fl.Uri Uri
           , lt.Name Name
           , lt.Description Description
           , lt.Url_Prefix Url_Prefix
-        FROM FILM_LINK fl
-        INNER JOIN LINK_TYPE lt
+        FROM FILM f
+        CROSS JOIN LINK_TYPE lt
+        LEFT OUTER JOIN FILM_LINK fl
             ON fl.Link_Type_Id = lt.Link_Type_Id
         "
     columns:

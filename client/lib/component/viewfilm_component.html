@@ -16,17 +16,39 @@
     <div ng-if="cmp.canEdit">
         <div ng-if="cmp.isEditing">
             <div>
-            <label for="film_name">Name:</label><input id="film_name" type="text" value="{{cmp.name}}">
+            <label for="film_name">Name:</label>
+            <input id="film_name" type="text" ng-model="cmp.name"
+                ng-minlength="1"
+                ng-maxlength="200"
+                required>
             </div>
             <div>
-            <label for="film_year">Release Year:</label><input id="film_year" type="text" value="{{cmp.releaseYear}}">
+            <label for="film_year">Release Year:</label>
+            <input id="film_year" type="number" ng-model="cmp.releaseYear"
+                ng-minnumber="1800"
+                ng-maxnumber="9999"
+                required>
             </div>
             <div>
+            <!-- FIXME validation -->
             <span ng-click="cmp.save()">Update film</span>
+            <span ng-click="cmp.revert()">Cancel</span>
             </div>
         </div>
         <div ng-if="! cmp.isEditing">
             <span ng-click="cmp.isEditing = true">Edit</span>
+        </div>
+        <div ng-if="cmp.isEditing">
+            <div ng-repeat="link in cmp.links">
+                <span>{{link.name}}</span>
+                <span>{{link.desc}}</span>
+                <span>{{link.urlPrefix}}</span>
+                <span><input type="text" ng-model="link.uri"></span>
+            </div>
+            <div>
+                <!-- FIXME disable if no edits. -->
+                <span ng-click="cmp.saveLinks()">Save changes to links</span>
+            </div>
         </div>
     </div>
     <div ng-if="cmp.cannotEdit">
@@ -34,6 +56,12 @@
     </div>
     <div ng-if="cmp.notLoggedIn">
     You must log in to edit a film.
+    </div>
+    <div ng-if="! cmp.isEditing">
+        <div ng-repeat="link in cmp.links" ng-if="link.isDefined">
+            <span><a ng-href="link.url">{{link.name}}</a></span>
+            <span>({{link.desc}})</span>
+        </div>
     </div>
 
     <div>

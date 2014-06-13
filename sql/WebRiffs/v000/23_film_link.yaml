@@ -4,14 +4,6 @@ table:
     tableName: FILM_LINK
     columns:
         - column:
-            name: Film_Link_Id
-            type: int
-            autoIncrement: true
-            constraints:
-                - constraint:
-                    type: primary key
-                    name: Film_Branch_Id_Key
-        - column:
             name: Film_Id
             type: int
             constraints:
@@ -43,8 +35,6 @@ table:
             constraints:
                 - constraint:
                     type: not null
-                - constraint:
-                    type: no update
         - column:
             name: Created_On
             type: timestamp
@@ -74,3 +64,8 @@ table:
                 - constraint:
                     type: initial value
                     value: "NULL"
+    constraints:
+        - constraint:
+              type: unique index
+              name: Film_Link__Film_Id_Link_Type_Id
+              columns: Film_Id, Link_Type_Id

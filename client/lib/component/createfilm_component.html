@@ -2,10 +2,19 @@
 
   <div>
     <div>
-        <label for="film.name">Film Title</label><input id="film.name' type="text" ng-model="cmp.filmName">
+        <label for="film.name">Film Title</label>
+        <input id="film.name' type="text" ng-model="cmp.filmName"
+            ng-minlength="1"
+            ng-maxlength="200"
+            placeholder="Film name"
+            required>
     </div>
     <div>
-        <label for="film.year">Release Year</label><input id="film.year' type="text" ng-model="cmp.releaseYear">
+        <label for="film.year">Release Year</label>
+        <input id="film.year' type="number" ng-model="cmp.releaseYear"
+            ng-minnumber="1800"
+            ng-maxnumber="9999"
+            required>
     </div>
     <div ng-if="cmp.hasError">
     <!-- actually more of a status message -->

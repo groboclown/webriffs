@@ -126,6 +126,21 @@ class ViewFilmComponent extends PagingComponent {
 
     Future<ServerResponse> save() {
         // FIXME
+
+        isEditing = false;
+    }
+
+
+    void revert() {
+        // FIXME revert the fields
+        isEditing = false;
+    }
+
+
+
+
+    Future<ServerResponse> saveLinks() {
+        // FIXME
     }
 
 }
@@ -139,6 +154,10 @@ class LinkRecord {
     final String name;
     final String desc;
     String uri;
+
+    String get url => uri == null ? null : urlPrefix + uri;
+    bool get isDefined => url != null;
+
 
     factory LinkRecord.fromJson(Map<String, dynamic> row) {
         return new LinkRecord(row['Film_Id'], row['Link_Type_Id'],

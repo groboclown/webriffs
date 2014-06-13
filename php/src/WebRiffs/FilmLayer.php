@@ -300,11 +300,59 @@ class FilmLayer {
         $filmId = intval($filmId);
         $data = VFilmLink::$INSTANCE->readBy_Film_Id($db, $filmId);
         FilmLayer::checkError($data,
-        new Base\ValidationException(
-            array(
-                'unknown' => 'there was an unknown problem finding the film links'
-            )));
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem finding the film links'
+                )));
         return $data['result'];
+    }
+    
+    
+    public static function saveLinkForFilm($db, $filmId, $linkName, $uri) {
+        if (! is_integer($filmId)) {
+            throw new Base\ValidationException(array(
+                            'film_id' => 'invalid film id format'
+            ));
+        }
+        $filmId = intval($filmId);
+        // quick existence check
+        $data = Film::$INSTANCE->countByFilm_Id($db, $filmId);
+        FilmLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem finding the film'
+                )));
+        if ($data['result'] != 0) {
+            new Base\ValidationException(
+                array(
+                    'filmId' => 'no film with that id'
+                ));
+        }
+        
+        $data = LinkType::$INSTANCE->readBy_Name($db, $linkName);
+        FilmLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem finding the link type'
+                )));
+        if ($data['rowcount'] != 1) {
+            throw new Base\ValidationException(
+                array(
+                    'link type' => 'invalid link type name'
+                ));
+        }
+        $regex = $data['result'][0]['Validation_Regex'];
+        // test for both 0 and false
+        if (! preg_match($regex, $uri)) {
+            throw new Base\ValidationException(
+                array(
+                    'uri' => 'uri does not match allowed patterns for this link type'
+                ));
+        }
+        $linkId = $data['result'][0]['Link_Type_Id'];
+        
+        // FIXME need an insert into ... on duplicate key update ...
+        $data = FilmLink::$INSTANCE->x;
     }
 
 
