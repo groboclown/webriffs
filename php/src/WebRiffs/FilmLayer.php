@@ -316,7 +316,7 @@ class FilmLayer {
         }
         $filmId = intval($filmId);
         // quick existence check
-        $data = Film::$INSTANCE->countByFilm_Id($db, $filmId);
+        $data = Film::$INSTANCE->countBy_Film_Id($db, $filmId);
         FilmLayer::checkError($data,
             new Base\ValidationException(
                 array(
@@ -343,7 +343,10 @@ class FilmLayer {
         }
         $regex = $data['result'][0]['Validation_Regex'];
         // test for both 0 and false
-        if (! preg_match($regex, $uri)) {
+        if (! preg_match('/'.$regex.'/', $uri)) {
+            $matches = array();
+            $ret = preg_match('/'.$regex.'/', $uri, $matches);
+            error_log("bad match: return: ".($ret===false ? 'false' : $ret).", match: ".print_r($matches, true).", uri: ".$uri.", regex: ".$regex);
             throw new Base\ValidationException(
                 array(
                     'uri' => 'uri does not match allowed patterns for this link type'
@@ -351,8 +354,21 @@ class FilmLayer {
         }
         $linkId = $data['result'][0]['Link_Type_Id'];
         
-        // FIXME need an insert into ... on duplicate key update ...
-        $data = FilmLink::$INSTANCE->x;
+        $data = FilmLink::$INSTANCE->upsert($db, $filmId, $linkId, $uri);
+        FilmLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem inserting the uri'
+                )));
+        // This value doesn't really mean anything
+        //if ($data['rowcount'] != 1) {
+        //    error_log('upsert rowcount = '.$data['rowcount']);
+        //    throw new Base\ValidationException(
+        //        array(
+        //            'link type' => 'could not update the link'
+        //        ));
+        //}
+        return true;
     }
 
 

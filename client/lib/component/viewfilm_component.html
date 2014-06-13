@@ -58,9 +58,13 @@
     You must log in to edit a film.
     </div>
     <div ng-if="! cmp.isEditing">
-        <div ng-repeat="link in cmp.links" ng-if="link.isDefined">
-            <span><a ng-href="link.url">{{link.name}}</a></span>
+        Links for the film:
+        <div ng-repeat="link in cmp.links"><span ng-if="link.isDefined">
+            <span><a ng-href="{{link.url}}">{{link.name}}</a></span>
             <span>({{link.desc}})</span>
+        </span></div>
+        <div ng-if="cmp.links.isEmpty">
+            No links.
         </div>
     </div>
 

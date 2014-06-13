@@ -97,7 +97,8 @@ if ($data === null) {
     $data = WebRiffs\AdminLayer::createLink($db, 'wikipedia-en',
         'Open Encyclopedia (English)', 'http://en.wikipedia.org/wiki/',
         // Note: this leaves out articles in international characters.
-        '^[a-zA-Z0-9\\$_-\\(\\)]+$');
+        '^[a-zA-Z0-9$_\-()]+$');
+        #'^[a-zA-Z0-9\$_-\(\)]+$');
     $result['create_link_wikipedia'] = $data;
 }
 
@@ -156,7 +157,11 @@ $result['create-slacker-1991'] = array(
     'change_id' => $idList[3]
 );
 $slacker1991Id = $idList[1];
-$data = WebRiffs\
+WebRiffs\FilmLayer::saveLinkForFilm($db, $slacker1991Id, "imdb.com",
+    "tt0102943");
+WebRiffs\FilmLayer::saveLinkForFilm($db, $slacker1991Id, "wikipedia-en",
+    "Slacker_(film)");
+
 
 
 

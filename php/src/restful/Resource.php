@@ -220,7 +220,7 @@ class Resource extends Base\Resource {
             // We have an invalid cookie.  Clear it out.  Something else may
             // reset it, though.
             setcookie(Resource::COOKIE_NAME,
-                $userAuth['Authentication_Challenge'], time() - 3600,
+                $cookie, time() - 3600,
                 $this->container['path'], '', false, true);
             return false;
         }
