@@ -1,28 +1,10 @@
 <div ng-if="cmp.isLoggedIn">
 
   <div>
-    <div>
-        <label for="film.name">Film Title</label>
-        <input id="film.name' type="text" ng-model="cmp.filmName"
-            ng-minlength="1"
-            ng-maxlength="200"
-            placeholder="Film name"
-            required>
-    </div>
-    <div>
-        <label for="film.year">Release Year</label>
-        <input id="film.year' type="number" ng-model="cmp.releaseYear"
-            ng-minnumber="1800"
-            ng-maxnumber="9999"
-            required>
-    </div>
-    <div ng-if="cmp.hasError">
-    <!-- actually more of a status message -->
-    {{cmp.errorMessage}}
-    </div>
-    <div ng-if="! cmp.hasError" style="border: 1px solid black;">
-        <span ng-click="cmp.createFilm()">Submit</span>
-    </div>
+    <form action="#">
+      <filminfo-edit film-info="cmp.filmInfo"></filminfo-edit>
+      <input type="submit" ng-click="cmp.createFilm()" ng-disabled="cmp.disabled" value="Submit">
+    </form>
   </div>
 
 </div>

@@ -5,6 +5,7 @@ import 'dart:async';
 
 import '../service/server.dart';
 import 'paging.dart';
+import 'single_request.dart';
 
 
 /**
@@ -24,8 +25,11 @@ abstract class AsyncComponent {
 
 
 
+
+
 typedef Future<ServerResponse> MakeCsrfRequest(
         ServerStatusService server, String token);
+
 
 
 /**
@@ -47,10 +51,19 @@ abstract class RequestHandlingComponent implements AsyncComponent {
     bool _loaded = false;
     bool _loading = false;
 
+    @override
     bool get loadedError => _hasError;
+
+    @override
     bool get loadedSuccessful => ! _hasError && _loaded;
+
+    @override
     bool get loading => ! _hasError && _loading;
+
+    @override
     bool get notLoaded => ! _loaded && ! _loading && ! _hasError;
+
+    @override
     String get error => _errorMessage;
 
 
@@ -131,6 +144,103 @@ abstract class RequestHandlingComponent implements AsyncComponent {
 
 
 /**
+ * Handles single, interruptable requests to the server.
+ *
+ */
+abstract class SingleRequestComponent implements AsyncComponent {
+    final SingleRequest _server;
+    bool _hasError = false;
+    String _errorMessage = null;
+    bool _loaded = false;
+    bool _loading = false;
+
+    @override
+    bool get loadedError => _hasError;
+
+    @override
+    bool get loadedSuccessful => ! _hasError && _loaded;
+
+    @override
+    bool get loading => ! _hasError && _loading;
+
+    @override
+    bool get notLoaded => ! _loaded && ! _loading && ! _hasError;
+
+    @override
+    String get error => _errorMessage;
+
+
+    SingleRequestComponent(ServerStatusService server) :
+        _server = new SingleRequest(server);
+
+
+    Future<ServerResponse> get(String url, [ String csrfToken ]) {
+        return addRequest((ServerStatusService server) {
+            return server.get(url, csrfToken);
+        });
+    }
+
+
+    Future<ServerResponse> addRequest(MakeSingleRequest request,
+            [ Duration delay = null ]) {
+        // We don't start loading the data until the request is run.
+
+        return _server.add((ServerStatusService server) {
+            _loaded = false;
+            _loading = true;
+            _hasError = false;
+            _errorMessage = null;
+            return request(server);
+        }, delay).then((ServerResponse resp) {
+            if (resp.wasError) {
+                _hasError = true;
+                _errorMessage = resp.message;
+                _loaded = false;
+                _loading = false;
+                return resp;
+            } else {
+                _hasError = false;
+                _errorMessage = null;
+                Future<ServerResponse> ret = onSuccess(resp);
+                if (ret == null) {
+                    _loaded = true;
+                    _loading = false;
+                    return resp;
+                } else {
+                    return ret.then((ServerResponse r) {
+                        _loaded = true;
+                        _loading = false;
+                        return r;
+                    }, onError: (Exception e) {
+                        onError(e);
+                    }).catchError((Exception e) {
+                        onError(e);
+                    });
+                }
+            }
+        }, onError: (Exception e) {
+            onError(e);
+        }).catchError((Exception e) {
+            onError(e);
+        });
+    }
+
+
+    Future<ServerResponse> onSuccess(ServerResponse resp);
+
+
+    void onError(Exception e) {
+        _hasError = true;
+        _errorMessage = e.toString();
+        _loaded = false;
+        _loading = false;
+    }
+
+}
+
+
+
+/**
  * Standard component parent class that correctly handles the loading and
  * error states.  It provides handy methods that can be called by the
  * UI to change the page state immediately.
@@ -151,12 +261,21 @@ abstract class PagingComponent implements AsyncComponent {
     bool _localError = false;
     String _localErrorMessage = null;
 
+    @override
     bool get loadedError => _current.hasError || _localError;
+
+    @override
     bool get loadedSuccessful => ! loadedError &&
             _current.loadedFromServer && ! _loading;
+
+    @override
     bool get loading => ! loadedError && _loading;
+
+    @override
     bool get notLoaded => ! _current.loadedFromServer && ! _loading &&
             ! loadedError;
+
+    @override
     String get error =>
         (_current.hasError ? _current.errorMessage : _localErrorMessage);
 
