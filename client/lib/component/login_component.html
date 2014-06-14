@@ -5,7 +5,7 @@
             <span ng-click="cmp.logOut()">Log out</span>
         </div>
     </div>
-    <div ng-if="! cmp.loggedIn">
+    <form ng-if="! cmp.loggedIn" onsubmit="return false;">
         <div>
             <div>
                 <span>
@@ -23,12 +23,8 @@
             </div>
         </div>
         <div>
-            <span ng-if="cmp.hasError()">
-                <span>No Submit</span>
-            </span>
-            <span ng-if="!cmp.hasError()">
-                <span ng-click="cmp.submit()">Submit</span>
-            </span>
+            <input type="submit" ng-click="cmp.submit()"
+                ng-disabled="cmp.hasError()" value="Login">
         </div>
         <div>
             <a href="#/user/forgot">Forgot your password?</a>
@@ -36,5 +32,5 @@
         <div>
             <a href="#/user/create">Create an account</a>
         </div>
-    </div>
+    </form>
 </div>

@@ -3,6 +3,10 @@
     <h3>{{cmp.name}}</h3>
 </div>
 <div>
+    <span><a href="#/film/list">List films</a></span>
+    <span><a href="#/film/create" ng-if="cmp.canCreateFilm">Add a film</a></span>
+</div>
+<div>
     (login widget is here)
     <login></login>
 </div>

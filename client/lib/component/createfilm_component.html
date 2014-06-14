@@ -1,11 +1,9 @@
 <div ng-if="cmp.isLoggedIn">
 
-  <div>
-    <form action="#">
-      <filminfo-edit film-info="cmp.filmInfo"></filminfo-edit>
-      <input type="submit" ng-click="cmp.createFilm()" ng-disabled="cmp.disabled" value="Submit">
-    </form>
-  </div>
+  <form onsubmit="return false;">
+    <filminfo-edit film-info="cmp.filmInfo"></filminfo-edit>
+    <input type="submit" ng-click="cmp.createFilm()" ng-disabled="cmp.disabled" value="Submit">
+  </form>
 
 </div>
 <div ng-if="cmp.notLoggedIn">

@@ -6,7 +6,7 @@ import 'dart:html';
 import 'package:angular/angular.dart';
 import 'package:angular/routing/module.dart';
 import 'package:logging/logging.dart';
-
+import '../service/user.dart';
 
 @Component(
     selector: 'page-header',
@@ -16,6 +16,11 @@ class PageHeaderComponent implements DetachAware {
     final Logger _log = new Logger('components.PageHeaderComponent');
 
     RouteHandle _route;
+    UserService _user;
+
+    bool get isLoggedIn => _user.loggedIn;
+
+    bool get canCreateFilm => _user.canCreateFilms;
 
     String titleSuffix = " - WebRiffs";
     String defaultTitle = "WebRiffs";
@@ -24,7 +29,7 @@ class PageHeaderComponent implements DetachAware {
 
     String title;
 
-    PageHeaderComponent(RouteProvider routeProvider) {
+    PageHeaderComponent(RouteProvider routeProvider, this._user) {
         _onEnter(routeProvider.route);
 
         _route = routeProvider.route.newHandle();

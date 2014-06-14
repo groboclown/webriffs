@@ -7,6 +7,7 @@ import 'package:angular/angular.dart';
 
 import '../service/server.dart';
 import '../service/user.dart';
+import 'filminfoedit_component.dart';
 
 import '../util/async_component.dart';
 
@@ -26,6 +27,7 @@ class ViewFilmComponent extends PagingComponent {
     final UserService _user;
     final int _filmId;
     final String _inputFilmId;
+    final FilmInfo filmInfo = new FilmInfo();
 
     bool _validFilmId;
     String name;
@@ -34,9 +36,9 @@ class ViewFilmComponent extends PagingComponent {
     String lastUpdatedOn;
     bool _detailsLoaded;
 
-
+    bool get filmInfoDisabled => filmInfo.hasError || filmInfo.checking ||
+            filmInfo.commit;
     bool isEditing = false;
-    // FIXME borrow stuff from the CreateFilmComponent
 
     bool get detailsLoaded => _detailsLoaded;
     bool get validFilm => _validFilmId;
@@ -124,7 +126,7 @@ class ViewFilmComponent extends PagingComponent {
     }
 
 
-    Future<ServerResponse> save() {
+    Future<ServerResponse> updateFilm() {
         // FIXME
 
         isEditing = false;

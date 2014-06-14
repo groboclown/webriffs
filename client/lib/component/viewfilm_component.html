@@ -15,25 +15,11 @@
 
     <div ng-if="cmp.canEdit">
         <div ng-if="cmp.isEditing">
-            <div>
-            <label for="film_name">Name:</label>
-            <input id="film_name" type="text" ng-model="cmp.name"
-                ng-minlength="1"
-                ng-maxlength="200"
-                required>
-            </div>
-            <div>
-            <label for="film_year">Release Year:</label>
-            <input id="film_year" type="number" ng-model="cmp.releaseYear"
-                ng-minnumber="1800"
-                ng-maxnumber="9999"
-                required>
-            </div>
-            <div>
-            <!-- FIXME validation -->
-            <span ng-click="cmp.save()">Update film</span>
-            <span ng-click="cmp.revert()">Cancel</span>
-            </div>
+            <form onsubmit="return false;">
+                <filminfo-edit film-info="cmp.filmInfo"></filminfo-edit>
+                <input type="submit" ng-click="cmp.updateFilm()" ng-disabled="cmp.filmInfoDisabled" value="Save">
+                <button ng-click="cmp.revert()">Cancel</button>
+            </form>
         </div>
         <div ng-if="! cmp.isEditing">
             <span ng-click="cmp.isEditing = true">Edit</span>
