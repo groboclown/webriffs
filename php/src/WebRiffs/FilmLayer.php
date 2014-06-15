@@ -311,7 +311,7 @@ class FilmLayer {
     public static function saveLinkForFilm($db, $filmId, $linkName, $uri) {
         if (! is_integer($filmId)) {
             throw new Base\ValidationException(array(
-                            'film_id' => 'invalid film id format'
+                'film_id' => 'invalid film id format'
             ));
         }
         $filmId = intval($filmId);
