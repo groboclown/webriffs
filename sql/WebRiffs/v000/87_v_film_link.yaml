@@ -13,6 +13,7 @@ view:
         CROSS JOIN LINK_TYPE lt
         LEFT OUTER JOIN FILM_LINK fl
             ON fl.Link_Type_Id = lt.Link_Type_Id
+              AND fl.Film_Id = f.Film_Id
         "
     columns:
         - column:
