@@ -35,6 +35,18 @@ class FilmLayer {
      */
     public static $MAXIMUM_TAG_COUNT = 40;
     
+    
+    public static function doesFilmExist($db, $name, $year) {
+        $data = Film::$INSTANCE->readBy_Name_x_Release_Year($db, $name, $year);
+        FilmLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem checking the films'
+            )));
+        return (sizeof($data['result']) > 0);
+    }
+    
+    
 
     /**
      * Creates the film, and adds a new, empty film version.
@@ -71,9 +83,9 @@ class FilmLayer {
         $year = intval($year);
         if ($year < 0 || $year > 9999) {
             throw new Base\ValidationException(
-                    array(
-                                    "year" => "invalid year"
-                    ));
+                array(
+                    "year" => "invalid year"
+                ));
         }
         
         if (!$userInfo || !is_array($userInfo)) {
@@ -92,7 +104,8 @@ class FilmLayer {
                     'user' => 'invalid setup of the user data'
                 ));
         }
-        // FIXME need better permission checks.
+        // FIXME need better permission checks.  Though, this should be done
+        // at the entry level.
         
 
 
@@ -102,15 +115,7 @@ class FilmLayer {
         // constraint on the year+name, so that will prevent the duplicate
         // creation, but the project will still exist.  We can live with that.
         
-
-
-        $data = Film::$INSTANCE->readBy_Name_x_Release_Year($db, $name, $year);
-        FilmLayer::checkError($data,
-            new Base\ValidationException(
-                array(
-                    'unknown' => 'there was an unknown problem checking the films'
-                )));
-        if (sizeof($data['result']) > 0) {
+        if (FilmLayer::doesFilmExist($db, $name, $year)) {
             throw new Base\ValidationException(
                 array(
                     'name,year' => 'the name and release year already exist'
@@ -147,6 +152,52 @@ class FilmLayer {
             $changeId
         );
     }
+    
+    
+    public static function doesBranchExist($db, $filmId, $branchName) {
+        $data = VFilmBranch::$INSTANCE->countBy_Film_Id_x_Branch_Name($db,
+                $filmId, $branchName);
+        FilmLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem checking the branch'
+                )));
+        return $data['result'] > 0;
+    }
+    
+    
+    /**
+     *
+     *
+     * @param unknown $db
+     * @param int $filmId
+     * @param int $gaUserId
+     * @param String $branchName
+     * @param String $accessTemplate can be null; defaults to
+     *      $DEFAULT_TEMPLATE_ACCESS_NAME
+     */
+    public static function createBranch($db, $filmId, $gaUserId,
+            $branchName, $accessTemplate) {
+        
+        // A quick check to see if the film ID is valid, and captures the
+        // project ID
+        $data = Film::$INSTANCE->readBy_Film_Id($db, $filmId);
+        FilmLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem creating the branch'
+                )));
+        if (sizeof($data['result']) <= 0) {
+            throw new Base\ValidationException(array(
+                'filmid' => 'no film with that ID exists'
+            ));
+        }
+        
+        $projectId = $data['result'][0]['Gv_Project_Id'];
+        
+        return FilmLayer::createBranchById($db, $projectId, $filmId, $gaUserId,
+                $branchName, $accessTemplate);
+    }
 
 
     /**
@@ -163,7 +214,18 @@ class FilmLayer {
      */
     public static function createBranchById($db, $projectId, $filmId,
             $gaUserId, $branchName, $accessTemplate) {
-        // FIXME ensure the branch name does not exist for that film id.
+        
+        if ($accessTemplate == null) {
+            $accessTemplate = FilmLayer::$DEFAULT_TEMPLATE_ACCESS_NAME;
+        }
+        
+        if (FilmLayer::doesBranchExist($db, $filmId, $branchName)) {
+            throw new Base\ValidationException(
+                array(
+                    'Branch_Name' => 'A branch with that name already exists'
+                ));
+        }
+        
         // FIXME ensure the branch name is valid
         // FIXME validate branch name length is valid
         

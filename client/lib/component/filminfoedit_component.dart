@@ -147,9 +147,9 @@ class FilmInfoEditComponent extends SingleRequestComponent {
         _filmInUse = false;
 
         String year = filmInfo.releaseYear.toString();
-        String path = "/film?name=" +
+        String path = "/filmexists?Name=" +
                 Uri.encodeQueryComponent(filmInfo.filmName) +
-                "&yearMin=${year}&yearMax=${year}";
+                "&Release_Year=${year}";
         get(path);
     }
 
@@ -158,9 +158,8 @@ class FilmInfoEditComponent extends SingleRequestComponent {
     Future<ServerResponse> onSuccess(ServerResponse response) {
         filmInfo.checking = false;
         if (response.jsonData != null &&
-                response.jsonData.containsKey('result')) {
-            dynamic data = response.jsonData['result'];
-            _filmInUse = (data is Iterable) && (data.isNotEmpty);
+                response.jsonData.containsKey('exists')) {
+            _filmInUse = response.jsonData['exists'] == true;
         } else {
             _filmInUse = false;
         }

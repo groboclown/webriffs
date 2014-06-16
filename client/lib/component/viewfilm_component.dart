@@ -25,7 +25,7 @@ import 'filmlist_component.dart';
 class ViewFilmComponent extends PagingComponent {
     final ServerStatusService _server;
     final UserService _user;
-    final int _filmId;
+    final int filmId;
     final String _inputFilmId;
     final FilmInfo filmInfo = new FilmInfo();
 
@@ -49,7 +49,6 @@ class ViewFilmComponent extends PagingComponent {
     bool get canEdit => _user.canEditFilms;
     bool get cannotEdit => ! canEdit && _user.loggedIn;
     bool get notLoggedIn => ! _user.loggedIn;
-    bool get canCreateBranch => _user.canCreateBranch;
 
     final List<BranchRecord> branches = [];
     final List<LinkRecord> links = [];
@@ -79,7 +78,7 @@ class ViewFilmComponent extends PagingComponent {
 
 
     ViewFilmComponent._(ServerStatusService server, this._user, String path,
-            this._inputFilmId, this._filmId, this._validFilmId) :
+            this._inputFilmId, this.filmId, this._validFilmId) :
             _server = server,
             super(server, path) {
         _detailsLoaded = false;
@@ -107,7 +106,7 @@ class ViewFilmComponent extends PagingComponent {
 
     Future<ServerResponse> loadDetails() {
         _detailsLoaded = false;
-        return _server.get('/film/' + _filmId.toString(), null).
+        return _server.get('/film/' + filmId.toString(), null).
             then((ServerResponse resp) {
                 if (resp.wasError) {
                     _validFilmId = false;
@@ -132,7 +131,7 @@ class ViewFilmComponent extends PagingComponent {
     Future<ServerResponse> onSuccess(Iterable<dynamic> data) {
         branches.clear();
         data.forEach((Map<String, dynamic> row) {
-            branches.add(new BranchRecord.fromJson(_server, _filmId, row));
+            branches.add(new BranchRecord.fromJson(_server, filmId, row));
         });
         return null;
     }

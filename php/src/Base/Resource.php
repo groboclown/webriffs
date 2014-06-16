@@ -12,7 +12,25 @@ use Tonic;
 class Resource extends Tonic\Resource
 {
     private $problems = array();
-
+    
+    
+    protected function checkThat($valid, $name, $problem = null) {
+        if (! $valid) {
+            if ($problem == null) {
+                $problem = 'incorrect value';
+            }
+            $this->addValidationError($name, $problem);
+        }
+        return $valid;
+    }
+    
+    
+    protected function assertThat($valid, $name, $problem = null) {
+        if (! $this->checkThat($valid, $name, $problem)) {
+            $this->validate();
+        }
+    }
+    
 
     /**
      * Adds a validation problem, that will be reported on the next call to
@@ -42,7 +60,7 @@ class Resource extends Tonic\Resource
     protected function validateId($id, $name) {
         // FIXME if the id is a string, verify that it's the correct
         // format, and convert it.
-        if ($id != null && !is_int($id)) {
+        if ($id != null && is_numeric($id)) {
             $id = intval($id);
         }
         

@@ -274,7 +274,7 @@ class ServerResponse {
         var wasError = isErrorChecker(http.status);
         var jsonData = null;
 
-        if (http.data != null && (
+        if (http.data != null && http.data.length > 0 && (
                 http.headers('content-type') == 'application/json' ||
                 http.headers('content-type') == 'text/json')) {
             if (http.data is String) {

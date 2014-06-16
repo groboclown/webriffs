@@ -70,9 +70,9 @@ class CreateFilmComponent extends RequestHandlingComponent {
             filmInfo.filmName = null;
             filmInfo.releaseYear = null;
 
-            int filmId = response.jsonData['film_id'];
-            int branchId = response.jsonData['branch_id'];
-            int changeId = response.jsonData['change_id'];
+            int filmId = response.jsonData['Film_Id'];
+            int branchId = response.jsonData['Branch_Id'];
+            int changeId = response.jsonData['Change_Id'];
 
             // redirect to the edit page
             _route.go('Edit Your Branch', {

@@ -56,12 +56,43 @@ class FilmCollection extends Resource {
             WebRiffs\FilmLayer::$DEFAULT_TEMPLATE_ACCESS_NAME);
 
         $data = array(
-            'film_id' => $idList[1],
-            'branch_id' => $idList[2],
-            'change_id' => $idList[3]
+            'Film_Id' => $idList[1],
+            'Branch_Id' => $idList[2],
+            'Change_Id' => $idList[3]
         );
 
         return new Tonic\Response(Tonic\Response::CREATED, $data);
+    }
+}
+
+
+/**
+ * Does the film with the given name and year exactly exist?  This is needed
+ * over the general filter search, because the filter search checks if any
+ * film like the name exists (designed for humans to find information, not for
+ * computers to check for existence).
+ *
+ * @uri /filmexists
+ */
+class FilmNameObj extends Resource {
+    /**
+     * @method GET
+     */
+    public function fetch() {
+        
+        $this->assertThat(array_key_exists("Name", $_GET), 'Name');
+        $this->assertThat(array_key_exists("Release_Year", $_GET) &&
+                is_numeric($_GET['Release_Year']),
+                'Release_Year');
+        $this->validate();
+        
+        $name = $_GET['Name'];
+        $year = intval($_GET['Release_Year']);
+        
+        return array(200, array(
+            'exists' => WebRiffs\FilmLayer::doesFilmExist(
+                    $this->getDB(), $name, $year)
+        ));
     }
 }
 
@@ -103,7 +134,7 @@ class FilmObj extends Resource {
         $this->secure(WebRiffs\Access::$FILM_MODIFICATION, $PRIVILEGE_AUTHORIZED);
         
         $filmId = $this->validateId($this->filmid, "filmId");
-        $data = $this->request->data;
+        $data = $this->getRequestData();
         // FIXME validate that the data exists and is correct
         $name = $data['Name'];
         $releaseYear = $data['Release_Year'];
@@ -198,6 +229,8 @@ class FilmObjLink extends Resource {
  */
 class FilmObjBranch extends Resource {
     /**
+     * FIXME the filters on name don't seem to work.
+     *
      * @method GET
      */
     function fetch() {
@@ -217,10 +250,73 @@ class FilmObjBranch extends Resource {
     }
     
     
-    // TODO delete - delete a branch.
-    // TODO put - create a branch.
-    // TODO post - update a branch.
+    /**
+     * @method PUT
+     * @csrf create_branch
+     */
+    function create() {
+        $filmId = $this->validateId($this->filmid, "filmId");
+            
+        $data = $this->getRequestData();
+        $this->assertThat(
+            !! $data->{'name'} && is_string($data->{'name'}),
+            'name');
+        $branchName = trim($data->{'name'});
+        $this->assertThat(strlen($branchName) >= 1, 'name',
+                'must be at least 1 character long');
+        // FIXME ensure the branch name only has valid characters, and is of
+        // the correct length.
+        $this->validate();
+        
+        // Any user can create a new branch.
+        $this->secure(WebRiffs\Access::$FILM_BRANCH,
+                WebRiffs\Access::$PRIVILEGE_USER);
+        $userInfo = $this->container['user'];
+        
+        $db = $this->getDB();
+        
+        $result = WebRiffs\FilmLayer::createBranch($db, $filmId,
+            $userInfo['Ga_User_Id'], $branchName, null);
+        
+        $data = array(
+            'Branch_Id' => $result[0],
+            'Change_Id' => $result[2]
+        );
+        
+        return array(200, $data);
+    }
+    
+    
 }
+
+
+
+/**
+ * Does the branch with the given name exactly exist?  This is needed
+ * over the general filter search, because the filter search checks if any
+ * branch like the name exists (designed for humans to find information, not for
+ * computers to check for existence).
+ *
+ * @uri /film/:filmid/branchexists
+ */
+class FilmObjBranchName extends Resource {
+    /**
+     * @method GET
+     */
+    public function fetch() {
+        $filmId = $this->validateId($this->filmid, "filmId");
+        $this->assertThat(array_key_exists("Name", $_GET), 'Name');
+        $this->validate();
+
+        $name = $_GET['Name'];
+
+        return array(200, array(
+            'exists' => WebRiffs\FilmLayer::doesBranchExist(
+                    $this->getDB(), $filmId, $name)
+        ));
+    }
+}
+
 
 
 /**

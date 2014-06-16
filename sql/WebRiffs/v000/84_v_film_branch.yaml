@@ -81,4 +81,6 @@ view:
         - constraint:
             type: fake index
             columns: Film_Id, Film_Branch_Id
-            
+        - constraint:
+            type: fake index
+            columns: Film_Id, Branch_Name
