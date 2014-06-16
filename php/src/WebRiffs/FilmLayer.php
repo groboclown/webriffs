@@ -304,6 +304,8 @@ class FilmLayer {
                 array(
                     'unknown' => 'there was an unknown problem finding the film links'
                 )));
+        // FIXME remove the linkTypeId - it's not needed by the clients,
+        // and could be considered info leak.
         return $data['result'];
     }
     
@@ -343,7 +345,7 @@ class FilmLayer {
         }
         $regex = $data['result'][0]['Validation_Regex'];
         // test for both 0 and false
-        if (! preg_match('/'.$regex.'/', $uri)) {
+        if ($uri != null && ! preg_match('/'.$regex.'/', $uri)) {
             $matches = array();
             $ret = preg_match('/'.$regex.'/', $uri, $matches);
             error_log("bad match: return: ".($ret===false ? 'false' : $ret).", match: ".print_r($matches, true).", uri: ".$uri.", regex: ".$regex);

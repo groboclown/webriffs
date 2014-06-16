@@ -1,10 +1,10 @@
 library asyncstatus_component;
 
 
-import 'dart:html';
+//import 'dart:html';
 
 import 'package:angular/angular.dart';
-import 'package:logging/logging.dart';
+//import 'package:logging/logging.dart';
 
 import '../util/async_component.dart';
 
@@ -16,9 +16,9 @@ class AsyncStatusComponent {
     @NgOneWay('parent')
     AsyncComponent async;
 
-    bool get loadedError => async.loadedError;
-    bool get loadedSuccessful => async.loadedSuccessful;
-    bool get loading => async.loading;
-    bool get notLoaded => async.notLoaded;
-    String get error => async.error;
+    bool get loadedError => async == null ? true : async.loadedError;
+    bool get loadedSuccessful => async == null ? false : async.loadedSuccessful;
+    bool get loading => async == null ? false : async.loading;
+    bool get notLoaded => async == null ? false : async.notLoaded;
+    String get error => async == null ? "**INTERNAL ERROR: NO PARENT**" : async.error;
 }

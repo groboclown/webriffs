@@ -42,10 +42,11 @@ class FilmCollection extends Resource {
 
     /**
      * @method PUT
-     * @security create
      * @csrf create_film
      */
     public function create() {
+        $this->secure(WebRiffs\Access::$FILM_CREATE, $PRIVILEGE_AUTHORIZED);
+        
         $data = $this->getRequestData();
 
         $db = $this->getDB();
@@ -75,11 +76,9 @@ class FilmObj extends Resource {
      * @method GET
      */
     public function display() {
-        $filmId = $this->filmid;
-        
-        // FIXME convert filmId to an integer with correct error checking
-        $filmId = intval($filmId);
-        
+        $filmId = $this->validateId($this->filmid, "filmId");
+        $this->validate();
+                
         $db = $this->getDB();
         
         $row = WebRiffs\FilmLayer::getFilm($db, $filmId);
@@ -98,24 +97,19 @@ class FilmObj extends Resource {
 
     /**
      * @method POST
-     * @secure create
      * @csrf update_film
      */
     public function update() {
-        $filmid = $this->filmid;
+        $this->secure(WebRiffs\Access::$FILM_MODIFICATION, $PRIVILEGE_AUTHORIZED);
         
-        // FIXME convert filmId to an integer with correct error checking
-        $filmId = intval($filmId);
-        
-        $db = $this->getDB();
-
+        $filmId = $this->validateId($this->filmid, "filmId");
         $data = $this->request->data;
+        // FIXME validate that the data exists and is correct
         $name = $data['Name'];
         $releaseYear = $data['Release_Year'];
-        $imdbUrl = $data['Imdb_Url'];
-        $wikiUrl = $data['Wikipedia_Url'];
-
-        // FIXME validate data
+        $this->validate();
+        
+        $db = $this->getDB();
 
         //$stmt = $db->prepare('UPDATE FILM SET Name = ?, Release_Year = ?, Imdb_Url = ?, Wikipedia_Url = ? WHERE Film_Id = ?');
         //$stmt->execute(array($name, $releaseYear, $imdbUrl, $wikiUrl, $filmid));
@@ -127,11 +121,14 @@ class FilmObj extends Resource {
 
     /**
      * @method DELETE
-     * @secure delete
      * @csrf delete_film
      */
     function remove() {
-        $filmid = $this->filmid;
+        $this->secure(WebRiffs\Access::$FILM_DELETE, $PRIVILEGE_AUTHORIZED);
+        
+        $filmId = $this->validateId($this->filmid, "filmId");
+        $this->validate();
+        
         $db = $this->getDB();
 
         //$stmt = $db->prepare('DELETE FROM FILM WHERE Film_Id = ?');
@@ -140,6 +137,57 @@ class FilmObj extends Resource {
         return new Tonic\Response(Tonic\Response::NOCONTENT);
     }
 }
+
+
+
+/**
+ *
+ * @uri /film/:filmid/link
+ */
+class FilmObjLinkCollection extends Resource {
+    /**
+     * @mthod GET
+     */
+    public function fetch() {
+        $filmId = $this->validateId($this->filmid, "filmId");
+        $this->validate();
+        
+        $db = $this->getDB();
+        $result = WebRiffs\FilmLayer::getLinksForFilm($db, $filmId);
+        return array(200, $result);
+    }
+}
+
+
+/**
+ * @uri /film/:filmid/link/:linktypename
+ */
+class FilmObjLink extends Resource {
+    /**
+     * @method POST
+     * @csrf save_film_link
+     */
+    public function update() {
+        $this->secure(WebRiffs\Access::$FILM_MODIFICATION,
+                WebRiffs\Access::$PRIVILEGE_AUTHORIZED);
+        
+        $filmId = $this->validateId($this->filmid, "filmId");
+        $linkTypeName = $this->linktypename;
+        $data = $this->getRequestData();
+        if (! $data->{'Uri'} || ! is_string($data->{'Uri'})) {
+            $this->addValidationError('Uri', 'must specify the uri suffix');
+        } else {
+            $uri = $data->{'Uri'};
+        }
+        
+        $this->validate();
+        $db = $this->getDB();
+        
+        WebRiffs\FilmLayer::saveLinkForFilm($db, $filmId, $linkTypeName, $uri);
+        return new Tonic\Response(Tonic\Response::ACCEPTED);
+    }
+}
+
 
 
 /**
@@ -153,6 +201,9 @@ class FilmObjBranch extends Resource {
      * @method GET
      */
     function fetch() {
+        $filmId = $this->validateId($this->filmid, "filmId");
+        $this->validate();
+        
         $userId = null;
         if ($this->isUserAuthenticated()) {
             $userId = $this->container['user']['User_Id'];
@@ -160,7 +211,7 @@ class FilmObjBranch extends Resource {
         
         $db = $this->getDB();
         
-        $result = WebRiffs\FilmLayer::pageBranches($db, $userId, $this->filmid);
+        $result = WebRiffs\FilmLayer::pageBranches($db, $userId, $filmId);
         
         return array(200, $result);
     }
@@ -208,13 +259,10 @@ class FilmObjBranchObjTag extends Resource {
      * @method GET
      */
     function fetch() {
-        $branchId = $this->branchid;
-        $filmId = $this->filmid;
+        $branchId = $this->validateId($this->branchid, "branchId");
+        $filmId = $this->validateId($this->filmid, "filmId");
+        $this->validate();
 
-        // FIXME convert filmId to an integer with correct error checking
-        $filmId = intval($filmId);
-        $branchId = intval($branchId);
-        
         $userId = null;
         if ($this->isUserAuthenticated()) {
             $userId = $this->container['user']['User_Id'];

@@ -38,7 +38,9 @@ class ViewFilmComponent extends PagingComponent {
 
     bool get filmInfoDisabled => filmInfo.hasError || filmInfo.checking ||
             filmInfo.commit;
-    bool isEditing = false;
+    bool _isEditing = false;
+
+    bool get isEditing => _isEditing;
 
     bool get detailsLoaded => _detailsLoaded;
     bool get validFilm => _validFilmId;
@@ -92,6 +94,16 @@ class ViewFilmComponent extends PagingComponent {
 
 
 
+    void edit() {
+        if (! _isEditing) {
+            filmInfo.filmName = name;
+            filmInfo.releaseYear = releaseYear;
+            _isEditing = true;
+        }
+    }
+
+
+
 
     Future<ServerResponse> loadDetails() {
         _detailsLoaded = false;
@@ -110,7 +122,7 @@ class ViewFilmComponent extends PagingComponent {
                     links.clear();
                     List<Map<String, dynamic>> jsonLinks = resp.jsonData['links'];
                     jsonLinks.forEach((Map<String, dynamic> row) {
-                        links.add(new LinkRecord.fromJson(row));
+                        links.add(new LinkRecord.fromJson(_server, row));
                     });
                 }
             });
@@ -129,45 +141,77 @@ class ViewFilmComponent extends PagingComponent {
     Future<ServerResponse> updateFilm() {
         // FIXME
 
-        isEditing = false;
+        _isEditing = false;
     }
 
 
     void revert() {
-        // FIXME revert the fields
-        isEditing = false;
+        _isEditing = false;
     }
-
-
-
-
-    Future<ServerResponse> saveLinks() {
-        // FIXME
-    }
-
 }
 
 
 
 class LinkRecord {
+    final ServerStatusService _server;
     final int filmId;
-    final int linkTypeId;
     final String urlPrefix;
     final String name;
     final String desc;
+    String serverUri;
+    String errorUri;
     String uri;
+    String error;
+    bool get hasError => uri == errorUri && error != null;
+
+    bool get isChanged => uri != serverUri;
+    bool get isUnchanged => uri == serverUri;
 
     String get url => uri == null ? null : urlPrefix + uri;
     bool get isDefined => url != null;
 
 
-    factory LinkRecord.fromJson(Map<String, dynamic> row) {
-        return new LinkRecord(row['Film_Id'], row['Link_Type_Id'],
-                row['Url_Prefix'], row['Name'], row['Description'],
-                row['Uri']);
+    factory LinkRecord.fromJson(ServerStatusService server,
+            Map<String, dynamic> row) {
+        return new LinkRecord(server, row['Film_Id'], row['Url_Prefix'],
+                row['Name'], row['Description'], row['Uri']);
     }
 
 
-    LinkRecord(this.filmId, this.linkTypeId, this.urlPrefix, this.name,
-                       this.desc, this.uri);
+    LinkRecord(this._server, this.filmId, this.urlPrefix,
+           this.name, this.desc, this.serverUri) {
+        this.uri = serverUri;
+    }
+
+
+    Map<String, dynamic> toJson() {
+        Map<String, dynamic> ret = {};
+        ret['Uri'] = uri;
+        return ret;
+    }
+
+
+    void cancel() {
+        this.uri = serverUri;
+    }
+
+    Future<ServerResponse> save() {
+        return _server.createCsrfToken('save_film_link').then(
+                (String csrfToken) {
+            final String submittedUri = uri;
+            Map<String, dynamic> data = toJson();
+            return _server.post('film/' + filmId.toString() + '/link/' + name,
+                    csrfToken, data: data)
+                .then((ServerResponse resp) {
+                    if (resp.wasError) {
+                        error = resp.message;
+                        errorUri = submittedUri;
+                    } else {
+                        error = null;
+                        serverUri = submittedUri;
+                        errorUri = null;
+                    }
+                });
+        });
+    }
 }

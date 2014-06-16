@@ -20,6 +20,7 @@ class Access {
     // film_branch_X tables.
     static $FILM_CREATE = 'film-create';
     static $FILM_MODIFICATION = 'film-mod'; // change title, year
+    static $FILM_DELETE = 'film-delete';
     static $FILM_BRANCH = 'film-branch'; // creation of branches
     
     
@@ -67,6 +68,7 @@ Access::$USER_ACCESS = array(
     Access::$ADMIN_LINKS,
     Access::$FILM_CREATE,
     Access::$FILM_MODIFICATION,
+    Access::$FILM_DELETE,
     Access::$FILM_BRANCH,
     Access::$BRANCH_READ,    Access::$BRANCH_WRITE,
     Access::$BRANCH_USER_MAINTENANCE,

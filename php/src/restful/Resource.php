@@ -10,18 +10,6 @@ use WebRiffs;
 use GroboAuth;
 
 class Resource extends Base\Resource {
-    /**
-     * Validate that the given variable is a non-null number.
-     */
-    protected function validateId($id, $name) {
-        if ($id == null || !is_int($id)) {
-            // TODO include the id name in the error
-            throw new Base\ValidationException(array(
-                    $name => "not valid"
-                ));
-        }
-        return $id;
-    }
 
 
     protected function getDB() {
@@ -78,13 +66,27 @@ class Resource extends Base\Resource {
      */
     function secure($role, $minLevel) {
         $this->authenticated();
+        $minLevel = intval($minLevel);
         $db = $this->getDB();
 
-        $auth =& $this->container['user'];
-        if (! $this->isUserAuthSecureForRole($auth, $role)) {
+        $auth = $this->getUserSessionAuthorization();
+        
+        if (! $this->isUserAuthSecureForRole($auth, $role, $minLevel)) {
             throw new Tonic\UnauthorizedException();
         }
         return true;
+    }
+    
+    
+    function getUserSessionAuthorization() {
+        $this->authenticated();
+        $userInfo = $this->container['user'];
+        if (! array_key_exists('authorization', $userInfo)) {
+            $auth = WebRiffs\AuthenticationLayer::getUserAccess(
+                $this->getDB(), $userInfo['User_Id']);
+            $userInfo['authorization'] = $auth;
+        }
+        return $userInfo['authorization'];
     }
     
     
@@ -150,16 +152,12 @@ class Resource extends Base\Resource {
     }
 
 
-    function isUserAuthSecureForRole($userAuth, $role) {
+    function isUserAuthSecureForRole($userAuth, $role, $minPrivilege) {
         if (!$userAuth) {
             return false;
         }
-        foreach (array_keys($userAuth['attributes']) as $key) {
-            if (startsWith($key, 'role_') && $userAuth['attributes'][$key] == $role) {
-                return true;
-            }
-        }
-        return false;
+        return (array_key_exists($role, $userAuth) &&
+                $userAuth[$role] >= $minPrivilege);
     }
 
 

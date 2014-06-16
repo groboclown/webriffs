@@ -18,7 +18,7 @@ class Resource extends Tonic\Resource
      * Adds a validation problem, that will be reported on the next call to
      * validate().
      */
-    protected function addValidationError(string $name, string $problem) {
+    protected function addValidationError($name, $problem) {
         $problems[$name] = $problem;
     }
 
@@ -39,9 +39,15 @@ class Resource extends Tonic\Resource
      *
      * @return int
      */
-    protected function validateId(mixed $id, string $name) {
+    protected function validateId($id, $name) {
+        // FIXME if the id is a string, verify that it's the correct
+        // format, and convert it.
+        if ($id != null && !is_int($id)) {
+            $id = intval($id);
+        }
+        
         if ($id == null || !is_int($id)) {
-            addValidationError($name, "invalid id value");
+            $this->addValidationError($name, "invalid id value");
             return null;
         }
         return $id;
