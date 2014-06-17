@@ -145,7 +145,7 @@ class BranchRecord extends RequestHandlingComponent {
 
 
     void reload() {
-        handleRequest(_server.get('/film/${filmId}/branch/${branchId}/tag',
+        handleRequest(_server.get('/branch/${branchId}/tag',
             null));
     }
 }

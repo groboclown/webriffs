@@ -4,6 +4,18 @@ library single_request;
 import 'dart:async';
 import '../service/server.dart';
 
+
+abstract class AbstractRequest {
+    bool get hasPendingRequest;
+
+    bool get isActive;
+
+    Future<ServerResponse> add(MakeSingleRequest request,
+                [ Duration delay = null ]);
+}
+
+
+
 /**
  * This handles the situations where a library needs to handle
  * single requests to the server, whose results will be overwritten
@@ -22,7 +34,7 @@ import '../service/server.dart';
  * new request, they will not be honored.  *Only the last request will be
  * honored; all others are thrown away regardless of the delay value.*
  */
-class SingleRequest {
+class SingleRequest implements AbstractRequest {
     final ServerStatusService _server;
     RequestData _head = null;
     StreamController<RequestData> _stream;
@@ -36,11 +48,13 @@ class SingleRequest {
             });
     }
 
-
+    @override
     bool get hasPendingRequest => _head != null;
+
+    @override
     bool get isActive => _active != null;
 
-
+    @override
     Future<ServerResponse> add(MakeSingleRequest request,
             [ Duration delay = null ]) {
         RequestData data = new RequestData(request, delay);
@@ -191,4 +205,48 @@ class RequestData {
         return when.compareTo(other.when);
     }
     */
+}
+
+
+
+/**
+ * A drop-in replacement for the SingleRequest class.
+ */
+class AsyncRequest implements AbstractRequest {
+    final ServerStatusService _server;
+    int _pendingCount = 0;
+    int _activeCount = 0;
+
+    @override
+    bool get hasPendingRequest => _pendingCount > 0;
+
+    @override
+    bool get isActive => _activeCount > 0;
+
+    AsyncRequest(this._server);
+
+    @override
+    Future<ServerResponse> add(MakeSingleRequest request,
+                [ Duration delay = null ]) {
+        _pendingCount++;
+        if (delay == null || delay.inMilliseconds <= 0) {
+            return request(_server);
+        } else {
+            Completer<ServerResponse> ret = new Completer();
+            new Timer(delay, () {
+                request(_server).then((ServerResponse resp) {
+                    _pendingCount--;
+                    ret.complete();
+                }, onError: (Exception e) {
+                    _pendingCount--;
+                    ret.completeError(e);
+                }).catchError((Exception e) {
+                    _pendingCount--;
+                    ret.completeError(e);
+                });
+            });
+
+            return ret.future;
+        }
+    }
 }

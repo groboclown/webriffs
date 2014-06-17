@@ -283,7 +283,8 @@ abstract class PagingComponent implements AsyncComponent {
     bool get isAscSort => ! _current.isDescSort;
 
 
-    PagingComponent(this._server, String path, [ Duration delay = null ]) {
+    PagingComponent(this._server, String path, [ Duration delay = null,
+            bool singleRequest = true ]) {
         _current = new PageState(server, path,
             (PageState pageState, Iterable<dynamic> data, ServerResponse response) {
                 Future<ServerResponse> ret = onSuccess(data);
@@ -301,7 +302,7 @@ abstract class PagingComponent implements AsyncComponent {
                             _localErrorMessage = e.toString();
                             _loading = false;
                         });
-            }, delay);
+            }, delay, singleRequest);
     }
 
 

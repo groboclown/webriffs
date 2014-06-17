@@ -16,9 +16,6 @@ typedef Future<ServerResponse> PageLoaded(PageState pageState,
  * component should have its own current values for sorting and filters and
  * current page value to represent what the user selects, so that the
  * changing of the UI elements can be separate from the submission.
- *
- * TODO this should use the single_request utility to correctly handle
- * quick clicks from the user.
  */
 class PageState {
     final SingleRequest _server;
@@ -42,8 +39,11 @@ class PageState {
     // FIXME list of possible sorted_by values
 
     PageState(ServerStatusService server, this._path, this._on_loaded,
-                [ this._delay = null ]) :
-            this._server = new SingleRequest(server),
+                [ this._delay = null, bool singleRequest = true ]) :
+            this._server =
+                singleRequest
+                        ? new SingleRequest(server)
+                        : new AsyncRequest(server),
             this._currentPage = 0,
             this._pageCount = 0,
             this._recordCount = 0,

@@ -319,9 +319,12 @@ class FilmObjBranchName extends Resource {
 
 
 /**
+ * Fetches the top-level information about the branch.  This is essentially
+ * the film information + the branch name and creation / update dates.
+ *
  * This needs to include the user's pending changes in the results.
  *
- * @uri /film/:filmid/branch/:branchid
+ * @uri /branch/:branchid
  *
  */
 class FilmObjBranchObj extends Resource {
@@ -342,11 +345,38 @@ class FilmObjBranchObj extends Resource {
 }
 
 
+/**
+ * Paging in of the branch quips.  An extra parameter indicates that the
+ * user's current changes, rather than just the head, is requested.
+ *
+ * A separate request is necessary to fetch the quip tags.
+ *
+ * FIXME inspect if the tags should be associated directly on the object itself,
+ * since we have a hard-limit on the number of tags.  We can still keep a
+ * derivative table for quick searches.
+ *
+ * @uri /branch/:branchid/quips
+ */
+class FilmObjBranchObjQuips extends Resource {
+    
+}
+
+
+/**
+ * All committed changes for the branch.
+ *
+ * @uri /branch/:branchid/history
+ */
+class FilmObjBranchObjChanges extends Resource {
+    
+}
+
+
 
 /**
  * This needs to include the user's pending changes in the results.
  *
- * @uri /film/:filmid/branch/:branchid/tag
+ * @uri /branch/:branchid/tag
  */
 class FilmObjBranchObjTag extends Resource {
     
