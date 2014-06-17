@@ -16,9 +16,21 @@ class AsyncStatusComponent {
     @NgOneWay('parent')
     AsyncComponent async;
 
+    @NgOneWay('show-reload')
+    bool showReload = false;
+
+    @NgOneWay('show-initial-load')
+    bool showInitialLoad = true;
+
+    bool get showLoadButton => (showReload) || (showInitialLoad && notLoaded);
+
     bool get loadedError => async == null ? true : async.loadedError;
     bool get loadedSuccessful => async == null ? false : async.loadedSuccessful;
     bool get loading => async == null ? false : async.loading;
     bool get notLoaded => async == null ? false : async.notLoaded;
     String get error => async == null ? "**INTERNAL ERROR: NO PARENT**" : async.error;
+
+    void reload() {
+        async.reload();
+    }
 }

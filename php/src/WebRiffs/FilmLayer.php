@@ -139,7 +139,7 @@ class FilmLayer {
         $filmId = intval($data['result']);
         
         $branchData = FilmLayer::createBranchById($db, $projectId, $filmId,
-            $gaUserId, FilmLayer::$INITIAL_BRANCH_NAME,
+            $userId, $gaUserId, FilmLayer::$INITIAL_BRANCH_NAME,
             $accessTemplate);
         $branchId = $branchData[0];
         $filmBranchId = $branchData[1];
@@ -176,7 +176,7 @@ class FilmLayer {
      * @param String $accessTemplate can be null; defaults to
      *      $DEFAULT_TEMPLATE_ACCESS_NAME
      */
-    public static function createBranch($db, $filmId, $gaUserId,
+    public static function createBranch($db, $filmId, $userId, $gaUserId,
             $branchName, $accessTemplate) {
         
         // A quick check to see if the film ID is valid, and captures the
@@ -195,8 +195,8 @@ class FilmLayer {
         
         $projectId = $data['result'][0]['Gv_Project_Id'];
         
-        return FilmLayer::createBranchById($db, $projectId, $filmId, $gaUserId,
-                $branchName, $accessTemplate);
+        return FilmLayer::createBranchById($db, $projectId, $filmId, $userId,
+                $gaUserId, $branchName, $accessTemplate);
     }
 
 
@@ -212,7 +212,7 @@ class FilmLayer {
      * @param string $branchName
      * @return multitype:number
      */
-    public static function createBranchById($db, $projectId, $filmId,
+    public static function createBranchById($db, $projectId, $filmId, $userId,
             $gaUserId, $branchName, $accessTemplate) {
         
         if ($accessTemplate == null) {
@@ -257,6 +257,10 @@ class FilmLayer {
                 array(
                     'unknown' => 'there was an unknown problem creating the access permissions'
                 )));
+        
+        
+        // Add the user as the owner of the branch.
+        
         
         // Finally a change for the user to start using.
         $data = GroboVersion\GvChange::$INSTANCE->create(

@@ -264,8 +264,7 @@ class FilmObjBranch extends Resource {
         $branchName = trim($data->{'name'});
         $this->assertThat(strlen($branchName) >= 1, 'name',
                 'must be at least 1 character long');
-        // FIXME ensure the branch name only has valid characters, and is of
-        // the correct length.
+        // FIXME ensure the branch name only has valid characters
         $this->validate();
         
         // Any user can create a new branch.
@@ -276,7 +275,7 @@ class FilmObjBranch extends Resource {
         $db = $this->getDB();
         
         $result = WebRiffs\FilmLayer::createBranch($db, $filmId,
-            $userInfo['Ga_User_Id'], $branchName, null);
+            $userInfo['User_Id'], $userInfo['Ga_User_Id'], $branchName, null);
         
         $data = array(
             'Branch_Id' => $result[0],
