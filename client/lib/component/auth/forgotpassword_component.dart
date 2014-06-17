@@ -4,8 +4,8 @@ library forgotpassword_component;
 
 import 'package:angular/angular.dart';
 
-import '../service/server.dart';
-import '../service/user.dart';
+import '../../service/server.dart';
+import '../../service/user.dart';
 
 /**
  * The UI component view of the "forgot my password" form.

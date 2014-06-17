@@ -260,6 +260,10 @@ class FilmLayer {
         
         
         // Add the user as the owner of the branch.
+        foreach (Access::$BRANCH_ACCESS as $ba) {
+            $data = FilmBranchAccess::$INSTANCE->create($db, $filmBranchId,
+                $userId, $ba, Access::$PRIVILEGE_OWNER);
+        }
         
         
         // Finally a change for the user to start using.

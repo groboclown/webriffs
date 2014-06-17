@@ -5,11 +5,11 @@ import 'dart:async';
 
 import 'package:angular/angular.dart';
 
-import '../service/server.dart';
-import '../service/user.dart';
+import '../../service/server.dart';
+import '../../service/user.dart';
 import 'filminfoedit_component.dart';
 
-import '../util/async_component.dart';
+import '../../util/async_component.dart';
 
 // FIXME move the branch and tag common stuff into its own file.
 import 'filmlist_component.dart';

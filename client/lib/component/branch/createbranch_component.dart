@@ -5,16 +5,16 @@ import 'dart:async';
 
 import 'package:angular/angular.dart';
 
-import '../service/server.dart';
-import '../service/user.dart';
-import '../util/async_component.dart';
+import '../../service/server.dart';
+import '../../service/user.dart';
+import '../../util/async_component.dart';
 
 /**
  * The UI component to create a new branch.
  */
 @Component(
     selector: 'create-branch',
-    templateUrl: 'packages/webriffs_client/component/createbranch_component.html',
+    templateUrl: 'packages/webriffs_client/component/branch/createbranch_component.html',
     publishAs: 'cmp')
 class CreateBranchComponent extends RequestHandlingComponent {
     final ServerStatusService _server;

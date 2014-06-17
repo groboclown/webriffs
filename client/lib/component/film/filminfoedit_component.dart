@@ -4,8 +4,8 @@ library filminfoedit_component;
 import 'dart:async';
 import 'package:angular/angular.dart';
 
-import '../service/server.dart';
-import '../util/async_component.dart';
+import '../../service/server.dart';
+import '../../util/async_component.dart';
 
 /**
  * The model data used by the edit component, which is passed-in from the

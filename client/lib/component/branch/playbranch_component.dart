@@ -4,9 +4,9 @@ library playbranch_component;
 
 import 'package:angular/angular.dart';
 
-import '../service/server.dart';
+import '../../service/server.dart';
 
-import '../util/paging.dart';
+import '../../util/paging.dart';
 
 /**
  * The UI component to playback quips in a branch.

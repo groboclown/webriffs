@@ -5,16 +5,16 @@ import 'dart:async';
 
 import 'package:angular/angular.dart';
 
-import '../service/server.dart';
+import '../../service/server.dart';
 
-import '../util/async_component.dart';
+import '../../util/async_component.dart';
 
 /**
  * The UI component view of the list of films.
  */
 @Component(
     selector: 'film-list',
-    templateUrl: 'packages/webriffs_client/component/filmlist_component.html',
+    templateUrl: 'packages/webriffs_client/component/film/filmlist_component.html',
     //cssUrl: 'packages/webriffs_client/component/errorstatus_component.css',
     publishAs: 'cmp')
 class FilmListComponent extends PagingComponent {

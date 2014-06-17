@@ -20,7 +20,7 @@ class AsyncStatusComponent {
     bool showReload = false;
 
     @NgOneWay('show-initial-load')
-    bool showInitialLoad = true;
+    bool showInitialLoad = false;
 
     bool get showLoadButton => (showReload) || (showInitialLoad && notLoaded);
 

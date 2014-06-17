@@ -4,10 +4,11 @@ library createfilm_component;
 import 'dart:async';
 import 'package:angular/angular.dart';
 
-import '../service/server.dart';
-import '../service/user.dart';
-import '../util/async_component.dart';
+import '../../service/server.dart';
+import '../../service/user.dart';
+import '../../util/async_component.dart';
 import 'filminfoedit_component.dart';
+
 
 /**
  * The UI component view of the list of films.  This model stores the
@@ -19,7 +20,7 @@ import 'filminfoedit_component.dart';
  */
 @Component(
     selector: 'create-film',
-    templateUrl: 'packages/webriffs_client/component/createfilm_component.html',
+    templateUrl: 'packages/webriffs_client/component/film/createfilm_component.html',
     //cssUrl: 'packages/webriffs_client/component/errorstatus_component.css',
     publishAs: 'cmp')
 class CreateFilmComponent extends RequestHandlingComponent {

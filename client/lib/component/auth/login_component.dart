@@ -6,8 +6,8 @@ import 'dart:async';
 import 'package:angular/angular.dart';
 import 'package:logging/logging.dart';
 
-import '../service/server.dart';
-import '../service/user.dart';
+import '../../service/server.dart';
+import '../../service/user.dart';
 
 /**
  * The UI component view of the login form.
