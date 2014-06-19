@@ -9,7 +9,7 @@ view:
     # their level of access for all branches, regardless of the branch
     # maintainers' desires.
     query: "SELECT
-          fba.Film_Branch_Id Film_Branch_Id
+          fba.Gv_Branch_Id Gv_Branch_Id
           , ua.User_Id User_Id
           , fba.Access Access
           
@@ -27,13 +27,13 @@ view:
         "
     columns:
         - column:
-            name: Film_Branch_Id
+            name: Gv_Branch_Id
             type: int
             constraints:
                 - constraint:
                     type: foreign key
-                    table: FILM_BRANCH
-                    column: Film_Branch_Id
+                    table: GV_BRANCH
+                    column: Gv_Branch_Id
         - column:
             name: User_Id
             type: int
@@ -51,4 +51,4 @@ view:
     constraints:
         - constraint:
             type: fake index
-            columns: Film_Branch_Id, User_Id
+            columns: Gv_Branch_Id, User_Id

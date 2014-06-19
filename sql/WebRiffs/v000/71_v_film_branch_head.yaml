@@ -1,0 +1,55 @@
+# The details for the head versions of the branches for each film.  Includes
+# the simple film details, as well.
+
+view:
+    viewName: V_FILM_BRANCH_HEAD
+    query: "
+        SELECT
+          f.Film_Id Film_Id
+          , f.Gv_Project_Id Gv_Project_Id
+          , f.Name Film_Name
+          , f.Release_Year Release_Year
+          , f.Created_On Film_Created_On
+          , f.Last_Updated_On Film_Last_Updated_On
+          
+          , bh.Gv_Branch_Id Gv_Branch_Id
+          , bh.Gv_Item_Id Branch_Gv_Item_Id
+          , bh.Gv_Item_Version_Id Branch_Gv_Item_Version_Id
+          , c.Gv_Change_Id Gv_Change_Id
+          , fbv.Branch_Name Branch_Name
+          , fbv.Description Description
+          , COALESCE(fbv.Last_Updated_On, fbv.Created_On) Updated_On
+        FROM
+            V_BRANCH_HEAD bh
+        INNER JOIN
+            GV_ITEM_VERSION iv
+                ON iv.Gv_Item_Version_Id = bh.Gv_Item_Version_Id
+        INNER JOIN
+            GV_CHANGE c
+                ON c.Gv_Branch_Id = bh.Gv_Branch_Id
+        INNER JOIN
+            GV_CHANGE_VERSION cv
+                ON cv.Gv_Item_Version_Id = bh.Gv_Item_Version_Id
+                  AND cv.Gv_Change_Id = c.Gv_Change_Id
+        INNER JOIN
+            GV_BRANCH b
+                ON b.Gv_Branch_Id = bh.Gv_Branch_Id
+        INNER JOIN
+            FILM f
+                ON f.Gv_Project_Id = b.Gv_Project_Id
+        INNER JOIN
+            FILM_BRANCH_VERSION fbv
+                ON fbv.Gv_Item_Version_Id = bh.Gv_Item_Version_Id
+        
+        WHERE iv.Alive = 1
+        "
+    columns:
+        - column:
+            name: Film_Id
+            type: int
+            constraints:
+                type: foreign key
+                table: FILM
+                column: Film_Id
+        # FIXME the rest of the columns
+        

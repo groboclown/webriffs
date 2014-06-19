@@ -1,9 +1,8 @@
-# Reports the head version of all branches.
 
-
+# Reports the head change number of all branches.
 
 view:
-    viewName: V_GV_BRANCH_HEAD
+    viewName: V_GV_BRANCH_HEAD_CHANGE
     query: "
         SELECT
             b.Gv_Branch_Id Gv_Branch_Id

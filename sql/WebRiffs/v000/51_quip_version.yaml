@@ -1,5 +1,8 @@
 # A quip associated with the quip item's version.
 
+# The relationship between branches and quips is in the changes assigned to
+# a quip.
+
 # May want to look at splitting the data from the quip itself, especially when
 # we have large data associated with each quip (e.g. voice recordings).
 
@@ -7,19 +10,17 @@ table:
     tableName: QUIP_VERSION
     columns:
         - column:
-            name: Quip_Version_Id
-            type: int
-            autoIncrement: true
-            constraints:
-                - constraint:
-                    type: primary key
-                    name: Quip_Version_Id_Key
-        - column:
             name: Gv_Item_Version_Id
             type: int
             constraints:
                 - constraint:
                     type: not null
+                - constraint:
+                    type: primary key
+                    name: Quip_Version__Gv_Item_Version_Id_PK
+                - constraint:
+                    type: unique index
+                    name: Quip_Version__Gv_Item_Version_Id_IDX
                 - constraint:
                     type: foreign key
                     name: Quip_Version__Gv_Item_Version_Id_FK
@@ -37,6 +38,372 @@ table:
             constraints:
                 - constraint:
                     type: not null
+
+        # Just like with the branches, the tags are associated with the
+        # quip versions, rather than as independent objects.  This makes
+        # queries and server requests much lighter weight, at the cost of
+        # some ugly sql, and a hard-coded limit to the number of tags.
+        - column:
+            name: Tag_Id_1
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_1
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_2
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_2
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_3
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_3
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_4
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_4
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_5
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_5
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_6
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_6
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_7
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_7
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_8
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_8
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_9
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_9
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_10
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_10
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_11
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_11
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_12
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_12
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_13
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_13
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_14
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_14
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_15
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_15
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_16
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_16
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_17
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_17
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_18
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_18
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_19
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_19
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_20
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_20
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_21
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_21
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_22
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_22
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_23
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_23
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_24
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_24
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_25
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_25
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_26
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_26
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_27
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_27
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_28
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_28
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_29
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_29
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_30
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_30
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_31
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_31
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_32
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_32
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_33
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_33
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_34
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_34
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_35
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_35
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_36
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_36
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_37
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_37
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_38
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_38
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_39
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_39
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+        - column:
+            name: Tag_Id_40
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Quip_Version__Tag_Id_FK_40
+                    table: QUIP_TAG
+                    column: Quip_Tag_Id
+
 
         - column:
             name: Timestamp_Millis

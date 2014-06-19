@@ -9,14 +9,6 @@ table:
     tableName: BRANCH_TAG
     columns:
         - column:
-            name: Branch_Tag_Id
-            type: int
-            autoIncrement: true
-            constraints:
-                - constraint:
-                    type: primary key
-                    name: Branch_Tag_Id_Key
-        - column:
             name: Gv_Item_Id
             type: int
             constraints:
@@ -25,6 +17,9 @@ table:
                     name: Branch_Tag__Gv_Item_Id_FK
                     table: GV_ITEM
                     column: Gv_Item_Id
+                - constraint:
+                    type: primary key
+                    name: Branch_Tag__Gv_Item_Id_PK
         - column:
             name: Name
             type: nvarchar(64)

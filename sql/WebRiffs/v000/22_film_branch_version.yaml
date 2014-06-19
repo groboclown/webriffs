@@ -1,28 +1,46 @@
-# A single quip, which is a kind of item in the versioning model.
+# The top-level information about a branch.  The tags are blown out horizontally
+# here in order to make the number of server calls and db calls minimal.  It
+# also cleans up the versioning a bit.  It also puts a hard upper limit on the
+# number of tags, which also helps on the UI side to restrict paging.
+
+# The server code should restrict the tags such that they only contain unique
+# IDs.
 
 
 table:
-    tableName: QUIP
+    tableName: FILM_BRANCH_VERSION
     columns:
         - column:
-            name: Quip_Id
+            name: Gv_Item_Version_Id
             type: int
-            autoIncrement: true
             constraints:
                 - constraint:
                     type: primary key
-                    name: Quip_Id_Key
+                    name: Film_Branch_Version__Gv_Item_Version_Id_PK
+                - constraint:
+                    type: unique index
+                    name: Film_Branch_Version__Gv_Item_Version_Id_IDX
+                - constraint:
+                    type: foreign key
+                    name: Film_Branch_Version__Gv_Item_Version_Id_FK
+                    table: GV_ITEM_VERSION
+                    column: Gv_Item_Version_Id
+                - constraint:
+                    type: no update
+                - constraint:
+                    type: not null
         - column:
-            name: Gv_Item_Id
-            type: int
+            name: Branch_Name
+            type: nvarchar(255)
             constraints:
                 - constraint:
                     type: not null
+        - column:
+            name: Description
+            type: nvarchar(2048)
+            constraints:
                 - constraint:
-                    type: foreign key
-                    name: Quip__Gv_Item_Id_FK
-                    table: GV_ITEM
-                    column: Gv_Item_Id
+                    type: not null
         - column:
             name: Created_On
             type: timestamp

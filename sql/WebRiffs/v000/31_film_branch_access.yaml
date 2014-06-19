@@ -26,16 +26,16 @@ table:
                     type: primary key
                     name: Film_Branch_Access_Id_Key
         - column:
-            name: Film_Branch_Id
+            name: Gv_Branch_Id
             type: int
             constraints:
                 - constraint:
                     type: not null
                 - constraint:
                     type: foreign key
-                    name: Film_Branch_Access__Film_Branch_Id_FK
-                    table: FILM_BRANCH
-                    column: Film_Branch_Id
+                    name: Film_Branch_Access__Gv_Branch_Id_FK
+                    table: GV_BRANCH
+                    column: Gv_Branch_Id
         - column:
             name: User_Id
             type: int
@@ -91,7 +91,7 @@ table:
     constraints:
         - constraint:
               type: unique index
-              columns: Film_Branch_Id, User_Id, Access
+              columns: Gv_Branch_Id, User_Id, Access
               name: Film_Branch_Access__Branch_User_Access__IDX
     whereClauses:
         - where:
@@ -104,13 +104,13 @@ table:
             type: insert
             execute: "
               INSERT INTO FILM_BRANCH_ACCESS (
-                Film_Branch_Id, User_Id, Access, Privilege_Level, Created_On, Last_Updated_On
+                Gv_Branch_Id, User_Id, Access, Privilege_Level, Created_On, Last_Updated_On
               )
               SELECT
-                {Film_Branch_Id}, NULL, Access, Privilege_Level, NOW(), NULL
+                {Gv_Branch_Id}, NULL, Access, Privilege_Level, NOW(), NULL
               FROM
                 TEMPLATE_FILM_BRANCH_ACCESS
               WHERE Template_Name = {Template_Name}
               "
-            arguments: Film_Branch_Id, Template_Name
+            arguments: Gv_Branch_Id, Template_Name
       

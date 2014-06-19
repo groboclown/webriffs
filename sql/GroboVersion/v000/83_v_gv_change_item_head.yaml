@@ -1,31 +1,20 @@
-# All the current items per change and branch.  This will include items that
-# were deleted.
-
-# This is a very nasty view.  For efficiency, code that requires the
-# correct version of the items should perform one inner select on the
-# known branch and change id version:
-
-# SELECT blah FROM t
-# INNER JOIN (
-# SELECT Gv_Change_Id, Gv_Item_Id, MAX(Gv_Item_Version_Id) Gv_Item_Version_Id
-# FROM GV_CHANGE_VERSION GROUP BY Gv_Branch_Id, Gv_Change_Id, Gv_Item_Id
-# WHERE Gv_Branch_Id = {Branch_Id} AND Gv_Change_Id <= {Change_Id}
-# ) x on t.Gv_Item_Version_Id = x.Gv_Item_Version_Id
+# The current change items per branch.
 
 view:
-    viewName: V_GV_CHANGE_ITEM
+    viewName: V_GV_CHANGE_ITEM_HEAD
     query: "
         SELECT
-            mciv.Gv_Branch_Id Gv_Branch_Id
-            , mciv.Gv_Change_Id Gv_Change_Id
-            , mciv.Gv_Item_Id Gv_Item_Id
-            , mciv.Gv_Item_Version_Id Gv_Item_Version_Id
-            , mciv.Ga_User_Id Ga_User_Id
-            , iv.Alive Alive
-            , COALESCE(iv.Last_Updated_On, iv.Created_On) Updated_On
-        FROM V_GV_MAX_CHANGE_ITEM_VERSION mciv
-        INNER JOIN GV_ITEM_VERSION iv
-            ON mciv.Gv_Item_Version_Id = iv.Gv_Item_Version_Id
+            ci.Gv_Branch_Id Gv_Branch_Id
+            , ci.Gv_Change_Id Gv_Change_Id
+            , ci.Gv_Item_Id Gv_Item_Id
+            , ci.Gv_Item_Version_Id Gv_Item_Version_Id
+            , ci.Ga_User_Id Ga_User_Id
+            , ci.Alive Alive
+            , ci.Updated_On Updated_On
+        FROM V_GV_CHANGE_ITEM ci
+        INNER JOIN V_GV_BRANCH_HEAD_CHANGE bhc
+            ON bhc.Gv_Branch_Id = ci.Gv_Branch_Id
+              AND bhc.Gv_Change_Id = ci.Gv_Change_Id
         "
     columns:
         - column:
