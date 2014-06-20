@@ -82,4 +82,10 @@ view:
         - where:
             name: Is_Allowed
             sql: Access = {access} AND Minimum_Privilege_Level <= {privilege}
-            arguments: privilege, access
+            arguments:
+                - argument:
+                    name: privilege
+                    type: int
+                - argument:
+                    name: access
+                    type: varchar(64)

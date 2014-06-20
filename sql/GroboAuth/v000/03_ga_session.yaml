@@ -77,14 +77,18 @@ table:
                         - dialect:
                             platforms: mysql
                             sql: TIMESTAMPADD(MINUTE, {Minutes_From_Now}, NOW())
-                    argument: Minutes_From_Now
+                    argument:
+                        name: Minutes_From_Now
+                        type: int
                 - constraint:
                     type: update value
                     dialects:
                         - dialect:
                             platforms: mysql
                             sql: TIMESTAMPADD(MINUTE, {Minutes_From_Now}, NOW())
-                    argument: Minutes_From_Now
+                    argument:
+                        name: Minutes_From_Now
+                        type: int
         - column:
             name: Created_On
             type: timestamp

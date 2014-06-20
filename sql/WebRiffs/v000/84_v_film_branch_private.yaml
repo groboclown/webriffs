@@ -47,5 +47,5 @@ view:
     constraints:
         - constraint:
             type: fake index
-            columns: Film_Branch_Id, User_Id
+            columns: Gv_Branch_Id, User_Id
             

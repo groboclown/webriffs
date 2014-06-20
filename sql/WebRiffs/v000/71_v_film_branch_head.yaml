@@ -48,8 +48,9 @@ view:
             name: Film_Id
             type: int
             constraints:
-                type: foreign key
-                table: FILM
-                column: Film_Id
+                - constraint:
+                    type: foreign key
+                    table: FILM
+                    column: Film_Id
         # FIXME the rest of the columns
         

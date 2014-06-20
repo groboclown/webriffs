@@ -96,4 +96,10 @@ table:
                 V_GV_CHANGE_ITEM
               WHERE Gv_Branch_Id = {Gv_Branch_Id} AND Gv_Change_Id = {Gv_Change_Id}
               "
-            arguments: Gv_Change_Id, Gv_Branch_Id
+            arguments:
+                - argument:
+                    name: Gv_Change_Id
+                    type: int
+                - argument:
+                    name: Gv_Branch_Id
+                    type: int

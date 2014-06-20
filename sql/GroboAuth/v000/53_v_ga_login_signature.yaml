@@ -38,5 +38,7 @@ view:
         - where:
             name: Seconds
             sql: TIMESTAMPDIFF(SECOND, la.Created_On, NOW()) < {seconds}
-            argument: seconds
+            argument:
+                name: seconds
+                type: int
 

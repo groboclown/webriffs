@@ -31,7 +31,7 @@ table:
                     type: not null
         - column:
             name: Branch_Name
-            type: nvarchar(255)
+            type: nvarchar(200)
             constraints:
                 - constraint:
                     type: not null

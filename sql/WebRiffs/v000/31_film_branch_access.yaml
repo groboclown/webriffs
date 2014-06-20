@@ -97,7 +97,13 @@ table:
         - where:
             name: Is_Guest_Allowed
             sql: Access = {access} AND Privilege_Level <= {privilege} AND User_Id IS NULL
-            arguments: privilege, access
+            arguments:
+                - argument:
+                    name: privilege
+                    type: int
+                - argument:
+                    name: access
+                    type: VARCHAR(64)
     extend:
         - sql:
             name: create_from_template
@@ -112,5 +118,10 @@ table:
                 TEMPLATE_FILM_BRANCH_ACCESS
               WHERE Template_Name = {Template_Name}
               "
-            arguments: Gv_Branch_Id, Template_Name
-      
+            arguments:
+                - argument:
+                    name: Gv_Branch_Id
+                    type: int
+                - argument:
+                    name: Template_Name
+                    type: nvarchar(64)

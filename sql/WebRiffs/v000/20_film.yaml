@@ -70,8 +70,16 @@ table:
         - where:
             name: Restrict_Year
             sql: (Release_Year >= {min_year} AND Release_Year <= {max_year})
-            arguments: min_year, max_year
+            arguments:
+                - argument:
+                    name: min_year
+                    type: int
+                - argument:
+                    name: max_year
+                    type: int
         - where:
             name: Fuzzy_Name
             sql: NAME LIKE {fuzzy_name}
-            argument: fuzzy_name
+            argument:
+                name: fuzzy_name
+                type: int
