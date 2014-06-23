@@ -27,3 +27,4 @@ The whole site needs styling.  That'll come much later on, as right now
 we're concerned about getting the basic functionality first.
 
 
+The html graph viewer of the schema needs huge improvements.
