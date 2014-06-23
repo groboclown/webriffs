@@ -3,29 +3,30 @@
 
 view:
     viewName: V_FILM_BRANCH_GUEST_ACCESS
-    
-    # There will always be a cross-join between every branch and every user
-    # with the V_FILM_BRANCH_PUBLIC, while the private access will always be
-    # a subset of that.  So, we perform a left outer join from the public to
-    # the private, so that the private will sometimes have "null" values.
-    
     query: "SELECT
-          f.Film_Id Film_Id
-          , fb.Film_Branch_Id Film_Branch_Id
-          , fb.Gv_Branch_Id Gv_Branch_Id
-          , fb.Branch_Name Branch_Name
-          , fb.Created_On Branch_Created_On
-          , fb.Last_Updated_On Branch_Last_Updated_On
+          h.Film_Id Film_Id
+          , h.Gv_Project_Id Gv_Project_Id
+          , h.Film_Name Film_Name
+          , h.Release_Year Release_Year
+          , h.Film_Created_On Film_Created_On
+          , h.Film_Last_Updated_On Film_Last_Updated_On
+          
+          , h.Gv_Branch_Id Gv_Branch_Id
+          , h.Branch_Gv_Item_Id Branch_Gv_Item_Id
+          , h.Branch_Gv_Item_Version_Id Branch_Gv_Item_Version_Id
+          , h.Gv_Change_Id Gv_Change_Id
+          , h.Branch_Name Branch_Name
+          , h.Description Description
+          , h.Updated_On Updated_On
+          
+          , h.Tag_Name Tag_Name
+          , h.Tag_Gv_Item_Id Tag_Gv_Item_Id
           
           , acc.Access Access
           , acc.Privilege_Level Minimum_Privilege_Level
-        FROM FILM_BRANCH fb
-        INNER JOIN GV_BRANCH gb
-            ON fb.Gv_Branch_Id = gb.Gv_Branch_Id
-        INNER JOIN FILM f
-            ON f.Gv_Project_Id = gb.Gv_Project_Id
+        FROM V_FILM_BRANCH_TAG_HEAD h
         INNER JOIN FILM_BRANCH_ACCESS acc
-            ON acc.Film_Branch_Id = fb.Film_Branch_Id
+            ON acc.Gv_Branch_Id = h.Gv_Branch_Id
         WHERE acc.User_Id IS NULL
         "
     columns:

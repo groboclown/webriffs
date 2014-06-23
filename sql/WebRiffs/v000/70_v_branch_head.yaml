@@ -6,8 +6,8 @@
 view:
     viewName: V_BRANCH_HEAD
     query: "SELECT
-          fb.Gv_Branch_Id
-          iv.Gv_Item_Id Gv_Item_Id
+          fb.Gv_Branch_Id Gv_Branch_Id
+          , iv.Gv_Item_Id Gv_Item_Id
           , MAX(iv.Gv_Item_Version_Id) Gv_Item_Version_Id
           FROM
               GV_ITEM_VERSION iv

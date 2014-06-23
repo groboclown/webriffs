@@ -10,7 +10,7 @@ view:
             , Ga_User_Id
             , MAX(Gv_Item_Version_Id) Gv_Item_Version_Id
         FROM V_GV_ALL_CHANGE_ITEM
-        GROUP BY Gv_Branch_Id, Gv_Change_Id, Gv_User_Id, Gv_Item_Id
+        GROUP BY Gv_Branch_Id, Gv_Change_Id, Ga_User_Id, Gv_Item_Id
         "
     columns:
         - column:

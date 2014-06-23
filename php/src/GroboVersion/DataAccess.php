@@ -9,9 +9,11 @@ use Base;
 
 
 /**
+ * This data access should only be used to manage the basic object creation,
+ * and the management of changes.
  *
- * @author Groboclown
- *
+ * Items within branches or changes should be performed at the usage level,
+ * to better optimize the sql performance.
  */
 class DataAccess {
 
@@ -167,8 +169,8 @@ class DataAccess {
                 )));
         $branchHistoryId = intval($data['result']);
         
-        //  FIXME ensure the item versions are not already in the branch.
-        
+        // This will potentially insert the same item version number into
+        // the branch, which is fine.
 
         $data = GvChangeVersion::$INSTANCE->runInsertFromChangeItems($db,
             $sourceVersionId, $sourceBranchId);
@@ -178,7 +180,6 @@ class DataAccess {
                     'unknown' => 'there was an unknown problem branching'
                 )));
         // TODO Should we check the row counts?
-        
 
         return $branchHistoryId;
     }
@@ -191,9 +192,7 @@ class DataAccess {
      * @return int the head change ID, or null if no change for the branch.
      */
     public static function getHeadChange($db, $branchId) {
-        $data = VGvBranchHead::$INSTANCE->readBy_Gv_Branch_Id($db, $branchId,
-            // Order largest to smallest
-            'Gv_Change_Id DESC');
+        $data = VGvBranchHeadChange::$INSTANCE->readBy_Gv_Branch_Id($db, $branchId);
         DataAccess::checkError($data,
             new Base\ValidationException(
                 array(
@@ -243,7 +242,7 @@ class DataAccess {
      *         id ([1]).
      */
     public static function addItemToChange($db, $itemId, $changeId,
-        $deleted = false) {
+            $deleted = false) {
         if (DataAccess::isChangeCommitted($db, $changeId)) {
             throw new Exception("can only add items to pending changes");
         }
@@ -281,10 +280,36 @@ class DataAccess {
             $cvId
         );
     }
+    
+    
+    /**
+     * Removes the item from the pending change.
+     *
+     * @param unknown $db
+     * @param unknown $changeId
+     * @param unknown $itemId
+     */
+    public static function removeItemFromChange($db, $changeId, $itemId) {
+        if (DataAccess::isChangeCommitted($db, $changeId)) {
+            throw new Exception("can only add items to pending changes");
+        }
+        
+        $data = GvChangeVersion::$INSTANCE->runDeleteByChangeIdXItemId($db,
+                $changeId, $itemId);
+        DataAccess::checkError($data,
+        new Base\ValidationException(
+            array(
+                'unknown' => 'there was an unknown problem finding the version'
+            )));
+        if ($data['rowcount'] <= 0) {
+            return false;
+        }
+        return true;
+    }
 
 
     public static function getItemVersionFromChange($db, $changeId, $itemId) {
-        $data = GvItemVersion::$INSTANCE->readBy_Gv_Change_Id_x_Gv_Item_Id($db,
+        $data = GvChangeVersion::$INSTANCE->readBy_Gv_Change_Id_x_Gv_Item_Id($db,
             $changeId, $itemId);
         DataAccess::checkError($data,
             new Base\ValidationException(
@@ -295,6 +320,7 @@ class DataAccess {
             return false;
         }
         if (sizeof($data['result']) > 1) {
+            // shouldn't happen because of the unique constraint on the table.
             error_log(
                 "WARNING: Found more than 1 version of item " . $itemId .
                      " in change " . $changeId);
