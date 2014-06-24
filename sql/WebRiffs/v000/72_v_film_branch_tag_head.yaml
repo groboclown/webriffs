@@ -10,15 +10,12 @@ view:
     query: "
         SELECT
           h.Film_Id Film_Id
-          , h.Gv_Project_Id Gv_Project_Id
           , h.Film_Name Film_Name
           , h.Release_Year Release_Year
           , h.Film_Created_On Film_Created_On
           , h.Film_Last_Updated_On Film_Last_Updated_On
           
           , h.Gv_Branch_Id Gv_Branch_Id
-          , h.Branch_Gv_Item_Id Branch_Gv_Item_Id
-          , h.Branch_Gv_Item_Version_Id Branch_Gv_Item_Version_Id
           , h.Gv_Change_Id Gv_Change_Id
           , h.Branch_Name Branch_Name
           , h.Description Description

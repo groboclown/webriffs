@@ -264,6 +264,11 @@ class FilmObjBranch extends Resource {
         $branchName = trim($data->{'name'});
         $this->assertThat(strlen($branchName) >= 1, 'name',
                 'must be at least 1 character long');
+        $desc = '';
+        if (!! $data->{'description'}) {
+            $this->assertThat(is_string($data->{'description'}), 'description');
+            $desc = $data->{'description'};
+        }
         // FIXME ensure the branch name only has valid characters
         $this->validate();
         
@@ -275,7 +280,8 @@ class FilmObjBranch extends Resource {
         $db = $this->getDB();
         
         $result = WebRiffs\FilmLayer::createBranch($db, $filmId,
-            $userInfo['User_Id'], $userInfo['Ga_User_Id'], $branchName, null);
+            $userInfo['User_Id'], $userInfo['Ga_User_Id'],
+            $branchName, $description, null);
         
         $data = array(
             'Branch_Id' => $result[0],
@@ -331,15 +337,25 @@ class FilmObjBranchObj extends Resource {
     
     /**
      * Get the details for the branch.  If the branch is not visible by the
-     * user, then it
+     * user, then it rturns a "no content" response.
      *
      * @method GET
      */
     function fetch() {
-        // FIXME
+        $branchId = $this->validateId($this->branchid, "branchId");
+        $this->validate();
         
-        return new Tonic\Response(Tonic\Response::NOCONTENT);
-
+        $userId = null;
+        if ($this->isUserAuthenticated()) {
+            $userId = $this->container['user']['User_Id'];
+        }
+        $ret = WebRiffs\FilmLayer::getBranchDetails($this->getDB(),
+            $userId, $branchId);
+        
+        if (! $ret) {
+            return new Tonic\Response(Tonic\Response::NOCONTENT);
+        }
+        return array(200, $ret);
     }
     
 }
@@ -371,33 +387,3 @@ class FilmObjBranchObjChanges extends Resource {
     
 }
 
-
-
-/**
- * This needs to include the user's pending changes in the results.
- *
- * @uri /branch/:branchid/tag
- */
-class FilmObjBranchObjTag extends Resource {
-    
-    /**
-     * @method GET
-     */
-    function fetch() {
-        $branchId = $this->validateId($this->branchid, "branchId");
-        $filmId = $this->validateId($this->filmid, "filmId");
-        $this->validate();
-
-        $userId = null;
-        if ($this->isUserAuthenticated()) {
-            $userId = $this->container['user']['User_Id'];
-        }
-        
-        $db = $this->getDB();
-        
-        $result = WebRiffs\FilmLayer::getTagsForBranch($db, $userId, $filmId,
-            $branchId);
-        return array(200, array('tags' => $result));
-    }
-    
-}

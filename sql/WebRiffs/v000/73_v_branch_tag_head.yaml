@@ -1,0 +1,32 @@
+# A minimal set of values to describe the tags at the head revision.  The
+# intention forces the v_film_branch_head view to guide the results from
+# this view. 
+
+view:
+    viewName: V_BRANCH_TAG_HEAD
+    query: "
+        SELECT
+          h.Gv_Branch_Id Gv_Branch_Id
+          
+          , bt.Name Tag_Name
+          , bt.Gv_Item_Id Tag_Gv_Item_Id
+        FROM
+            V_FILM_BRANCH_HEAD h
+        INNER JOIN
+            V_GV_CHANGE_ITEM_HEAD cih
+                ON cih.Gv_Branch_Id = h.Gv_Branch_Id
+        INNER JOIN
+            BRANCH_TAG bt
+                ON bt.Gv_Item_Id = cih.Gv_Item_Id
+        
+        WHERE cih.Alive = 1
+        "
+    columns:
+        - column:
+            name: Gv_Branch_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_BRANCH
+                    column: Gv_Branch_Id

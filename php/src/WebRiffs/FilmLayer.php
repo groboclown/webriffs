@@ -27,6 +27,7 @@ class FilmLayer {
     public static $MIN_YEAR_SEARCH_FILTER;
     public static $MAX_YEAR_SEARCH_FILTER;
     public static $NAME_SEARCH_FILTER;
+    public static $DESCRIPTION_SEARCH_FILTER;
     
     /**
      * Maximum number of tags allowable on a quip or branch.
@@ -474,10 +475,22 @@ class FilmLayer {
         // We need a bit of dual logic here for the situation where the
         // user isn't logged in.
         
+        $wheres = array();
+        if ($paging->filters[FilmLayer::$NAME_SEARCH_FILTER->name] !== null) {
+            $wheres[] = new VFilmBranchHead_BranchNameLike(
+                    '%' . $paging->filters[FilmLayer::$NAME_SEARCH_FILTER->name] .
+                    '%');
+        }
+        if ($paging->filters[FilmLayer::$DESCRIPTION_SEARCH_FILTER->name] !== null) {
+            $wheres[] = new VFilmBranchHead_BranchDescriptionLike(
+                    '%' . $paging->filters[FilmLayer::$DESCRIPTION_SEARCH_FILTER->name] .
+                    '%');
+        }
+        
         if ($userId === null) {
-            $wheres = array(new VFilmBranchGuestAccess_IsAllowed(
+            $wheres[] = new VFilmBranchGuestAccess_IsAllowed(
                     Access::$PRIVILEGE_GUEST, Access::$BRANCH_READ
-                ));
+                );
             
             $rowData = VFilmBranchGuestAccess::$INSTANCE->readBy_Film_Id(
                     $db, $filmId, $wheres,
@@ -485,7 +498,7 @@ class FilmLayer {
             $countData = VFilmBranchGuestAccess::$INSTANCE->countBy_Film_Id(
                     $db, $filmId, $wheres);
         } else {
-            $wheres = array(new VFilmBranchAccess_IsAllowed());
+            $wheres[] = new VFilmBranchAccess_IsAllowed();
             
             $rowData = VFilmBranchAccess::$INSTANCE->readBy_Film_Id_x_User_Id_x_Access(
                     $db, $filmId, $userId, Access::$BRANCH_READ, $wheres,
@@ -506,6 +519,22 @@ class FilmLayer {
                     'unknown' => 'there was an unknown problem counting the branches'
                 )));
         $count = intval($countData['result'][0]);
+
+        # Add the tags
+        foreach ($rawRows as $row) {
+            $data = VBranchTagHead::$INSTANCE->readBy_Gv_Branch_Id($db,
+                $row['Gv_Branch_Id']);
+            FilmLayer::checkError($data,
+                new Base\ValidationException(
+                    array(
+                        'unknown' => 'there was an unknown problem reading the branch tags'
+                    )));
+            $tags = array();
+            foreach ($data as $tagRow) {
+                $tags[] = $tagRow['Tag_Name'];
+            }
+            $row['tags'] = $tags;
+        }
         
         return Base\PageResponse::createPageResponse($paging, $count, $rows);
     }
@@ -553,14 +582,67 @@ class FilmLayer {
         
         return $data['result'] > 0;
     }
+    
+    
+    /**
+     * Return the details for the film's branch.  This is all the header
+     * information about it.  It will also include details about the film.
+     * If the user is not authenticated to see the details, false is returned.
+     *
+     * @param PBO $db
+     * @param int $userId
+     * @param int $branchId
+     * @return mixed false if no data, array of results if the branch is
+     *      readable by the user and it exists.
+     */
+    public static function getBranchDetails($db, $userId, $branchId) {
+        if (! FilmLayer::canAccessBranch($db, $userId, $branchId,
+                Access::$BRANCH_READ)) {
+            return false;
+        }
+        
+        $data = VFilmBranchHead::$INSTANCE->readBy_Gv_Branch_Id($db, $branchId);
+        FilmLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem finding the branch'
+                )));
+        if (sizeof($data['result']) <= 0) {
+            return false;
+        }
+        if (sizeof($data['result']) > 1) {
+            throw new Base\ValidationException(
+                array(
+                    'internal error' => 'too many branches with that ID'
+                ));
+        }
+        $result = $data['result'][0];
+        $data = VBranchTagHead::$INSTANCE->readBy_Gv_Branch_Id($db, $branchId);
+        FilmLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem reading the branch tags'
+                )));
+        $tags = array();
+        foreach ($data as $tagRow) {
+            $tags[] = $tagRow['Tag_Name'];
+        }
+        $result['tags'] = $tags;
+        return $result;
+    }
 
 
     /**
      * Returns all the tags in the branch.  If the user can't see the branch,
      * then they can't see any tags.  The number of tags for a branch should be
      * limited, so this will not perform paging.
+     *
+     * The tags returned are ALWAYS at the head revision, unless the changeId
+     * is explicitly given.  The current change for the user will only be used
+     * for the quips.
      */
-    public static function getTagsForBranch($db, $userId, $filmId, $branchId) {
+    public static function getTagsForBranch($db, $userId, $filmId, $branchId,
+                $changeId = null) {
         // userId can be null
         
         if (! FilmLayer::canAccessBranch($db, $userId, $branchId,
@@ -569,7 +651,7 @@ class FilmLayer {
             return array();
         }
         
-        $data = VFilmBranchTag::$INSTANCE->readBy_Film_Branch_Id(
+        $data = VFilmBranchTagHead::$INSTANCE->readBy_Film_Branch_Id(
                 $db, $branchId);
         FilmLayer::checkError($data,
             new Base\ValidationException(
@@ -579,6 +661,51 @@ class FilmLayer {
         $rows = $data['result'];
         
         return $rows;
+    }
+    
+    
+    public static function updateFilmDetails($db, $filmId, $newFilmName, $newReleaseYear) {
+        // FIXME
+    }
+    
+    
+    public static function updateBranchHeader($db, $filmId, $branchId,
+                $newName, $newDescription, $tagList) {
+        // userId CANNOT be null
+        
+        if (! $userId || ! FilmLayer::canAccessBranch($db, $userId, $branchId,
+                Access::$BRANCH_TAG)) {
+            throw new Tonic\UnauthorizedException();
+        }
+        
+        
+        // FIXME
+        
+        // Branch header updates happen all at once in a new change.
+        
+        
+        // For the tags, we need to query the current list.  The new tag list
+        // are either added, removed, or kept.
+    }
+    
+    
+    public static function updateTagOnBranch($db, $userId, $filmId, $branchId,
+            $tagName, $changeId, $removed) {
+        // userId CANNOT be null
+        
+        if (! $userId || ! FilmLayer::canAccessBranch($db, $userId, $branchId,
+                Access::$BRANCH_TAG)) {
+            throw new Tonic\UnauthorizedException();
+        }
+        
+        // Check if the branch tag already exists
+        // BranchTag::$INSTANCE-> ...
+        
+        // If it doesn't, create it (it's a Gv_Item).
+        
+        // Add the item to the given change ID.
+        
+        // DO NOT submit the change.
     }
     
 
@@ -600,7 +727,10 @@ FilmLayer::$MAX_YEAR_SEARCH_FILTER =
     new Base\SearchFilterInt("yearMax", 9999, 1800, 9999);
 FilmLayer::$NAME_SEARCH_FILTER =
     new Base\SearchFilterString("name", null);
-
+FilmLayer::$DESCRIPTION_SEARCH_FILTER =
+    new Base\SearchFilterString("description", null);
+    
+    
 FilmLayer::$DEFAULT_FILM_SORT_COLUMN = "name";
 
 FilmLayer::$FILM_FILTERS = array(
@@ -611,6 +741,7 @@ FilmLayer::$FILM_FILTERS = array(
 
 FilmLayer::$BRANCH_SORT_COLUMNS = array(
     "name" => "Branch_Name",
+    "description" => "Description",
     "created" => "Created_On",
     "updated" => "Last_Updated_On"
 );
@@ -618,5 +749,6 @@ FilmLayer::$BRANCH_SORT_COLUMNS = array(
 FilmLayer::$DEFAULT_BRANCH_SORT_COLUMN = "name";
 
 FilmLayer::$BRANCH_FILTERS = array(
-    FilmLayer::$NAME_SEARCH_FILTER
+    FilmLayer::$NAME_SEARCH_FILTER,
+    FilmLayer::$DESCRIPTION_SEARCH_FILTER
 );

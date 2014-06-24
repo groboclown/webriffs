@@ -6,15 +6,12 @@ view:
     query: "
         SELECT
           f.Film_Id Film_Id
-          , f.Gv_Project_Id Gv_Project_Id
           , f.Name Film_Name
           , f.Release_Year Release_Year
           , f.Created_On Film_Created_On
           , f.Last_Updated_On Film_Last_Updated_On
           
           , bh.Gv_Branch_Id Gv_Branch_Id
-          , bh.Gv_Item_Id Branch_Gv_Item_Id
-          , bh.Gv_Item_Version_Id Branch_Gv_Item_Version_Id
           , c.Gv_Change_Id Gv_Change_Id
           , fbv.Branch_Name Branch_Name
           , fbv.Description Description
@@ -53,6 +50,14 @@ view:
                     table: FILM
                     column: Film_Id
         - column:
+            name: Gv_Branch_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_BRANCH
+                    column: Gv_Branch_Id
+        - column:
             name: Branch_Name
             type: nvarchar(200)
         # FIXME the rest of the columns
@@ -60,3 +65,23 @@ view:
         - constraint:
             type: fake index
             columns: Film_Id, Branch_Name
+    whereClauses:
+        - where:
+            name: Film_Name_Like
+            sql: Film_Name LIKE {name}
+            argument:
+                name: name
+                type: nvarchar(200)
+        - where:
+            name: Branch_Name_Like
+            sql: Branch_Name LIKE {name}
+            argument:
+                name: name
+                type: nvarchar(200)
+        - where:
+            name: Branch_Description_Like
+            sql: Description LIKE {desc}
+            argument:
+                name: desc
+                type: nvarchar(2048)
+            
