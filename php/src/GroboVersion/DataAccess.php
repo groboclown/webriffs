@@ -262,13 +262,14 @@ class DataAccess {
         $alive = (!!$deleted) ? 0 : 1;
         
         $data = GvItemVersion::$INSTANCE->create($db, $itemId, $alive);
-        DataAccess::checkError(GvItemVersion::$INSTANCE,
+        DataAccess::checkError($data,
             new Base\ValidationException(
                 array(
                     'unknown' => 'there was an unknown problem creating the version'
                 )));
         $ivId = intval($data['result']);
-        $data = GvChangeVersion::$INSTANCE->create($db, $ivId, $changeId);
+        $data = GvChangeVersion::$INSTANCE->create($db, $ivId, $itemId,
+                $changeId);
         DataAccess::checkError($data,
             new Base\ValidationException(
                 array(
@@ -328,22 +329,11 @@ class DataAccess {
         }
         return intval($data['result'][0]['Gv_Item_Version_Id']);
     }
-
-
-    public static function removeItemFromChange($db, $changeId, $itemId) {
-        if (DataAccess::isChangeCommitted($db, $changeId)) {
-            throw new Exception("can only add items to pending changes");
-        }
-        
-        // Find the version to remove
-        $data = GvItemVersion::$INSTANCE->readBy_Gv_Change_Id_x_Gv_Item_Id(
-            $db, $changeId, $itemId);
-    }
-
+    
 
     public static function isChangeCommitted($db, $changeId) {
         $data = GvChange::$INSTANCE->readBy_Gv_Change_Id($db, $changeId);
-        DataAccess::checkError(GvChangeVersion::$INSTANCE,
+        DataAccess::checkError($data,
             new Base\ValidationException(
                 array(
                     'unknown' => 'there was an unknown problem creating the version'
@@ -390,27 +380,6 @@ class DataAccess {
                     'unknown' => 'there was an unknown problem searching the change'
                 )));
         return intval($data['result']);
-    }
-
-
-    /**
-     * Returns all the items in the change.
-     *
-     * @param PBO $db
-     * @param int $changeId
-     * @return array() of rows, with each row containing elements
-     *         Gv_Change_Version_Id,
-     *         Gv_Item_Version_Id, Gv_Change_Id, Created_On, Last_Updated_On
-     */
-    public static function getItemsInChange($db, $changeId, $rowStart, $rowEnd) {
-        $data = GvChangeVersion::$INSTANCE->readBy_Gv_Change_Id($db, $changeId,
-            false, $rowStart, $rowEnd);
-        DataAccess::checkError($data,
-            new Base\ValidationException(
-                array(
-                    'unknown' => 'there was an unknown problem searching the change'
-                )));
-        return $data['result'];
     }
 
 
@@ -486,17 +455,6 @@ class DataAccess {
     }
 
 
-    public static function countItemsInChange($db, $changeId) {
-        $data = VGvChangeItem::$INSTANCE->countBy_Gv_Change_Id($db, $changeId);
-        DataAccess::checkError($data,
-            new Base\ValidationException(
-                array(
-                    'unknown' => 'there was an unknown problem searching the changes'
-                )));
-        return $data['result'];
-    }
-
-
     public static function getItemsInChange($db, $changeId, $start, $end) {
         $data = VGvChangeItem::$INSTANCE->readBy_Gv_Change_Id($db, $changeId,
             false, $start, $end);
@@ -508,6 +466,27 @@ class DataAccess {
         return $data['result'];
     }
     
+    
+    /*
+     * Returns all the items in the change.
+     *
+     * @param PBO $db
+     * @param int $changeId
+     * @return array() of rows, with each row containing elements
+     *         Gv_Change_Version_Id,
+     *         Gv_Item_Version_Id, Gv_Change_Id, Created_On, Last_Updated_On
+    public static function getItemsInChange($db, $changeId, $rowStart, $rowEnd) {
+        $data = GvChangeVersion::$INSTANCE->readBy_Gv_Change_Id($db, $changeId,
+            false, $rowStart, $rowEnd);
+        DataAccess::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem searching the change'
+                )));
+        return $data['result'];
+    }
+
+     */
 
     // ----------------------------------------------------------------------
     private static function checkError($returned, $exception) {

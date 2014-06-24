@@ -14,7 +14,7 @@ use GroboVersion;
 class FilmLayer {
     public static $DEFAULT_TEMPLATE_ACCESS_NAME = "standard";
     public static $INITIAL_BRANCH_NAME = "Initial";
-    
+    public static $INITIAL_BRANCH_DESCRIPTION = "First branch for the film";
     
     public static $FILM_SORT_COLUMNS;
     public static $DEFAULT_FILM_SORT_COLUMN = "name";
@@ -140,22 +140,20 @@ class FilmLayer {
         
         $branchData = FilmLayer::createBranchById($db, $projectId, $filmId,
             $userId, $gaUserId, FilmLayer::$INITIAL_BRANCH_NAME,
-            $accessTemplate);
+            FilmLayer::$INITIAL_BRANCH_DESCRIPTION, $accessTemplate);
         $branchId = $branchData[0];
-        $filmBranchId = $branchData[1];
-        $changeId = $branchData[2];
+        $changeId = $branchData[1];
         return array(
             $projectId,
             $filmId,
             $branchId,
-            $filmBranchId,
             $changeId
         );
     }
     
     
     public static function doesBranchExist($db, $filmId, $branchName) {
-        $data = VFilmBranch::$INSTANCE->countBy_Film_Id_x_Branch_Name($db,
+        $data = VFilmBranchHead::$INSTANCE->countBy_Film_Id_x_Branch_Name($db,
                 $filmId, $branchName);
         FilmLayer::checkError($data,
             new Base\ValidationException(
@@ -177,7 +175,7 @@ class FilmLayer {
      *      $DEFAULT_TEMPLATE_ACCESS_NAME
      */
     public static function createBranch($db, $filmId, $userId, $gaUserId,
-            $branchName, $accessTemplate) {
+            $branchName, $description, $accessTemplate) {
         
         // A quick check to see if the film ID is valid, and captures the
         // project ID
@@ -196,7 +194,7 @@ class FilmLayer {
         $projectId = $data['result'][0]['Gv_Project_Id'];
         
         return FilmLayer::createBranchById($db, $projectId, $filmId, $userId,
-                $gaUserId, $branchName, $accessTemplate);
+                $gaUserId, $branchName, $description, $accessTemplate);
     }
 
 
@@ -213,7 +211,7 @@ class FilmLayer {
      * @return multitype:number
      */
     public static function createBranchById($db, $projectId, $filmId, $userId,
-            $gaUserId, $branchName, $accessTemplate) {
+            $gaUserId, $branchName, $description, $accessTemplate) {
         
         if ($accessTemplate == null) {
             $accessTemplate = FilmLayer::$DEFAULT_TEMPLATE_ACCESS_NAME;
@@ -240,18 +238,19 @@ class FilmLayer {
         
         
         // Then the branch itself
-        $data = FilmBranch::$INSTANCE->create($db, $branchId, $branchName);
+        $branchItemId = GroboVersion\DataAccess::createItem($db);
+        
+        $data = FilmBranch::$INSTANCE->create($db, $branchId, $branchItemId);
         FilmLayer::checkError($data,
             new Base\ValidationException(
                 array(
                     'unknown' => 'there was an unknown problem creating the film branch'
                 )));
-        $filmBranchId = intval($data['result']);
         
         
         // Next set the permissions based on the template
         $data = FilmBranchAccess::$INSTANCE->runCreateFromTemplate($db,
-                $filmBranchId, $accessTemplate);
+                $branchId, $accessTemplate);
         FilmLayer::checkError($data,
             new Base\ValidationException(
                 array(
@@ -261,23 +260,36 @@ class FilmLayer {
         
         // Add the user as the owner of the branch.
         foreach (Access::$BRANCH_ACCESS as $ba) {
-            $data = FilmBranchAccess::$INSTANCE->create($db, $filmBranchId,
+            $data = FilmBranchAccess::$INSTANCE->create($db, $branchId,
                 $userId, $ba, Access::$PRIVILEGE_OWNER);
         }
-        
-        
-        // Finally a change for the user to start using.
-        $data = GroboVersion\GvChange::$INSTANCE->create(
-                $db, $branchId, 0, $gaUserId);
+
+
+        // Add a name to the branch and submit the change.
+        // FIXME this needs to be formally supported as a top-level action.
+        // Note that we're creating and committing the change, so that the
+        // branch has a comitted name value.
+        $branchChangeId = GroboVersion\DataAccess::createChange($db,
+                $branchId, $gaUserId);
+        $idSet = GroboVersion\DataAccess::addItemToChange($db, $branchItemId,
+                $branchChangeId);
+        $data = FilmBranchVersion::$INSTANCE->create($db, $idSet[0],
+                $branchName, $description);
         FilmLayer::checkError($data,
             new Base\ValidationException(
                 array(
                     'unknown' => 'there was an unknown problem creating the change'
                 )));
-        $changeId = intval($data['result']);
+        GroboVersion\DataAccess::commitChange($db, $branchChangeId);
+        
+        
+        // Add change for the user to start using.
+        $changeId = GroboVersion\DataAccess::createChange($db,
+                $branchId, $gaUserId);
+        
+        
         return array(
             $branchId,
-            $filmBranchId,
             $changeId
         );
     }

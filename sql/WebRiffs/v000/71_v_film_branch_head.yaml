@@ -52,5 +52,11 @@ view:
                     type: foreign key
                     table: FILM
                     column: Film_Id
+        - column:
+            name: Branch_Name
+            type: nvarchar(200)
         # FIXME the rest of the columns
-        
+    constraints:
+        - constraint:
+            type: fake index
+            columns: Film_Id, Branch_Name
