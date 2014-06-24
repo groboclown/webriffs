@@ -1,4 +1,3 @@
-
 # A join between the film_branch and the permissions.
 
 view:
@@ -33,13 +32,23 @@ view:
                     table: FILM
                     column: Film_Id
         - column:
-            name: Film_Branch_Id
+            name: Film_Name
+            type: nvarchar(200)
+            constraints:
+                - constraint:
+                    type: not null
+        - column:
+            name: Release_Year
             type: int
             constraints:
                 - constraint:
-                    type: foreign key
-                    table: FILM_BRANCH
-                    column: Film_Branch_Id
+                    type: not null
+        - column:
+            name: Film_Created_On
+            type: timestamp
+        - column:
+            name: Film_Last_Updated_On
+            type: timestamp
         - column:
             name: Gv_Branch_Id
             type: int
@@ -49,13 +58,21 @@ view:
                     table: GV_BRANCH
                     column: Gv_Branch_Id
         - column:
+            name: Gv_Change_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_CHANGE
+                    column: Gv_Change_Id
+        - column:
             name: Branch_Name
-            type: nvarchar(255)
+            type: nvarchar(200)
         - column:
-            name: Branch_Created_On
-            type: timestamp
+            name: Description
+            type: nvarchar(2048)
         - column:
-            name: Branch_Last_Updated_On
+            name: Updated_On
             type: timestamp
         - column:
             name: Access

@@ -13,7 +13,7 @@ import '../../util/paging.dart';
  */
 @Component(
     selector: 'edit-branch',
-    templateUrl: 'packages/webriffs_client/component/editbranch_component.html',
+    templateUrl: 'packages/webriffs_client/component/branch/editbranch_component.html',
     publishAs: 'cmp')
 class EditBranchComponent {
     final ServerStatusService _server;

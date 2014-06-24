@@ -34,7 +34,6 @@
                         
                         <div ng-if="film.expanded">
                             <div ng-repeat="branch in film.branches">
-                                <async-status parent="branch"></async-status>
                                 <span><a href="#/branch/view/{{branch.branchId}}/0">{{branch.name}}</a></span>
                                 <span ng-repeat="tag in branch.tags">{{tag.name}}</span>
                             </div>

@@ -13,7 +13,7 @@ import '../../util/paging.dart';
  */
 @Component(
     selector: 'play-branch',
-    templateUrl: 'packages/webriffs_client/component/playbranch_component.html',
+    templateUrl: 'packages/webriffs_client/component/branch/playbranch_component.html',
     publishAs: 'cmp')
 class PlayBranchComponent {
     final ServerStatusService _server;

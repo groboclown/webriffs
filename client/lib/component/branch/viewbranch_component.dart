@@ -13,7 +13,7 @@ import '../../util/paging.dart';
  */
 @Component(
     selector: 'view-branch',
-    templateUrl: 'packages/webriffs_client/component/viewbranch_component.html',
+    templateUrl: 'packages/webriffs_client/component/branch/viewbranch_component.html',
     publishAs: 'cmp')
 class ViewBranchComponent {
     final ServerStatusService _server;

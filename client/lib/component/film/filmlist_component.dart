@@ -111,42 +111,37 @@ class FilmRecord extends PagingComponent {
 }
 
 
-class BranchRecord extends RequestHandlingComponent {
+class BranchRecord {
     final ServerStatusService _server;
     final String name;
+    final String description;
     final int filmId;
     final int branchId;
     final createdOn;
     final lastUpdatedOn;
     final List<TagRecord> tags;
 
-    BranchRecord._(this._server, this.name, this.filmId,
+    BranchRecord._(this._server, this.name, this.description, this.filmId,
             this.branchId, this.createdOn,
-            this.lastUpdatedOn) : tags = [] {
-        reload();
-    }
+            this.lastUpdatedOn, this.tags);
 
     factory BranchRecord.fromJson(ServerStatusService server, int filmId,
             Map<String, dynamic> json) {
         String name = json['Branch_Name'];
-        int id = json['Film_Branch_Id'];
+        String desc = json['Description'];
+        int id = json['Gv_Branch_Id'];
         var created = json['Branch_Created_On'];
         var updated = json['Branch_Last_Updated_On'];
-        return new BranchRecord._(server, name, filmId, id, created, updated);
-    }
-
-
-    Future<ServerResponse> onSuccess(ServerResponse resp) {
-        tags.clear();
-        resp.jsonData['tags'].forEach((Map<String, dynamic> tag) {
+        List<TagRecord> tags = [];
+        for (Map<String, dynamic> tag in json['tags']) {
             tags.add(new TagRecord.fromJson(tag));
-        });
-    }
-
-
-    void reload() {
-        handleRequest(_server.get('/branch/${branchId}/tag',
-            null));
+        }
+        if (filmId != json['Film_Id']) {
+            print("Branch " + name + ": Film IDs don't match (" +
+                    filmId.toString() + " vs " + json['Film_Id'] + ")");
+        }
+        return new BranchRecord._(server, name, desc, filmId, id,
+                created, updated, tags);
     }
 }
 

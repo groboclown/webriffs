@@ -19,7 +19,7 @@ import 'filmlist_component.dart';
  */
 @Component(
     selector: 'view-film',
-    templateUrl: 'packages/webriffs_client/component/viewfilm_component.html',
+    templateUrl: 'packages/webriffs_client/component/film/viewfilm_component.html',
     //cssUrl: 'packages/webriffs_client/component/errorstatus_component.css',
     publishAs: 'cmp')
 class ViewFilmComponent extends PagingComponent {

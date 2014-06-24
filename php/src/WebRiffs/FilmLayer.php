@@ -520,20 +520,25 @@ class FilmLayer {
                 )));
         $count = intval($countData['result'][0]);
 
-        # Add the tags
-        foreach ($rawRows as $row) {
+        // Add the tags
+        // Use a for rather than foreach, so that we directly affect the
+        // row data, rather than a copy of each row's data.
+        for ($i = 0; $i < sizeof($rows); ++$i) {
+            $rows[$i]['Film_Id'] = intval($rows[$i]['Film_Id']);
+            $rows[$i]['Gv_Branch_Id'] = intval($rows[$i]['Gv_Branch_Id']);
+            $rows[$i]['Gv_Change_Id'] = intval($rows[$i]['Gv_Change_Id']);
             $data = VBranchTagHead::$INSTANCE->readBy_Gv_Branch_Id($db,
-                $row['Gv_Branch_Id']);
+                $rows[$i]['Gv_Branch_Id']);
             FilmLayer::checkError($data,
                 new Base\ValidationException(
                     array(
                         'unknown' => 'there was an unknown problem reading the branch tags'
                     )));
             $tags = array();
-            foreach ($data as $tagRow) {
+            foreach ($data['result'] as $tagRow) {
                 $tags[] = $tagRow['Tag_Name'];
             }
-            $row['tags'] = $tags;
+            $rows[$i]['tags'] = $tags;
         }
         
         return Base\PageResponse::createPageResponse($paging, $count, $rows);
