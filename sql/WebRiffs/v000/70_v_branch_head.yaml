@@ -14,6 +14,7 @@ view:
           INNER JOIN
               FILM_BRANCH fb
             ON fb.Gv_Item_Id = iv.Gv_Item_Id
+          GROUP BY fb.Gv_Branch_Id, iv.Gv_Item_Id
         "
     columns:
         - column:

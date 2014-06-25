@@ -24,6 +24,8 @@ table:
                 - constraint:
                     type: not null
                 - constraint:
+                    type: no update
+                - constraint:
                     type: foreign key
                     name: Gv_Change__Gv_Branch_Id_FK
                     table: GV_BRANCH
@@ -47,6 +49,8 @@ table:
             constraints:
                 - constraint:
                     type: not null
+                - constraint:
+                    type: no update
                 - constraint:
                     type: foreign key
                     name: Gv_Change__Ga_User_Id_FK

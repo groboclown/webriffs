@@ -136,9 +136,9 @@ class BranchRecord {
         for (Map<String, dynamic> tag in json['tags']) {
             tags.add(new TagRecord.fromJson(tag));
         }
-        if (filmId != json['Film_Id']) {
+        if (filmId.toString() != json['Film_Id'].toString()) {
             print("Branch " + name + ": Film IDs don't match (" +
-                    filmId.toString() + " vs " + json['Film_Id'] + ")");
+                    filmId.toString() + " vs " + json['Film_Id'].toString() + ")");
         }
         return new BranchRecord._(server, name, desc, filmId, id,
                 created, updated, tags);

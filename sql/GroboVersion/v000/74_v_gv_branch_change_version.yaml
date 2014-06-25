@@ -5,22 +5,32 @@
 # extra where clause
 
 view:
-    viewName: V_GV_ALL_CHANGE_ITEM
+    viewName: V_GV_BRANCH_CHANGE_VERSION
     query: "
         SELECT
             c.Gv_Branch_Id
             , cv.Gv_Change_Id Gv_Change_Id
+            , cv.Gv_Change_Version_Id Gv_Change_Version_Id
+            , cv.Gv_Item_Version_Id Gv_Item_Version_Id
+            , cv.Gv_Item_Id Gv_Item_Id
             , c.Ga_User_Id Ga_User_Id
-            , iv.Gv_Item_Id Gv_Item_Id
-            , iv.Gv_Item_Version_Id Gv_Item_Version_Id
         FROM GV_CHANGE c
-        CROSS JOIN
-        GV_CHANGE_VERSION cv
-        INNER JOIN GV_ITEM_VERSION iv
-            ON cv.Gv_Item_Version_Id = iv.Gv_Item_Version_Id
-        WHERE c.Gv_Change_Id >= cv.Gv_Change_Id
+        INNER JOIN GV_CHANGE_VERSION cv
+            ON c.Gv_Change_Id = cv.Gv_Change_Id
+        WHERE c.Active_State >= 1
         "
     columns:
+        - column:
+            name: Gv_Branch_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    name: Gv_Change__Gv_Branch_Id_FK
+                    table: GV_BRANCH
+                    column: Gv_Branch_Id
         - column:
             name: Gv_Change_Id
             type: int
@@ -29,28 +39,24 @@ view:
                     type: not null
                 - constraint:
                     type: foreign key
-                    name: V_Gv_Change_Item__Gv_Change_Id_FK
                     table: GV_CHANGE
                     column: Gv_Change_Id
         - column:
-            name: Ga_User_Id
+            name: Gv_Change_Version_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_CHANGE_VERSION
+                    column: Gv_Change_Version_Id
+        - column:
+            name: Gv_Item_Version_Id
             type: int
             constraints:
                 - constraint:
                     type: not null
                 - constraint:
                     type: foreign key
-                    name: Gv_Change__Ga_User_Id_FK
-                    table: GA_USER
-                    column: Ga_User_Id
-        - column:
-            name: Gv_Item_Version_Id
-            type: int
-            autoIncrement: true
-            constraints:
-                - constraint:
-                    type: foreign key
-                    name: V_Gv_Change_Item__Gv_Item_Version_Id_Key
                     table: GV_ITEM_VERSION
                     column: Gv_Item_Version_Id
         - column:
@@ -61,6 +67,8 @@ view:
                     type: not null
                 - constraint:
                     type: foreign key
-                    name: V_Gv_Change_Item__Gv_Item_Id_FK
                     table: GV_ITEM
                     column: Gv_Item_Id
+        - column:
+            name: Ga_User_Id
+            type: int
