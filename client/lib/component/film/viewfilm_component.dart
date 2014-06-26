@@ -152,7 +152,7 @@ class ViewFilmComponent extends PagingComponent {
         if (filmInfo.hasError) {
             // the same as canceling
             revert();
-            return;
+            return null;
         }
         _server.createCsrfToken('update_film').then((String csrf) {
             Map<String, dynamic> jsonData = {
