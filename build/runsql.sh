@@ -15,5 +15,6 @@ for i in exports/sql/*/*.sql; do
 done
 #echo 'INSERT INTO GA_SOURCE (Source_Name, Created_On, Last_Updated_On) VALUES ('\''local'\'', NOW(), NULL);' | mysql --user=${TEST_MYSQL_USER} --password=${TEST_MYSQL_PASSWD} ${TEST_MYSQL_DBNAME}
 echo "Creating test data..."
-curl http://localhost/webriffs/test_data.php
+curl http://localhost/webriffs/test_data.php || echo "Error in response: Check error logs."
+echo ""
 

@@ -1,10 +1,13 @@
-# The details for the head versions of the branches for each film.  Includes
+# The details for all the versions of the branches for each film.  Includes
 # the simple film details, as well.
 
-# The column list needs to be kept in sync with V_FILM_BRANCH_VERSION
+# Because of the simple branch header versioning (one version = one change;
+# e.g. there are no sub-items), we don't need a complicated join.
+
+# The column list needs to be kept in sync with V_FILM_BRANCH_HEAD
 
 view:
-    viewName: V_FILM_BRANCH_HEAD
+    viewName: V_FILM_BRANCH_VERSION
     query: "
         SELECT
           f.Film_Id Film_Id
@@ -19,10 +22,7 @@ view:
           , fbv.Description Description
           , COALESCE(fbv.Last_Updated_On, fbv.Created_On) Updated_On
         FROM
-            V_BRANCH_HEAD bh
-        INNER JOIN
-            GV_ITEM_VERSION iv
-                ON iv.Gv_Item_Id = bh.Gv_Item_Id
+            V_BRANCH_VERSION bh
         INNER JOIN
             GV_CHANGE c
                 ON c.Gv_Branch_Id = bh.Gv_Branch_Id
@@ -39,8 +39,6 @@ view:
         INNER JOIN
             FILM_BRANCH_VERSION fbv
                 ON fbv.Gv_Item_Version_Id = bh.Gv_Item_Version_Id
-        
-        WHERE iv.Alive = 1
         "
     columns:
         - column:
@@ -91,24 +89,4 @@ view:
     constraints:
         - constraint:
             type: fake index
-            columns: Film_Id, Branch_Name
-    whereClauses:
-        - where:
-            name: Film_Name_Like
-            sql: Film_Name LIKE {name}
-            argument:
-                name: name
-                type: nvarchar(200)
-        - where:
-            name: Branch_Name_Like
-            sql: Branch_Name LIKE {name}
-            argument:
-                name: name
-                type: nvarchar(200)
-        - where:
-            name: Branch_Description_Like
-            sql: Description LIKE {desc}
-            argument:
-                name: desc
-                type: nvarchar(2048)
-            
+            columns: Gv_Branch_Id, Gv_Change_Id

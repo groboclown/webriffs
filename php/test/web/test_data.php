@@ -142,22 +142,22 @@ foreach (WebRiffs\Access::$BRANCH_ACCESS as $access) {
 $data = WebRiffs\User::$INSTANCE->readBy_Username($db, "user0");
 Base\BaseDataAccess::checkError($data, new \Exception("find user0"));
 $userData = $data['result'][0];
-$idList = WebRiffs\FilmLayer::createFilm($db, $userData, "Slacker 2011", 2011,
+$idList1 = WebRiffs\FilmLayer::createFilm($db, $userData, "Slacker 2011", 2011,
     WebRiffs\FilmLayer::$DEFAULT_TEMPLATE_ACCESS_NAME);
 $result['create-slacker-2011'] = array(
-    'film_id' => $idList[1],
-    'branch_id' => $idList[2],
-    'change_id' => $idList[3]
+    'film_id' => $idList1[1],
+    'branch_id' => $idList1[2],
+    'change_id' => $idList1[3]
 );
 
-$idList = WebRiffs\FilmLayer::createFilm($db, $userData, "Slacker", 1991,
+$idList2 = WebRiffs\FilmLayer::createFilm($db, $userData, "Slacker", 1991,
     WebRiffs\FilmLayer::$DEFAULT_TEMPLATE_ACCESS_NAME);
 $result['create-slacker-1991'] = array(
-    'film_id' => $idList[1],
-    'branch_id' => $idList[2],
-    'change_id' => $idList[3]
+    'film_id' => $idList2[1],
+    'branch_id' => $idList2[2],
+    'change_id' => $idList2[3]
 );
-$slacker1991Id = $idList[1];
+$slacker1991Id = $idList2[1];
 WebRiffs\FilmLayer::saveLinkForFilm($db, $slacker1991Id, "imdb.com",
     "tt0102943");
 WebRiffs\FilmLayer::saveLinkForFilm($db, $slacker1991Id, "wikipedia-en",

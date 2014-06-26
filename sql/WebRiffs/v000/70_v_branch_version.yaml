@@ -1,0 +1,43 @@
+
+# The head versions of each branch.  This is used for the top-level views of
+# the branches on a film.
+
+
+view:
+    viewName: V_BRANCH_VERSION
+    query: "SELECT
+          fb.Gv_Branch_Id Gv_Branch_Id
+          , iv.Gv_Item_Id Gv_Item_Id
+          , iv.Gv_Item_Version_Id Gv_Item_Version_Id
+          FROM
+              GV_ITEM_VERSION iv
+          INNER JOIN
+              FILM_BRANCH fb
+            ON fb.Gv_Item_Id = iv.Gv_Item_Id
+          GROUP BY fb.Gv_Branch_Id, iv.Gv_Item_Id
+        "
+    columns:
+        - column:
+            name: Gv_Branch_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_BRANCH
+                    column: Gv_Branch_Id
+        - column:
+            name: Gv_Item_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_ITEM
+                    column: Gv_Item_Id
+        - column:
+            name: Gv_Item_Version_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_ITEM_VERSION
+                    column: Gv_Item_Version_Id

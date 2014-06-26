@@ -1,25 +1,27 @@
 # A minimal set of values to describe the tags at the head revision.  The
-# intention forces the v_film_branch_head view to guide the results from
+# intention forces the v_film_branch_version view to guide the results from
 # this view. 
 
 view:
-    viewName: V_BRANCH_TAG_HEAD
+    viewName: V_BRANCH_TAG_VERSION
     query: "
         SELECT
           bh.Gv_Branch_Id Gv_Branch_Id
+          
+          , ci.Gv_Change_Id Gv_Change_Id
           
           , bt.Name Tag_Name
           , bt.Gv_Item_Id Tag_Gv_Item_Id
         FROM
             FILM_BRANCH bh
         INNER JOIN
-            V_GV_CHANGE_ITEM_HEAD cih
-                ON cih.Gv_Branch_Id = bh.Gv_Branch_Id
+            V_GV_CHANGE_ITEM ci
+                ON ci.Gv_Branch_Id = bh.Gv_Branch_Id
         INNER JOIN
             BRANCH_TAG bt
-                ON bt.Gv_Item_Id = cih.Gv_Item_Id
+                ON bt.Gv_Item_Id = ci.Gv_Item_Id
         
-        WHERE cih.Alive = 1
+        WHERE ci.Alive = 1
         "
     columns:
         - column:
@@ -31,6 +33,14 @@ view:
                     table: GV_BRANCH
                     column: Gv_Branch_Id
         - column:
+            name: Gv_Change_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_CHANGE
+                    column: Gv_Change_Id
+        - column:
             name: Tag_Name
             type: nvarchar(64)
         - column:
@@ -41,3 +51,7 @@ view:
                     type: foreign key
                     table: GV_ITEM
                     column: Gv_Item_Id
+    constraints:
+        - constraint:
+            type: fake index
+            columns: Gv_Branch_Id, Gv_Change_Id

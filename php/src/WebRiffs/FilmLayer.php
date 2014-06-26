@@ -491,8 +491,8 @@ class FilmLayer {
 
 
     /**
-     * Returns all the branches in the film that are visible by the user.
-     * Currently there are no filters on branch names.
+     * Returns the head revision of all the branches in the film that are
+     * visible by the user.
      */
     public static function pageBranches($db, $userId, $filmId,
             Base\PageRequest $paging = null) {
@@ -630,16 +630,24 @@ class FilmLayer {
      * @param PBO $db
      * @param int $userId
      * @param int $branchId
+     * @param int $changeId
      * @return mixed false if no data, array of results if the branch is
      *      readable by the user and it exists.
      */
-    public static function getBranchDetails($db, $userId, $branchId) {
+    public static function getBranchDetails($db, $userId, $branchId, $changeId) {
         if (! FilmLayer::canAccessBranch($db, $userId, $branchId,
                 Access::$BRANCH_READ)) {
             return false;
         }
         
-        $data = VFilmBranchHead::$INSTANCE->readBy_Gv_Branch_Id($db, $branchId);
+        if ($changeId <= 0) {
+            // Get the head revision
+            $data = VFilmBranchHead::$INSTANCE->readBy_Gv_Branch_Id($db, $branchId);
+        } else {
+            $data = VFilmBranchVersion::$INSTANCE->readBy_Gv_Branch_Id_x_Gv_Change_Id(
+                 $db, $branchId, $changeId);
+        }
+        
         FilmLayer::checkError($data,
             new Base\ValidationException(
                 array(
@@ -651,11 +659,17 @@ class FilmLayer {
         if (sizeof($data['result']) > 1) {
             throw new Base\ValidationException(
                 array(
-                    'internal error' => 'too many branches with that ID'
+                    'internal error' => 'too many branches with that ID and change'
                 ));
         }
         $result = $data['result'][0];
-        $data = VBranchTagHead::$INSTANCE->readBy_Gv_Branch_Id($db, $branchId);
+        
+        if ($changeId <= 0) {
+            $data = VBranchTagHead::$INSTANCE->readBy_Gv_Branch_Id($db, $branchId);
+        } else {
+            $data = VBranchTagVersion::$INSTANCE->readBy_Gv_Branch_Id_x_Gv_Change_Id(
+                    $db, $branchId, $changeId);
+        }
         FilmLayer::checkError($data,
             new Base\ValidationException(
                 array(
@@ -667,43 +681,6 @@ class FilmLayer {
         }
         $result['tags'] = $tags;
         return $result;
-    }
-
-
-    /**
-     * Returns all the tags in the branch.  If the user can't see the branch,
-     * then they can't see any tags.  The number of tags for a branch should be
-     * limited, so this will not perform paging.
-     *
-     * The tags returned are ALWAYS at the head revision, unless the changeId
-     * is explicitly given.  The current change for the user will only be used
-     * for the quips.
-     */
-    public static function getTagsForBranch($db, $userId, $filmId, $branchId,
-                $changeId = null) {
-        // userId can be null
-        
-        if (! FilmLayer::canAccessBranch($db, $userId, $branchId,
-                Access::$BRANCH_READ)) {
-            // not a visible branch
-            return array();
-        }
-        
-        $data = VFilmBranchTagHead::$INSTANCE->readBy_Film_Branch_Id(
-                $db, $branchId);
-        FilmLayer::checkError($data,
-            new Base\ValidationException(
-                array(
-                    'unknown' => 'there was an unknown problem reading the tags'
-                )));
-        $rows = $data['result'];
-        
-        return $rows;
-    }
-    
-    
-    public static function updateFilmDetails($db, $filmId, $newFilmName, $newReleaseYear) {
-        // FIXME
     }
     
     

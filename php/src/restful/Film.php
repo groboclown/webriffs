@@ -327,17 +327,22 @@ class FilmObjBranchName extends Resource {
 }
 
 
+/**
+ * All committed changes for the branch.
+ *
+ * @uri /branch/:branchid/version
+ */
+class BranchObjChanges extends Resource {
+    // FIXME
+}
+
 
 /**
- * Fetches the top-level information about the branch.  This is essentially
- * the film information + the branch name and creation / update dates.
+ * All committed changes for the branch.
  *
- * This needs to include the user's pending changes in the results.
- *
- * @uri /branch/:branchid
- *
+ * @uri /branch/:branchid/version/:changeid
  */
-class FilmObjBranchObj extends Resource {
+class BranchObjChangeVersion extends Resource {
     
     /**
      * Get the details for the branch.  If the branch is not visible by the
@@ -347,6 +352,7 @@ class FilmObjBranchObj extends Resource {
      */
     function fetch() {
         $branchId = $this->validateId($this->branchid, "branchId");
+        $changeId = $this->validateId($this->changeid, "changeId");
         $this->validate();
         
         $userId = null;
@@ -354,15 +360,15 @@ class FilmObjBranchObj extends Resource {
             $userId = $this->container['user']['User_Id'];
         }
         $ret = WebRiffs\FilmLayer::getBranchDetails($this->getDB(),
-            $userId, $branchId);
+            $userId, $branchId, $changeId);
         
         if (! $ret) {
             return new Tonic\Response(Tonic\Response::NOCONTENT);
         }
         return array(200, $ret);
     }
-    
 }
+
 
 
 /**
@@ -375,19 +381,9 @@ class FilmObjBranchObj extends Resource {
  * since we have a hard-limit on the number of tags.  We can still keep a
  * derivative table for quick searches.
  *
- * @uri /branch/:branchid/quips
+ * @uri /branch/:branchid/version/:changeid/quip
  */
-class FilmObjBranchObjQuips extends Resource {
-    
-}
-
-
-/**
- * All committed changes for the branch.
- *
- * @uri /branch/:branchid/history
- */
-class FilmObjBranchObjChanges extends Resource {
-    
+class BranchObjQuips extends Resource {
+    // FIXME
 }
 
