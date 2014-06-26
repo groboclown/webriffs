@@ -72,27 +72,31 @@ class FilmInfoEditComponent extends SingleRequestComponent {
 
     set filmName(String name) {
         if (filmInfo.filmName != name) {
-            validateFilmNameYear(name, filmInfo.releaseYear);
+            validateFilmNameYear(name, _checkYear(filmInfo.releaseYear));
+        }
+    }
+
+
+    int _checkYear(dynamic year) {
+        if (year == null) {
+            _isYearValid = false;
+            filmInfo.hasError = true;
+            return null;
+        } else {
+            // convert the year here, so that the check for did-change is valid.
+            try {
+                return int.parse(year.toString());
+            } catch (FormatException) {
+                _isYearValid = false;
+                filmInfo.hasError = true;
+                return null;
+            }
         }
     }
 
     set releaseYear(dynamic year) {
-        // convert the year here, so that the check for did-change is valid.
-        if (year is String) {
-            try {
-                year = int.parse(year);
-            } catch (FormatException) {
-                _isYearValid = false;
-                filmInfo.hasError = true;
-                year = null;
-            }
-        } else if (! (year is int)) {
-            _isYearValid = false;
-            filmInfo.hasError = true;
-            year = null;
-        }
-
-        if (year != filmInfo.releaseYear) {
+        int yearInt = _checkYear(year);
+        if (yearInt != null && yearInt != filmInfo.releaseYear) {
             validateFilmNameYear(filmInfo.filmName, year);
         }
     }

@@ -135,16 +135,20 @@ class FilmObj extends Resource {
         
         $filmId = $this->validateId($this->filmid, "filmId");
         $data = $this->getRequestData();
-        // FIXME validate that the data exists and is correct
-        $name = $data['Name'];
-        $releaseYear = $data['Release_Year'];
+        $this->checkThat(!! $data->{'Name'} && is_string($data->{'Name'}),
+            'Name', "Name must be specified as a string");
+        $this->checkthat( !! $data->{'Release_Year'} &&
+                is_numeric($data->{'Release_Year'}),
+            'Release_Year', "Release_Year must be specified as a number");
         $this->validate();
+        $name = $data->{'Name'};
+        $this->assertThat($releaseYear >= 1800 && $releaseYear <= 9999,
+            'Release_Year', "Release_Year must be within the bounds [1800, 9999]");
+        $releaseYear = intval($data->{'Release_Year'});
         
         $db = $this->getDB();
-
-        //$stmt = $db->prepare('UPDATE FILM SET Name = ?, Release_Year = ?, Imdb_Url = ?, Wikipedia_Url = ? WHERE Film_Id = ?');
-        //$stmt->execute(array($name, $releaseYear, $imdbUrl, $wikiUrl, $filmid));
-
+        WebRiffs\FilmLayer::updateFilm($db, $filmId, $name, $releaseYear);
+        
         return $this->display();
     }
 

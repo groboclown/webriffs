@@ -374,6 +374,39 @@ class FilmLayer {
     }
     
     
+    public static function updateFilm($db, $filmId, $name, $releaseYear) {
+        if (! is_integer($filmId)) {
+            error_log("Expected integer, found [".$filmId."]");
+            throw new Base\ValidationException(array(
+                            'film_id' => 'invalid film id format'
+            ));
+        }
+        $filmId = intval($filmId);
+        
+        // See if there's anything to do
+        $currentFilmData = FilmLayer::getFilm($db, $filmId);
+        if ($currentFilmData['Name'] == $name &&
+                $currentFilmData['Release_Year'] == $releaseYear) {
+            return true;
+        }
+        
+        // Ensure the film name/year don't already exist
+        // There should already be a unique index on the table for these
+        // two values.
+        //if (FilmLayer::doesFilmExist($db, $name, $releaseYear)) {
+        //    return false;
+        //}
+        
+        $data = Film::$INSTANCE->update($db, $filmId, $name, $releaseYear);
+        FilmLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem updating the film'
+                )));
+        return true;
+    }
+    
+    
     public static function getLinksForFilm($db, $filmId) {
         if (! is_integer($filmId)) {
             throw new Base\ValidationException(array(

@@ -20,6 +20,8 @@ table:
                     name: Film__Gv_Project_Id_FK
                     table: GV_PROJECT
                     column: Gv_Project_Id
+                - constraint:
+                    type: no update
         - column:
             name: Name
             type: nvarchar(200)

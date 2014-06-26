@@ -111,20 +111,31 @@ class ViewFilmComponent extends PagingComponent {
                 if (resp.wasError) {
                     _validFilmId = false;
                 } else {
-                    int projectId = resp.jsonData['Gv_Project_Id'];
-                    name = resp.jsonData['Name'];
-                    releaseYear = resp.jsonData['Release_Year'];
-                    createdOn = resp.jsonData['Created_On']; // datetime -> ?
-                    lastUpdatedOn = resp.jsonData['Last_Updated_On']; // datetime -> ?
-                    _detailsLoaded = true;
-
-                    links.clear();
-                    List<Map<String, dynamic>> jsonLinks = resp.jsonData['links'];
-                    jsonLinks.forEach((Map<String, dynamic> row) {
-                        links.add(new LinkRecord.fromJson(_server, row));
-                    });
+                    _loadFilmJsonResponse(resp);
                 }
             });
+    }
+
+
+    void _loadFilmJsonResponse(ServerResponse resp) {
+        int projectId = resp.jsonData['Gv_Project_Id'];
+        name = resp.jsonData['Name'];
+        dynamic year = resp.jsonData['Release_Year'];
+        if (year is String) {
+            releaseYear = int.parse(year);
+        } else if (! (year is int)) {
+            print("Invalid year from server: " + year);
+            releaseYear = null;
+        }
+        createdOn = resp.jsonData['Created_On']; // datetime -> ?
+        lastUpdatedOn = resp.jsonData['Last_Updated_On']; // datetime -> ?
+        _detailsLoaded = true;
+
+        links.clear();
+        List<Map<String, dynamic>> jsonLinks = resp.jsonData['links'];
+        jsonLinks.forEach((Map<String, dynamic> row) {
+            links.add(new LinkRecord.fromJson(_server, row));
+        });
     }
 
 
@@ -138,7 +149,25 @@ class ViewFilmComponent extends PagingComponent {
 
 
     Future<ServerResponse> updateFilm() {
-        // FIXME
+        if (filmInfo.hasError) {
+            // the same as canceling
+            revert();
+            return;
+        }
+        _server.createCsrfToken('update_film').then((String csrf) {
+            Map<String, dynamic> jsonData = {
+                'Name': filmInfo.filmName,
+                'Release_Year': filmInfo.releaseYear
+            };
+            return _server.post('/film/' + filmId.toString(), csrf,
+                    data: jsonData);
+        }).then((ServerResponse response) {
+            if (response.wasError) {
+                // FIXME report error from server better.
+            } else {
+                _loadFilmJsonResponse(response);
+            }
+        });
 
         _isEditing = false;
     }
