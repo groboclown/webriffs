@@ -63,13 +63,14 @@ class BranchDetails {
             throw new Exception("invalid state: branch id changed");
         }
         if (initialLoad) {
+            filmId = fid;
+        } else {
             if (fid != filmId) {
-                throw new Exception("invalid state: film id changed");
+                throw new Exception("invalid state: film id changed (was " +
+                        fid.toString() + ", but now is " + filmId.toString() + ")");
             }
             // the rest of the film information can change, because someone
             // else can edit it underneath you.
-        } else {
-            filmId = fid;
         }
         filmName = fn;
         filmReleaseYear = fry;

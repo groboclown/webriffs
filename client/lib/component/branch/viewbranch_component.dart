@@ -23,9 +23,29 @@ class ViewBranchComponent {
 
     bool get noQuips => quipPaging.quips.length <= 0;
 
-    final Future<BranchDetails> branchDetails;
+    BranchDetails _branchDetails;
     final int branchId;
-    final int changeId;
+    final int urlChangeId;
+
+    bool get loaded => _branchDetails != null;
+    int get filmId => _branchDetails == null ? null :
+            _branchDetails.filmId;
+    int get filmReleaseYear => _branchDetails == null ? null :
+            _branchDetails.filmReleaseYear;
+    String get filmName => _branchDetails == null ? null :
+            _branchDetails.filmName;
+    String get filmCreatedOn => _branchDetails == null ? null :
+            _branchDetails.filmCreatedOn;
+    String get filmLastUpdatedOn => _branchDetails == null ? null :
+            _branchDetails.filmLastUpdatedOn;
+    int get changeId => _branchDetails == null ? urlChangeId :
+            _branchDetails.changeId;
+    String get branchName => _branchDetails == null ? null :
+            _branchDetails.name;
+    String get description => _branchDetails == null ? null :
+            _branchDetails.description;
+    String get updatedOn => _branchDetails == null ? null :
+            _branchDetails.updatedOn;
 
 
     factory ViewBranchComponent(ServerStatusService server,
@@ -42,7 +62,11 @@ class ViewBranchComponent {
                 branchDetails, quips);
     }
 
-    ViewBranchComponent._(this._server, this.branchId, this.changeId,
-            this.branchDetails, this.quipPaging);
+    ViewBranchComponent._(this._server, this.branchId, this.urlChangeId,
+            Future<BranchDetails> branchDetails, this.quipPaging) {
+        branchDetails.then((BranchDetails bd) {
+            _branchDetails = bd;
+        });
+    }
 }
 

@@ -601,14 +601,14 @@ class FilmLayer {
         
         if ($userId === null) {
             // guest user
-            $wheres = array(new FilmBranchAccess_IsGuestAllowed(
+            $wheres = array(new VFilmBranchGuestAccess_IsAllowed(
                     $access, Access::$PRIVILEGE_GUEST));
-            $data = FilmBranchAccess::$INSTANCE->countBy_Film_Branch_Id(
+            $data = VFilmBranchGuestAccess::$INSTANCE->countBy_Gv_Branch_Id(
                     $db, $branchId, $wheres);
         } else {
             // logged-in user
             $wheres = array(new VFilmBranchAccess_IsAllowed());
-            $data = VFilmBranchAccess::$INSTANCE->countBy_Film_Branch_Id_x_User_Id_x_Access(
+            $data = VFilmBranchAccess::$INSTANCE->countBy_Gv_Branch_Id_x_User_Id_x_Access(
                     $db, $branchId, $userId, $access, $wheres);
         }
         
@@ -676,7 +676,7 @@ class FilmLayer {
                     'unknown' => 'there was an unknown problem reading the branch tags'
                 )));
         $tags = array();
-        foreach ($data as $tagRow) {
+        foreach ($data['result'] as $tagRow) {
             $tags[] = $tagRow['Tag_Name'];
         }
         $result['tags'] = $tags;

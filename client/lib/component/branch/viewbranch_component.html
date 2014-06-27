@@ -1,18 +1,20 @@
 <div>
-    <a ng-href="#/film/view/{{cmp.filmId}}" ng-if="cmp.filmId != null">Film Details</a>
+    <a ng-href="#/film/view/{{cmp.filmId}}" ng-if="cmp.loaded">Film Details</a>
     <a ng-href="#/branch/changes/{{cmp.branchId}}" ng-if="cmp.branchId != null">Branch History</a>
     
-    <div>
-        <div>{{cmp.branchDetails.filmName}} ({{cmp.branchDetails.filmReleaseYear}})</div>
-        <div>{{cmp.branchDetails.name}}</div>
-        <div>{{cmp.branchDetails.description}}</div>
-        <div>Last updated on {{cmp.branchDetails.updatedOn}}</div>
+    <div ng-if="cmp.loaded">
+        <div>{{cmp.filmName}} ({{cmp.filmReleaseYear}})
+            <span ng-if="cmp.urlChangeId != 0">(change {{cmp.changeId}})</span>
+        </div>
+        <div>{{cmp.branchName}}</div>
+        <div>{{cmp.description}}</div>
+        <div>Last updated on {{cmp.updatedOn}}</div>
     </div>
     
     <div>
         <!-- filter controls -->
     </div>
-    <page-control page-state="cmp.pageState">
+    <page-control page-state="cmp.quipPaging">
         <table>
             <thead>
                 <tr>
@@ -22,7 +24,7 @@
                     <th>Tags</th>
                 </tr>
             </thead>
-            <tbody ng-if="cmp.pageState.loadedFromServer">
+            <tbody ng-if="cmp.quipPaging.loadedSuccessful">
             
             <!--  FIXME first row is always the empty one. -->
             

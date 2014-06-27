@@ -21,6 +21,7 @@ class PageHeaderComponent implements DetachAware {
     bool get isLoggedIn => _user.loggedIn;
 
     bool get canCreateFilm => _user.canCreateFilms;
+    bool get canCreateBranch => _user.canCreateBranch;
 
     String titleSuffix = " - WebRiffs";
     String defaultTitle = "WebRiffs";
@@ -28,6 +29,15 @@ class PageHeaderComponent implements DetachAware {
     String name;
 
     String title;
+
+    String branchId;
+    bool get hasBranchOnPage => branchId != null;
+    bool get showForkLink => canCreateBranch && hasBranchOnPage;
+
+    String filmId;
+    bool get hasFilmOnPage => filmId != null;
+    bool get showBranchLink => canCreateBranch && hasFilmOnPage;
+
 
     PageHeaderComponent(RouteProvider routeProvider, this._user) {
         _onEnter(routeProvider.route);
@@ -59,6 +69,13 @@ class PageHeaderComponent implements DetachAware {
         route.parameters.forEach((String k, dynamic v) {
             n = n.replaceAll('<${k}>', v.toString());
             t = t.replaceAll('<${k}>', v.toString());
+
+            if (k == "branchId" && v != null) {
+                branchId = v.toString();
+            } else if (k == "filmId" && v != null) {
+                filmId = v.toString();
+            }
+            //print("Found parameter [${k}]=[${v}]");
         });
 
         title = t;

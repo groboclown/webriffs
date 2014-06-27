@@ -7,6 +7,7 @@ import '../../service/server.dart';
 import '../../util/async_component.dart';
 import '../../json/quip_details.dart';
 
+import '../../util/paging.dart';
 
 
 
@@ -14,6 +15,9 @@ import '../../json/quip_details.dart';
  * A deep cache for the quips.  It pages the quips in, but keeps a longer list
  * of the quips in memory than what the server returns.  The actual control
  * over when to page, and which data to clear, is up to the owning component.
+ *
+ * This uses the PagingComponent to help with the loading of the data and the
+ * error / loading state,
  */
 class QuipPaging extends PagingComponent {
 
@@ -50,5 +54,57 @@ class QuipPaging extends PagingComponent {
             quips.add(new QuipDetails.fromJson(branchId, json));
         });
         return null;
+    }
+
+    // TODO: implement currentPage
+    @override
+    int get currentPage => null;
+
+    // TODO: implement errorMessage
+    @override
+    String get errorMessage => null;
+
+    // TODO: implement filter_names
+    @override
+    Iterable<String> get filter_names => null;
+
+    // TODO: implement hasError
+    @override
+    bool get hasError => null;
+
+    // TODO: implement loadedFromServer
+    @override
+    bool get loadedFromServer => null;
+
+    // TODO: implement pageCount
+    @override
+    int get pageCount => null;
+
+    // TODO: implement recordCount
+    @override
+    int get recordCount => null;
+
+    // TODO: implement recordsPerPage
+    @override
+    int get recordsPerPage => null;
+
+    // TODO: implement sortOrder
+    @override
+    String get sortOrder => null;
+
+    // TODO: implement sortedBy
+    @override
+    String get sortedBy => null;
+
+    @override
+    Future<ServerResponse> updateFromServer({int nextPage: null,
+            int newRecordsPerPage: null, String newSortedBy: null,
+            String newSortOrder: null, Map<String, dynamic> newFilters: null}) {
+        return current.updateFromServer(
+                nextPage: nextPage,
+                newRecordsPerPage: newRecordsPerPage,
+                newSortedBy: newSortedBy,
+                newSortOrder: newSortOrder,
+                newFilters: newFilters);
     }
 }

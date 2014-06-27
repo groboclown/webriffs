@@ -4,7 +4,9 @@
 </div>
 <div>
     <span><a href="#/film/list">List films</a></span>
-    <span><a href="#/film/create" ng-if="cmp.canCreateFilm">Add a film</a></span>
+    <span ng-if="cmp.canCreateFilm"><a href="#/film/create">Add a film</a></span>
+    <span ng-if="cmp.showBranchLink"><a ng-href="#/branch/create/{{cmp.filmId}}">Create a branch for this film</a></span>
+    <span ng-if="cmp.showForkLink"><a ng-href="#/branch/fork/{{cmp.branchId}}">Fork this branch</a></span>
 </div>
 <div>
     (login widget is here)
