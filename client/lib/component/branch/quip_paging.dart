@@ -5,82 +5,8 @@ import 'dart:async';
 
 import '../../service/server.dart';
 import '../../util/async_component.dart';
+import '../../json/quip_details.dart';
 
-
-
-class Quip {
-    static final int MAX_TAG_COUNT = 20;
-
-    final int _quipId;
-    final int _branchId;
-    final List<QuipTag> _tags = [];
-    String _text;
-    int _timestamp;
-    bool _changed = false;
-
-    String get text => _text;
-    int get timestamp => _timestamp;
-    bool get changed => _changed;
-
-    List<QuipTag> get tags => _tags;
-
-    Quip(this._branchId, this._quipId);
-
-    factory Quip.fromJson(int branchId, Map<String, dynamic> json) {
-        int quipId = json['Gv_Item_Id'];
-        int versionId = json['Gv_Item_Version_Id'];
-        Quip q = new Quip(branchId, quipId);
-        q._text = json['Text_Value'];
-        q._timestamp = json['Timestamp_Millis'];
-
-        for (int i = 1; i <= MAX_TAG_COUNT; ++i) {
-            String t = json['TAG_' + i.toString()];
-            if (t != null) {
-                t = t.trim();
-                _tags.add(new QuipTag(t));
-            }
-        }
-    }
-
-    set text(String t) {
-        if (t != _text) {
-            _changed = true;
-            _text = t;
-        }
-    }
-
-    set timestamp(int t) {
-        if (t != _timestamp) {
-            _changed = true;
-            _timestamp = t;
-        }
-    }
-
-    void addTag(String tag) {
-        if (tag != null) {
-            tag = tag.trim();
-            for (QuipTag t in _tags) {
-                if (t.name.toLowerCase() == tag.toLowerCase()) {
-                    return;
-                }
-            }
-            _tags.add(new QuipTag(tag));
-            _changed = true;
-        }
-    }
-
-    void removeTag(QuipTag t) {
-        _changed = _changed || _tags.remove(t);
-    }
-}
-
-
-
-class QuipTag {
-    final String name;
-
-    QuipTag(this.name);
-}
 
 
 
@@ -90,9 +16,19 @@ class QuipTag {
  * over when to page, and which data to clear, is up to the owning component.
  */
 class QuipPaging extends PagingComponent {
+
+    // FIXME need a better storage for the quips.  They need to be stored such
+    // that N items are saved to reduce paging from the server.  When a get
+    // request is made for an item that is "near" the end of the current
+    // cache (in either direction), a request should be made to pull in the
+    // next ones.
+
+    // The forward/backwards cache should be configurable depending if the user
+    // is in edit or view or playback mode.
+
     final int branchId;
     final int changeId;
-    final List<Quip> quips;
+    final List<QuipDetails> quips;
 
     factory QuipPaging(ServerStatusService server, int branchId, int changeId) {
         String path = "/branch/${branchId}/version/${changeId}/quip";
@@ -111,7 +47,7 @@ class QuipPaging extends PagingComponent {
     Future<ServerResponse> onSuccess(Iterable data) {
         quips.clear();
         data.forEach((Map<String, dynamic> json) {
-            quips.add(new Quip.fromJson(branchId, json));
+            quips.add(new QuipDetails.fromJson(branchId, json));
         });
         return null;
     }

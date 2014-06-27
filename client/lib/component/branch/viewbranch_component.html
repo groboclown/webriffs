@@ -1,6 +1,14 @@
 <div>
     <a ng-href="#/film/view/{{cmp.filmId}}" ng-if="cmp.filmId != null">Film Details</a>
     <a ng-href="#/branch/changes/{{cmp.branchId}}" ng-if="cmp.branchId != null">Branch History</a>
+    
+    <div>
+        <div>{{cmp.branchDetails.filmName}} ({{cmp.branchDetails.filmReleaseYear}})</div>
+        <div>{{cmp.branchDetails.name}}</div>
+        <div>{{cmp.branchDetails.description}}</div>
+        <div>Last updated on {{cmp.branchDetails.updatedOn}}</div>
+    </div>
+    
     <div>
         <!-- filter controls -->
     </div>

@@ -1,10 +1,12 @@
 
 library viewbranch_component;
 
+import 'dart:async';
 
 import 'package:angular/angular.dart';
 
 import '../../service/server.dart';
+import '../../json/branch_details.dart';
 import 'quip_paging.dart';
 
 /**
@@ -21,9 +23,7 @@ class ViewBranchComponent {
 
     bool get noQuips => quipPaging.quips.length <= 0;
 
-    bool _headerLoaded = false;
-    bool get headerLoaded => _headerLoaded;
-    int filmId;
+    final Future<BranchDetails> branchDetails;
     final int branchId;
     final int changeId;
 
@@ -33,24 +33,16 @@ class ViewBranchComponent {
         int branchId = int.parse(routeProvider.parameters['branchId']);
         int changeId = int.parse(routeProvider.parameters['changeId']);
 
-        // FIXME
+        Future<BranchDetails> branchDetails = loadBranchDetails(server,
+                branchId, changeId);
+
         QuipPaging quips = new QuipPaging(server, branchId, changeId);
-        return new ViewBranchComponent._(_server, branchId, changeId, quips);
+
+        return new ViewBranchComponent._(server, branchId, changeId,
+                branchDetails, quips);
     }
 
     ViewBranchComponent._(this._server, this.branchId, this.changeId,
-            this.quipPaging) {
-        _server.get('/branch/${branchId}/version/${changeId}', null)
-            .then((ServerResponse response) {
-
-            });
-
-
-        // FIXME set film ID
-        // FIXME load details
-
-        // changeId: if 0, then load the head version from the server.
-
-    }
+            this.branchDetails, this.quipPaging);
 }
 
