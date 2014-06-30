@@ -689,7 +689,7 @@ class FilmLayer {
         // userId CANNOT be null
         
         if (! $userId || ! FilmLayer::canAccessBranch($db, $userId, $branchId,
-                Access::$BRANCH_TAG)) {
+                Access::$BRANCH_WRITE)) {
             throw new Tonic\UnauthorizedException();
         }
         
@@ -722,6 +722,9 @@ class FilmLayer {
         
         // DO NOT submit the change.
     }
+    
+    
+    
     
 
     // ----------------------------------------------------------------------

@@ -1,0 +1,166 @@
+# The full quip values for each branch at the head version.
+
+view:
+    viewName: V_QUIP_HEAD
+    query: "
+        SELECT
+          qh.Gv_Branch_Id Gv_Branch_Id
+          , qh.Gv_Item_Id
+          , qh.Gv_Item_Version_Id
+          
+          , qv.Text_Value Text_Value
+          
+          , qv.Tag_1
+          , qv.Tag_2
+          , qv.Tag_3
+          , qv.Tag_4
+          , qv.Tag_5
+          , qv.Tag_6
+          , qv.Tag_7
+          , qv.Tag_8
+          , qv.Tag_9
+          , qv.Tag_10
+          , qv.Tag_11
+          , qv.Tag_12
+          , qv.Tag_13
+          , qv.Tag_14
+          , qv.Tag_15
+          , qv.Tag_16
+          , qv.Tag_17
+          , qv.Tag_18
+          , qv.Tag_19
+          , qv.Tag_20
+          
+          , qv.Timestamp_Millis
+          , COALESCE(qv.Last_Updated_On, qv.Created_On) Updated_On
+        FROM
+            V_Q_HEAD qh
+        INNER JOIN
+            QUIP_VERSION qv
+                ON qv.Gv_Item_Version_Id = qh.Gv_Item_Version_Id
+        INNER JOIN
+            GV_ITEM_VERSION iv
+                ON iv.Gv_Item_Version_Id = qv.Gv_Item_Version_Id
+        
+        WHERE iv.Alive = 1
+        "
+    columns:
+        - column:
+            name: Gv_Branch_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_BRANCH
+                    column: Gv_Branch_Id
+        - column:
+            name: Gv_Item_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_ITEM
+                    column: Gv_Item_Id
+        - column:
+            name: Gv_Item_Version_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_ITEM_VERSION
+                    column: Gv_Item_Version_Id
+        - column:
+            name: Text_Value
+            type: nvarchar(2048)
+            constraints:
+                - constraint:
+                    type: not null
+
+        - column:
+            name: Tag_1
+            type: nvarchar(64)
+        - column:
+            name: Tag_2
+            type: nvarchar(64)
+        - column:
+            name: Tag_3
+            type: nvarchar(64)
+        - column:
+            name: Tag_4
+            type: nvarchar(64)
+        - column:
+            name: Tag_5
+            type: nvarchar(64)
+        - column:
+            name: Tag_6
+            type: nvarchar(64)
+        - column:
+            name: Tag_7
+            type: nvarchar(64)
+        - column:
+            name: Tag_8
+            type: nvarchar(64)
+        - column:
+            name: Tag_9
+            type: nvarchar(64)
+        - column:
+            name: Tag_10
+            type: nvarchar(64)
+        - column:
+            name: Tag_11
+            type: nvarchar(64)
+        - column:
+            name: Tag_12
+            type: nvarchar(64)
+        - column:
+            name: Tag_13
+            type: nvarchar(64)
+        - column:
+            name: Tag_14
+            type: nvarchar(64)
+        - column:
+            name: Tag_15
+            type: nvarchar(64)
+        - column:
+            name: Tag_16
+            type: nvarchar(64)
+        - column:
+            name: Tag_17
+            type: nvarchar(64)
+        - column:
+            name: Tag_18
+            type: nvarchar(64)
+        - column:
+            name: Tag_19
+            type: nvarchar(64)
+        - column:
+            name: Tag_20
+            type: nvarchar(64)
+
+
+        - column:
+            name: Timestamp_Millis
+            type: int
+        - column:
+            name: Updated_On
+            type: timestamp
+    whereClauses:
+        - where:
+            name: Film_Name_Like
+            sql: Film_Name LIKE {name}
+            argument:
+                name: name
+                type: nvarchar(200)
+        - where:
+            name: Branch_Name_Like
+            sql: Branch_Name LIKE {name}
+            argument:
+                name: name
+                type: nvarchar(200)
+        - where:
+            name: Branch_Description_Like
+            sql: Description LIKE {desc}
+            argument:
+                name: desc
+                type: nvarchar(2048)
+            

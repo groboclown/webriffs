@@ -18,6 +18,7 @@ view:
         V_GV_BRANCH_CHANGE_VERSION cv
         WHERE c.Gv_Change_Id >= cv.Gv_Change_Id
             AND c.Gv_Branch_Id = cv.Gv_Branch_Id
+            AND c.Active_State = 1
         "
     columns:
         - column:

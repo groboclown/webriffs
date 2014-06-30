@@ -1,0 +1,58 @@
+# The quips at each version.
+
+# This uses the very, very nasty view V_CHANGE_ITEM.  This should be cleaned
+# up in the future to avoid using it, if possible.
+
+# As this does use the V_CHANGE_ITEM view, it doesn't need to check the
+# Active_State flag, as the V_CHANGE_ITEM already performs that filtering.
+
+view:
+    viewName: V_Q_VERSION
+    query: "SELECT
+            ci.Gv_Branch_Id Gv_Branch_Id
+            , ci.Gv_Change_Id Gv_Change_Id
+            , ci.Gv_Item_Id Gv_Item_Id
+            , ci.Gv_Item_Version_Id Gv_Item_Version_Id
+            , ci.Ga_User_Id Ga_User_Id
+            , ci.Alive Alive
+            , ci.Updated_On Updated_On
+          FROM
+              V_GV_CHANGE_ITEM ci
+          INNER JOIN
+              QUIP_VERSION qv
+            ON
+              qv.Gv_Item_Version_Id = ci.Gv_Item_Version_Id
+        "
+    columns:
+        - column:
+            name: Gv_Branch_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_BRANCH
+                    column: Gv_Branch_Id
+        - column:
+            name: Gv_Change_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_CHANGE
+                    column: Gv_Change_Id
+        - column:
+            name: Gv_Item_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_ITEM
+                    column: Gv_Item_Id
+        - column:
+            name: Gv_Item_Version_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_ITEM_VERSION
+                    column: Gv_Item_Version_Id

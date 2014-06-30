@@ -1,0 +1,81 @@
+# Records the description and kind of change related to each GV_CHANGE item
+# on a branch.
+
+table:
+    tableName: FILM_BRANCH_HISTORY
+    columns:
+        - column:
+            name: Gv_Branch_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Film_Branch__Gv_Branch_Id_FK
+                    table: GV_BRANCH
+                    column: Gv_Branch_Id
+                - constraint:
+                    type: no update
+                - constraint:
+                    type: not null
+        - column:
+            name: Gv_Change_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: Film_Branch__Gv_Change_Id_FK
+                    table: GV_CHANGE
+                    column: Gv_Change_Id
+                - constraint:
+                    type: no update
+                - constraint:
+                    type: not null
+        - column:
+            name: Description
+            type: nvarchar(2048)
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: no update
+        - column:
+            name: Change_Type
+            type: char(3)
+            constraints:
+                - constraint:
+                    type: not null
+        - column:
+            name: Created_On
+            type: timestamp
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: no update
+                - constraint:
+                    type: initial value
+                    dialects:
+                        - dialect:
+                            platforms: mysql
+                            sql: NOW()
+        - column:
+            name: Last_Updated_On
+            type: timestamp
+            constraints:
+                - constraint:
+                    type: nullable
+                - constraint:
+                    type: constant update
+                    dialects:
+                        - dialect:
+                            platforms: mysql
+                            sql: NOW()
+                - constraint:
+                    type: initial value
+                    value: "NULL"
+    constraints:
+        - constraint:
+            type: primary key
+            name: Film_Branch_History__Gv_Branch_Id_PK
+            columns: Gv_Branch_Id, Gv_Change_Id
+            

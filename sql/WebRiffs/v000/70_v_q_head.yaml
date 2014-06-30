@@ -1,28 +1,25 @@
-# The versions of each branch.
+# The quips at the head versions of each branch.
 
-# TODO the Active_State for the branch header is really short lived (disabled,
-# I mean), so the 2 extra joins (GV_CHANGE_VERSION, GV_CHANGE) just to grab
-# the Active_State may not be totally necessary.  For correctness, though, it
-# is.
+# The inner join on the QUIP_VERSION doesn't bring in any extra columns, but
+# instead limits the Gv_Item to just the quips.
 
 view:
-    viewName: V_BRANCH_VERSION
+    viewName: V_Q_HEAD
     query: "SELECT
-          fb.Gv_Branch_Id Gv_Branch_Id
-          , iv.Gv_Item_Id Gv_Item_Id
-          , iv.Gv_Item_Version_Id Gv_Item_Version_Id
+          c.Gv_Branch_Id Gv_Branch_Id
+          , cv.Gv_Item_Id Gv_Item_Id
+          , MAX(cv.Gv_Item_Version_Id) Gv_Item_Version_Id
           FROM
-              GV_ITEM_VERSION iv
-          INNER JOIN
-              FILM_BRANCH fb
-                  ON fb.Gv_Item_Id = iv.Gv_Item_Id
-          INNER JOIN
               GV_CHANGE_VERSION cv
-                  ON cv.Gv_Item_Version_Id = iv.Gv_Item_Version_Id
+          INNER JOIN
+              QUIP_VERSION qv
+            ON
+              qv.Gv_Item_Version_Id = cv.Gv_Item_Version_Id
           INNER JOIN
               GV_CHANGE c
-                  ON c.Gv_Change_Id = cv.Gv_Change_Id
-          GROUP BY fb.Gv_Branch_Id, iv.Gv_Item_Id
+            ON
+              cv.Gv_Change_Id = c.Gv_Change_Id
+          GROUP BY c.Gv_Branch_Id, cv.Gv_Item_Id
           WHERE c.Active_State = 1
         "
     columns:
