@@ -452,14 +452,22 @@ class BranchObjQuips extends Resource {
  * @uri /branch/:branchid/pending/quip
  */
 class BranchObjQuipsPending extends Resource {
-    // FIXME
+    /**
+     * Page in the pending quips.  These should be merged with the head
+     * quips on the client side.
+     *
+     * @method GET
+     */
+    function fetch() {
+        // FIXME
+    }
     
     
     /**
      * @method PUT
      */
     function create() {
-        
+        // FIXME
     }
 }
 
@@ -470,4 +478,39 @@ class BranchObjQuipsPending extends Resource {
  */
 class BranchObjQuipItem extends Resource {
     // FIXME
+    /**
+     * Retrieve the detailed information for this one specific quip.  If the
+     * quip is not in the pending change for the user, then nothing is
+     * returned (no content).
+     *
+     * @method GET
+     */
+    function fetch() {
+        // FIXME
+    }
+    
+    
+    /**
+     * Update the information on this pending quip.  If this is a quip in
+     * the branch but not in the pending list, then it should be added to
+     * the pending list as an update to the quip.
+     *
+     * This can potentially update the quip tags, so the tag access needs to
+     * be checked separately.
+     *
+     * @method POST
+     */
+    function update() {
+        // FIXME
+    }
+    
+    
+    /**
+     * Remove the quip.
+     *
+     * @method DELETE
+     */
+    function remove() {
+        // FIXME
+    }
 }
