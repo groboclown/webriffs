@@ -40,6 +40,15 @@ class QuipPaging extends PagingComponent {
         return new QuipPaging._(server, branchId, changeId, path);
     }
 
+    /**
+     * Fetch the quips that the user has pending a commit.
+     */
+    factory QuipPaging.pending(ServerStatusService server, int branchId) {
+        String path = "/branch/${branchId}/pending/quip";
+
+        return new QuipPaging._(server, branchId, null, path);
+    }
+
 
     QuipPaging._(ServerStatusService server, this.branchId, this.changeId,
             String path) :

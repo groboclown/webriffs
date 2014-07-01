@@ -233,7 +233,6 @@ class FilmObjLink extends Resource {
  */
 class FilmObjBranch extends Resource {
     /**
-     * FIXME the filters on name don't seem to work.
      *
      * @method GET
      */
@@ -333,7 +332,52 @@ class FilmObjBranchName extends Resource {
  * @uri /branch/:branchid/version
  */
 class BranchObjChanges extends Resource {
-    // FIXME
+    /**
+     * Retrieve all the changes for the branch.  This is a paging operation.
+     *
+     * @method GET
+     */
+    function fetch() {
+        $branchId = $this->validateId($this->branchid, "branchId");
+        $this->validate();
+        
+        $userId = null;
+        if ($this->isUserAuthenticated()) {
+            $userId = $this->container['user']['User_Id'];
+        }
+        
+        
+        // FIXME
+        // Be sure to check that the user can view the branch.
+    }
+    
+    
+    /**
+     * @method POST
+     */
+    function update() {
+        $branchId = $this->validateId($this->branchid, "branchId");
+        $this->validate();
+        
+        $userId = null;
+        if ($this->isUserAuthenticated()) {
+            $userId = $this->container['user']['User_Id'];
+        }
+        
+        // FIXME
+    }
+    
+    
+    /**
+     * Calls the post method.  Conceptually, the user is updating a branch,
+     * but it can also be viewed as adding a new change to the branch.  So
+     * we'll allow both.
+     *
+     * @method PUT
+     */
+    function create() {
+        return $this->update();
+    }
 }
 
 
@@ -372,18 +416,58 @@ class BranchObjChangeVersion extends Resource {
 
 
 /**
- * Paging in of the branch quips.  An extra parameter indicates that the
- * user's current changes, rather than just the head, is requested.
- *
- * A separate request is necessary to fetch the quip tags.
- *
- * FIXME inspect if the tags should be associated directly on the object itself,
- * since we have a hard-limit on the number of tags.  We can still keep a
- * derivative table for quick searches.
+ * Paging for the committed branch quips.
  *
  * @uri /branch/:branchid/version/:changeid/quip
  */
 class BranchObjQuips extends Resource {
-    // FIXME
+    
+    /**
+     * @method GET
+     */
+    function fetch() {
+        $branchId = $this->validateId($this->branchid, "branchId");
+        $changeId = $this->validateId($this->changeid, "changeId");
+        $this->validate();
+    
+        $userId = null;
+        if ($this->isUserAuthenticated()) {
+            $userId = $this->container['user']['User_Id'];
+        }
+        $ret = WebRiffs\FilmLayer::pageCommittedQuips($this->getDB(),
+                $userId, $branchId, $changeId);
+    
+        if (! $ret) {
+            return new Tonic\Response(Tonic\Response::NOCONTENT);
+        }
+        return array(200, $ret);
+    }
 }
 
+
+/**
+ * Paging for the pending branch quips of the current user, and adding new
+ * quips.
+ *
+ * @uri /branch/:branchid/pending/quip
+ */
+class BranchObjQuipsPending extends Resource {
+    // FIXME
+    
+    
+    /**
+     * @method PUT
+     */
+    function create() {
+        
+    }
+}
+
+
+/**
+ *
+ * @uri /branch/:branchid/pending/quip/:itemid
+ */
+class BranchObjQuipItem extends Resource {
+    // FIXME
+}

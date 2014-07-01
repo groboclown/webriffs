@@ -19,8 +19,8 @@ view:
               GV_CHANGE c
             ON
               cv.Gv_Change_Id = c.Gv_Change_Id
-          GROUP BY c.Gv_Branch_Id, cv.Gv_Item_Id
           WHERE c.Active_State = 1
+          GROUP BY c.Gv_Branch_Id, cv.Gv_Item_Id
         "
     columns:
         - column:

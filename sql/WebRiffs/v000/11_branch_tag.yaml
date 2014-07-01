@@ -26,6 +26,9 @@ table:
             constraints:
                 - constraint:
                     type: not null
+                - constraint:
+                    type: unique index
+                    name: Branch_Tag__Name_IDX
         - column:
             name: Created_On
             type: timestamp

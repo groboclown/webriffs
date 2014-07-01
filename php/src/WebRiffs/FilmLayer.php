@@ -17,12 +17,16 @@ class FilmLayer {
     public static $INITIAL_BRANCH_DESCRIPTION = "First branch for the film";
     
     public static $FILM_SORT_COLUMNS;
-    public static $DEFAULT_FILM_SORT_COLUMN = "name";
+    public static $DEFAULT_FILM_SORT_COLUMN = 'name';
     public static $FILM_FILTERS;
     
     public static $BRANCH_SORT_COLUMNS;
     public static $DEFAULT_BRANCH_SORT_COLUMN = 'name';
     public static $BRANCH_FILTERS;
+    
+    public static $QUIP_SORT_COLUMNS;
+    public static $DEFAULT_QUIP_SORT_COLUMN = 'timestamp';
+    public static $QUIP_FILTERS;
 
     public static $MIN_YEAR_SEARCH_FILTER;
     public static $MAX_YEAR_SEARCH_FILTER;
@@ -267,21 +271,9 @@ class FilmLayer {
 
 
         // Add a name to the branch and submit the change.
-        // FIXME this needs to be formally supported as a top-level action.
-        // Note that we're creating and committing the change, so that the
-        // branch has a comitted name value.
-        $branchChangeId = GroboVersion\DataAccess::createChange($db,
-                $branchId, $gaUserId);
-        $idSet = GroboVersion\DataAccess::addItemToChange($db, $branchItemId,
-                $branchChangeId);
-        $data = FilmBranchVersion::$INSTANCE->create($db, $idSet[0],
-                $branchName, $description);
-        FilmLayer::checkError($data,
-            new Base\ValidationException(
-                array(
-                    'unknown' => 'there was an unknown problem creating the change'
-                )));
-        GroboVersion\DataAccess::commitChange($db, $branchChangeId);
+        
+        FilmLayer::updateBranchHeader($db, $branchId, $userId, $gaUserId,
+            $newName, $newDescription, array());
         
         
         // Add change for the user to start using.
@@ -684,8 +676,21 @@ class FilmLayer {
     }
     
     
-    public static function updateBranchHeader($db, $filmId, $branchId,
-                $newName, $newDescription, $tagList) {
+    /**
+     * Update all the header-level details for the branch.  This will create
+     * a new change and submit it.
+     *
+     * @param PBO $db
+     * @param int $branchId
+     * @param int $userId
+     * @param int $gaUserId
+     * @param String $newName
+     * @param String $newDescription
+     * @param array(string) $tagList
+     * @throws Tonic\UnauthorizedException
+     */
+    public static function updateBranchHeader($db, $branchId, $userId,
+                $gaUserId, $newName, $newDescription, $tagList) {
         // userId CANNOT be null
         
         if (! $userId || ! FilmLayer::canAccessBranch($db, $userId, $branchId,
@@ -694,40 +699,186 @@ class FilmLayer {
         }
         
         
-        // FIXME
-        
         // Branch header updates happen all at once in a new change.
+        $branchChangeId = GroboVersion\DataAccess::createChange($db,
+                $branchId, $gaUserId);
+        $idSet = GroboVersion\DataAccess::addItemToChange($db, $branchItemId,
+                $branchChangeId);
+        $data = FilmBranchVersion::$INSTANCE->create($db, $idSet[0],
+                $newName, $newDescription);
+        FilmLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem creating the change version'
+                )));
         
+        FilmLayer::updateAllTagsOnBranch($db, $userId, $gaUserId,
+                $branchChangeId, $tagList, false);
         
-        // For the tags, we need to query the current list.  The new tag list
-        // are either added, removed, or kept.
+        GroboVersion\DataAccess::commitChange($db, $branchChangeId);
     }
     
     
-    public static function updateTagOnBranch($db, $userId, $filmId, $branchId,
-            $tagName, $changeId, $removed) {
+    public static function updateAllTagsOnBranch($db, $userId, $gaUserId,
+            $changeId, $tagList, $checkAccess) {
         // userId CANNOT be null
         
-        if (! $userId || ! FilmLayer::canAccessBranch($db, $userId, $branchId,
-                Access::$BRANCH_TAG)) {
+        if ($checkAccess && (! $userId ||
+                ! FilmLayer::canAccessBranch($db, $userId, $branchId,
+                Access::$BRANCH_TAG))) {
             throw new Tonic\UnauthorizedException();
         }
+
+        $tagMap = array();
+        // Mark each tag as added.  This will be updated when we compare  this
+        // list against what's in the database.
+        foreach ($tagList as $tag) {
+            $tag = normalizeTagName($tag);
+            $tagMap[$tag] = true;
+        }
         
-        // Check if the branch tag already exists
-        // BranchTag::$INSTANCE-> ...
+        // Find the deltas on the tag list
+        $data = VBranchTagHead::$INSTANCE->readBy_Gv_Branch_Id($db, $branchId);
+        FilmLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem reading the branch tags'
+                )));
         
-        // If it doesn't, create it (it's a Gv_Item).
+        foreach ($data['result'] as $tagRow) {
+            $tag = $tagRow['Tag_Name'];
+            if (array_key_exists($tag, $tagMap)) {
+                // don't do anything with it
+                $tagMap[$tag] = false;
+            } else {
+                // delete it
+                FilmLayer::updateTagOnBranch($db, $userId, $branchId,
+                    $tag, $tagRow['Tag_Gv_Item_Id'], $changeId, true, false);
+            }
+        }
+        
+        // Add each new tag.
+        foreach ($tagMap as $tag => $added) {
+            if ($added) {
+                FilmLayer::updateTagOnBranch($db, $userId, $branchId, $tag,
+                    $tagId, $changeId, false, false);
+            }
+        }
+    }
+    
+    
+    public static function updateTagOnBranch($db, $userId, $branchId,
+            $tagName, $tagId, $changeId, $removed, $checkAccess) {
+        // userId CANNOT be null
+        
+        if ($checkAccess && (! $userId ||
+                ! FilmLayer::canAccessBranch($db, $userId, $branchId,
+            Access::$BRANCH_TAG))) {
+                    throw new Tonic\UnauthorizedException();
+        }
+        
+        // Normalize the tag name
+        $tagName = normalizeTagName($tagName);
+        
+        if ($tagId === null) {
+            // Find the tag's item ID.  If it doesn't exist, create it.
+            $data = BranchTag::$INSTANCE->readBy_Name($db, $tagName);
+            FilmLayer::checkError($data,
+                new Base\ValidationException(
+                    array(
+                        'unknown' => 'there was an unknown problem finding the branch tags'
+                    )));
+            $tagId = null;
+            if ($data['rowcount'] > 1) {
+                throw new Base\ValidationException(
+                        array($tag => "multiple entries"));
+            }
+            if ($data['rowcount'] == 1) {
+                $tagId = $data['result'][0]['Gv_Item_Id'];
+            } else {
+                // Create the tag id
+                $tagId = GroboVersion\DataAccess::createItem($db);
+                $data = BrachTag::$INSTANCE->create($db, $tagId, $tagName);
+                FilmLayer::checkError($data,
+                    new Base\ValidationException(
+                        array(
+                            "Tags/$tag" => 'there was an unknown problem adding the branch tag'
+                        )));
+            }
+        }
         
         // Add the item to the given change ID.
+        GroboVersion\DataAccess::addItemToChange($db, $tagId, $changeId, $removed);
         
         // DO NOT submit the change.
     }
     
     
+    public static function pageCommittedQuips($db, $userId, $branchId,
+            $changeId, Base\PageRequest $paging = null) {
+        if (! FilmLayer::canAccessBranch($db, $userId, $branchId,
+                Access::$BRANCH_READ)) {
+            // This is a bit of a data leak
+            throw new Tonic\UnauthorizedException();
+        }
+        
+        if ($paging == null) {
+            $paging = Base\PageRequest::parseGetRequest(
+                    FilmLayer::$QUIP_FILTERS,
+                    FilmLayer::$DEFAULT_QUIP_SORT_COLUMN,
+                    FilmLayer::$QUIP_SORT_COLUMNS);
+        }
+        
+        $wheres = array();
+        
+        // TODO No "where" support right now.  That will be checking the tags,
+        // eventually
+        
+        FilmLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem reading the branch tags'
+                )));
+        
+        if ($changeId <= 0) {
+            // Get the head revision
+            $rowData = VQuipHead::$INSTANCE->readBy_Gv_Branch_Id_x_Gv_Change_Id(
+                 $db, $branchId, $changeId);
+            $countData = VQuipHead::$INSTANCE->countBy_Gv_Branch_Id_x_Gv_Change_Id(
+                 $db, $branchId, $changeId);
+        } else {
+            $rowData = VQuipVersion::$INSTANCE->readBy_Gv_Branch_Id_x_Gv_Change_Id(
+                 $db, $branchId, $changeId);
+            $countData = VQuipVersion::$INSTANCE->countBy_Gv_Branch_Id_x_Gv_Change_Id(
+                 $db, $branchId, $changeId);
+        }
+        FilmLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem reading the branch tags'
+                )));
+        
+        $rows = $rowData['result'];
+        $count = $countData['result'];
+        
+        return Base\PageResponse::createPageResponse($paging, $count, $rows);
+    }
+    
     
     
 
     // ----------------------------------------------------------------------
+    
+    
+    // Clean tag name so it can be added or match existing tags:
+    //  - trim whitespace at the start and end of the string.
+    //  - replace connected whitespace in the middle with a single underscore
+    //  - lowercase it.
+    private static function normalizeTagName($tagName) {
+        return strtolower(preg_replace('/\s+/', '_', trim($tagName)));
+    }
+    
+    
     private static function checkError($returned, $exception) {
         Base\BaseDataAccess::checkError($returned, $exception);
     }
@@ -747,15 +898,15 @@ FilmLayer::$NAME_SEARCH_FILTER =
     new Base\SearchFilterString("name", null);
 FilmLayer::$DESCRIPTION_SEARCH_FILTER =
     new Base\SearchFilterString("description", null);
-    
-    
-FilmLayer::$DEFAULT_FILM_SORT_COLUMN = "name";
+
 
 FilmLayer::$FILM_FILTERS = array(
     FilmLayer::$MIN_YEAR_SEARCH_FILTER,
     FilmLayer::$MAX_YEAR_SEARCH_FILTER,
     FilmLayer::$NAME_SEARCH_FILTER
 );
+
+
 
 FilmLayer::$BRANCH_SORT_COLUMNS = array(
     "name" => "Branch_Name",
@@ -764,9 +915,17 @@ FilmLayer::$BRANCH_SORT_COLUMNS = array(
     "updated" => "Last_Updated_On"
 );
 
-FilmLayer::$DEFAULT_BRANCH_SORT_COLUMN = "name";
-
 FilmLayer::$BRANCH_FILTERS = array(
     FilmLayer::$NAME_SEARCH_FILTER,
     FilmLayer::$DESCRIPTION_SEARCH_FILTER
 );
+
+
+
+FilmLayer::$QUIP_SORT_COLUMNS = array(
+    "timestamp" => "Timestamp_Millis"
+            
+    // FIXME eventually this will add tags to the filters.
+);
+
+FilmLayer::$QUIP_FILTERS = array();

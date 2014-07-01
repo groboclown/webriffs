@@ -154,21 +154,12 @@ view:
             type: timestamp
     whereClauses:
         - where:
-            name: Film_Name_Like
-            sql: Film_Name LIKE {name}
+            name: Tag_In
+            sql: (Tag_1 IN ({tag})
             argument:
-                name: name
-                type: nvarchar(200)
-        - where:
-            name: Branch_Name_Like
-            sql: Branch_Name LIKE {name}
-            argument:
-                name: name
-                type: nvarchar(200)
-        - where:
-            name: Branch_Description_Like
-            sql: Description LIKE {desc}
-            argument:
-                name: desc
-                type: nvarchar(2048)
-            
+                name: tag
+                type: nvarchar(64)
+    constraints:
+        - constraint:
+            type: fake index
+            columns: Gv_Branch_Id, Gv_Change_Id
