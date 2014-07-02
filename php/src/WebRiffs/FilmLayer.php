@@ -690,7 +690,7 @@ class FilmLayer {
      * @throws Tonic\UnauthorizedException
      */
     public static function updateBranchHeader($db, $branchId, $userId,
-                $gaUserId, $newName, $newDescription, $tagList) {
+                $gaUserId, $newName, $newDescription, &$tagList) {
         // userId CANNOT be null
         
         if (! $userId || ! FilmLayer::canAccessBranch($db, $userId, $branchId,

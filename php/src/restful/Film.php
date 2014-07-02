@@ -264,15 +264,12 @@ class FilmObjBranch extends Resource {
         $this->assertThat(
             !! $data->{'name'} && is_string($data->{'name'}),
             'name');
-        $branchName = trim($data->{'name'});
-        $this->assertThat(strlen($branchName) >= 1, 'name',
-                'must be at least 1 character long');
+        $branchName = Validation::normalizeBranchName($data->{'name'}, $this);
         $desc = '';
         if (!! $data->{'description'}) {
             $this->assertThat(is_string($data->{'description'}), 'description');
             $desc = $data->{'description'};
         }
-        // FIXME ensure the branch name only has valid characters
         $this->validate();
         
         // Any user can create a new branch.
@@ -360,11 +357,38 @@ class BranchObjChanges extends Resource {
         $this->validate();
         
         $userId = null;
+        $gaUserId = null;
         if ($this->isUserAuthenticated()) {
             $userId = $this->container['user']['User_Id'];
+            $gaUserId = $this->container['user']['Ga_User_Id'];
         }
         
-        // FIXME
+        $data = $this->getRequestData();
+        $branchName = Validation::normalizeBranchName($data->{'name'}, $this);
+        $desc = '';
+        if (!! $data->{'description'}) {
+            $this->assertThat(is_string($data->{'description'}), 'description');
+            $desc = $data->{'description'};
+        }
+        
+        $tags = array();
+        if (!! $data->{'tags'} && is_array($data->{'tags'})) {
+            foreach ($data->{'tags'} as $tag) {
+                if (!! $tag && is_string($tag)) {
+                    $tag = trim($tag);
+                    if (strlen($tag) > 0) {
+                        $tags[] = $tag;
+                    }
+                }
+            }
+        }
+        
+        $this->validate();
+        
+        WebRiffs\FilmLayer::updateBranchHeader($this->getDB(), $branchId,
+            $userId, $gaUserId, $branchName, $desc, $tags);
+        
+        return new Tonic\Response(Tonic\Response::ACCEPTED);
     }
     
     
@@ -514,3 +538,27 @@ class BranchObjQuipItem extends Resource {
         // FIXME
     }
 }
+
+
+// ---------------------------------------------------------------------------
+
+class Validation {
+    
+    public static function normalizeBranchName($name, Resource &$res) {
+        // Strip out the leading and tailing spaces, and replace all double
+        // white space with a single space.
+        
+        if (! $res->checkThat(!! $data->{'name'} && is_string($data->{'name'}),
+                'name')) {
+            return null;
+        }
+        
+        $ret = preg_replace('/\s+/', ' ', trim($name));
+        $res->checkThat(strlen($ret) >= 1, 'name',
+                    'must be at least 1 character long');
+        
+        return $ret;
+    }
+    
+}
+
