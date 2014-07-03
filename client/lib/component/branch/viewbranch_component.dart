@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:angular/angular.dart';
 
 import '../../service/server.dart';
+import '../../service/user.dart';
 import '../../json/branch_details.dart';
 import 'quip_paging.dart';
 
@@ -18,6 +19,7 @@ import 'quip_paging.dart';
     publishAs: 'cmp')
 class ViewBranchComponent {
     final ServerStatusService _server;
+    final UserService _user;
 
     final QuipPaging quipPaging;
 
@@ -48,7 +50,7 @@ class ViewBranchComponent {
             _branchDetails.updatedOn;
 
 
-    factory ViewBranchComponent(ServerStatusService server,
+    factory ViewBranchComponent(ServerStatusService server, UserService user,
             RouteProvider routeProvider) {
         int branchId = int.parse(routeProvider.parameters['branchId']);
         int changeId = int.parse(routeProvider.parameters['changeId']);
@@ -58,12 +60,13 @@ class ViewBranchComponent {
 
         QuipPaging quips = new QuipPaging(server, branchId, changeId);
 
-        return new ViewBranchComponent._(server, branchId, changeId,
+        return new ViewBranchComponent._(server, user, branchId, changeId,
                 branchDetails, quips);
     }
 
-    ViewBranchComponent._(this._server, this.branchId, this.urlChangeId,
-            Future<BranchDetails> branchDetails, this.quipPaging) {
+    ViewBranchComponent._(this._server, this._user, this.branchId,
+            this.urlChangeId, Future<BranchDetails> branchDetails,
+            this.quipPaging) {
         branchDetails.then((BranchDetails bd) {
             _branchDetails = bd;
         });
