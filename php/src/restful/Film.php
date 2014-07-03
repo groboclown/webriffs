@@ -343,9 +343,10 @@ class BranchObjChanges extends Resource {
             $userId = $this->container['user']['User_Id'];
         }
         
+        $result = WebRiffs\FilmLayer::pageBranchVersions($this->getDB(),
+            $userId, $branchId, null);
         
-        // FIXME
-        // Be sure to check that the user can view the branch.
+        return array(200, $result);
     }
     
     

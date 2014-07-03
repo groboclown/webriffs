@@ -23,6 +23,10 @@ class FilmLayer {
     public static $BRANCH_SORT_COLUMNS;
     public static $DEFAULT_BRANCH_SORT_COLUMN = 'name';
     public static $BRANCH_FILTERS;
+
+    public static $BRANCH_VERSION_SORT_COLUMNS;
+    public static $DEFAULT_BRANCH_VERSION_SORT_COLUMN = 'change';
+    public static $BRANCH_VERSION_FILTERS;
     
     public static $QUIP_SORT_COLUMNS;
     public static $DEFAULT_QUIP_SORT_COLUMN = 'timestamp';
@@ -615,6 +619,55 @@ class FilmLayer {
     
     
     /**
+     * Page in the different versions of the branch.
+     *
+     * @param unknown $db
+     * @param unknown $userId
+     * @param unknown $branchId
+     * @param Base\PageRequest $paging
+     * @return multitype:
+     */
+    public static function pageBranchVersions($db, $userId, $branchId,
+            Base\PageRequest $paging = null) {
+        // userId can be null
+        
+        if ($paging == null) {
+            $paging = Base\PageRequest::parseGetRequest(
+                    FilmLayer::$BRANCH_VERSION_FILTERS,
+                    FilmLayer::$DEFAULT_BRANCH_VERSION_SORT_COLUMN,
+                    FilmLayer::$BRANCH_VERSION_SORT_COLUMNS);
+        }
+        
+        if (! FilmLayer::canAccessBranch($db, $userId, $branchId,
+                Access::$BRANCH_READ)) {
+            return Base\PageResponse::createPageResponse($paging, 0, array());
+        }
+        
+        $rowData = VFilmBranchVersion::$INSTANCE->readBy_Gv_Branch_Id(
+                $db, $branchId,
+                $paging->order, $paging->startRow, $paging->endRow);
+        $countData = VFilmBranchVersion::$INSTANCE->countBy_Gv_Branch_Id(
+                $db, $branchId);
+        FilmLayer::checkError($rowData,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem finding the branch versions'
+                )));
+        $rows = $rowData['result'];
+        
+        FilmLayer::checkError($countData,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem counting the branches'
+                )));
+        $count = intval($countData['result'][0]);
+
+        // Don't add the tags.
+        return Base\PageResponse::createPageResponse($paging, $count, $rows);
+    }
+    
+    
+    /**
      * Return the details for the film's branch.  This is all the header
      * information about it.  It will also include details about the film.
      * If the user is not authenticated to see the details, false is returned.
@@ -918,6 +971,16 @@ FilmLayer::$BRANCH_SORT_COLUMNS = array(
 FilmLayer::$BRANCH_FILTERS = array(
     FilmLayer::$NAME_SEARCH_FILTER,
     FilmLayer::$DESCRIPTION_SEARCH_FILTER
+);
+
+
+FilmLayer::$BRANCH_VERSION_SORT_COLUMNS = array(
+    "change" => "Gv_Change_Id",
+    "created" => "Created_On",
+    "updated" => "Last_Updated_On"
+);
+
+FilmLayer::$BRANCH_VERSION_FILTERS = array(
 );
 
 
