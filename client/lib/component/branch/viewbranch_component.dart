@@ -25,6 +25,7 @@ class ViewBranchComponent {
 
     bool get noQuips => quipPaging.quips.length <= 0;
 
+
     BranchDetails _branchDetails;
     final int branchId;
     final int urlChangeId;

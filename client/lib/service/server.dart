@@ -1,5 +1,5 @@
 
-library error_service;
+library server_service;
 
 import 'dart:convert';
 import 'dart:async';

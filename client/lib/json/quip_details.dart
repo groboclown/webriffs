@@ -30,7 +30,7 @@ class QuipDetails {
             String t = json['TAG_' + i.toString()];
             if (t != null) {
                 t = t.trim();
-                _tags.add(new QuipTag(t));
+                q._tags.add(new QuipTag(t));
             }
         }
     }

@@ -119,8 +119,8 @@ def init(config):
 
 @depends(init)
 def setup(config):
-    todir(os.path.exists(config['work.dir']))
-    todir(os.path.exists(config['exports.dir']))
+    todir(config['work.dir'])
+    todir(config['exports.dir'])
 
 
 @depends(init)

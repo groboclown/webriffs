@@ -502,7 +502,6 @@ class BranchObjQuipsPending extends Resource {
  * @uri /branch/:branchid/pending/quip/:itemid
  */
 class BranchObjQuipItem extends Resource {
-    // FIXME
     /**
      * Retrieve the detailed information for this one specific quip.  If the
      * quip is not in the pending change for the user, then nothing is

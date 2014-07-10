@@ -1,4 +1,4 @@
-library recipe_book_routing;
+library webriffs_router;
 
 import 'package:angular/angular.dart';
 

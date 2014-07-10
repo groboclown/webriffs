@@ -28,6 +28,7 @@ class BranchInfo {
     bool checking = false;
     bool commit = false;
 
+    // FIXME just bring in the details, don't directly reference it.
     final BranchDetails details;
 
     BranchInfo(this.details);
