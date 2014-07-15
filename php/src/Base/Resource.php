@@ -14,7 +14,7 @@ class Resource extends Tonic\Resource
     private $problems = array();
     
     
-    protected function checkThat($valid, $name, $problem = null) {
+    function checkThat($valid, $name, $problem = null) {
         if (! $valid) {
             if ($problem == null) {
                 $problem = 'incorrect value';
@@ -37,7 +37,7 @@ class Resource extends Tonic\Resource
      * validate().
      */
     protected function addValidationError($name, $problem) {
-        $problems[$name] = $problem;
+        $this->problems[$name] = $problem;
     }
 
 
@@ -58,16 +58,17 @@ class Resource extends Tonic\Resource
      * @return int
      */
     protected function validateId($id, $name) {
-        // FIXME if the id is a string, verify that it's the correct
+        // if the id is a string, verify that it's the correct
         // format, and convert it.
-        if ($id != null && is_numeric($id)) {
+        if ($id !== null && is_numeric($id)) {
             $id = intval($id);
         }
         
-        if ($id == null || !is_int($id)) {
+        if ($id === null || !is_int($id)) {
             $this->addValidationError($name, "invalid id value");
             return null;
         }
+        error_log("Found id [".$id."]");
         return $id;
     }
 

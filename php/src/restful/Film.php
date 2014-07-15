@@ -262,11 +262,11 @@ class FilmObjBranch extends Resource {
             
         $data = $this->getRequestData();
         $this->assertThat(
-            !! $data->{'name'} && is_string($data->{'name'}),
+            !! @$data->{'name'} && is_string($data->{'name'}),
             'name');
         $branchName = Validation::normalizeBranchName($data->{'name'}, $this);
         $desc = '';
-        if (!! $data->{'description'}) {
+        if (!! @$data->{'description'}) {
             $this->assertThat(is_string($data->{'description'}), 'description');
             $desc = $data->{'description'};
         }
@@ -281,7 +281,7 @@ class FilmObjBranch extends Resource {
         
         $result = WebRiffs\FilmLayer::createBranch($db, $filmId,
             $userInfo['User_Id'], $userInfo['Ga_User_Id'],
-            $branchName, $description, null);
+            $branchName, $desc, null);
         
         $data = array(
             'Branch_Id' => $result[0],
@@ -548,8 +548,7 @@ class Validation {
         // Strip out the leading and tailing spaces, and replace all double
         // white space with a single space.
         
-        if (! $res->checkThat(!! $data->{'name'} && is_string($data->{'name'}),
-                'name')) {
+        if (! $res->checkThat(!! $name && is_string($name), 'name')) {
             return null;
         }
         

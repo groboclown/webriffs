@@ -188,15 +188,15 @@ class FilmLayer {
         
         // A quick check to see if the film ID is valid, and captures the
         // project ID
-        $data = Film::$INSTANCE->readBy_Film_Id($db, $filmId);
+        $data = Film::$INSTANCE->countBy_Film_Id($db, $filmId);
         FilmLayer::checkError($data,
             new Base\ValidationException(
                 array(
                     'unknown' => 'there was an unknown problem creating the branch'
                 )));
-        if (sizeof($data['result']) <= 0) {
+        if ($data['result'] <= 0) {
             throw new Base\ValidationException(array(
-                'filmid' => 'no film with that ID exists'
+                'filmid' => 'no film with ID '.$filmId.' exists'
             ));
         }
         

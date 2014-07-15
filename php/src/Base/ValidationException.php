@@ -12,7 +12,7 @@ class ValidationException extends Tonic\Exception
 {
     protected $code = 406;
     public $problems;
-    protected $message = 'Validation of user data failed';
+    protected $message = 'Validation of input data failed';
 
 
     public function __construct(array $problems)
