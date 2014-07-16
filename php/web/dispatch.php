@@ -33,6 +33,7 @@ $tonicConfig = array(
         __DIR__.'/../dbo/GroboVersion/*.php',
         __DIR__.'/../dbo/WebRiffs/*.php',
         __DIR__.'/../src/GroboAuth/*.php',
+        __DIR__.'/../src/GroboVersion/*.php',
         __DIR__.'/../src/WebRiffs/*.php',
         __DIR__.'/../src/restful/*.php',
     ),

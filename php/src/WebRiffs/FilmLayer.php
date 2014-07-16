@@ -188,13 +188,13 @@ class FilmLayer {
         
         // A quick check to see if the film ID is valid, and captures the
         // project ID
-        $data = Film::$INSTANCE->countBy_Film_Id($db, $filmId);
+        $data = Film::$INSTANCE->readBy_Film_Id($db, $filmId);
         FilmLayer::checkError($data,
             new Base\ValidationException(
                 array(
                     'unknown' => 'there was an unknown problem creating the branch'
                 )));
-        if ($data['result'] <= 0) {
+        if (sizeof($data['result']) <= 0) {
             throw new Base\ValidationException(array(
                 'filmid' => 'no film with ID '.$filmId.' exists'
             ));
@@ -275,9 +275,9 @@ class FilmLayer {
 
 
         // Add a name to the branch and submit the change.
-        
+        $tags = array();
         FilmLayer::updateBranchHeader($db, $branchId, $userId, $gaUserId,
-            $newName, $newDescription, array());
+            $branchName, $description, $tags);
         
         
         // Add change for the user to start using.
@@ -746,7 +746,7 @@ class FilmLayer {
                 $gaUserId, $newName, $newDescription, &$tagList) {
         // userId CANNOT be null
         
-        if (! $userId || ! FilmLayer::canAccessBranch($db, $userId, $branchId,
+        if ($userId === null || ! FilmLayer::canAccessBranch($db, $userId, $branchId,
                 Access::$BRANCH_WRITE)) {
             throw new Tonic\UnauthorizedException();
         }

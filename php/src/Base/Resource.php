@@ -68,7 +68,6 @@ class Resource extends Tonic\Resource
             $this->addValidationError($name, "invalid id value");
             return null;
         }
-        error_log("Found id [".$id."]");
         return $id;
     }
 

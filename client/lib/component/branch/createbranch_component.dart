@@ -39,9 +39,15 @@ class CreateBranchComponent extends RequestHandlingComponent {
 
 
 
-    CreateBranchComponent(ServerStatusService server, this._user,  this._route) :
+    CreateBranchComponent(ServerStatusService server, this._user,  this._route,
+            RouteProvider routeProvider) :
             _server = server,
-            lookupName = new LookUpBranchNameComponent(server);
+            lookupName = new LookUpBranchNameComponent(server)
+    {
+        if (routeProvider.parameters.containsKey('filmId')) {
+            filmId = int.parse(routeProvider.parameters['filmId']);
+        }
+    }
 
     void cancel() {
         showCreateBranch = false;
