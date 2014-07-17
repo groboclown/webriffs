@@ -277,7 +277,7 @@ class FilmLayer {
         // Add a name to the branch and submit the change.
         $tags = array();
         FilmLayer::updateBranchHeader($db, $branchId, $userId, $gaUserId,
-            $branchName, $description, $tags);
+            $branchName, $description, $tags, false);
         
         
         // Add change for the user to start using.
@@ -599,10 +599,12 @@ class FilmLayer {
             // guest user
             $wheres = array(new VFilmBranchGuestAccess_IsAllowed(
                     $access, Access::$PRIVILEGE_GUEST));
+error_log("Checking if anonymous user can access branch ".$branchId." for ".$access." with level ".Access::$PRIVILEGE_GUEST);
             $data = VFilmBranchGuestAccess::$INSTANCE->countBy_Gv_Branch_Id(
                     $db, $branchId, $wheres);
         } else {
             // logged-in user
+error_log("Checking if user ".$userId." can access branch ".$branchId." for ".$access);
             $wheres = array(new VFilmBranchAccess_IsAllowed());
             $data = VFilmBranchAccess::$INSTANCE->countBy_Gv_Branch_Id_x_User_Id_x_Access(
                     $db, $branchId, $userId, $access, $wheres);
@@ -743,14 +745,28 @@ class FilmLayer {
      * @throws Tonic\UnauthorizedException
      */
     public static function updateBranchHeader($db, $branchId, $userId,
-                $gaUserId, $newName, $newDescription, &$tagList) {
+                $gaUserId, $newName, $newDescription, &$tagList,
+                $checkAccess = true) {
         // userId CANNOT be null
         
-        if ($userId === null || ! FilmLayer::canAccessBranch($db, $userId, $branchId,
-                Access::$BRANCH_WRITE)) {
+        if ($userId === null || ($checkAccess &&
+                ! FilmLayer::canAccessBranch($db, $userId, $branchId,
+                        Access::$BRANCH_WRITE))) {
             throw new Tonic\UnauthorizedException();
         }
         
+        $data = FilmBranch::$INSTANCE->readBy_Gv_Branch_Id($db, $branchId);
+        FilmLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem finding the branch item'
+                )));
+        if ($data['rowcount'] != 1) {
+            throw new Base\ValidationException(array(
+                'branchId' => 'Unknown branch ID'
+            ));
+        }
+        $branchItemId = $data['result'][0]['Gv_Item_Id'];
         
         // Branch header updates happen all at once in a new change.
         $branchChangeId = GroboVersion\DataAccess::createChange($db,
@@ -776,7 +792,7 @@ class FilmLayer {
             $changeId, $tagList, $checkAccess) {
         // userId CANNOT be null
         
-        if ($checkAccess && (! $userId ||
+        if ($userId === null || ($checkAccess &&
                 ! FilmLayer::canAccessBranch($db, $userId, $branchId,
                 Access::$BRANCH_TAG))) {
             throw new Tonic\UnauthorizedException();
