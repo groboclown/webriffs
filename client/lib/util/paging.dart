@@ -78,6 +78,12 @@ class PageState {
 
     String get errorMessage => _errorMessage;
 
+    int get pageFirstIndex => currentPage * recordsPerPage;
+
+    int get pageLastIndex => (recordCount > currentPage * recordsPerPage)
+            ? (currentPage * recordsPerPage)
+            : recordCount;
+
 
 
 

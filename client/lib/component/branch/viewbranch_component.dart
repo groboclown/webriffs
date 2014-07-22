@@ -61,11 +61,11 @@ class ViewBranchComponent {
 
         QuipPaging quips = new QuipPaging(server, branchId, changeId);
 
-        return new ViewBranchComponent._(server, user, branchId, changeId,
+        return new ViewBranchComponent.direct(server, user, branchId, changeId,
                 branchDetails, quips);
     }
 
-    ViewBranchComponent._(this._server, this._user, this.branchId,
+    ViewBranchComponent.direct(this._server, this._user, this.branchId,
             this.urlChangeId, Future<BranchDetails> branchDetails,
             this.quipPaging) {
         branchDetails.then((BranchDetails bd) {

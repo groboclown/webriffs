@@ -352,6 +352,7 @@ class BranchObjChanges extends Resource {
     
     /**
      * @method POST
+     * @csrf edit_branch
      */
     function update() {
         $branchId = $this->validateId($this->branchid, "branchId");
@@ -362,6 +363,8 @@ class BranchObjChanges extends Resource {
         if ($this->isUserAuthenticated()) {
             $userId = $this->container['user']['User_Id'];
             $gaUserId = $this->container['user']['Ga_User_Id'];
+        } else {
+            throw new Tonic\UnauthorizedException();
         }
         
         $data = $this->getRequestData();
@@ -399,6 +402,7 @@ class BranchObjChanges extends Resource {
      * we'll allow both.
      *
      * @method PUT
+     * @csrf edit_branch
      */
     function create() {
         return $this->update();
@@ -490,9 +494,56 @@ class BranchObjQuipsPending extends Resource {
     
     /**
      * @method PUT
+     * @csrf create_quip
      */
     function create() {
+        $branchId = $this->validateId($this->branchid, "branchId");
+        $this->validate();
+                
+        $userId = null;
+        $gaUserId = null;
+        if ($this->isUserAuthenticated()) {
+            $userId = $this->container['user']['User_Id'];
+            $gaUserId = $this->container['user']['Ga_User_Id'];
+        } else {
+            throw new Tonic\UnauthorizedException();
+        }
+        
         // FIXME
+    }
+    
+    
+    /**
+     * Performs a series of actions over many quips.  The JSon object is broken
+     * down into different actions by way of the top-level key.
+     *
+     * @method POST
+     * @csrf mass_update_quip
+     */
+    function mass_updates() {
+        $branchId = $this->validateId($this->branchid, "branchId");
+        $this->validate();
+                
+        $userId = null;
+        $gaUserId = null;
+        if ($this->isUserAuthenticated()) {
+            $userId = $this->container['user']['User_Id'];
+            $gaUserId = $this->container['user']['Ga_User_Id'];
+        } else {
+            throw new Tonic\UnauthorizedException();
+        }
+        
+        $data = $this->getRequestData();
+        if (!! $data->{'create'} && is_array($data->{'create'})) {
+            // FIXME
+        }
+        if (!! $data->{'delete'} && is_array($data->{'delete'})) {
+            // FIXME
+        }
+        if (!! $data->{'update'} && is_array($data->{'update'})) {
+            // FIXME
+        }
+        
     }
 }
 
@@ -523,8 +574,21 @@ class BranchObjQuipItem extends Resource {
      * be checked separately.
      *
      * @method POST
+     * @csrf update_quip
      */
     function update() {
+        $branchId = $this->validateId($this->branchid, "branchId");
+        $quipId = $this->validateId($this->itemid, "itemId");
+        $this->validate();
+                
+        $userId = null;
+        $gaUserId = null;
+        if ($this->isUserAuthenticated()) {
+            $userId = $this->container['user']['User_Id'];
+            $gaUserId = $this->container['user']['Ga_User_Id'];
+        } else {
+            throw new Tonic\UnauthorizedException();
+        }
         // FIXME
     }
     
@@ -533,8 +597,21 @@ class BranchObjQuipItem extends Resource {
      * Remove the quip.
      *
      * @method DELETE
+     * @csrf delete_quip
      */
     function remove() {
+        $branchId = $this->validateId($this->branchid, "branchId");
+        $quipId = $this->validateId($this->itemid, "itemId");
+        $this->validate();
+                
+        $userId = null;
+        $gaUserId = null;
+        if ($this->isUserAuthenticated()) {
+            $userId = $this->container['user']['User_Id'];
+            $gaUserId = $this->container['user']['Ga_User_Id'];
+        } else {
+            throw new Tonic\UnauthorizedException();
+        }
         // FIXME
     }
 }

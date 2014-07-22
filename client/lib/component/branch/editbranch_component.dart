@@ -1,12 +1,17 @@
 
 library editbranch_component;
 
+import 'dart:async';
 
 import 'package:angular/angular.dart';
 
+import '../../service/user.dart';
 import '../../service/server.dart';
+import '../../json/branch_details.dart';
+import '../../json/quip_details.dart';
 
-import '../../util/paging.dart';
+import 'quip_paging.dart';
+import 'viewbranch_component.dart';
 
 /**
  * The UI component view of the list of films.
@@ -15,48 +20,48 @@ import '../../util/paging.dart';
     selector: 'edit-branch',
     templateUrl: 'packages/webriffs_client/component/branch/editbranch_component.html',
     publishAs: 'cmp')
-class EditBranchComponent {
+class EditBranchComponent extends ViewBranchComponent {
     final ServerStatusService _server;
+    final UserService _user;
 
-    PageState pageState;
+    final QuipDetails pendingQuip = new QuipDetails.pending();
 
-    final List<Quip> quips = [];
+    int currentMillisTime;
 
-    bool get noQuips => quips.length <= 0;
+    factory EditBranchComponent(ServerStatusService server, UserService user,
+            RouteProvider routeProvider) {
+        int branchId = int.parse(routeProvider.parameters['branchId']);
+        int changeId = int.parse(routeProvider.parameters['changeId']);
 
-    int filmId;
-    int branchId;
+        Future<BranchDetails> branchDetails = loadBranchDetails(server,
+                branchId, changeId);
 
-    EditBranchComponent(this._server, RouteProvider routeProvider) {
-        branchId = int.parse(routeProvider.parameters['branchId']);
+        QuipPaging quips = new QuipPaging(server, branchId, changeId);
 
-        pageState = new PageState(this._server, '/branch/',
-            (PageState ps, Iterable<dynamic> fl) {
-                quips.clear();
-                fl.forEach((Map<String, dynamic> json) {
-                    quips.add(new Quip.fromJson(json));
-                });
-            });
+        return new EditBranchComponent._(server, user, branchId, changeId,
+                branchDetails, quips);
+    }
+
+    EditBranchComponent._(ServerStatusService server, UserService user,
+            int branchId, int urlChangeId, Future<BranchDetails> branchDetails,
+            QuipPaging quipPaging) :
+            _server = server,
+            _user = user,
+            super.direct(server, user, branchId, urlChangeId, branchDetails,
+                    quipPaging);
+
+
+    void startTimer() {
+        // FIXME
+    }
+
+    void stopTimer() {
+        // FIXME
+    }
+
+    void savePendingQuip() {
+        // save the quip to the server, add it to our pending quip list,
+        // and clear out the pending quip.
     }
 }
 
-
-
-
-class Quip {
-    String name;
-    int releaseYear;
-    List<String> branches;
-    List<String> tags;
-
-    factory Quip.fromJson(Map<String, dynamic> json) {
-        // FIXME
-
-        return new Quip._();
-    }
-
-
-    Quip._() {
-        // FIXME
-    }
-}
