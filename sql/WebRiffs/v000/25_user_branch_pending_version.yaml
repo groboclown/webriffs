@@ -1,0 +1,79 @@
+# When a user starts changes to a film branch, it is against the head version
+# of that branch.  The user may merge their changes against the new head
+# if a change came in under them, either as a stand-alone operation (e.g.
+# move the change in this table up) or on check-in.
+
+
+table:
+    tableName: USER_BRANCH_PENDING_VERSION
+    columns:
+        - column:
+            name: User_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: User_Branch_Pending_Version__User_Id_FK
+                    table: USER
+                    column: User_Id
+                - constraint:
+                    type: no update
+                - constraint:
+                    type: not null
+        - column:
+            name: Gv_Branch_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: User_Branch_Pending_Version__Gv_Branch_Id_FK
+                    table: GV_BRANCH
+                    column: Gv_Branch_Id
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: no update
+        - column:
+            name: Gv_Change_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: User_Branch_Pending_Version__Gv_Change_Id_FK
+                    table: GV_CHANGE
+                    column: Gv_Change_Id
+                - constraint:
+                    type: not null
+        - column:
+            name: Created_On
+            type: timestamp
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: no update
+                - constraint:
+                    type: initial value
+                    dialects:
+                        - dialect:
+                            platforms: mysql
+                            sql: NOW()
+        - column:
+            name: Last_Updated_On
+            type: timestamp
+            constraints:
+                - constraint:
+                    type: nullable
+                - constraint:
+                    type: constant update
+                    dialects:
+                        - dialect:
+                            platforms: mysql
+                            sql: NOW()
+                - constraint:
+                    type: initial value
+                    value: "NULL"
+    constraints:
+        - constraint:
+            type: unique key
+            columns: User_Id, Gv_Branch_Id

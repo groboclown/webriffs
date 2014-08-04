@@ -482,8 +482,9 @@ class BranchObjQuips extends Resource {
  */
 class BranchObjQuipsPending extends Resource {
     /**
-     * Page in the pending quips.  These should be merged with the head
-     * quips on the client side.
+     * Page in the pending and committed quips.  Each returned quip includes
+     * a field to indicate whether it is pending or committed.  The whole
+     * returned structure includes the version number requested.
      *
      * @method GET
      */
@@ -580,7 +581,7 @@ class BranchObjQuipItem extends Resource {
         $branchId = $this->validateId($this->branchid, "branchId");
         $quipId = $this->validateId($this->itemid, "itemId");
         $this->validate();
-                
+        
         $userId = null;
         $gaUserId = null;
         if ($this->isUserAuthenticated()) {

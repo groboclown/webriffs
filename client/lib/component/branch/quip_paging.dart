@@ -111,7 +111,8 @@ class QuipPaging extends PagingComponent {
 
     /**
      * FIXME This has an issue where it can't remove quips if the user is
-     * looking at the head revision.
+     * looking at the head revision.  This can be solved by *forcing* the
+     * user to always look at a specific version.
      */
     @override
     Future<ServerResponse> onSuccess(Iterable data) {
