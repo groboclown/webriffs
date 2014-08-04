@@ -599,12 +599,12 @@ class FilmLayer {
             // guest user
             $wheres = array(new VFilmBranchGuestAccess_IsAllowed(
                     $access, Access::$PRIVILEGE_GUEST));
-error_log("Checking if anonymous user can access branch ".$branchId." for ".$access." with level ".Access::$PRIVILEGE_GUEST);
+            //error_log("Checking if anonymous user can access branch ".$branchId." for ".$access." with level ".Access::$PRIVILEGE_GUEST);
             $data = VFilmBranchGuestAccess::$INSTANCE->countBy_Gv_Branch_Id(
                     $db, $branchId, $wheres);
         } else {
             // logged-in user
-error_log("Checking if user ".$userId." can access branch ".$branchId." for ".$access);
+            //error_log("Checking if user ".$userId." can access branch ".$branchId." for ".$access);
             $wheres = array(new VFilmBranchAccess_IsAllowed());
             $data = VFilmBranchAccess::$INSTANCE->countBy_Gv_Branch_Id_x_User_Id_x_Access(
                     $db, $branchId, $userId, $access, $wheres);
@@ -617,6 +617,23 @@ error_log("Checking if user ".$userId." can access branch ".$branchId." for ".$a
                 )));
         
         return $data['result'] > 0;
+    }
+
+
+    public static function getHeadBranchVersion($db, $userId, $branchId) {
+        if (! FilmLayer::canAccessBranch($db, $userId, $branchId,
+                Access::$BRANCH_READ)) {
+            throw new Tonic\UnauthorizedException();
+        }
+        
+        $data = VFilmBranchHead::$INSTANCE->readBy_Gv_Branch_Id(
+                 $db, $branchId);
+        FilmLayer::checkError($rowData,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem finding the branches'
+                )));
+        return $data['result'][0];
     }
     
     
@@ -930,6 +947,57 @@ error_log("Checking if user ".$userId." can access branch ".$branchId." for ".$a
         $rows = $rowData['result'];
         $count = $countData['result'];
         
+        return Base\PageResponse::createPageResponse($paging, $count, $rows);
+    }
+
+
+    public static function pageCommittedPendingQuips($db, $userId, $branchId,
+            $changeId, Base\PageRequest $paging = null) {
+        if (! FilmLayer::canAccessBranch($db, $userId, $branchId,
+                Access::$BRANCH_READ)) {
+            // This is a bit of a data leak
+            throw new Tonic\UnauthorizedException();
+        }
+    
+        if ($paging == null) {
+            $paging = Base\PageRequest::parseGetRequest(
+                    FilmLayer::$QUIP_FILTERS,
+                    FilmLayer::$DEFAULT_QUIP_SORT_COLUMN,
+                    FilmLayer::$QUIP_SORT_COLUMNS);
+        }
+    
+        $wheres = array();
+    
+        // TODO No "where" support right now.  That will be checking the tags,
+        // eventually
+    
+        FilmLayer::checkError($data,
+        new Base\ValidationException(
+        array(
+        'unknown' => 'there was an unknown problem reading the branch tags'
+                )));
+    
+        if ($changeId <= 0) {
+            // Get the head revision
+            $rowData = VQuipHead::$INSTANCE->readBy_Gv_Branch_Id_x_Gv_Change_Id(
+                    $db, $branchId, $changeId);
+            $countData = VQuipHead::$INSTANCE->countBy_Gv_Branch_Id_x_Gv_Change_Id(
+                    $db, $branchId, $changeId);
+        } else {
+            $rowData = VQuipVersion::$INSTANCE->readBy_Gv_Branch_Id_x_Gv_Change_Id(
+                    $db, $branchId, $changeId);
+            $countData = VQuipVersion::$INSTANCE->countBy_Gv_Branch_Id_x_Gv_Change_Id(
+                    $db, $branchId, $changeId);
+        }
+        FilmLayer::checkError($data,
+        new Base\ValidationException(
+        array(
+        'unknown' => 'there was an unknown problem reading the branch tags'
+                )));
+    
+        $rows = $rowData['result'];
+        $count = $countData['result'];
+    
         return Base\PageResponse::createPageResponse($paging, $count, $rows);
     }
     

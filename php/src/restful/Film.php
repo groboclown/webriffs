@@ -324,6 +324,34 @@ class FilmObjBranchName extends Resource {
 
 
 /**
+ * Retrieves the head version number for the branch.  Used for standard
+ * viewing of a branch, so that subsequent submits won't affect the
+ * current viewing.
+ *
+ * @uri /branch/:branchid/head
+ */
+class BranchObjHeadVersion extends Resource {
+    /**
+     * @method GET
+     */
+    function fetch() {
+        $branchId = $this->validateId($this->branchid, "branchId");
+        $this->validate();
+        
+        $userId = null;
+        if ($this->isUserAuthenticated()) {
+            $userId = $this->container['user']['User_Id'];
+        }
+        
+        $result = WebRiffs\FilmLayer::getHeadBranchVersion($this->getDB(),
+            $userId, $branchId);
+        
+        return array(200, $result);
+    }
+}
+
+
+/**
  * All committed changes for the branch.
  *
  * @uri /branch/:branchid/version
@@ -411,7 +439,7 @@ class BranchObjChanges extends Resource {
 
 
 /**
- * All committed changes for the branch.
+ * Returns details about committed changes on a branch.
  *
  * @uri /branch/:branchid/version/:changeid
  */
@@ -475,6 +503,59 @@ class BranchObjQuips extends Resource {
 
 
 /**
+ * Returns the user's version of the branch on which it was created.  It
+ * is also used to merge the pending change, delete, create, and commit.
+ */
+class BranchObjUserPendingVersion extends Resource {
+    /**
+     * Returns the branch version that
+     * the user's pending was branched against, and the (head - N, up to
+     * the pending change number) number of changes that have happened on the
+     * branch since the user branch.  It also returns the number of branch
+     * changes that have happened since the pending change was created.
+     *
+     * @method GET
+     */
+    function fetchBranchVersion() {
+        // FIXME
+    }
+    
+    
+    /**
+     * @method PUT
+     * @csrf create_change
+     */
+    function createPendingChange() {
+        // FIXME
+    }
+    
+    
+    /**
+     * @method DELETE
+     * @csrf delete_change
+     */
+    function deletePendingChange() {
+        // FIXME
+    }
+    
+    
+    /**
+     * @method UPDATE
+     * @csrf update_change
+     */
+    function updateChange() {
+        // FIXME
+        
+        // This is either a MERGE or COMMIT.
+        // MERGE will move the user's branched-from change to the current
+        // head, and COMMIT will add these changes into the submission
+        // (which will implicitly move these revisions into a new change
+        // with a top number).
+    }
+}
+
+
+/**
  * Paging for the pending branch quips of the current user, and adding new
  * quips.
  *
@@ -490,6 +571,8 @@ class BranchObjQuipsPending extends Resource {
      */
     function fetch() {
         // FIXME
+        
+        // pull from V_QUIP_USER_ALL
     }
     
     

@@ -77,3 +77,4 @@ table:
         - constraint:
             type: unique key
             columns: User_Id, Gv_Branch_Id
+            name: User_Branch_Pending_Version__User_Branch_PK

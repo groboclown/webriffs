@@ -1,9 +1,8 @@
 # The pending (not-submitted) user quips along with the pending-version
-# (committed) for the branch
+# (committed) for the branch.
 
-# FIXME this will create duplicates - the committed changes should be omitted
-# if they overlap the pending ones; however, this behavior may be desired,
-# as it allows the query to see the pending + the original values!
+# This will be sorted on the pending quips, but it still needs a full sort
+# on the Timestamp_Millis.
 
 view:
     viewName: V_QUIP_USER_ALL
@@ -14,76 +13,73 @@ view:
             , qup.Gv_Change_Id Gv_Change_Id
             
             , qup.Gv_Item_Id Gv_Item_Id
-            , qup.Gv_Item_Version_Id Gv_Item_Version_Id
             
-            , 0 Committed
+            , (CASE WHEN quv.Gv_Change_Id IS NULL THEN 0 ELSE 1 END) +
+              (CASE WHEN qup.Gv_Change_Id IS NULL THEN 0 ELSE 2 END)
+                  Populated_State
             
-            , qup.Text_Value Text_Value
+            , COALESCE(qup.Gv_Item_Version_Id, quv.Gv_Item_Version_Id)
+                  Gv_Item_Version_Id
+            , qup.Gv_Item_Version_Id Pending_Gv_Item_Version_Id
+            , quv.Gv_Item_Version_Id Committed_Gv_Item_Version_Id
             
-            , qup.Tag_1  Tag_1
-            , qup.Tag_2  Tag_2
-            , qup.Tag_3  Tag_3
-            , qup.Tag_4  Tag_4
-            , qup.Tag_5  Tag_5
-            , qup.Tag_6  Tag_6
-            , qup.Tag_7  Tag_7
-            , qup.Tag_8  Tag_8
-            , qup.Tag_9  Tag_9
-            , qup.Tag_10 Tag_10
-            , qup.Tag_11 Tag_11
-            , qup.Tag_12 Tag_12
-            , qvp.Tag_13 Tag_13
-            , qup.Tag_14 Tag_14
-            , qup.Tag_15 Tag_15
-            , qup.Tag_16 Tag_16
-            , qup.Tag_17 Tag_17
-            , qup.Tag_18 Tag_18
-            , qup.Tag_19 Tag_19
-            , qup.Tag_20 Tag_20
+            , qup.Text_Value Pending_Text_Value
+            , quv.Text_Value Committed_Text_Value
             
-            , qup.Timestamp_Millis Timestamp_Millis
-            , qup.Updated_On Updated_On
+            , qup.Tag_1  Pending_Tag_1
+            , quv.Tag_1  Committed_Tag_1
+            , qup.Tag_2  Pending_Tag_2
+            , quv.Tag_2  Committed_Tag_2
+            , qup.Tag_3  Pending_Tag_3
+            , quv.Tag_3  Committed_Tag_3
+            , qup.Tag_4  Pending_Tag_4
+            , quv.Tag_4  Committed_Tag_4
+            , qup.Tag_5  Pending_Tag_5
+            , quv.Tag_5  Committed_Tag_5
+            , qup.Tag_6  Pending_Tag_6
+            , quv.Tag_6  Committed_Tag_6
+            , qup.Tag_7  Pending_Tag_7
+            , quv.Tag_7  Committed_Tag_7
+            , qup.Tag_8  Pending_Tag_8
+            , quv.Tag_8  Committed_Tag_8
+            , qup.Tag_9  Pending_Tag_9
+            , quv.Tag_9  Committed_Tag_9
+            , qup.Tag_10 Pending_Tag_10
+            , quv.Tag_10 Committed_Tag_10
+            , qup.Tag_11 Pending_Tag_11
+            , quv.Tag_11 Committed_Tag_11
+            , qup.Tag_12 Pending_Tag_12
+            , quv.Tag_12 Committed_Tag_12
+            , qup.Tag_13 Pending_Tag_13
+            , quv.Tag_13 Committed_Tag_13
+            , qup.Tag_14 Pending_Tag_14
+            , quv.Tag_14 Committed_Tag_14
+            , qup.Tag_15 Pending_Tag_15
+            , quv.Tag_15 Committed_Tag_15
+            , qup.Tag_16 Pending_Tag_16
+            , quv.Tag_16 Committed_Tag_16
+            , qup.Tag_17 Pending_Tag_17
+            , quv.Tag_17 Committed_Tag_17
+            , qup.Tag_18 Pending_Tag_18
+            , quv.Tag_18 Committed_Tag_18
+            , qup.Tag_19 Pending_Tag_19
+            , quv.Tag_19 Committed_Tag_19
+            , qup.Tag_20 Pending_Tag_20
+            , quv.Tag_20 Committed_Tag_20
+            
+            , COALESCE(qup.Timestamp_Millis, quv.Timestamp_Millis) Timestamp_Millis
+            , qup.Timestamp_Millis Pending_Timestamp_Millis
+            , quv.Timestamp_Millis Committed_Timestamp_Millis
+            
+            , COALESCE(qup.Updated_On, quv.Updated_On) Updated_On
+            , qup.Updated_On Pending_Updated_On
+            , quv.Updated_On Committed_Updated_On
         FROM V_QUIP_USER_PENDING qup
         
-        UNION
-        
-        SELECT
-            quv.User_Id User_Id
-            , quv.Gv_Branch_Id Gv_Branch_Id
-            , quv.Gv_Change_Id Gv_Change_Id
-            
-            , quv.Gv_Item_Id Gv_Item_Id
-            , quv.Gv_Item_Version_Id Gv_Item_Version_Id
-            
-            , 1 Committed
-            
-            , quv.Text_Value Text_Value
-            
-            , quv.Tag_1  Tag_1
-            , quv.Tag_2  Tag_2
-            , quv.Tag_3  Tag_3
-            , quv.Tag_4  Tag_4
-            , quv.Tag_5  Tag_5
-            , quv.Tag_6  Tag_6
-            , quv.Tag_7  Tag_7
-            , quv.Tag_8  Tag_8
-            , quv.Tag_9  Tag_9
-            , quv.Tag_10 Tag_10
-            , quv.Tag_11 Tag_11
-            , quv.Tag_12 Tag_12
-            , qvv.Tag_13 Tag_13
-            , quv.Tag_14 Tag_14
-            , quv.Tag_15 Tag_15
-            , quv.Tag_16 Tag_16
-            , quv.Tag_17 Tag_17
-            , quv.Tag_18 Tag_18
-            , quv.Tag_19 Tag_19
-            , quv.Tag_20 Tag_20
-            
-            , qup.Timestamp_Millis Timestamp_Millis
-            , qup.Updated_On Updated_On
-        FROM V_QUIP_USER_VERSION quv
-        WHERE quv.Gv_Item_Id NOT IN 
+        LEFT OUTER JOIN
+            V_QUIP_USER_VERSION quv
+                ON qup.Gv_Item_Id = quv.Gv_Item_Id
+                  AND qup.Gv_Branch_Id = quv.Gv_Branch_Id
         "
     columns:
         - column:
@@ -119,6 +115,17 @@ view:
                     table: GV_ITEM
                     column: Gv_Item_Id
         - column:
+            name: Populated_State
+            type: int
+            comment: "0 = no setting (shouldn't happen);
+            1 = only in the pending set;
+            2 = only in the committed set;
+            3 = both pending and committed.
+              "
+            constraints:
+                - constraint:
+                    type: not null
+        - column:
             name: Gv_Item_Version_Id
             type: int
             constraints:
@@ -127,71 +134,153 @@ view:
                     table: GV_ITEM_VERSION
                     column: Gv_Item_Version_Id
         - column:
-            name: Text_Value
+            name: Pending_Gv_Item_Version_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_ITEM_VERSION
+                    column: Gv_Item_Version_Id
+        - column:
+            name: Committed_Gv_Item_Version_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_ITEM_VERSION
+                    column: Gv_Item_Version_Id
+        - column:
+            name: Pending_Text_Value
+            type: nvarchar(2048)
+            constraints:
+                - constraint:
+                    type: not null
+        - column:
+            name: Committed_Text_Value
             type: nvarchar(2048)
             constraints:
                 - constraint:
                     type: not null
 
         - column:
-            name: Tag_1
+            name: Pending_Tag_1
             type: nvarchar(64)
         - column:
-            name: Tag_2
+            name: Committed_Tag_1
             type: nvarchar(64)
         - column:
-            name: Tag_3
+            name: Pending_Tag_2
             type: nvarchar(64)
         - column:
-            name: Tag_4
+            name: Committed_Tag_2
             type: nvarchar(64)
         - column:
-            name: Tag_5
+            name: Pending_Tag_3
             type: nvarchar(64)
         - column:
-            name: Tag_6
+            name: Committed_Tag_3
             type: nvarchar(64)
         - column:
-            name: Tag_7
+            name: Pending_Tag_4
             type: nvarchar(64)
         - column:
-            name: Tag_8
+            name: Committed_Tag_4
             type: nvarchar(64)
         - column:
-            name: Tag_9
+            name: Pending_Tag_5
             type: nvarchar(64)
         - column:
-            name: Tag_10
+            name: Committed_Tag_5
             type: nvarchar(64)
         - column:
-            name: Tag_11
+            name: Pending_Tag_6
             type: nvarchar(64)
         - column:
-            name: Tag_12
+            name: Committed_Tag_6
             type: nvarchar(64)
         - column:
-            name: Tag_13
+            name: Pending_Tag_7
             type: nvarchar(64)
         - column:
-            name: Tag_14
+            name: Committed_Tag_7
             type: nvarchar(64)
         - column:
-            name: Tag_15
+            name: Pending_Tag_8
             type: nvarchar(64)
         - column:
-            name: Tag_16
+            name: Committed_Tag_8
             type: nvarchar(64)
         - column:
-            name: Tag_17
+            name: Pending_Tag_9
             type: nvarchar(64)
         - column:
-            name: Tag_18
+            name: Committed_Tag_9
             type: nvarchar(64)
         - column:
-            name: Tag_19
+            name: Pending_Tag_10
             type: nvarchar(64)
         - column:
-            name: Tag_20
+            name: Committed_Tag_10
+            type: nvarchar(64)
+        - column:
+            name: Pending_Tag_11
+            type: nvarchar(64)
+        - column:
+            name: Committed_Tag_11
+            type: nvarchar(64)
+        - column:
+            name: Pending_Tag_12
+            type: nvarchar(64)
+        - column:
+            name: Committed_Tag_12
+            type: nvarchar(64)
+        - column:
+            name: Pending_Tag_13
+            type: nvarchar(64)
+        - column:
+            name: Committed_Tag_13
+            type: nvarchar(64)
+        - column:
+            name: Pending_Tag_14
+            type: nvarchar(64)
+        - column:
+            name: Committed_Tag_14
+            type: nvarchar(64)
+        - column:
+            name: Pending_Tag_15
+            type: nvarchar(64)
+        - column:
+            name: Committed_Tag_15
+            type: nvarchar(64)
+        - column:
+            name: Pending_Tag_16
+            type: nvarchar(64)
+        - column:
+            name: Committed_Tag_16
+            type: nvarchar(64)
+        - column:
+            name: Pending_Tag_17
+            type: nvarchar(64)
+        - column:
+            name: Committed_Tag_17
+            type: nvarchar(64)
+        - column:
+            name: Pending_Tag_18
+            type: nvarchar(64)
+        - column:
+            name: Committed_Tag_18
+            type: nvarchar(64)
+        - column:
+            name: Pending_Tag_19
+            type: nvarchar(64)
+        - column:
+            name: Committed_Tag_19
+            type: nvarchar(64)
+        - column:
+            name: Pending_Tag_20
+            type: nvarchar(64)
+        - column:
+            name: Committed_Tag_20
             type: nvarchar(64)
 
 
@@ -199,7 +288,19 @@ view:
             name: Timestamp_Millis
             type: int
         - column:
+            name: Pending_Timestamp_Millis
+            type: int
+        - column:
+            name: Committed_Timestamp_Millis
+            type: int
+        - column:
             name: Updated_On
+            type: timestamp
+        - column:
+            name: Pending_Updated_On
+            type: timestamp
+        - column:
+            name: Committed_Updated_On
             type: timestamp
     constraints:
         - constraint:

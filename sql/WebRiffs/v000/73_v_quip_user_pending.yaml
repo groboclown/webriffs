@@ -37,13 +37,14 @@ view:
             , qv.Timestamp_Millis Timestamp_Millis
             , COALESCE(qv.Last_Updated_On, qv.Created_On) Updated_On
         FROM GV_CHANGE ch
-            WHERE ch.Active_State = 0
         INNER JOIN USER user
             ON ch.Ga_User_Id = user.Ga_User_Id
         INNER JOIN GV_CHANGE_VERSION cv
             ON ch.Gv_Change_Id = cv.Gv_Change_Id
         INNER JOIN QUIP_VERSION qv
-            ON qv.Gv_Item_Version_Id = ch.Gv_Item_Version_Id
+            ON qv.Gv_Item_Version_Id = cv.Gv_Item_Version_Id
+
+        WHERE ch.Active_State = 0
           
         ORDER BY qv.Timestamp_Millis
         "
