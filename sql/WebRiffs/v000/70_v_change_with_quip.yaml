@@ -1,0 +1,24 @@
+# The change IDs that include quip updates.
+
+view:
+    viewName: V_CHANGE_WITH_QUIP
+    query: "SELECT
+          DISTINCT ch.Gv_Change_Id Gv_Change_Id
+          FROM
+              GV_CHANGE ch
+          INNER JOIN
+              GV_CHANGE_VERSION cv
+                  ON ch.Gv_Change_Id = cv.Gv_Change_Id
+          INNER JOIN
+              QUIP_VERSION qv
+                  ON cv.Gv_Item_Version_Id = cv.Gv_Item_Version_Id
+        "
+    columns:
+        - column:
+            name: Gv_Change_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_CHANGE
+                    column: Gv_Change_Id

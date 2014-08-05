@@ -104,14 +104,13 @@ class Resource extends Base\Resource {
         // trigger the authenticaiton to run first.
         $this->authenticated();
         
-        // Check to see if the CSRF token was passed in.
-        
-        // FIXME may want to put this as a custom header instead of request
-        // data.
+        // Check to see if the CSRF token was passed in (it is passed as a
+        // header key/value).
         
         $token = $this->request->csrfToken;
         if (! $token) {
-            error_log("Request for action ".$action." with no token; ".print_r($this->request, true));
+            error_log("Request for action ".$action." with no token; ".
+                    print_r($this->request, true));
             throw new Tonic\UnauthorizedException();
         }
         $db = $this->getDB();

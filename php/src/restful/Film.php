@@ -165,9 +165,8 @@ class FilmObj extends Resource {
         $this->validate();
         
         $db = $this->getDB();
-
-        //$stmt = $db->prepare('DELETE FROM FILM WHERE Film_Id = ?');
-        //$stmt->execute(array($filmid));
+        
+        // FIXME perform the delete
 
         return new Tonic\Response(Tonic\Response::NOCONTENT);
     }
@@ -503,8 +502,31 @@ class BranchObjQuips extends Resource {
 
 
 /**
+ * Lists all of the branches (and their films) in which the user has a pending
+ * change.
+ *
+ * @uri /branch/pending
+ */
+class BranchObjUserPendingBranches extends Resource {
+    
+    /**
+     * @method GET
+     * @authenticated
+     */
+    function pageBranches() {
+        $userId = $this->container['user']['User_Id'];
+        $gaUserId = $this->container['user']['Ga_User_Id'];
+        
+        // FIXME
+    }
+}
+
+
+/**
  * Returns the user's version of the branch on which it was created.  It
  * is also used to merge the pending change, delete, create, and commit.
+ *
+ * @uri /branch/:branchid/pending
  */
 class BranchObjUserPendingVersion extends Resource {
     /**
@@ -515,9 +537,26 @@ class BranchObjUserPendingVersion extends Resource {
      * changes that have happened since the pending change was created.
      *
      * @method GET
+     * @authenticated
      */
     function fetchBranchVersion() {
-        // FIXME
+        $branchId = $this->validateId($this->branchid, "branchId");
+        $this->validate();
+        
+        $userId = $this->container['user']['User_Id'];
+        $gaUserId = $this->container['user']['Ga_User_Id'];
+        
+        $changeCount = 0;
+        
+        if (array_key_exists("changes", $_GET) &&
+                is_numeric($_GET["changes"]) &&
+                ($_GET["changes"]*1 == (int)($_GET["changes"]*1))) {
+            $changeCount = intval($_GET["changes"]);
+        }
+        
+        
+        
+        // FIXME call into getBranchQuipChangesFromPending
     }
     
     

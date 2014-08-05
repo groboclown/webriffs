@@ -1,7 +1,9 @@
 # When a user starts changes to a film branch, it is against the head version
-# of that branch.  The user may merge their changes against the new head
+# of that branch's quips.  The user may merge their changes against the new head
 # if a change came in under them, either as a stand-alone operation (e.g.
 # move the change in this table up) or on check-in.
+
+# This is only for the quip changes, not the branch header changes.
 
 
 table:

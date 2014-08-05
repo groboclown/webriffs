@@ -687,6 +687,31 @@ class FilmLayer {
     
     
     /**
+     * Find the changes that have happened between the user's pending
+     * version and the current head version.  These are changes on the
+     * quips for the branch, not the branch header.
+     */
+    public static function getBranchQuipChangesFromPending($db, $userId,
+                $branchId) {
+        // FIXME
+        
+        // First, load from USER_BRANCH_PENDING_VERSION
+        // to see if the user even has an entry for the branch (this acts as
+        // access control, implicitly).
+        // If there is a result, use it to
+        // Load from V_QUIP_CHANGE
+        
+        // Need to augment the returned list to limit the number of row results,
+        // and to describe how many changes have happened to the branch
+        // since the user pending was created.
+    }
+    
+    
+    // FIXME need a function to return how many branches, and which ones,
+    // the user has pending changes on.
+    
+    
+    /**
      * Return the details for the film's branch.  This is all the header
      * information about it.  It will also include details about the film.
      * If the user is not authenticated to see the details, false is returned.

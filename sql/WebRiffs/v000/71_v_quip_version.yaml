@@ -1,4 +1,4 @@
-# The full quip values for each branch at the head version.
+# The full quip values for each branch at each change.
 
 view:
     viewName: V_QUIP_VERSION

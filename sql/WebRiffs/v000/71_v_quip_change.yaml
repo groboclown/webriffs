@@ -1,0 +1,56 @@
+# The changes that have quips.  Allows for finding the changes on a branch
+# that have happened since a user started editing that branch's quips.
+
+view:
+    viewName: V_QUIP_CHANGE
+    query: "SELECT
+            ch.Gv_Branch_Id
+            , cwq.Gv_Change_Id Gv_Change_Id
+            , ch.Created_On Created_Updated_On
+            , ch.Last_Updated_On Last_Updated_On
+            , COALESCE(ch.Last_Updated_On, ch.Created_On) Updated_On
+          FROM
+              V_CHANGE_WITH_QUIP cwq
+          INNER JOIN
+              GV_CHANGE ch
+            ON
+              ch.Gv_Change_Id = cwq.Gv_Change_Id
+          
+          WHERE ch.Active_State = 1
+        "
+    columns:
+        - column:
+            name: Gv_Branch_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_BRANCH
+                    column: Gv_Branch_Id
+                - constraint:
+                    type: fake index
+        - column:
+            name: Gv_Change_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_CHANGE
+                    column: Gv_Change_Id
+        - column:
+            name: Created_On
+            type: timestamp
+        - column:
+            name: Last_Updated_On
+            type: timestamp
+        - column:
+            name: Updated_On
+            type: timestamp
+    whereClauses:
+        - where:
+            name: changes_after
+            sql: Gv_Change_Id >= {Gv_Change_Id}
+            arguments:
+                - argument:
+                    name: Gv_Change_Id
+                    type: int
