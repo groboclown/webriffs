@@ -39,7 +39,7 @@ RESTful API
 -----------
 
 The Public API is implemented through the
-(PHP Tonic library)[http://www.peej.co.uk/tonic/], which all goes
+[PHP Tonic library](http://www.peej.co.uk/tonic/), which all goes
 through the `php/web/dispatch.php` file.  These use URL parameters (in the case
 of GET requests) or JSon data as input, and the responses are in JSon data.
 

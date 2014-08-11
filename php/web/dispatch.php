@@ -18,7 +18,6 @@ header('X-Frame-Options: deny');
 // FIXME look into how to mandate TLS connections.
 
 
-// load autoloader (delete as appropriate)
 require_once '../lib/Tonic/Autoloader.php';
 require_once '../lib/Pimple/Container.php';
 
@@ -58,41 +57,52 @@ $request = new Tonic\Request();
 
 try {
 
-    $container = new Pimple\Container();
-    $container['db_config'] = array(
-        'dsn' => $siteConfig['db_config']['dsn'],
-        'username' => $siteConfig['db_config']['username'],
-        'password' => $siteConfig['db_config']['password']
-    );
-    
-    $container['sources'] = $siteConfig['sources'];
-    $container['dataStore'] = function($c) {
-        $conn = new PDO($c['db_config']['dsn'],
-            $c['db_config']['username'],
-            $c['db_config']['password']);
-        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        return $conn;
-    };
-    
-    $container['path'] = $siteConfig['path'];
-
-
-
+    $validRequest = TRUE;
     // decode JSON data received from HTTP request
     if ($request->contentType == 'application/json' ||
             $request->contentType == 'text/json') {
-        $request->data = json_decode($request->data);
+        $request->data = json_decode($request->data, true);
+        if (json_last_error() != JSON_ERROR_NONE) {
+            // We don't want to log the error to avoid outside spamming of
+            // our log files.
+            
+            $response = new Tonic\Response(400,
+                    array('message' => "malformed json data"));
+            $validRequest = FALSE;
+        }
     } elseif (! $request->contentType) {
         // no data passed to server
         $request->data = array();
     } else {
-        error_log("Invalid content type: " + $request->contentType);
-        throw new Tonic\NotAcceptableException();
+        $response = new Tonic\Response(406,
+                "Invalid content type: " + $request->contentType);
+        $validRequest = FALSE;
     }
-
-    $resource = $app->getResource($request);
-    $resource->container = $container;
-    $response = $resource->exec();
+    
+    if ($validRequest) {
+        $container = new Pimple\Container();
+        $container['db_config'] = array(
+            'dsn' => $siteConfig['db_config']['dsn'],
+            'username' => $siteConfig['db_config']['username'],
+            'password' => $siteConfig['db_config']['password']
+        );
+        
+        $container['sources'] = $siteConfig['sources'];
+        $container['dataStore'] = function($c) {
+            $conn = new PDO($c['db_config']['dsn'],
+                $c['db_config']['username'],
+                $c['db_config']['password']);
+            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            return $conn;
+        };
+        
+        $container['path'] = $siteConfig['path'];
+    
+    
+        $resource = $app->getResource($request);
+        $resource->container = $container;
+        $response = $resource->exec();
+    }
 
 } catch (Tonic\NotFoundException $e) {
     $response = new Tonic\Response(404, array('message' => $e->getMessage()));
@@ -136,8 +146,6 @@ try {
     
     $response = new Tonic\Response(500, array('message' => "server error"));
 }
-
-#echo $response;
 
 // encode output after exception handling
 //if ($response->contentType == 'application/json') {

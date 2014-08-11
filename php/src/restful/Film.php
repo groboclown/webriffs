@@ -17,7 +17,7 @@ use Base;
 
 
 /**
- * FIXME include validation of input values
+ * References information about the films.
  *
  * @uri /film
  */
@@ -26,7 +26,7 @@ class FilmCollection extends Resource {
     
     /**
      * "GET" returns the records, and includes paging.  All films are public,
-     * while the individual branches are not.
+     * while the individual branches are not necessarily public.
      *
      * @method GET
      */
@@ -45,14 +45,18 @@ class FilmCollection extends Resource {
      * @csrf create_film
      */
     public function create() {
-        $this->secure(WebRiffs\Access::$FILM_CREATE, $PRIVILEGE_AUTHORIZED);
+        $this->secure(WebRiffs\Access::$FILM_CREATE,
+                WebRiffs\Access::$PRIVILEGE_AUTHORIZED);
         
-        $data = $this->getRequestData();
-
+        // FIXME client side is still referencing the wrong keys
+        $name = $this->loadRequestString("Name");
+        $year = $this->loadRequestInt("Release_Year");
+        $this->validate();
+        
         $db = $this->getDB();
         
         $idList = WebRiffs\FilmLayer::createFilm($db, $this->container['user'],
-            $data->name, $data->year,
+            $name, $year,
             WebRiffs\FilmLayer::$DEFAULT_TEMPLATE_ACCESS_NAME);
 
         $data = array(
@@ -79,15 +83,9 @@ class FilmNameObj extends Resource {
      * @method GET
      */
     public function fetch() {
-        
-        $this->assertThat(array_key_exists("Name", $_GET), 'Name');
-        $this->assertThat(array_key_exists("Release_Year", $_GET) &&
-                is_numeric($_GET['Release_Year']),
-                'Release_Year');
+        $name = $this->loadGetString("Name");
+        $year = $this->loadGetInt("Release_Year");
         $this->validate();
-        
-        $name = $_GET['Name'];
-        $year = intval($_GET['Release_Year']);
         
         return array(200, array(
             'exists' => WebRiffs\FilmLayer::doesFilmExist(
@@ -131,23 +129,20 @@ class FilmObj extends Resource {
      * @csrf update_film
      */
     public function update() {
-        $this->secure(WebRiffs\Access::$FILM_MODIFICATION, $PRIVILEGE_AUTHORIZED);
+        $this->secure(WebRiffs\Access::$FILM_MODIFICATION,
+                WebRiffs\Access::$PRIVILEGE_AUTHORIZED);
         
         $filmId = $this->validateId($this->filmid, "filmId");
-        $data = $this->getRequestData();
-        $this->checkThat(!! $data->{'Name'} && is_string($data->{'Name'}),
-            'Name', "Name must be specified as a string");
-        $this->checkthat( !! $data->{'Release_Year'} &&
-                is_numeric($data->{'Release_Year'}),
-            'Release_Year', "Release_Year must be specified as a number");
+        $name = $this->loadRequestString("Name");
+        $year = $this->loadRequestInt("Release_Year");
+        if ($year !== null) {
+            $this->checkThat($year >= 1800 && $year <= 9999,
+                'Release_Year', "Release_Year must be within the bounds [1800, 9999]");
+        }
         $this->validate();
-        $name = $data->{'Name'};
-        $this->assertThat($releaseYear >= 1800 && $releaseYear <= 9999,
-            'Release_Year', "Release_Year must be within the bounds [1800, 9999]");
-        $releaseYear = intval($data->{'Release_Year'});
         
         $db = $this->getDB();
-        WebRiffs\FilmLayer::updateFilm($db, $filmId, $name, $releaseYear);
+        WebRiffs\FilmLayer::updateFilm($db, $filmId, $name, $year);
         
         return $this->display();
     }
@@ -159,7 +154,8 @@ class FilmObj extends Resource {
      * @csrf delete_film
      */
     function remove() {
-        $this->secure(WebRiffs\Access::$FILM_DELETE, $PRIVILEGE_AUTHORIZED);
+        $this->secure(WebRiffs\Access::$FILM_DELETE,
+                WebRiffs\Access::$PRIVILEGE_AUTHORIZED);
         
         $filmId = $this->validateId($this->filmid, "filmId");
         $this->validate();
@@ -207,14 +203,10 @@ class FilmObjLink extends Resource {
         
         $filmId = $this->validateId($this->filmid, "filmId");
         $linkTypeName = $this->linktypename;
-        $data = $this->getRequestData();
-        if (! $data->{'Uri'} || ! is_string($data->{'Uri'})) {
-            $this->addValidationError('Uri', 'must specify the uri suffix');
-        } else {
-            $uri = $data->{'Uri'};
-        }
-        
+        // FIXME validate input text of $linkTypeName -  non-null and such.
+        $uri = $this->loadRequestString("Uri");
         $this->validate();
+        
         $db = $this->getDB();
         
         WebRiffs\FilmLayer::saveLinkForFilm($db, $filmId, $linkTypeName, $uri);
@@ -258,7 +250,16 @@ class FilmObjBranch extends Resource {
      */
     function create() {
         $filmId = $this->validateId($this->filmid, "filmId");
-            
+        
+        // Any user can create a new branch.
+        $this->secure(WebRiffs\Access::$FILM_BRANCH,
+                WebRiffs\Access::$PRIVILEGE_USER);
+
+        
+        // FIXME
+        // FIXME FIX ALL AUTHENTICATION DATA BELOW HERE
+        // FIXME
+        
         $data = $this->getRequestData();
         $this->assertThat(
             !! @$data->{'name'} && is_string($data->{'name'}),
@@ -271,9 +272,6 @@ class FilmObjBranch extends Resource {
         }
         $this->validate();
         
-        // Any user can create a new branch.
-        $this->secure(WebRiffs\Access::$FILM_BRANCH,
-                WebRiffs\Access::$PRIVILEGE_USER);
         $userInfo = $this->container['user'];
         
         $db = $this->getDB();

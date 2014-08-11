@@ -31,6 +31,130 @@ class Resource extends Tonic\Resource
         }
     }
     
+    
+    /**
+     *
+     * @param string $name
+     * @param bool $required
+     * @return string
+     */
+    protected function loadRequestString($name, $required = TRUE) {
+        // inline of $this->getRequestData()
+        return $this->loadArrayString($name, $this->request->data, $required);
+    }
+    
+    
+    /**
+     *
+     * @param string $name
+     * @param string $required
+     * @return int
+     */
+    protected function loadRequestInt($name, $required = TRUE) {
+        // inline of $this->getRequestData()
+        return $this->loadArrayInt($name, $this->request->data, $required);
+    }
+
+
+    /**
+     *
+     * @param string $name
+     * @param string $required
+     * @return int
+     */
+    protected function loadRequestId($name, $required = TRUE) {
+        // inline of $this->getRequestData()
+        return $this->loadArrayId($name, $this->request->data, $required);
+    }
+    
+
+    /**
+     *
+     * @param string $name
+     * @param bool $required
+     * @return string
+     */
+    protected function loadGetString($name, $required = TRUE) {
+        return $this->loadArrayString($name, $_GET, $required);
+    }
+    
+    
+    /**
+     *
+     * @param string $name
+     * @param string $required
+     * @return int
+     */
+    protected function loadGetInt($name, $required = TRUE) {
+        return $this->loadArrayInt($name, $_GET, $required);
+    }
+
+
+    /**
+     *
+     * @param string $name
+     * @param string $required
+     * @return int
+     */
+    protected function loadGetId($name, $required = TRUE) {
+        return $this->loadArrayId($name, $_GET, $required);
+    }
+    
+
+    /**
+     *
+     * @param string $name
+     * @param bool $required
+     * @return string
+     */
+    protected function loadArrayString($name, &$data, $required) {
+        if (array_key_exists($name, $data)) {
+            $value = $data[$name];
+            if (is_string($value)) {
+                return $value;
+            }
+            $this->addValidationError($name, "not string");
+            return NULL;
+        }
+        if ($required) {
+            $this->addValidationError($name, "no specified value");
+        }
+        return NULL;
+    }
+
+
+    /**
+     *
+     * @param string $name
+     * @param string $required
+     * @return int
+     */
+    protected function loadArrayInt($name, &$data, $required) {
+        if (array_key_exists($name, $data)) {
+            $value = $data[$name];
+            if (is_numeric($value)) {
+                return intval($value);
+            }
+            $this->addValidationError($name, "not integer");
+            return NULL;
+        }
+        if ($required) {
+            $this->addValidationError($name, "no specified value");
+        }
+        return NULL;
+    }
+    
+    
+    /**
+     *
+     * @param string $name
+     * @param string $required
+     * @return int
+     */
+    protected function loadArrayId($name, &$data, $required) {
+        return $this->loadArrayInt($name, $data, $required);
+    }
+    
 
     /**
      * Adds a validation problem, that will be reported on the next call to
@@ -66,7 +190,7 @@ class Resource extends Tonic\Resource
         
         if ($id === null || !is_int($id)) {
             $this->addValidationError($name, "invalid id value");
-            return null;
+            return NULL;
         }
         return $id;
     }
