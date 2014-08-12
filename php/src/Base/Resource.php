@@ -132,7 +132,8 @@ class Resource extends Tonic\Resource
     protected function loadArrayInt($name, &$data, $required) {
         if (array_key_exists($name, $data)) {
             $value = $data[$name];
-            if (is_numeric($value)) {
+            if (is_numeric($value) &&
+                    $value*1 == (int)($value*1)) {
                 return intval($value);
             }
             $this->addValidationError($name, "not integer");
@@ -184,7 +185,8 @@ class Resource extends Tonic\Resource
     protected function validateId($id, $name) {
         // if the id is a string, verify that it's the correct
         // format, and convert it.
-        if ($id !== null && is_numeric($id)) {
+        if ($id !== null && is_numeric($id) &&
+                    $id*1 == (int)($id*1)) {
             $id = intval($id);
         }
         

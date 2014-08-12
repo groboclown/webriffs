@@ -33,6 +33,9 @@ class UserObj extends Tonic\Resource {
     public function display() {
         $userid = $this->userid;
         $db = getDB();
+        
+        // FIXME
+        
         //$stmt = $db->prepare('SELECT User_Id, Username, Email, Authentication_Source, Created_On, Last_Updated_On, Last_Access FROM USER WHERE Username = ? OR User_Id = ?');
         //$stmt->setFetchMode(PDO::FETCH_ASSOC);
         //$stmt->execute(array($userid, $userid));
@@ -81,7 +84,9 @@ class UserObj extends Tonic\Resource {
         
         $ret = array();
 
-        return new Tonic\Response(200, $ret);
+        //return new Tonic\Response(200, $ret);
+
+        return array(500, array('message' => "not implemented yet"));
     }
 
 
@@ -116,7 +121,9 @@ class UserObj extends Tonic\Resource {
 
         // FIXME delete the data
 
-        return new Tonic\Response(Tonic\Response::NOCONTENT);
+        //return new Tonic\Response(Tonic\Response::NOCONTENT);
+
+        return array(500, array('message' => "not implemented yet"));
     }
 
 

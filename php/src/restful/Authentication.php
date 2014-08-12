@@ -83,6 +83,8 @@ class AuthenticationToken extends Resource {
      */
     public function data() {
         $action = $this->actionname;
+        $this->assertThat(is_string($action) && !! $action, "bad action");
+        
         $user = $this->container['user'];
         $sessionId = $user['Ga_Session_Id'];
         $db = $this->getDB();
@@ -101,41 +103,24 @@ class AuthenticationToken extends Resource {
  * @uri /authentication/login
  */
 class AuthenticationLogin extends Resource {
-
-
-    /**
-     *
-     * @method GET
-     */
-    public function fetch() {
-        throw new Tonic\MethodNotAllowedException();
-    }
-
-
     /**
      *
      * @method POST
      */
     public function login() {
-        $db = $this->getDB();
-        $data = $this->getRequestData();
-        if (!$data->{'username'} || !$data->{'password'} || !$data->{'source'} ||
-             !is_string($data->{'username'}) || !is_string($data->{'password'}) ||
-             !is_string($data->{'source'})) {
-            throw new Base\ValidationException(
-                array(
-                    'data' => 'invalid request data'
-                ));
-        }
-        
+        $username = $this->loadRequestString("username");
+        $password = $this->loadRequestString("password");
+        $source = $this->loadRequestString("source");
+        $this->validate();
         
         // TODO make the session minutes settable by the user,
         // within reason
         $timeout = Resource::DEFAULT_SESSION_TIMEOUT;
         
+        $db = $this->getDB();
         $userData = WebRiffs\AuthenticationLayer::login($db,
-            $data->{'username'}, $this->getSourceId($data->{'source'}),
-            $data->{'password'},
+            $username, $this->getSourceId($source),
+            $password,
             // TODO make this configurable per source
             function ($u, $p, $h) {
                 return WebRiffs\AuthenticationLayer::validatePassword(
@@ -175,9 +160,10 @@ class AuthenticationLogout extends Resource {
      * @method POST
      */
     public function logout() {
-        $db = $this->getDB();
         $userAuth = $this->container['user'];
-        error_log('User auth value: '.print_r($userAuth, true));
+        
+        $db = $this->getDB();
+        //error_log('User auth value: '.print_r($userAuth, true));
         WebRiffs\AuthenticationLayer::logout($db, $userAuth['User_Id'],
             $userAuth['Ga_Session_Id']);
         
@@ -202,16 +188,6 @@ class AuthenticationLogout extends Resource {
  */
 class AuthenticationCreate extends Resource {
 
-
-    /**
-     *
-     * @method GET
-     */
-    public function fetch() {
-        throw new Tonic\MethodNotAllowedException();
-    }
-
-
     /**
      *
      * @method PUT
@@ -227,25 +203,19 @@ class AuthenticationCreate extends Resource {
         
 
         $db = $this->getDB();
-        $data = $this->getRequestData();
-        if (!$data->{'username'} || !$data->{'password'} || !$data->{'source'} ||
-             !$data->{'contact'} || !is_string($data->{'username'}) ||
-             !is_string($data->{'password'}) || !is_string($data->{'contact'}) ||
-             !is_string($data->{'source'})) {
-            var_dump($data);
-            throw new Base\ValidationException(
-                array(
-                    'json' => 'invalid request data'
-                ));
-        }
+        
+        $username = $this->loadRequestString("username");
+        $password = $this->loadRequestString("password");
+        $source = $this->loadRequestString("source");
+        $contact = $this->loadRequestString("contact");
+        $this->validate();
         
         // FIXME make this configurable per source
-        $password = WebRiffs\AuthenticationLayer::hashPassword(
-            $data->{'password'});
+        $password = WebRiffs\AuthenticationLayer::hashPassword($password);
         
         $userId = WebRiffs\AuthenticationLayer::createUser($db,
-            $data->{'username'}, $this->getSourceId($data->{'source'}),
-            $data->{'username'}, $password, $data->{'contact'},
+            $username, $this->getSourceId($source),
+            $username, $password, $contact,
             Access::$PRIVILEGE_USER);
         
         // don't expose the internal ID to the user.

@@ -255,21 +255,11 @@ class FilmObjBranch extends Resource {
         $this->secure(WebRiffs\Access::$FILM_BRANCH,
                 WebRiffs\Access::$PRIVILEGE_USER);
 
-        
-        // FIXME
-        // FIXME FIX ALL AUTHENTICATION DATA BELOW HERE
-        // FIXME
-        
-        $data = $this->getRequestData();
-        $this->assertThat(
-            !! @$data->{'name'} && is_string($data->{'name'}),
-            'name');
-        $branchName = Validation::normalizeBranchName($data->{'name'}, $this);
-        $desc = '';
-        if (!! @$data->{'description'}) {
-            $this->assertThat(is_string($data->{'description'}), 'description');
-            $desc = $data->{'description'};
-        }
+        // FIXME make these parameter keys match what the rest of the
+        // API uses (first letter capitalized).
+        $branchName = Validation::normalizeBranchName(
+                $this->loadRequestString("name"), $this);
+        $desc = $this->loadRequestString("description", FALSE) || "";
         $this->validate();
         
         $userInfo = $this->container['user'];
@@ -299,6 +289,9 @@ class FilmObjBranch extends Resource {
  * branch like the name exists (designed for humans to find information, not for
  * computers to check for existence).
  *
+ * FIXME this should be like BitBucket or GitHub, where each user can have
+ * their own branch names.
+ *
  * @uri /film/:filmid/branchexists
  */
 class FilmObjBranchName extends Resource {
@@ -307,10 +300,9 @@ class FilmObjBranchName extends Resource {
      */
     public function fetch() {
         $filmId = $this->validateId($this->filmid, "filmId");
-        $this->assertThat(array_key_exists("Name", $_GET), 'Name');
+        
+        $name = $this->loadGetString("Name");
         $this->validate();
-
-        $name = $_GET['Name'];
 
         return array(200, array(
             'exists' => WebRiffs\FilmLayer::doesBranchExist(
@@ -381,7 +373,14 @@ class BranchObjChanges extends Resource {
      */
     function update() {
         $branchId = $this->validateId($this->branchid, "branchId");
+        
+        // FIXME match argument names with the rest of the API
+        $branchName = Validation::normalizeBranchName(
+                $this->loadRequestString('name'), $this);
+        $desc = $this->loadRequestString('description', FALSE) || "";
+        
         $this->validate();
+        
         
         $userId = null;
         $gaUserId = null;
@@ -390,14 +389,6 @@ class BranchObjChanges extends Resource {
             $gaUserId = $this->container['user']['Ga_User_Id'];
         } else {
             throw new Tonic\UnauthorizedException();
-        }
-        
-        $data = $this->getRequestData();
-        $branchName = Validation::normalizeBranchName($data->{'name'}, $this);
-        $desc = '';
-        if (!! $data->{'description'}) {
-            $this->assertThat(is_string($data->{'description'}), 'description');
-            $desc = $data->{'description'};
         }
         
         $tags = array();
@@ -444,7 +435,7 @@ class BranchObjChangeVersion extends Resource {
     
     /**
      * Get the details for the branch.  If the branch is not visible by the
-     * user, then it rturns a "no content" response.
+     * user, then it returns a "no content" response.
      *
      * @method GET
      */
@@ -534,24 +525,19 @@ class BranchObjUserPendingVersion extends Resource {
      * branch since the user branch.  It also returns the number of branch
      * changes that have happened since the pending change was created.
      *
+     * If the user does not have an open change for the branch, then this
+     * will return no content.
+     *
      * @method GET
      * @authenticated
      */
     function fetchBranchVersion() {
         $branchId = $this->validateId($this->branchid, "branchId");
+        $changeCount = $this->loadGetInt("changes", FALSE) || 0;
         $this->validate();
         
         $userId = $this->container['user']['User_Id'];
         $gaUserId = $this->container['user']['Ga_User_Id'];
-        
-        $changeCount = 0;
-        
-        if (array_key_exists("changes", $_GET) &&
-                is_numeric($_GET["changes"]) &&
-                ($_GET["changes"]*1 == (int)($_GET["changes"]*1))) {
-            $changeCount = intval($_GET["changes"]);
-        }
-        
         
         
         // FIXME call into getBranchQuipChangesFromPending
@@ -604,6 +590,12 @@ class BranchObjQuipsPending extends Resource {
      * a field to indicate whether it is pending or committed.  The whole
      * returned structure includes the version number requested.
      *
+     * If the request is not authenticated, or if the user does not have an
+     * open change, then this will return an error message.  This is because
+     * there is no specific change number in the request, so the client side
+     * can potentially get into a bad state during playback if this returned
+     * the head revision.
+     *
      * @method GET
      */
     function fetch() {
@@ -614,6 +606,8 @@ class BranchObjQuipsPending extends Resource {
     
     
     /**
+     * Add a (1) new quip.
+     *
      * @method PUT
      * @csrf create_quip
      */
@@ -636,7 +630,16 @@ class BranchObjQuipsPending extends Resource {
     
     /**
      * Performs a series of actions over many quips.  The JSon object is broken
-     * down into different actions by way of the top-level key.
+     * down into different actions by way of the top-level key.  This allows
+     * multiple simulated requests to the /branch/:branchid/pending/quip/:itemid
+     * URL, without the need for lots of independent connections.
+     *
+     * If there are issues with the request, they are returned in the JSon
+     * response (just like all errors), with one per request object, in a
+     * similar structure to how it was requested.
+     *
+     * TODO should be investigated into put a maximum size to the request,
+     * to eliminate a possible hog of resources in a single request.
      *
      * @method POST
      * @csrf mass_update_quip
@@ -655,13 +658,13 @@ class BranchObjQuipsPending extends Resource {
         }
         
         $data = $this->getRequestData();
-        if (!! $data->{'create'} && is_array($data->{'create'})) {
+        if (array_key_exists("create", $data) && is_array($data['create'])) {
             // FIXME
         }
-        if (!! $data->{'delete'} && is_array($data->{'delete'})) {
+        if (array_key_exists('delete', $data) && is_array($data['delete'])) {
             // FIXME
         }
-        if (!! $data->{'update'} && is_array($data->{'update'})) {
+        if (array_key_exists('update', $data) && is_array($data['update'])) {
             // FIXME
         }
         
