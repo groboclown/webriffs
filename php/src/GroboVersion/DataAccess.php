@@ -414,9 +414,39 @@ class DataAccess {
                 )));
         return $data['result'];
     }
+    
+    
+    // FIXME return a list of branches and their pending changes for a user.
+    // Needs to be pagable.
 
 
+    /**
+     * Changes the change to be active (committed), and ensures that it is
+     * the new top change.
+     *
+     * @param PBO $db
+     * @param int $changeId
+     * @throws Exception
+     */
     public static function commitChange($db, $changeId) {
+        // FIXME this needs to return the new top change number, which
+        // may be the same number.
+        // This is critical to how many of the submits and everything will
+        // work.
+        
+        // FIXME ensure the change is not already committed.
+        
+        // FIXME as this is the big, major part of the system, this should
+        // probably lock the DB so that nothing can jump in the middle of
+        // this operation. At the very least, it should lock the change version
+        // table and the change table.
+        
+        // The only way to avoid this lock is if we throw away the concept
+        // of changes always increasing.  This could be changed by sorting by
+        // date, but that alone won't do it (there's always the potential for
+        // two submits that land on the same time).
+        
+        
         $data = GvChange::$INSTANCE->update($db, $changeId, 1);
         DataAccess::checkError($data,
             new Base\ValidationException(

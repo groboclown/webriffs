@@ -130,7 +130,7 @@ foreach (WebRiffs\Access::$BRANCH_ACCESS as $access) {
         $level = WebRiffs\Access::$PRIVILEGE_USER;
     }
     $data = WebRiffs\TemplateFilmBranchAccess::$INSTANCE->create($db,
-        WebRiffs\FilmLayer::$DEFAULT_TEMPLATE_ACCESS_NAME,
+        WebRiffs\BranchLayer::$DEFAULT_TEMPLATE_ACCESS_NAME,
         $access, $level);
     Base\BaseDataAccess::checkError($data, new \Exception("create access ".$access));
     $result['access-'.$access] = $level;
@@ -143,7 +143,7 @@ $data = WebRiffs\User::$INSTANCE->readBy_Username($db, "user0");
 Base\BaseDataAccess::checkError($data, new \Exception("find user0"));
 $userData = $data['result'][0];
 $idList1 = WebRiffs\FilmLayer::createFilm($db, $userData, "Slacker 2011", 2011,
-    WebRiffs\FilmLayer::$DEFAULT_TEMPLATE_ACCESS_NAME);
+    WebRiffs\BranchLayer::$DEFAULT_TEMPLATE_ACCESS_NAME);
 $result['create-slacker-2011'] = array(
     'film_id' => $idList1[1],
     'branch_id' => $idList1[2],
@@ -151,22 +151,31 @@ $result['create-slacker-2011'] = array(
 );
 
 $idList2 = WebRiffs\FilmLayer::createFilm($db, $userData, "Slacker", 1991,
-    WebRiffs\FilmLayer::$DEFAULT_TEMPLATE_ACCESS_NAME);
+    WebRiffs\BranchLayer::$DEFAULT_TEMPLATE_ACCESS_NAME);
 $result['create-slacker-1991'] = array(
     'film_id' => $idList2[1],
     'branch_id' => $idList2[2],
     'change_id' => $idList2[3]
 );
 $slacker1991Id = $idList2[1];
+$slacker1991BranchId = $idList2[2];
+$slacker1991ChangeId = $idList2[3];
 WebRiffs\FilmLayer::saveLinkForFilm($db, $slacker1991Id, "imdb.com",
     "tt0102943");
 WebRiffs\FilmLayer::saveLinkForFilm($db, $slacker1991Id, "wikipedia-en",
     "Slacker_(film)");
 
-
+// ---------------------------------------------------------------------------
+// Create tags for the branch (header updates)
+$tags = array('Theatrical Release', 'Direction Notes');
+WebRiffs\BranchLayer::updateAlltagsOnBranch($db, $userData['User_Id'],
+    $userData['Ga_User_Id'], $slacker1991BranchId, $tags);
 
 
 // ---------------------------------------------------------------------------
+// Create a quip in a branch and submit the change
+
+
 
 
 // ---------------------------------------------------------------------------
