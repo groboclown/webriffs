@@ -37,6 +37,8 @@ table:
         # is committed, the old change is removed (marked deleted), and its
         # pending changes are given to a new change entry, so that the history
         # of changes are always increasing through history.
+        # Invalid (was pending, but then committed to a higher change number)
+        # changes have an Active_State value of 2.
         - column:
             name: Active_State
             type: tinyint

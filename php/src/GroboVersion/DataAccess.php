@@ -426,18 +426,17 @@ class DataAccess {
      *
      * @param PBO $db
      * @param int $changeId
+     * @param int $gaUserId the user ID making the request, which should
+     *      match the change's user.  If the user is NULL, then the check is
+     *      not made.  This means all callers need to do some preliminary
+     *      checks in advance (is there a user, or is the user an admin who
+     *      can make this commit).
      * @throws Exception
+     * @return int the final change ID actually committed.
      */
-    public static function commitChange($db, $changeId) {
-        // FIXME this needs to return the new top change number, which
-        // may be the same number.
-        // This is critical to how many of the submits and everything will
-        // work.
-        
-        // FIXME ensure the change is not already committed.
-        
-        // FIXME as this is the big, major part of the system, this should
-        // probably lock the DB so that nothing can jump in the middle of
+    public static function commitChange($db, $changeId, $gaUserId) {
+        // As this is the big, major part of the system, this needs to
+        // lock the DB so that nothing can jump in the middle of
         // this operation. At the very least, it should lock the change version
         // table and the change table.
         
@@ -446,18 +445,105 @@ class DataAccess {
         // date, but that alone won't do it (there's always the potential for
         // two submits that land on the same time).
         
-        
-        $data = GvChange::$INSTANCE->update($db, $changeId, 1);
+        // FIXME this needs to obtain a write lock also on the Gv_Change_Version table
+        $data = GvChange::$INSTANCE->writeLockTables($db,
+                array(GvChange::$TABLENAME, GvChangeVersion::$TABLENAME),
+                function() {
+            // Ensure the passed-in change is in the correct state.  This needs
+            // to be in a lock so that another request doesn't attempt to
+            // have parallel active state change.
+            
+            $data = GvChange::$INSTANCE->readBy_Gv_Change_Id($db, $changeId);
+            if ($data["haserror"]) {
+                return $data;
+            }
+            if ($data["rowcount"] !== 1) {
+                throw new Base\ValidationException(array(
+                    'changeId' => 'invalid change id'
+                ));
+            }
+            if ($data["result"][0]["Active_State"] !== 0) {
+                throw new Base\ValidationException(array(
+                    'changeId' => 'must be a pending change id'
+                ));
+            }
+            if ($gaUserId !== null && $data["result"][0]["Ga_User_Id"] != $gaUserId) {
+                throw new Base\ValidationException(array(
+                    'changeId' => 'change id not owned by user'
+                ));
+            }
+            $branchId = $data["result"][0]["Gv_Branch_Id"];
+            
+            // Find the current head change number.  We're not filtering by
+            // active, because we require the new change to be the highest of
+            // all the changes.
+            $data = GvChange::$INSTANCE->readAll($db, "Gv_Change_Id DESC",
+                0, 0);
+            if ($data["haserror"]) {
+                return $data;
+            }
+            // There will always be at least 1
+            $headChangeId = $data["result"][0]["Gv_Change_Id"];
+            if ($headChangeId == $changeId) {
+                // The easy path - we just mark the change as active.
+                $data = GvChange::$INSTANCE->update($db, $changeId, 1);
+            } else {
+                // The hard path.  We need to mark the old change as invalid (2),
+                // create a new change, and update the Gv_Change_Version table
+                // to reference the new value.
+
+                // Create the new change first.  If something went horribly
+                // wrong, nothing was touched, so we're in the same state as
+                // before the commit call was made.
+                $data = GvChange::$INSTANCE->create($db, $branchId, 1, $gaUserId);
+                if ($data["haserror"]) {
+                    return $data;
+                }
+                $newChangeId = $data["result"];
+                
+                // Update the change versions to point to the new change.
+                // If something goes wrong, then we'll have the same pending
+                // change that we did before, but now there will also be a new
+                // change at the top that contains no item versions.  The state
+                // of the system will be a bit different, but there will be no
+                // actual changes to the contents of the branch.
+                $data = GvChange::$INSTANCE->runUpdateCommittedChangeId($db,
+                        $changeId, $newChangeId);
+                if ($data["haserror"]) {
+                    return $data;
+                }
+                
+                // Finally, remove the old change.  Because other foreign keys
+                // may still reference this, and will need to be updated after
+                // this command to reference the new change, we won't actually
+                // delete it.  Instead, we'll change the active state to the
+                // invalid value.  If this goes wrong, then there will be an
+                // old pending change with no items in it.  This is really the
+                // only bad state, as it means that the user will now have an
+                // empty pending change associated with their account.
+                $data = GvChange::$INSTANCE->update($db, $changeId, 2);
+                if ($data["haserror"]) {
+                    return $data;
+                }
+                if ($data["rowcount"] !== 1) {
+                    throw new Base\ValidationException(array(
+                        'changeId' => 'could not update change ('.$data["rowcount"].')'
+                    ));
+                }
+                
+                // Make sure we return the new change ID, rather than the old
+                // one.
+                $changeId = $newChangeId;
+            }
+            return array('haserror' => false, 'changeId' => $changeId);
+        });
         DataAccess::checkError($data,
             new Base\ValidationException(
                 array(
-                    'unknown' => 'there was an unknown problem searching the changes'
+                    'unknown' => 'there was an unknown problem committing the change'
                 )));
         
-        if ($data['rowcount'] != 1) {
-            throw new Exception(
-                "could not find change (" . $data['rowcount'] . ")");
-        }
+        return $data['changeId'];
     }
 
 

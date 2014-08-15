@@ -118,3 +118,19 @@ table:
                 - argument:
                     name: Gv_Item_Id
                     type: int
+    extend:
+        - sql:
+            name: update_committed_change_id
+            type: update
+            execute: "
+              UPDATE GV_CHANGE_VERSION
+                  SET Gv_Change_Id = {newChangeId}
+                  WHERE Gv_Change_Id = {oldChangeId}
+              "
+            arguments:
+                - argument:
+                    name: oldChangeId
+                    type: int
+                - argument:
+                    name: newChangeId
+                    type: int

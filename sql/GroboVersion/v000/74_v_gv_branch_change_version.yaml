@@ -17,7 +17,7 @@ view:
         FROM GV_CHANGE c
         INNER JOIN GV_CHANGE_VERSION cv
             ON c.Gv_Change_Id = cv.Gv_Change_Id
-        WHERE c.Active_State >= 1
+        WHERE c.Active_State = 1
         "
     columns:
         - column:
