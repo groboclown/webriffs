@@ -438,6 +438,7 @@ class BranchLayer {
      * @param String $newDescription
      * @param array(string) $tagList
      * @throws Tonic\UnauthorizedException
+     * @return the change ID that was committed
      */
     public static function updateBranchHeader($db, $branchId, $userId,
                 $gaUserId, $newName, $newDescription, &$tagList,
@@ -479,7 +480,7 @@ class BranchLayer {
         BranchLayer::updateAllTagsOnBranchByChange($db, $userId, $gaUserId,
                 $branchId, $branchChangeId, $tagList, false);
         
-        GroboVersion\DataAccess::commitChange($db, $branchChangeId);
+        return GroboVersion\DataAccess::commitChange($db, $branchChangeId, $gaUserId);
     }
     
     
@@ -494,6 +495,7 @@ class BranchLayer {
      * @param unknown $branchId
      * @param unknown $tagList
      * @param string $checkAccess
+     * @return the change ID that was committed
      */
     public static function updateAlltagsOnBranch($db, $userId, $gaUserId,
                 $branchId, &$tagList, $checkAccess = true) {
@@ -524,9 +526,7 @@ class BranchLayer {
         BranchLayer::updateAllTagsOnBranchByChange($db, $userId, $gaUserId,
                 $branchId, $branchChangeId, $tagList, false);
 
-        GroboVersion\DataAccess::commitChange($db, $branchChangeId);
-        
-        // FIXME return the new change number from the commit
+        return GroboVersion\DataAccess::commitChange($db, $branchChangeId, $gaUserId);
     }
     
     
