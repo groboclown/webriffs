@@ -90,7 +90,7 @@ class PageState {
     Future<ServerResponse> updateFromServer({ int nextPage: null,
             int newRecordsPerPage: null, String newSortedBy: null,
             String newSortOrder: null,
-            Map<String, dynamic> newFilters: null}) {
+            Map<String, dynamic> newFilters: null }) {
         if (nextPage == null) {
             nextPage = currentPage;
         }

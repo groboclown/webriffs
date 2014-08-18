@@ -286,7 +286,7 @@ class ServerResponse {
             // else no data
         }
 
-        var message = null;
+        String message = null;
         var parameterNotes = new Map<String, String>();
 
         if (jsonData != null) {
@@ -306,8 +306,11 @@ class ServerResponse {
                         parameterNotes[k] = v;
                     }
                 });
-
             }
+        }
+
+        if (wasError && message == null) {
+            message = "Fatal server error";
         }
 
         return new ServerResponse._(http, wasError, message, parameterNotes,

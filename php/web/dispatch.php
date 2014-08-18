@@ -18,6 +18,28 @@ header('X-Frame-Options: deny');
 // FIXME look into how to mandate TLS connections.
 
 
+// TODO add a fatal error handler
+//register_shutdown_function( "fatal_handler" );
+//
+//function fatal_handler() {
+//     $errfile = "unknown file";
+//     $errstr  = "shutdown";
+//     $errno   = E_CORE_ERROR;
+//     $errline = 0;
+//
+//     $error = error_get_last();
+//
+//     if( $error !== NULL) {
+//         $errno   = $error["type"];
+//         $errfile = $error["file"];
+//         $errline = $error["line"];
+//         $errstr  = $error["message"];
+//
+//         error_mail(format_error( $errno, $errstr, $errfile, $errline));
+//     }
+// }
+
+
 require_once '../lib/Tonic/Autoloader.php';
 require_once '../lib/Pimple/Container.php';
 
