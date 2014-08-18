@@ -93,7 +93,7 @@ class Resource extends Base\Resource {
     /**
      * Tonic Annotation
      *
-     * Requires that the header value "csrf-token" is set with a valid
+     * Requires that the header value "x-csrf-token" is set with a valid
      * CSRF token.
      *
      * The token should be passed to the client initially with a call to
@@ -107,7 +107,7 @@ class Resource extends Base\Resource {
         // Check to see if the CSRF token was passed in (it is passed as a
         // header key/value).
         
-        $token = $this->request->csrfToken;
+        $token = $this->request->xCsrfToken;
         if (! $token) {
             error_log("Request for action ".$action." with no token; ".
                     print_r($this->request, true));
@@ -145,7 +145,6 @@ class Resource extends Base\Resource {
         
         // FIXME TEST
         //throw new Exception("ensure failures are checked");
-        
         
         return GroboAuth\DataAccess::createCsrfToken($db, $sessionId, $action);
     }

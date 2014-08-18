@@ -161,7 +161,7 @@ class ServerStatusService {
             _activeRequests++;
             Map<String, dynamic> headers = new Map.from(_json_headers);
             if (csrfToken != null) {
-                headers['csrf-token'] = csrfToken;
+                headers['x-csrf-token'] = csrfToken;
             }
             return _http.delete(fullUrl, headers: headers)
             .then((HttpResponse response) {
