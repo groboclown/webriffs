@@ -87,3 +87,15 @@ table:
                 - constraint:
                     type: initial value
                     value: "NULL"
+    extend:
+        - sql:
+            name: lock_for_commit
+            type: wrapper
+            pre:
+                - dialect:
+                    platforms: mysql
+                    sql: "LOCK TABLES GV_CHANGE WRITE, GV_CHANGE_VERSION WRITE"
+            post:
+                - dialect:
+                    platforms: mysql
+                    sql: "UNLOCK TABLES"

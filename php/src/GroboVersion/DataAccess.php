@@ -446,9 +446,12 @@ class DataAccess {
         // two submits that land on the same time).
         
         // FIXME this needs to obtain a write lock also on the Gv_Change_Version table
-        $data = GvChange::$INSTANCE->writeLockTables($db,
-                array(GvChange::$TABLENAME, GvChangeVersion::$TABLENAME),
-                function() {
+        $data = GvChange::$INSTANCE->wrapLockForCommit($db,
+                array($changeId, $gaUserId),
+                function($db, $arg) {
+            $changeId = $arg[0];
+            $gaUserId = $arg[1];
+            
             // Ensure the passed-in change is in the correct state.  This needs
             // to be in a lock so that another request doesn't attempt to
             // have parallel active state change.
@@ -462,7 +465,7 @@ class DataAccess {
                     'changeId' => 'invalid change id'
                 ));
             }
-            if ($data["result"][0]["Active_State"] !== 0) {
+            if (intval($data["result"][0]["Active_State"]) !== 0) {
                 throw new Base\ValidationException(array(
                     'changeId' => 'must be a pending change id'
                 ));
@@ -487,6 +490,9 @@ class DataAccess {
             if ($headChangeId == $changeId) {
                 // The easy path - we just mark the change as active.
                 $data = GvChange::$INSTANCE->update($db, $changeId, 1);
+                if ($data["haserror"]) {
+                    return $data;
+                }
             } else {
                 // The hard path.  We need to mark the old change as invalid (2),
                 // create a new change, and update the Gv_Change_Version table
