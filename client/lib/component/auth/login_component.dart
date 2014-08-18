@@ -76,13 +76,14 @@ class LoginComponent {
 
     Future<ServerResponse> submit() {
         if (! hasError() && ! loggedIn) {
-            _user.login(username, password).
+            return _user.login(username, password).
             then((ServerResponse response) {
                 // clear the password field
                 password = null;
                 return response;
             });
         }
+        return null;
     }
 
 
@@ -90,6 +91,7 @@ class LoginComponent {
         if (loggedIn) {
             return _user.logout();
         }
+        return null;
     }
 }
 

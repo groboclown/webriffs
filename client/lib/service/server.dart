@@ -21,6 +21,7 @@ final IsErrorCheckerFunc DEFAULT_IS_ERROR_CHECKER_FUNC = (int statusCode) {
 @Injectable()
 class ServerStatusService {
     static final Logger _log = new Logger('service.ServerStatusService');
+    static final String CSRF_HEADER_TOKEN = "x-csrf-token";
     static final Map<String, String> _json_headers = {
       'Content-Type': 'application/json'
     };
@@ -62,7 +63,7 @@ class ServerStatusService {
             _activeRequests++;
             Map<String, dynamic> headers = new Map.from(_get_headers);
             if (csrfToken != null) {
-                headers['csrf-token'] = csrfToken;
+                headers[CSRF_HEADER_TOKEN] = csrfToken;
             }
             print("Running get on ${fullUrl}");
             return _http.get(fullUrl, headers: headers)
@@ -101,7 +102,7 @@ class ServerStatusService {
             _activeRequests++;
             Map<String, dynamic> headers = new Map.from(_json_headers);
             if (csrfToken != null) {
-                headers['csrf-token'] = csrfToken;
+                headers[CSRF_HEADER_TOKEN] = csrfToken;
             }
             return _http.put(fullUrl, jsonData, headers: headers).then((HttpResponse response) {
                 _activeRequests--;
@@ -133,7 +134,7 @@ class ServerStatusService {
             _activeRequests++;
             Map<String, dynamic> headers = new Map.from(_json_headers);
             if (csrfToken != null) {
-                headers['csrf-token'] = csrfToken;
+                headers[CSRF_HEADER_TOKEN] = csrfToken;
             }
             return _http.post(fullUrl, jsonData, headers: headers)
             .then((HttpResponse response) {
@@ -161,7 +162,7 @@ class ServerStatusService {
             _activeRequests++;
             Map<String, dynamic> headers = new Map.from(_json_headers);
             if (csrfToken != null) {
-                headers['x-csrf-token'] = csrfToken;
+                headers[CSRF_HEADER_TOKEN] = csrfToken;
             }
             return _http.delete(fullUrl, headers: headers)
             .then((HttpResponse response) {
