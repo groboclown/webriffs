@@ -584,10 +584,10 @@ class DataAccess {
             'Authentication_Challenge' => $authorizationChallenge
         );
         
-        // FIXME DEBUG
-        error_log(
-            "valid session for [" . $userAgent . "] [" . $remoteAddress . "] [" .
-                 $forwardedFor . "] [" . $authorizationChallenge . "]");
+        // DEBUG
+        //error_log(
+        //    "valid session for [" . $userAgent . "] [" . $remoteAddress . "] [" .
+        //         $forwardedFor . "] [" . $authorizationChallenge . "]");
         
         return $ret;
     }
