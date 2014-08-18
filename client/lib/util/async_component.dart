@@ -287,6 +287,9 @@ abstract class PagingComponent implements AsyncComponent {
             bool singleRequest = true ]) {
         _current = new PageState(server, path,
             (PageState pageState, Iterable<dynamic> data, ServerResponse response) {
+                if (response.wasError) {
+                    // FIXME properly handle error reporting here
+                }
                 Future<ServerResponse> ret = onSuccess(data);
                 if (ret == null) {
                     _loading = false;
@@ -369,4 +372,12 @@ abstract class PagingComponent implements AsyncComponent {
      *      the chained future response.
      */
     Future<ServerResponse> onSuccess(Iterable<dynamic> data);
+
+
+    /**
+     * Handles the error conditions.  By default, it does nothing.
+     */
+    Future<ServerResponse> onError(ServerResponse response) {
+        return null;
+    }
 }
