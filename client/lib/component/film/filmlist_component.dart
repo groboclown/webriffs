@@ -45,6 +45,7 @@ class FilmListComponent extends PagingComponent {
 
 // TODO make the list of top branches returned be the "most popular" branches,
 // sub-sorted by the last update time.
+// FIXME move this into the "lib/json/film_details.dart" file.
 class FilmRecord extends PagingComponent {
     final ServerStatusService _server;
 
@@ -111,6 +112,7 @@ class FilmRecord extends PagingComponent {
 }
 
 
+// FIXME move this into the "lib/json/branch_details.dart" file.
 class BranchRecord {
     final ServerStatusService _server;
     final String name;
@@ -152,8 +154,12 @@ class TagRecord {
 
     TagRecord._(this.name);
 
-    factory TagRecord.fromJson(Map<String, dynamic> json) {
-        return new TagRecord._(json['Tag_Name']);
+    factory TagRecord.fromJson(dynamic json) {
+        // For the moment, a Tag is just a string.
+        if (! (json is String)) {
+            throw new Exception("tag data is not a string: ${json}");
+        }
+        return new TagRecord._(json);
     }
 }
 

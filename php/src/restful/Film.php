@@ -57,7 +57,7 @@ class FilmCollection extends Resource {
         
         $idList = WebRiffs\FilmLayer::createFilm($db, $this->container['user'],
             $name, $year,
-            WebRiffs\FilmLayer::$DEFAULT_TEMPLATE_ACCESS_NAME);
+            WebRiffs\BranchLayer::$DEFAULT_TEMPLATE_ACCESS_NAME);
 
         $data = array(
             'Film_Id' => $idList[1],
@@ -238,7 +238,7 @@ class FilmObjBranch extends Resource {
         
         $db = $this->getDB();
         
-        $result = WebRiffs\FilmLayer::pageBranches($db, $userId, $filmId);
+        $result = WebRiffs\BranchLayer::pageBranches($db, $userId, $filmId);
         
         return array(200, $result);
     }
@@ -266,7 +266,7 @@ class FilmObjBranch extends Resource {
         
         $db = $this->getDB();
         
-        $result = WebRiffs\FilmLayer::createBranch($db, $filmId,
+        $result = WebRiffs\BranchLayer::createBranch($db, $filmId,
             $userInfo['User_Id'], $userInfo['Ga_User_Id'],
             $branchName, $desc, null);
         
@@ -305,7 +305,7 @@ class FilmObjBranchName extends Resource {
         $this->validate();
 
         return array(200, array(
-            'exists' => WebRiffs\FilmLayer::doesBranchExist(
+            'exists' => WebRiffs\BranchLayer::doesBranchExist(
                     $this->getDB(), $filmId, $name)
         ));
     }
@@ -332,7 +332,7 @@ class BranchObjHeadVersion extends Resource {
             $userId = $this->container['user']['User_Id'];
         }
         
-        $result = WebRiffs\FilmLayer::getHeadBranchVersion($this->getDB(),
+        $result = WebRiffs\BranchLayer::getHeadBranchVersion($this->getDB(),
             $userId, $branchId);
         
         return array(200, $result);
@@ -360,7 +360,7 @@ class BranchObjChanges extends Resource {
             $userId = $this->container['user']['User_Id'];
         }
         
-        $result = WebRiffs\FilmLayer::pageBranchVersions($this->getDB(),
+        $result = WebRiffs\BranchLayer::pageBranchVersions($this->getDB(),
             $userId, $branchId, null);
         
         return array(200, $result);
@@ -405,7 +405,7 @@ class BranchObjChanges extends Resource {
         
         $this->validate();
         
-        WebRiffs\FilmLayer::updateBranchHeader($this->getDB(), $branchId,
+        WebRiffs\BranchLayer::updateBranchHeader($this->getDB(), $branchId,
             $userId, $gaUserId, $branchName, $desc, $tags);
         
         return new Tonic\Response(Tonic\Response::ACCEPTED);
@@ -448,7 +448,7 @@ class BranchObjChangeVersion extends Resource {
         if ($this->isUserAuthenticated()) {
             $userId = $this->container['user']['User_Id'];
         }
-        $ret = WebRiffs\FilmLayer::getBranchDetails($this->getDB(),
+        $ret = WebRiffs\BranchLayer::getBranchDetails($this->getDB(),
             $userId, $branchId, $changeId);
         
         if (! $ret) {
@@ -479,7 +479,7 @@ class BranchObjQuips extends Resource {
         if ($this->isUserAuthenticated()) {
             $userId = $this->container['user']['User_Id'];
         }
-        $ret = WebRiffs\FilmLayer::pageCommittedQuips($this->getDB(),
+        $ret = WebRiffs\QuipLayer::pageCommittedQuips($this->getDB(),
                 $userId, $branchId, $changeId);
     
         if (! $ret) {
