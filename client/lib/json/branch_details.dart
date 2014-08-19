@@ -31,6 +31,8 @@ class BranchDetails {
     String description;
     String updatedOn;
 
+    List<BranchTagDetails> tags;
+
 
 
     factory BranchDetails.fromJson(Map<String, dynamic> json) {
@@ -59,6 +61,12 @@ class BranchDetails {
         String bn = json['Branch_Name'];
         String d = json['Description'];
         String uo = json['Updated_On'];
+        List<BranchTagDetails> btd = [];
+        if (json.containsKey('tags') && json['tags'] is List) {
+            json['tags'].forEach((var j) {
+                btd.add(new BranchTagDetails.fromJson(j));
+            });
+        }
         if (gbi != branchId) {
             throw new Exception("invalid state: branch id changed");
         }
@@ -80,6 +88,25 @@ class BranchDetails {
         name = bn;
         description = d;
         updatedOn = uo;
+        tags = btd;
     }
+}
+
+
+/**
+ * A tag for a branch.  For now, this is just a string.
+ */
+class BranchTagDetails {
+    String name;
+
+    factory BranchTagDetails.fromJson(dynamic json) {
+        if (json != null && json is String) {
+            return new BranchTagDetails(name);
+        }
+        throw new Exception("invalid json data: expected string for tag");
+    }
+
+
+    BranchTagDetails(this.name);
 }
 

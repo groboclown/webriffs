@@ -90,3 +90,11 @@ view:
         - constraint:
             type: fake index
             columns: Gv_Branch_Id, Gv_Change_Id
+    whereClauses:
+        - where:
+            name: Versions_After
+            sql: Gv_Change_Id > {version}
+            argument:
+                name: version
+                type: int
+            

@@ -50,12 +50,7 @@ class PageState {
             this._recordsPerPage = 0,
             this._loadedFromServer = false,
             this._sortOrder = 'A',
-            this._filters = {} {
-
-        for (String f in filter_names) {
-            _filters[f] = null;
-        }
-    }
+            this._filters = {};
 
 
     Iterable<String> get filter_names => _filters.keys;
@@ -132,11 +127,11 @@ class PageState {
             if (newFilters.containsKey(key)) {
                 if (newFilters[key] != null) {
                     path += '&' + Uri.encodeQueryComponent(key) + '=' +
-                            Uri.encodeQueryComponent(newFilters[key]);
+                        Uri.encodeQueryComponent(newFilters[key].toString());
                 }
             } else if (value != null) {
                 path += '&' + Uri.encodeQueryComponent(key) + '=' +
-                        Uri.encodeQueryComponent(value);
+                        Uri.encodeQueryComponent(value.toString());
             }
         });
 

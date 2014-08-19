@@ -11,7 +11,7 @@ import 'filminfoedit_component.dart';
 
 import '../../util/async_component.dart';
 
-// FIXME move the branch and tag common stuff into its own file.
+// FIXME switch this to ../../json/branch_details.dart
 import 'filmlist_component.dart';
 
 /**
@@ -154,7 +154,7 @@ class ViewFilmComponent extends PagingComponent {
             revert();
             return null;
         }
-        _server.createCsrfToken('update_film').then((String csrf) {
+        var ret = _server.createCsrfToken('update_film').then((String csrf) {
             Map<String, dynamic> jsonData = {
                 'Name': filmInfo.filmName,
                 'Release_Year': filmInfo.releaseYear
@@ -170,6 +170,8 @@ class ViewFilmComponent extends PagingComponent {
         });
 
         _isEditing = false;
+
+        return ret;
     }
 
 

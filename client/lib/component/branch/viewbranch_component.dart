@@ -20,11 +20,11 @@ import 'quip_paging.dart';
 class ViewBranchComponent {
     final ServerStatusService _server;
     final UserService _user;
+    final Future<BranchDetails> branchDetails;
 
     final QuipPaging quipPaging;
 
     bool get noQuips => quipPaging.quips.length <= 0;
-
 
     BranchDetails _branchDetails;
     final int branchId;
@@ -66,8 +66,7 @@ class ViewBranchComponent {
     }
 
     ViewBranchComponent.direct(this._server, this._user, this.branchId,
-            this.urlChangeId, Future<BranchDetails> branchDetails,
-            this.quipPaging) {
+            this.urlChangeId, this.branchDetails, this.quipPaging) {
         branchDetails.then((BranchDetails bd) {
             _branchDetails = bd;
         });

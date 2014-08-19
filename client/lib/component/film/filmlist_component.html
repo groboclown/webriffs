@@ -34,8 +34,9 @@
                         
                         <div ng-if="film.expanded">
                             <div ng-repeat="branch in film.branches">
-                                <span><a href="#/branch/view/{{branch.branchId}}/0">{{branch.name}}</a></span>
-                                <span ng-repeat="tag in branch.tags">{{tag.name}}</span>
+                                <span><a href="#/branch/view/{{branch.branchId}}/{{branch.headChangeId}}">{{branch.name}}</a></span>
+                                <span>[{{branch.headChangeId}}]</span>
+                                <span ng-repeat="tag in branch.tags">{{tag.name}} </span>
                             </div>
                             <div ng-if="film.remainingBranches > 0">
                             ({{film.remainingBranches}} more)

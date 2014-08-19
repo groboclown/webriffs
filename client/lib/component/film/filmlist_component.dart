@@ -7,6 +7,8 @@ import 'package:angular/angular.dart';
 
 import '../../service/server.dart';
 
+import '../../json/branch_details.dart';
+
 import '../../util/async_component.dart';
 
 /**
@@ -105,6 +107,10 @@ class FilmRecord extends PagingComponent {
     Future<ServerResponse> onSuccess(Iterable<dynamic> data) {
         branches.clear();
         data.forEach((Map<String, dynamic> row) {
+
+            // FIXME once film/.../branch returns in the list the same data
+            // as /branch/.../version/..., switch this to use BranchDetails.
+
             branches.add(new BranchRecord.fromJson(_server, filmId, row));
         });
         return null;
@@ -119,12 +125,13 @@ class BranchRecord {
     final String description;
     final int filmId;
     final int branchId;
+    final int headChangeId;
     final createdOn;
     final lastUpdatedOn;
     final List<TagRecord> tags;
 
     BranchRecord._(this._server, this.name, this.description, this.filmId,
-            this.branchId, this.createdOn,
+            this.branchId, this.headChangeId, this.createdOn,
             this.lastUpdatedOn, this.tags);
 
     factory BranchRecord.fromJson(ServerStatusService server, int filmId,
@@ -132,6 +139,7 @@ class BranchRecord {
         String name = json['Branch_Name'];
         String desc = json['Description'];
         int id = json['Gv_Branch_Id'];
+        int changeId = json['Gv_Change_Id'];
         var created = json['Branch_Created_On'];
         var updated = json['Branch_Last_Updated_On'];
         List<TagRecord> tags = [];
@@ -142,7 +150,7 @@ class BranchRecord {
             print("Branch " + name + ": Film IDs don't match (" +
                     filmId.toString() + " vs " + json['Film_Id'].toString() + ")");
         }
-        return new BranchRecord._(server, name, desc, filmId, id,
+        return new BranchRecord._(server, name, desc, filmId, id, changeId,
                 created, updated, tags);
     }
 }

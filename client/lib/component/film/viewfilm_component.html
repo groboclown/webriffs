@@ -80,9 +80,12 @@
             </tbody>
             <tbody ng-if="cmp.loadedSuccessful">
                 <tr ng-repeat="branch in cmp.branches">
-                     <td><a href="#/branch/view/{{branch.branchId}}/0">{{branch.name}}</a></span>
                      <td>
-                     <span ng-repeat="tag in branch.tags">{{tag.name}}</span>
+                        <span><a href="#/branch/view/{{branch.branchId}}/{{branch.headChangeId}}">{{branch.name}}</a></span>
+                        <span>[{{branch.headChangeId}}]</span>
+                     </td>
+                     <td>
+                     <span ng-repeat="tag in branch.tags">{{tag.name}} </span>
                      </td>
                 </tr>
                 

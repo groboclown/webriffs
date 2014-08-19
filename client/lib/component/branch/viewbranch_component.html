@@ -3,13 +3,15 @@
     <a ng-href="#/branch/changes/{{cmp.branchId}}" ng-if="cmp.branchId != null">Branch History</a>
     
     <div ng-if="cmp.loaded">
-        <div>{{cmp.filmName}} ({{cmp.filmReleaseYear}})
+        <div><span>{{cmp.filmName}}</span> <span>({{cmp.filmReleaseYear}})</span>
             <span ng-if="cmp.urlChangeId != 0">(change {{cmp.changeId}})</span>
         </div>
         <div>{{cmp.branchName}}</div>
         <div>{{cmp.description}}</div>
         <div>Last updated on {{cmp.updatedOn}}</div>
     </div>
+    
+    <branch-updates current-branch="cmp.branchDetails">
     
     <div>
         <!-- filter controls -->

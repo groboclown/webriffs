@@ -24,6 +24,7 @@ class BranchLayer {
 
     public static $NAME_SEARCH_FILTER;
     public static $DESCRIPTION_SEARCH_FILTER;
+    public static $BRANCH_VERSIONS_AFTER_FILTER;
     
     /**
      * Maximum number of tags allowable on a branch.
@@ -340,8 +341,18 @@ class BranchLayer {
             return Base\PageResponse::createPageResponse($paging, 0, array());
         }
         
+        
+        $wheres = array();
+        if ($paging->filters[
+                BranchLayer::$BRANCH_VERSIONS_AFTER_FILTER->name] !== null) {
+            $wheres[] = new VFilmBranchVersion_VersionsAfter(
+                $paging->filters[BranchLayer::$BRANCH_VERSIONS_AFTER_FILTER->name]
+            );
+        }
+        
+        
         $rowData = VFilmBranchVersion::$INSTANCE->readBy_Gv_Branch_Id(
-                $db, $branchId,
+                $db, $branchId, $wheres,
                 $paging->order, $paging->startRow, $paging->endRow);
         $countData = VFilmBranchVersion::$INSTANCE->countBy_Gv_Branch_Id(
                 $db, $branchId);
@@ -359,7 +370,8 @@ class BranchLayer {
                 )));
         $count = intval($countData['result'][0]);
 
-        // Don't add the tags.
+        // Don't add the tags.  Note that this includes both header changes
+        // and quip changes.
         return Base\PageResponse::createPageResponse($paging, $count, $rows);
     }
     
@@ -663,7 +675,8 @@ BranchLayer::$NAME_SEARCH_FILTER =
     new Base\SearchFilterString("name", null);
 BranchLayer::$DESCRIPTION_SEARCH_FILTER =
     new Base\SearchFilterString("description", null);
-
+BranchLayer::$BRANCH_VERSIONS_AFTER_FILTER =
+    new Base\SearchFilterInt("versions_after", 1, 1, 10000000000);
 
 
 BranchLayer::$BRANCH_SORT_COLUMNS = array(
@@ -686,5 +699,6 @@ BranchLayer::$BRANCH_VERSION_SORT_COLUMNS = array(
 );
 
 BranchLayer::$BRANCH_VERSION_FILTERS = array(
+    BranchLayer::$BRANCH_VERSIONS_AFTER_FILTER
 );
 
