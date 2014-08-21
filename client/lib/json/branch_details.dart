@@ -9,7 +9,10 @@ Future<BranchDetails> loadBranchDetails(ServerStatusService server,
         int branchId, int changeId) {
     return server.get('/branch/${branchId}/version/${changeId}', null)
         .then((ServerResponse response) {
-            if (response.wasError || response.jsonData == null) {
+            if (response.wasError) {
+                return null;
+            }
+            if (response.jsonData == null) {
                 return null;
             }
             return new BranchDetails.fromJson(response.jsonData);
@@ -32,6 +35,15 @@ class BranchDetails {
     String updatedOn;
 
     List<BranchTagDetails> tags;
+
+    bool userCanEditBranch = false;
+    bool userCanDeleteBranch = false;
+    bool userCanEditBranchTags = false;
+    bool userCanEditBranchPermissions = false;
+
+    bool userCanReadQuips = false;
+    bool userCanEditQuips = false;
+    bool userCanEditQuipTags = false;
 
 
 
@@ -89,6 +101,33 @@ class BranchDetails {
         description = d;
         updatedOn = uo;
         tags = btd;
+
+
+        if (json.containsKey('access') && json['access'] is Map) {
+            Map<String, dynamic> access = json['access'];
+            if (access.containsKey('branch-write') && access['branch-write']) {
+                userCanEditBranch = true;
+            }
+            if (access.containsKey('branch-del') && access['branch-del']) {
+                userCanDeleteBranch = true;
+            }
+            if (access.containsKey('branch-tag') && access['branch-tag']) {
+                userCanEditBranchTags = true;
+            }
+            if (access.containsKey('branch-users') && access['branch-users']) {
+                userCanEditBranchPermissions = true;
+            }
+
+            if (access.containsKey('quip-read') && access['quip-read']) {
+                userCanReadQuips = true;
+            }
+            if (access.containsKey('quip-write') && access['quip-write']) {
+                userCanEditQuips = true;
+            }
+            if (access.containsKey('quip-tag') && access['quip-tag']) {
+                userCanEditQuipTags = true;
+            }
+        }
     }
 }
 

@@ -277,7 +277,7 @@ class BranchLayer {
         if ($userId === null) {
             // guest user
             $wheres = array(new VFilmBranchGuestAccess_IsAllowed(
-                    $access, Access::$PRIVILEGE_GUEST));
+                    Access::$PRIVILEGE_GUEST, $access));
             //error_log("Checking if anonymous user can access branch ".$branchId." for ".$access." with level ".Access::$PRIVILEGE_GUEST);
             $data = VFilmBranchGuestAccess::$INSTANCE->countBy_Gv_Branch_Id(
                     $db, $branchId, $wheres);
@@ -295,6 +295,7 @@ class BranchLayer {
                     'unknown' => 'there was an unknown problem checking the branches'
                 )));
         
+        //error_log("Found ".$data['result']." results");
         return $data['result'] > 0;
     }
 
@@ -391,6 +392,9 @@ class BranchLayer {
     public static function getBranchDetails($db, $userId, $branchId, $changeId) {
         if (! BranchLayer::canAccessBranch($db, $userId, $branchId,
                 Access::$BRANCH_READ)) {
+            # FIXME debug
+            error_log("Cannot access branch ".$branchId);
+            
             return false;
         }
         
@@ -408,6 +412,9 @@ class BranchLayer {
                     'unknown' => 'there was an unknown problem finding the branch'
                 )));
         if (sizeof($data['result']) <= 0) {
+            # FIXME debug
+            error_log("no such branch (".$branchId.") at that version (".$changeId.")");
+            
             return false;
         }
         if (sizeof($data['result']) > 1) {
@@ -434,6 +441,36 @@ class BranchLayer {
             $tags[] = $tagRow['Tag_Name'];
         }
         $result['tags'] = $tags;
+        
+        
+        // FIXME this could potentially be joined up with the canAccessBranch
+        // call above to limit the number of sql calls.
+        
+        if ($userId === null) {
+            // guest user
+            $wheres = array(new VFilmBranchGuestAccess_AllAllowedAccess(
+                    Access::$PRIVILEGE_GUEST));
+            $data = VFilmBranchGuestAccess::$INSTANCE->readBy_Gv_Branch_Id(
+                    $db, $branchId, $wheres);
+        } else {
+            // logged-in user
+            $wheres = array(new VFilmBranchAccess_IsAllowed());
+            $data = VFilmBranchAccess::$INSTANCE->readBy_Gv_Branch_Id_x_User_Id(
+                    $db, $branchId, $userId, $wheres);
+        }
+        BranchLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem checking the branches'
+                )));
+        
+        $access = array();
+        foreach ($data['result'] as $accessRow) {
+            //error_log($accessRow['Access']."=".)
+            $access[$accessRow['Access']] = true;
+        }
+        $result['access'] = $access;
+        
         return $result;
     }
     

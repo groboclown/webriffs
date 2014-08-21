@@ -30,6 +30,9 @@ class ViewBranchComponent {
     final int branchId;
     final int urlChangeId;
 
+    bool _loadError = false;
+    bool get loadError => _loadError;
+
     bool get loaded => _branchDetails != null;
     int get filmId => _branchDetails == null ? null :
             _branchDetails.filmId;
@@ -49,6 +52,10 @@ class ViewBranchComponent {
             _branchDetails.description;
     String get updatedOn => _branchDetails == null ? null :
             _branchDetails.updatedOn;
+    bool get canEdit => _branchDetails == null ? false :
+            _branchDetails.userCanEditBranch;
+    bool get canDelete => _branchDetails == null ? false :
+            _branchDetails.userCanDeleteBranch;
 
 
     factory ViewBranchComponent(ServerStatusService server, UserService user,
@@ -68,7 +75,14 @@ class ViewBranchComponent {
     ViewBranchComponent.direct(this._server, this._user, this.branchId,
             this.urlChangeId, this.branchDetails, this.quipPaging) {
         branchDetails.then((BranchDetails bd) {
-            _branchDetails = bd;
+            if (bd == null) {
+                // Either an error or there is no such branch.
+                _loadError = true;
+                _branchDetails = null;
+            } else {
+                _branchDetails = bd;
+                _loadError = false;
+            }
         });
     }
 }

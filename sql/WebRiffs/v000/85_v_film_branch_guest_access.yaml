@@ -101,3 +101,11 @@ view:
                 - argument:
                     name: access
                     type: varchar(64)
+        - where:
+            name: All_Allowed_Access
+            sql: Minimum_Privilege_Level <= {privilege}
+            arguments:
+                - argument:
+                    name: privilege
+                    type: int
+                    
