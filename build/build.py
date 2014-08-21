@@ -58,9 +58,9 @@ def clean_dir(*path):
     return p
 
 
-def run_command(cmd, dir, env, shell = False):
+def run_command(cmd, dirname, env, shell = False):
     print("Executing [" + "] [".join(cmd) + "]")
-    ex = subprocess.Popen(cmd, cwd = dir, env = env, shell=shell)
+    ex = subprocess.Popen(cmd, cwd = dirname, env = env, shell=shell)
     ex.wait()
     return ex.returncode
 
@@ -68,7 +68,6 @@ def run_command(cmd, dir, env, shell = False):
 def run_sqlmigrate(config, script, *args):
     c = [sys.executable, os.path.join(config['sql-migration.src.dir'], script)]
     c.extend(args)
-    path = []
     env = os.environ
     env['PYTHONPATH'] = config['sql-migration.path']
     ret = run_command(c, config['basedir'], env)
@@ -83,19 +82,25 @@ def init(config):
     config['exports.dir'] = os.path.join(config['basedir'], 'exports')
     config['root.dir'] = os.path.join(config['basedir'], '..')
     config['php.dir'] = os.path.join(config['root.dir'], 'php')
+    config['php-unittest.dir'] = os.path.join(config['php.dir'], 'test',
+            'unit_tests')
     config['client.dir'] = os.path.join(config['root.dir'], 'client')
-    config['php.dir'] = os.path.join(config['root.dir'], 'php')
     config['sql.dir'] = os.path.join(config['root.dir'], 'sql')
     config['sql-categories.dirs'] = (
-         os.path.join(config['sql.dir'], 'GroboAuth'),
-         os.path.join(config['sql.dir'], 'GroboVersion'),
-         os.path.join(config['sql.dir'], 'WebRiffs')
+            os.path.join(config['sql.dir'], 'GroboAuth'),
+            os.path.join(config['sql.dir'], 'GroboVersion'),
+            os.path.join(config['sql.dir'], 'WebRiffs')
     )
     config['sql-migration.src.dir'] = os.path.join(config['root.dir'],
-           'sql-migration', 'src')
+            'sql-migration', 'src')
     smp = [config['sql-migration.src.dir']]
     smp.extend(sys.path)
     config['sql-migration.path'] = os.pathsep.join(smp)
+    
+    config['php.phpunit'] = os.path.join(config['php.dir'], 'testlib',
+            'php-unit', 'phpunit.phar')
+    
+    
     if ('TEST_MYSQL_USER' in os.environ and 'TEST_MYSQL_PASSWD' in os.environ):
         config['sql.cmd'] =  [
                'mysql', '--user=' + os.environ['TEST_MYSQL_USER'],
@@ -131,6 +136,31 @@ def clean(config):
     if os.path.exists(config['exports.dir']):
         print("Deleting " + config['exports.dir'])
         shutil.rmtree(config['exports.dir'])
+
+
+@depends(setup)
+def test_php(config):
+    # cmd to run:
+    # php config['php.phpunit'] --coverage-html config['work.dir]/tests/php/coverage 
+    #        --strict
+    #        --color (if non-Windows)
+    #        --bootstrap (filename) (to load the dependent libraries)?
+    #        config['php-unittest.dir']
+    
+    cmd = [ "php", config['php.phpunit'], '--strict', '--coverage-html',
+           os.path.abspath(todir(os.path.join(
+                  config['work.dir'], 'tests', 'php', 'coverage'))),
+           '--bootstrap',
+           os.path.join(config['php-unittest.dir'], 'bootstrap.php')]
+    
+    # Find all the test directories
+    for root, dirs, files in os.walk(config['php-unittest.dir']):
+        if root != config['php-unittest.dir']:
+            cmd.append(root)
+    
+    ret = run_command(cmd, None, None)
+    if ret != 0:
+        raise Exception("PHP tests failed")
 
 
 @depends(setup)

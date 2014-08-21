@@ -46,7 +46,7 @@ class SearchFilterInt extends SearchFilter {
                 ($v*1 == (int) ($v*1))) {
             $x = (int) ($v * 1);
         } else {
-            $x = $this->defaultValue;
+            return $this->defaultValue;
         }
         if ($x !== null && $x < $this->minValue) {
             $x = $this->minValue;

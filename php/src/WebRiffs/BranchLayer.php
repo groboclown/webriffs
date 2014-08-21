@@ -443,7 +443,7 @@ class BranchLayer {
         $result['tags'] = $tags;
         
         
-        // FIXME this could potentially be joined up with the canAccessBranch
+        // TODO this could potentially be joined up with the canAccessBranch
         // call above to limit the number of sql calls.
         
         if ($userId === null) {
