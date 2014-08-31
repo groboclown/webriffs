@@ -140,7 +140,7 @@ class BranchTagDetails {
 
     factory BranchTagDetails.fromJson(dynamic json) {
         if (json != null && json is String) {
-            return new BranchTagDetails(name);
+            return new BranchTagDetails(json);
         }
         throw new Exception("invalid json data: expected string for tag");
     }
