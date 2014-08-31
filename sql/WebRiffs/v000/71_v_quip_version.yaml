@@ -155,7 +155,7 @@ view:
     whereClauses:
         - where:
             name: Tag_In
-            sql: (Tag_1 IN ({tag})
+            sql: (Tag_1 IN ({tag}))
             argument:
                 name: tag
                 type: nvarchar(64)
