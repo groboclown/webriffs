@@ -109,7 +109,7 @@ view:
     constraints:
         - constraint:
             type: fake index
-            columns: Film_Id, Gv_Branch_Id, User_Id
+            columns: Gv_Branch_Id, User_Id
         - constraint:
             type: fake_index
             columns: Film_Id, User_Id, Access

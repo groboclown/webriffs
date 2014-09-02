@@ -28,16 +28,26 @@ You can then create the sql files, php dbo files, and the web directory layout b
 
     python build.py all
 
+This will put the web-server files out at `build/exports`.  That directory has the correct layout as expected by the server.  Note that the web accesible files are in the `web` subdirectory.
+
 To simulate an install, you can run:
 
     python build.py copy_php_test
+
+This will remove the `admin.php` file, whose existence prohibits the normal execution of the server.
 
 You will need to setup the MySql database to load the SQL files.  You can do that by running from the `build` directory:
 
     ./recreate-db.sh
 
+This will touch the test setup page and create some initial data.
+
+    
 # Current Status
 
 The authentication, film, and branch creation/editing is present.  The quip storage and retrieval are in the workings.  The UI is just a rudimentary outline that allows for data input.
 
+## Known Bugs
 
+ * The "Add a Film" page can be accessed even if the user doesn't have the authorization to create it.  This needs to check the user access when showing the create button.
+ * 
