@@ -1,6 +1,6 @@
-#/usr/bin/python3
+# /usr/bin/python3
 
-import shutil, subprocess, distutils.dir_util, http.client
+import shutil, subprocess, distutils.dir_util
 
 # -------------------------------------------------------------------------
 # Build library
@@ -60,7 +60,7 @@ def clean_dir(*path):
 
 def run_command(cmd, dirname, env, shell = False):
     print("Executing [" + "] [".join(cmd) + "]")
-    ex = subprocess.Popen(cmd, cwd = dirname, env = env, shell=shell)
+    ex = subprocess.Popen(cmd, cwd = dirname, env = env, shell = shell)
     ex.wait()
     return ex.returncode
 
@@ -96,15 +96,15 @@ def init(config):
     smp = [config['sql-migration.src.dir']]
     smp.extend(sys.path)
     config['sql-migration.path'] = os.pathsep.join(smp)
-    
+
     config['php.phpunit'] = os.path.join(config['php.dir'], 'testlib',
             'php-unit', 'phpunit.phar')
-    
-    
+
+
     if ('TEST_MYSQL_USER' in os.environ and 'TEST_MYSQL_PASSWD' in os.environ):
-        config['sql.cmd'] =  [
+        config['sql.cmd'] = [
                'mysql', '--user=' + os.environ['TEST_MYSQL_USER'],
-               #'--host=' + os.environ['TEST_MYSQL_HOST'],
+               # '--host=' + os.environ['TEST_MYSQL_HOST'],
                '--password=' + os.environ['TEST_MYSQL_PASSWD'],
                '--batch', '--no-beep',
                os.environ['TEST_MYSQL_DBNAME'] ]
@@ -112,7 +112,7 @@ def init(config):
         config['sql.cmd'] = None
     if ('TEST_MYSQL_RoOTUSER' in os.environ and
             'TEST_MYSQL_ROOTPASSWD' in os.environ):
-        config['sql.root_cmd'] =  [
+        config['sql.root_cmd'] = [
                'mysql', '--user=' + os.environ['TEST_MYSQL_ROOTUSER'],
                '--host=' + os.environ['TEST_MYSQL_HOST'],
                '--password=' + os.environ['TEST_MYSQL_ROOTPASSWD'],
@@ -141,23 +141,23 @@ def clean(config):
 @depends(setup)
 def test_php(config):
     # cmd to run:
-    # php config['php.phpunit'] --coverage-html config['work.dir]/tests/php/coverage 
+    # php config['php.phpunit'] --coverage-html config['work.dir]/tests/php/coverage
     #        --strict
     #        --color (if non-Windows)
     #        --bootstrap (filename) (to load the dependent libraries)?
     #        config['php-unittest.dir']
-    
+
     cmd = [ "php", config['php.phpunit'], '--strict', '--coverage-html',
            os.path.abspath(todir(os.path.join(
                   config['work.dir'], 'tests', 'php', 'coverage'))),
            '--bootstrap',
            os.path.join(config['php-unittest.dir'], 'bootstrap.php')]
-    
+
     # Find all the test directories
     for root, dirs, files in os.walk(config['php-unittest.dir']):
         if root != config['php-unittest.dir']:
             cmd.append(root)
-    
+
     ret = run_command(cmd, None, None)
     if ret != 0:
         raise Exception("PHP tests failed")
@@ -179,6 +179,10 @@ def generate_dbo(config):
         dn = os.path.basename(d)
         outdir = clean_dir(config['exports.dir'], 'dbo', dn)
         run_sqlmigrate(config, 'genPhpDboLayer.py', 'Base\\DboParent',
+            dn, d, outdir)
+
+        outdir = clean_dir(config['exports.dir'], 'mock_dbo', dn)
+        run_sqlmigrate(config, 'genPhpDboMocks.py', 'Base\\DboParent',
             dn, d, outdir)
 
 
@@ -239,7 +243,7 @@ def db_clean(config):
     else:
         cmd = list(config['sql.root_cmd'])
         print("Cleaning the database")
-        ex = subprocess.Popen(cmd, shell=True, stdin = subprocess.PIPE)
+        ex = subprocess.Popen(cmd, shell = True, stdin = subprocess.PIPE)
         ex.stdin.write('SET FOREIGN_KEY_CHECKS = 0; DROP DATABASE IF EXISTS ' +
                        os.environ['TEST_MYSQL_DBNAME'] +
                        ';CREATE DATABASE ' + os.environ['TEST_MYSQL_DBNAME'] +
@@ -258,7 +262,7 @@ def db_run_sql(config):
     if 'sq.cmd' not in config:
         print("Environment not setup for running sql")
         return
-    
+
     i = 0
     cmd = list(config['sql.cmd'])
     for d in config['sql-categories.dirs']:
@@ -270,15 +274,15 @@ def db_run_sql(config):
             f = os.path.join(indir, fn)
             with open(f) as fin:
                 data = fn.read()
-                ex = subprocess.Popen(cmd, shell=True, stdin = subprocess.PIPE)
+                ex = subprocess.Popen(cmd, shell = True, stdin = subprocess.PIPE)
                 ex.stdin.write(data)
                 ex.stdin.close()
                 ex.wait()
                 if ex.returncode != 0:
                     raise Exception("Failed to process sql for " + f)
-        
+
         i += 1
-    
+
 
 
 @depends(generate_sql, db_clean, db_run_sql)
