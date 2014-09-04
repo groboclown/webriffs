@@ -14,7 +14,9 @@ import 'quip_paging.dart';
 import 'viewbranch_component.dart';
 
 /**
- * The UI component view of the list of films.
+ * The UI component view of the list of films.  The video timer controls are
+ * embedded in this component, and are accessed by this component through the
+ * `mediaStatusService` field.
  */
 @Component(
     selector: 'edit-branch',
@@ -26,15 +28,15 @@ class EditBranchComponent extends ViewBranchComponent {
 
     final QuipDetails pendingQuip = new QuipDetails.pending();
 
-    int currentMillisTime;
+
+    // FIXME include header editing with the branchinfoedit component.
 
     factory EditBranchComponent(ServerStatusService server, UserService user,
             RouteProvider routeProvider) {
         int branchId = int.parse(routeProvider.parameters['branchId']);
-        int changeId = int.parse(routeProvider.parameters['changeId']);
 
         Future<BranchDetails> branchDetails = loadBranchDetails(server,
-                branchId, changeId);
+                branchId, -1);
 
         QuipPaging quips = new QuipPaging(server, branchId, changeId);
 
@@ -50,18 +52,31 @@ class EditBranchComponent extends ViewBranchComponent {
             super.direct(server, user, branchId, urlChangeId, branchDetails,
                     quipPaging);
 
-
-    void startTimer() {
-        // FIXME
-    }
-
-    void stopTimer() {
-        // FIXME
-    }
-
     void savePendingQuip() {
         // save the quip to the server, add it to our pending quip list,
         // and clear out the pending quip.
     }
+
+    void setPendingQuipTime() {
+        if (mediaStatusService.isConnected) {
+            pendingQuip.timestamp = mediaStatusService.currentTimeMillis;
+        }
+    }
+
+
+    Future<BranchDetails> _loadEditBranchChange(ServerStatusService server,
+            int branchId) {
+        return server.get('/branch/${branchId}/pending', null)
+            .then((ServerResponse response) {
+                // FIXME this should return the pending changes between the
+                // user's branch-from version and the head version, and it
+                // should also include the head revision, so we can pull in the
+                // head branch details.
+            });
+    }
 }
+
+
+
+
 

@@ -5,6 +5,10 @@ import 'dart:async';
 
 import '../service/server.dart';
 
+/**
+ * Load all the details for the branch and change.  If you want the head
+ * revision, use a changeId = -1.
+ */
 Future<BranchDetails> loadBranchDetails(ServerStatusService server,
         int branchId, int changeId) {
     return server.get('/branch/${branchId}/version/${changeId}', null)
@@ -15,10 +19,9 @@ Future<BranchDetails> loadBranchDetails(ServerStatusService server,
             if (response.jsonData == null) {
                 return null;
             }
-            return new BranchDetails.fromJson(response.jsonData);
+            return new BranchDetails.fromJson(response.jsonData, changeId < 0);
         });
 }
-
 
 
 class BranchDetails {
@@ -29,6 +32,7 @@ class BranchDetails {
     String filmLastUpdatedOn;
 
     final int branchId;
+    final bool requestingHeadRevision;
     int changeId;
     String name;
     String description;
@@ -47,18 +51,38 @@ class BranchDetails {
 
 
 
-    factory BranchDetails.fromJson(Map<String, dynamic> json) {
-        var ret = new BranchDetails._(json['Gv_Branch_Id']);
+    factory BranchDetails.fromJson(Map<String, dynamic> json, bool isHead) {
+        var ret = new BranchDetails._(json['Gv_Branch_Id'], isHead);
         ret._loadJson(json, true);
         return ret;
     }
 
 
-    BranchDetails._(this.branchId);
+    BranchDetails._(this.branchId, this.requestingHeadRevision);
 
 
     void update(Map<String, dynamic> json) {
         _loadJson(json, false);
+    }
+
+
+    /**
+     * Load the details from the server.  This will return as a future with
+     * the server response, so errors can be handled appropriately.  On an
+     * error, this object will not be updated.
+     */
+    Future<ServerResponse> updateFromServer(ServerStatusService server) {
+        int reqChange = changeId;
+        if (requestingHeadRevision) {
+            reqChange = -1;
+        }
+        return server.get('/branch/${branchId}/version/${reqChange}', null)
+            .then((ServerResponse response) {
+                if (! response.wasError && response.jsonData != null) {
+                    update(response.jsonData);
+                }
+                return response;
+            });
     }
 
 

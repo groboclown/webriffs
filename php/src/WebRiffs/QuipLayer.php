@@ -25,7 +25,6 @@ class QuipLayer {
     
     
     
-    
     /**
      * Find the changes that have happened between the user's pending
      * version and the current head version.  These are changes on the
@@ -39,7 +38,7 @@ class QuipLayer {
         // to see if the user even has an entry for the branch (this acts as
         // access control, implicitly).
         // If there is a result, use it to
-        // Load from V_QUIP_CHANGE
+        // Load from V_QUIP_CHANGE.
         
         // Need to augment the returned list to limit the number of row results,
         // and to describe how many changes have happened to the branch

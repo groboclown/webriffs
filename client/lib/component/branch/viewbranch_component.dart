@@ -8,6 +8,9 @@ import 'package:angular/angular.dart';
 import '../../service/server.dart';
 import '../../service/user.dart';
 import '../../json/branch_details.dart';
+
+import '../media/media_status.dart';
+
 import 'quip_paging.dart';
 
 /**
@@ -21,6 +24,12 @@ class ViewBranchComponent {
     final ServerStatusService _server;
     final UserService _user;
     final Future<BranchDetails> branchDetails;
+
+    /**
+     * Communication layer between the real service, when it finally is
+     * initialized, and whatever it may be, and this outer component.
+     */
+    final MediaStatusServiceConnector mediaStatusService;
 
     final QuipPaging quipPaging;
 
@@ -73,7 +82,8 @@ class ViewBranchComponent {
     }
 
     ViewBranchComponent.direct(this._server, this._user, this.branchId,
-            this.urlChangeId, this.branchDetails, this.quipPaging) {
+            this.urlChangeId, this.branchDetails, this.quipPaging) :
+            this.mediaStatusService = new MediaStatusServiceConnector() {
         branchDetails.then((BranchDetails bd) {
             if (bd == null) {
                 // Either an error or there is no such branch.
@@ -84,6 +94,21 @@ class ViewBranchComponent {
                 _loadError = false;
             }
         });
+    }
+
+    /**
+     * Reload the branch header details.
+     */
+    Future<BranchDetails> reloadDetails() {
+        // Only force a reload if we have a first load
+        if (_branchDetails != null) {
+            return _branchDetails.updateFromServer(_server)
+                .then((ServerResponse response) {
+                    return _branchDetails;
+                });
+        } else {
+            return branchDetails;
+        }
     }
 }
 

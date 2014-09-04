@@ -50,4 +50,4 @@ The authentication, film, and branch creation/editing is present.  The quip stor
 ## Known Bugs
 
  * The "Add a Film" page can be accessed even if the user doesn't have the authorization to create it.  This needs to check the user access when showing the create button.
- * 
+ * "Branch Edit" is still under development, and isn't working.

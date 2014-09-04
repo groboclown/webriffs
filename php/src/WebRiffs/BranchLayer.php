@@ -398,7 +398,7 @@ class BranchLayer {
             return false;
         }
         
-        if ($changeId <= 0) {
+        if ($changeId < 0) {
             // Get the head revision
             $data = VFilmBranchHead::$INSTANCE->readBy_Gv_Branch_Id($db, $branchId);
         } else {
