@@ -11,7 +11,8 @@ import 'filminfoedit_component.dart';
 
 import '../../util/async_component.dart';
 
-// FIXME switch this to ../../json/branch_details.dart
+import '../../json/film_details.dart';
+// FIXME switch this to using the film_details import.
 import 'filmlist_component.dart';
 
 /**
@@ -134,7 +135,7 @@ class ViewFilmComponent extends PagingComponent {
         links.clear();
         List<Map<String, dynamic>> jsonLinks = resp.jsonData['links'];
         jsonLinks.forEach((Map<String, dynamic> row) {
-            links.add(new LinkRecord.fromJson(_server, row));
+            links.add(new LinkRecord.fromJson(row));
         });
     }
 
@@ -175,73 +176,13 @@ class ViewFilmComponent extends PagingComponent {
     }
 
 
+    Future<ServerResponse> saveLink(LinkRecord link) {
+        return link.save(_server);
+    }
+
+
     void revert() {
         _isEditing = false;
     }
 }
 
-
-
-class LinkRecord {
-    final ServerStatusService _server;
-    final int filmId;
-    final String urlPrefix;
-    final String name;
-    final String desc;
-    String serverUri;
-    String errorUri;
-    String uri;
-    String error;
-    bool get hasError => uri == errorUri && error != null;
-
-    bool get isChanged => uri != serverUri;
-    bool get isUnchanged => uri == serverUri;
-
-    String get url => uri == null ? null : urlPrefix + uri;
-    bool get isDefined => url != null;
-
-
-    factory LinkRecord.fromJson(ServerStatusService server,
-            Map<String, dynamic> row) {
-        return new LinkRecord(server, row['Film_Id'], row['Url_Prefix'],
-                row['Name'], row['Description'], row['Uri']);
-    }
-
-
-    LinkRecord(this._server, this.filmId, this.urlPrefix,
-           this.name, this.desc, this.serverUri) {
-        this.uri = serverUri;
-    }
-
-
-    Map<String, dynamic> toJson() {
-        Map<String, dynamic> ret = {};
-        ret['Uri'] = uri;
-        return ret;
-    }
-
-
-    void cancel() {
-        this.uri = serverUri;
-    }
-
-    Future<ServerResponse> save() {
-        return _server.createCsrfToken('save_film_link').then(
-                (String csrfToken) {
-            final String submittedUri = uri;
-            Map<String, dynamic> data = toJson();
-            return _server.post('film/' + filmId.toString() + '/link/' + name,
-                    csrfToken, data: data)
-                .then((ServerResponse resp) {
-                    if (resp.wasError) {
-                        error = resp.message;
-                        errorUri = submittedUri;
-                    } else {
-                        error = null;
-                        serverUri = submittedUri;
-                        errorUri = null;
-                    }
-                });
-        });
-    }
-}

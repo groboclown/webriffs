@@ -424,6 +424,7 @@ class BranchLayer {
                 ));
         }
         $result = $data['result'][0];
+        $filmId = intval($result['Film_Id']);
         
         if ($changeId <= 0) {
             $data = VBranchTagHead::$INSTANCE->readBy_Gv_Branch_Id($db, $branchId);
@@ -470,6 +471,8 @@ class BranchLayer {
             $access[$accessRow['Access']] = true;
         }
         $result['access'] = $access;
+        
+        $result['film_links'] = FilmLayer::getLinksForFilm($db, $filmId);
         
         return $result;
     }

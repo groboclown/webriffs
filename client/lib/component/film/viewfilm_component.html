@@ -32,7 +32,7 @@
                     <span>{{link.urlPrefix}}<input type="text" ng-model="link.uri"></span>
                     <span><button ng-click="link.cancel()"
                         ng-disabled="link.isUnchanged">X</button></span>
-                    <span><input type="submit" ng-click="link.save()"
+                    <span><input type="submit" ng-click="cmp.saveLink(link)"
                         ng-disabled="link.isUnchanged" value="Save"></span>
                     <span ng-if="link.hasError">{{link.error}}</span>
                 </form>

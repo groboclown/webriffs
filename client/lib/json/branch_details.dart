@@ -5,6 +5,8 @@ import 'dart:async';
 
 import '../service/server.dart';
 
+import 'film_details.dart';
+
 /**
  * Load all the details for the branch and change.  If you want the head
  * revision, use a changeId = -1.
@@ -48,6 +50,8 @@ class BranchDetails {
     bool userCanReadQuips = false;
     bool userCanEditQuips = false;
     bool userCanEditQuipTags = false;
+
+    List<LinkRecord> filmLinks = [];
 
 
 
@@ -150,6 +154,15 @@ class BranchDetails {
             }
             if (access.containsKey('quip-tag') && access['quip-tag']) {
                 userCanEditQuipTags = true;
+            }
+        }
+
+        if (json.containsKey('film_links') && json['film_links'] is List) {
+            filmLinks = [];
+            for (var link in json['film_link']) {
+                if (link is Map) {
+                    filmLinks.add(new LinkRecord.fromJson(link));
+                }
             }
         }
     }

@@ -111,7 +111,13 @@ if ($data === null) {
     $result['create_link_imdb'] = $data;
 }
 
-// Youtube?
+$data = WebRiffs\AdminLayer::getLinkNamed($db, 'YouTube');
+if ($data === null) {
+    $data = WebRiffs\AdminLayer::createLink($db, 'YouTube',
+            'Google YouTube', 'https://youtube.com/watch?v=',
+            '^[a-zA-Z0-9]+$');
+    $result['create_link_youtube'] = $data;
+}
 
 
 // ---------------------------------------------------------------------------
@@ -164,6 +170,9 @@ WebRiffs\FilmLayer::saveLinkForFilm($db, $slacker1991Id, "imdb.com",
     "tt0102943");
 WebRiffs\FilmLayer::saveLinkForFilm($db, $slacker1991Id, "wikipedia-en",
     "Slacker_(film)");
+WebRiffs\FilmLayer::saveLinkForFilm($db, $slacker1991Id, "YouTube",
+    "sZSkyWDF6UY");
+//sZSkyWDF6UY
 
 // ---------------------------------------------------------------------------
 // Create tags for the branch (header updates)

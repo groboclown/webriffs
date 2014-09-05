@@ -122,14 +122,6 @@ class MediaComponent extends ShadowRootAware implements DetachAware {
                     ' media="cmp.media"></' + mediaService.htmlTag + '>');
             ViewFactory template = _compiler([ inner ], _directives);
             Scope childScope = _scope.createChild(_scope.context);
-            Module childModule =
-                    new Module()..bind(Scope, toValue: childScope);
-
-            // FIXME the child injector scope is now deprecated.
-            // What do we replace this with?
-            //Injector childInjector = _injector.createChild(
-            //        [new Module()..bind(Scope, toValue: childScope)]);
-            //template(childScope, childInjector, [ inner ]);
             template(childScope, null, [ inner ]);
         });
     }
