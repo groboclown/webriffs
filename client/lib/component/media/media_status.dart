@@ -130,7 +130,7 @@ class MediaStatusServiceConnector extends MediaStatusService {
  * `htmlTag` attribute.
  */
 abstract class AbstractMediaStatusComponent {
-    @NgOneWay('media')
+    //@NgOneWay('media')
     set media(Future<MediaStatusService> service);
 }
 

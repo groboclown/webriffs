@@ -57,7 +57,7 @@ class WebRiffsModule extends Module {
 
         // Make sure the full path and query are used by the router.
         bind(NgRoutingUsePushState, toFactory:
-            (_) => new NgRoutingUsePushState.value(false));
+            () => new NgRoutingUsePushState.value(false));
     }
 }
 

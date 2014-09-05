@@ -1,7 +1,7 @@
 name: webriffs_client
 dependencies:
   browser: any
-  angular: 0.10.0
+  angular: ">=0.14.0"
   web_components: any
 dev_dependencies:
   unittest: any
