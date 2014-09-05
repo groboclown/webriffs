@@ -1,0 +1,22 @@
+<div ng-if="! cmp.loaded">
+loading...
+</div>
+<div ng-if="cmp.loaded">
+  <form onsubmit="return false;">
+    <div>
+        <span ng-if="cmp.status.playing">Playing</span>
+        <span ng-if="cmp.status.waiting"></span>
+        <span>{{cmp.time}}</span>
+    </div>
+    <div>
+        <span ng-if="cmp.status.playing" ng-click="cmp.pause()">Pause</span>
+        <span ng-if="cmp.status.waiting" ng-click="cmp.start()">Play</span>
+        <span ng-click="cmp.stop()">Stop</span>
+    </div>
+    <div>
+        <input type="text" ng-model="cmp.timeField">
+        <input type="submit" ng-click="cmp.setTime()" value="Set time">
+        <span ng-if="cmp.hasTimeFieldFormatError">Bad time format</span>
+    </div>
+  </form>
+</div>

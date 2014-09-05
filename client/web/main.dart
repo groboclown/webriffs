@@ -20,6 +20,8 @@ import 'package:webriffs_client/component/branch/editbranch_component.dart';
 import 'package:webriffs_client/component/branch/viewbranch_component.dart';
 import 'package:webriffs_client/component/branch/playbranch_component.dart';
 import 'package:webriffs_client/component/branch/branchupdates_component.dart';
+import 'package:webriffs_client/component/media/media_component.dart';
+import 'package:webriffs_client/component/media/stopwatch_media_component.dart';
 //import 'package:webriffs_client/component/_component.dart';
 import 'package:webriffs_client/service/server.dart';
 import 'package:webriffs_client/service/user.dart';
@@ -43,6 +45,8 @@ class WebRiffsModule extends Module {
         bind(CreateBranchComponent);
         bind(FilmInfoEditComponent);
         bind(BranchUpdatesComponent);
+        bind(MediaComponent);
+        bind(StopwatchMediaComponent);
 
         // Stateful Services
         bind(ServerStatusService);

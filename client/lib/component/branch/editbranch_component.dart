@@ -38,18 +38,18 @@ class EditBranchComponent extends ViewBranchComponent {
         Future<BranchDetails> branchDetails = loadBranchDetails(server,
                 branchId, -1);
 
-        QuipPaging quips = new QuipPaging(server, branchId, changeId);
+        QuipPaging quips = new QuipPaging.pending(server, branchId);
 
-        return new EditBranchComponent._(server, user, branchId, changeId,
+        return new EditBranchComponent._(server, user, branchId,
                 branchDetails, quips);
     }
 
     EditBranchComponent._(ServerStatusService server, UserService user,
-            int branchId, int urlChangeId, Future<BranchDetails> branchDetails,
+            int branchId, Future<BranchDetails> branchDetails,
             QuipPaging quipPaging) :
             _server = server,
             _user = user,
-            super.direct(server, user, branchId, urlChangeId, branchDetails,
+            super.direct(server, user, branchId, null, branchDetails,
                     quipPaging);
 
     void savePendingQuip() {
@@ -64,19 +64,20 @@ class EditBranchComponent extends ViewBranchComponent {
     }
 
 
-    Future<BranchDetails> _loadEditBranchChange(ServerStatusService server,
-            int branchId) {
-        return server.get('/branch/${branchId}/pending', null)
+    Future<BranchDetails> _loadEditBranchChange(ServerStatusService server) {
+        return branchDetails
+            .then((BranchDetails details) =>
+                    details.updateFromServer(server))
+            .then((ServerResponse response) =>
+                    server.get('/branch/${branchId}/pending', null))
             .then((ServerResponse response) {
                 // FIXME this should return the pending changes between the
                 // user's branch-from version and the head version, and it
                 // should also include the head revision, so we can pull in the
                 // head branch details.
+
+                return branchDetails;
             });
     }
 }
-
-
-
-
 

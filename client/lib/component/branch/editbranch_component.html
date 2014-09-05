@@ -1,9 +1,35 @@
 <div>
-    <a ng-href="#/film/view/{{cmp.filmId}}" ng-if="cmp.filmId != null">Film Details</a>
+<a ng-href="#/film/view/{{cmp.filmId}}" ng-if="cmp.loaded">Film Details</a>
+<a ng-href="#/branch/changes/{{cmp.branchId}}" ng-if="cmp.branchId != null">Branch History</a>
+</div>
+
+<div ng-if="! cmp.canEdit">
+Unfortunately, you don't have permissions to edit this branch.
+</div>
+<div ng-if="cmp.canEdit">
+    
+    <div ng-if="cmp.loaded">
+        <div><span>{{cmp.filmName}}</span> <span>({{cmp.filmReleaseYear}})</span>
+            <span ng-if="cmp.urlChangeId != 0">(revision {{cmp.changeId}})</span>
+        </div>
+        <div>{{cmp.branchName}}</div>
+        <div>{{cmp.description}}</div>
+        <div>Last updated on {{cmp.updatedOn}}</div>
+    </div>
+    <div ng-if="! cmp.loaded">
+        <span ng-if="cmp.loadError">Problem loading branch.  You may not have
+        permission to see it.</span>
+        <span ng-if="! cmp.loadError">loading...</span>
+    </div>
+
+    <branch-updates current-branch="cmp.branchDetails"></branch-updates>
+    
+    <media-controller branch-details="cmp.branchDetails"></media-controller>
+    
     <div>
         <!-- filter controls -->
     </div>
-    <page-control page-state="cmp.pageState">
+    <page-control page-state="cmp.quipPaging">
         <table>
             <thead>
                 <tr>
@@ -13,10 +39,17 @@
                     <th>Tags</th>
                 </tr>
             </thead>
-            <tbody ng-if="cmp.pageState.loadedFromServer">
-            
-            <!--  FIXME first row is always the empty one. -->
-            
+            <tbody ng-if="cmp.quipPaging.loadedSuccessful">
+                <tr ng-repeat="quip in cmp.quips">
+                    <!-- FIXME handle committed timestamp -->
+                    <td>{{quip.timestamp}}</td>
+                    <td>{{quip.text}}</td>
+                    <td>
+                        <span ng-repeat="tag in quip.tags">
+                            {{tag.name}}
+                        </span>
+                    </td>
+                </tr>
             </tbody>
         </table>
     </page-control>

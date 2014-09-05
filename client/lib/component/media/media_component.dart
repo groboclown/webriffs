@@ -1,4 +1,4 @@
-library media_status_component;
+library media_component;
 
 import 'dart:async';
 import 'dart:html';
@@ -15,16 +15,20 @@ import 'media_status_loader.dart';
 /**
  * The generic top-level media component that loads the dynamically loaded
  * media component, based on the media type.
+ *
+ * When the page is changes, this will force the underlying media component
+ * to stop.
  */
 @Component(
     selector: 'media-controller',
-    templateUrl: 'packages/webriffs_client/component/media/media_component.html',
+    template: '<div id="media"></div>',
     publishAs: 'cmp')
-class MediaComponent extends ShadowRootAware {
+class MediaComponent extends ShadowRootAware implements DetachAware {
     final Compiler _compiler;
     final Injector _injector;
     final Scope _scope;
     final DirectiveMap _directives;
+    RouteHandle _route;
 
     @NgOneWay('branch-details')
     set branchDetails(Future<BranchDetails> details) {
@@ -95,17 +99,27 @@ class MediaComponent extends ShadowRootAware {
 
 
 
-
-
     MediaComponent(this._compiler, this._injector, this._scope,
-            this._directives);
+            this._directives, RouteProvider routeProvider) {
+        _route = routeProvider.route.newHandle();
+        _route.onPreLeave.listen((RouteEvent e) {
+            if (_realMedia != null) {
+                _realMedia.forceStop();
+            }
+        });
+    }
+
+    void detach() {
+        // The route handle must be discarded.
+        _route.discard();
+    }
 
     void onShadowRoot(ShadowRoot shadowRoot) {
         media.then((MediaStatusService mediaService) {
             setRealMedia(mediaService);
             DivElement inner = shadowRoot.querySelector('#media');
             inner.appendHtml('<' + mediaService.htmlTag +
-                    ' media="cmp."></' + mediaService.htmlTag + '>');
+                    ' media="cmp.media"></' + mediaService.htmlTag + '>');
             ViewFactory template = _compiler([ inner ], _directives);
             Scope childScope = _scope.createChild(_scope.context);
             Injector childInjector = _injector.createChild(

@@ -131,7 +131,7 @@ class MediaStatusServiceConnector extends MediaStatusService {
  */
 abstract class AbstractMediaStatusComponent {
     @NgOneWay('media')
-    set media(MediaStatusService service);
+    set media(Future<MediaStatusService> service);
 }
 
 

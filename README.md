@@ -4,15 +4,25 @@ webriffs
 Custom movie riffs managed from your web browser.
 
 
+
 # Why WebRiffs?
 
 Have you ever watched _Mystery Science Theater 3000_ or _Riff Tracks_ and thought, "Hey, I could do that!" but didn't have the tools to record your comments?  Well now you can!
 
 WebRiffs allows you to create your own comments to a film (with time markers), and share them with friends.  You can even collaborate with friends to create community comments.
 
+
+
+# How it Works
+
+In WebRiffs, each registered film has a set of _branches_.  These branches can have their own set of comments, called "quips".  This allows for comments to be in different groups, such as one for "snark" and one for "filming locations".
+
+
 # What's Required
 
 WebRiffs runs on PHP and MySQL, and uses the browser to manage and maintain a repository of comments.
+
+
 
 # Building WebRiffs
 
@@ -42,12 +52,25 @@ You will need to setup the MySql database to load the SQL files.  You can do tha
 
 This will touch the test setup page and create some initial data.
 
+
     
 # Current Status
 
 The authentication, film, and branch creation/editing is present.  The quip storage and retrieval are in the workings.  The UI is just a rudimentary outline that allows for data input.
 
+## Feature Status
+
+ * The User Interface is just the bare minimum to show the data.  Later, a massive undertaking will begin to style and shape the html.
+ * User authentication is complete.
+ * Films 
+ * Branch editing is still under development.
+ * There's currently no way to recover a lost password.
+ * Administrative tools are non-existent beyond site set-up.
+ * Currently there's only support for a "stopwatch" video timer.  Eventually, this will allow for embeddable video playback services such as YouTube and Twitch.
+
 ## Known Bugs
 
  * The "Add a Film" page can be accessed even if the user doesn't have the authorization to create it.  This needs to check the user access when showing the create button.
- * "Branch Edit" is still under development, and isn't working.
+ * The "Edit this branch" link on the "View Branch" page is flaky.  It appears at odd times.  If you log out, the link is still on the page.
+ * Need to add sercurity checks at the top of each page, to see if the user has access to that functionality. 
+ 
