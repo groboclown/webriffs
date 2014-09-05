@@ -4,6 +4,7 @@ library editbranch_component;
 import 'dart:async';
 
 import 'package:angular/angular.dart';
+import 'package:logging/logging.dart';
 
 import '../../service/user.dart';
 import '../../service/server.dart';
@@ -23,6 +24,8 @@ import 'viewbranch_component.dart';
     templateUrl: 'packages/webriffs_client/component/branch/editbranch_component.html',
     publishAs: 'cmp')
 class EditBranchComponent extends ViewBranchComponent {
+    static final Logger _log = new Logger('media.StopwatchMedia');
+
     final ServerStatusService _server;
     final UserService _user;
 
@@ -55,11 +58,14 @@ class EditBranchComponent extends ViewBranchComponent {
     void savePendingQuip() {
         // save the quip to the server, add it to our pending quip list,
         // and clear out the pending quip.
+        _log.warning("Saving not implemented");
     }
 
     void setPendingQuipTime() {
         if (mediaStatusService.isConnected) {
             pendingQuip.timestamp = mediaStatusService.currentTimeMillis;
+        } else {
+            _log.warning('media service is not connected');
         }
     }
 

@@ -21,7 +21,7 @@ import 'media_status_loader.dart';
  */
 @Component(
     selector: 'media-controller',
-    template: '<div id="media"></div>',
+    template: '<script>var media_config = null;</script><div id="media"></div>',
     publishAs: 'cmp')
 class MediaComponent extends ShadowRootAware implements DetachAware {
     final Compiler _compiler;

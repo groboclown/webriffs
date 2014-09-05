@@ -1,0 +1,146 @@
+<div ng-if="! cmp.loaded">
+loading...
+</div>
+<div ng-if="cmp.loaded">
+  <div id="youtube_player"></div>
+  <script>//<!--
+// REFERENCE:
+// https://developers.google.com/youtube/iframe_api_reference#Loading_a_Video_Player
+var youtube = {
+    // The YouTube player object.
+    player: null,
+
+    // List of functions that will be called when the video player is ready.
+    onPlayerReady: [],
+
+    // List of functions that will be called when the player's state changes.
+    onPlayerStateChange: [],
+    
+    // List of functions that will be called when the player encounters an error
+    // Argument:
+    // 2 – The request contains an invalid parameter value. For example, this error occurs if you specify a video ID that does not have 11 characters, or if the video ID contains invalid characters, such as exclamation points or asterisks.
+    // 5 – The requested content cannot be played in an HTML5 player or another error related to the HTML5 player has occurred.
+    // 100 – The video requested was not found. This error occurs when a video has been removed (for any reason) or has been marked as private.
+    // 101 – The owner of the requested video does not allow it to be played in embedded players.
+    onError: [],
+
+    lastPlayerState: null,
+    
+    // -2: not loaded
+    // -1: unstarted
+    // 0: ended
+    // 1: playing
+    // 2: paused
+    // 3: buffering
+    // 4: video cued
+    getPlayerState: function() {
+        if (youtube.player == null) {
+            return -2;
+        }
+        return youtube.player.getPlayerState();
+    },
+    
+    /**
+     * Current time in seconds since the video started playing (float)
+     */
+    getPlaybackSeconds: function() {
+        if (youtube.player == null) {
+            return 0.0;
+        }
+        return youtube.player.getCurrentTime();
+    },
+    
+    getDuration: function() {
+        if (youtube.player == null) {
+            return -1.0;
+        }
+        return youtube.player.getDuration();
+    },
+    
+    stop: function() {
+        youtube.player.stopVideo();
+    },
+    
+    pause: function() {
+        youtube.player.pauseVideo();
+    },
+    
+    play: function() {
+        youtube.player.playVideo();
+    },
+    
+    seekTo: function(seconds) {
+        youtube.player.seekTo(seconds, true);
+    },
+    
+    getBufferedFraction: function() {
+        return youtube.player.getVideoLoadedFraction();
+    },
+    
+    videoId: null,
+    
+    setVideoId: function(id) {
+        youtube.videoId = id;
+        if (youtube._isReady) {
+            youtube.player.loadVideoById(id);
+        }
+    },
+    
+    isReady: false,
+    
+    // private initialization stuff.
+    _tag: null,
+    _firstScriptTag: null,
+    _onReady: function(event) {
+        youtube._isReady = true;
+        for (var i = 0; i < youtube.onPlayerReady.length; ++i) {
+            youtube.onPlayerReady[i](event);
+        }
+    },
+    _onStateChange: function(event) {
+        youtube.lastPlayerState = event.data;
+        for (var i = 0; i < youtube.onPlayerStateChange.length; ++i) {
+            youtube.onPlayerStateChange[i](event);
+        }
+    },
+    _onError: function(event) {
+        var errcode = event.data;
+        if (errcode == 150) {
+            errcode = 101;
+        }
+        for (var i = 0; i < youtube.onError.length; ++i) {
+            youtube.onError[i](event);
+        }
+    }
+};
+media_config = youtube;
+
+youtube._tag = document.createElement('script');
+youtube._tag.src = "https://www.youtube.com/iframe_api";
+youtube._firstScriptTag = document.getElementsByTagName('script')[0];
+youtube._firstScriptTag.parentNode.insertBefore(
+        youtube._tag, youtube._firstScriptTag);
+
+
+function onYouTubeIframeAPIReady() {
+    var arg = {
+        height: '390',
+        width: '640',
+        playerVars: { 'autoplay': 0 },
+        events: {
+            'onReady': youtube._onReady,
+            'onStateChange': youtube._onStateChange,
+            //'onPlaybackQualityChange': null,
+            //'onPlaybackRateChange'
+            //'onApiChange'
+            'onError': youtube._onError
+        }
+    };
+    if (videoId != null) {
+        arg.videoId = youtube.videoId;
+    }
+    youtube.player = new YT.Player('youtube_player', arg);
+}
+
+// --></script>
+</div>

@@ -159,7 +159,7 @@ class BranchDetails {
 
         if (json.containsKey('film_links') && json['film_links'] is List) {
             filmLinks = [];
-            for (var link in json['film_link']) {
+            for (var link in json['film_links']) {
                 if (link is Map) {
                     filmLinks.add(new LinkRecord.fromJson(link));
                 }

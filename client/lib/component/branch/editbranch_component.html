@@ -29,6 +29,22 @@ Unfortunately, you don't have permissions to edit this branch.
     <div>
         <!-- filter controls -->
     </div>
+    <div>
+        <!-- new quip to add -->
+        <form onsubmit="return false;">
+            Add a quip:
+            <div>
+            Time: <input type="text" ng-model="cmp.pendingQuip.timestamp">
+            <button ng-click="cmp.setPendingQuipTime()">Set</button>
+            </div>
+            <div>
+            <input type="text" ng-model="cmp.pendingQuip.text">
+            </div>
+            <div>
+            Quip: <input type="submit" ng-click="cmp.savePendingQuip()">
+            </div>
+        </form>
+    </div>
     <page-control page-state="cmp.quipPaging">
         <table>
             <thead>

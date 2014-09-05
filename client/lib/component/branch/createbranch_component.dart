@@ -32,7 +32,17 @@ class CreateBranchComponent extends RequestHandlingComponent {
         lookupName.filmId = i;
     }
 
-    bool showCreateBranch;
+    @NgOneWay('always-show')
+    bool alwaysShowCreate = false;
+
+    bool _showCreateToggle = false;
+
+    bool get showCreateBranch => _showCreateToggle || alwaysShowCreate;
+
+    set showCreateBranch(bool s) {
+        _showCreateToggle = s;
+    }
+
     bool get canCreateBranch => _user.canCreateBranch;
 
     bool get disabled => filmId != null && ! lookupName.okayToSubmit;
