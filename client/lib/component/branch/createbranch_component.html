@@ -1,6 +1,5 @@
 <div ng-if="cmp.canCreateBranch">
     <div ng-if="cmp.showCreateBranch">
-        <async-status parent="cmp"></async-status>
         <form onsubmit="return false;">
            <async-status parent="cmp.lookupName"></async-status>
            <div>
@@ -17,6 +16,7 @@
              <button ng-click="cmp.cancel()">Cancel</button>
            </div>
         </form>
+        <async-status parent="cmp"></async-status>
     </div>
     <div ng-if="! cmp.showCreateBranch">
         <span ng-click="cmp.showCreateBranch = true">Create a new branch</span>

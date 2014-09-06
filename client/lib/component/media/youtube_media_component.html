@@ -1,7 +1,12 @@
+Youtube media viewer
+
 <div ng-if="! cmp.loaded">
 loading...
 </div>
 <div ng-if="cmp.loaded">
+Youtube media viewer
+  <div ng-if="cmp.youtubeLoading">loading Youtube...</div>
+  <div ng-if="! cmp.youtubeLoading"> should have loaded </div>
   <div id="youtube_player"></div>
   <script>//<!--
 // REFERENCE:
@@ -18,10 +23,10 @@ var youtube = {
     
     // List of functions that will be called when the player encounters an error
     // Argument:
-    // 2 – The request contains an invalid parameter value. For example, this error occurs if you specify a video ID that does not have 11 characters, or if the video ID contains invalid characters, such as exclamation points or asterisks.
-    // 5 – The requested content cannot be played in an HTML5 player or another error related to the HTML5 player has occurred.
-    // 100 – The video requested was not found. This error occurs when a video has been removed (for any reason) or has been marked as private.
-    // 101 – The owner of the requested video does not allow it to be played in embedded players.
+    // 2 - The request contains an invalid parameter value. For example, this error occurs if you specify a video ID that does not have 11 characters, or if the video ID contains invalid characters, such as exclamation points or asterisks.
+    // 5 - The requested content cannot be played in an HTML5 player or another error related to the HTML5 player has occurred.
+    // 100 - The video requested was not found. This error occurs when a video has been removed (for any reason) or has been marked as private.
+    // 101 - The owner of the requested video does not allow it to be played in embedded players.
     onError: [],
 
     lastPlayerState: null,
@@ -80,19 +85,39 @@ var youtube = {
     videoId: null,
     
     setVideoId: function(id) {
+        console.log("set the video id: " + id);
         youtube.videoId = id;
-        if (youtube._isReady) {
-            youtube.player.loadVideoById(id);
+        if (youtube.isLoaded) {
+            if (youtube.isReady) {
+                youtube.player.loadVideoById(id);
+            } else {
+                // Rerun the ready listener, this time
+                // we have a videoId, so it will create the
+                // object.
+                console.log("video id = " + id + "; the player is loaded, but not ready.  Should not happen!");
+                onYouTubeIframeAPIReady();
+            }
+        } else if (! youtube._initialized) {
+            youtube._initialized = true;
+            youtube._tag = document.createElement('script');
+            youtube._tag.src = "https://www.youtube.com/iframe_api";
+            youtube._firstScriptTag = document.getElementsByTagName('script')[0];
+            youtube._firstScriptTag.parentNode.insertBefore(
+                    youtube._tag, youtube._firstScriptTag);
+        } else {
+            console.log("video id = " + id + "; the player is not loaded but is initialized; the video id was probably set too quickly.  Ignoring.");
         }
     },
     
     isReady: false,
+    isLoaded: false,
     
     // private initialization stuff.
+    _initialized: false,
     _tag: null,
     _firstScriptTag: null,
     _onReady: function(event) {
-        youtube._isReady = true;
+        youtube.isReady = true;
         for (var i = 0; i < youtube.onPlayerReady.length; ++i) {
             youtube.onPlayerReady[i](event);
         }
@@ -115,31 +140,29 @@ var youtube = {
 };
 media_config = youtube;
 
-youtube._tag = document.createElement('script');
-youtube._tag.src = "https://www.youtube.com/iframe_api";
-youtube._firstScriptTag = document.getElementsByTagName('script')[0];
-youtube._firstScriptTag.parentNode.insertBefore(
-        youtube._tag, youtube._firstScriptTag);
-
 
 function onYouTubeIframeAPIReady() {
-    var arg = {
-        height: '390',
-        width: '640',
-        playerVars: { 'autoplay': 0 },
-        events: {
-            'onReady': youtube._onReady,
-            'onStateChange': youtube._onStateChange,
-            //'onPlaybackQualityChange': null,
-            //'onPlaybackRateChange'
-            //'onApiChange'
-            'onError': youtube._onError
-        }
-    };
-    if (videoId != null) {
-        arg.videoId = youtube.videoId;
+    youtube.isLoaded = true;
+    if (youtube.videoId != null) {
+        console.log("Creating the iframe player");
+        var arg = {
+            height: '390',
+            width: '640',
+            playerVars: { 'autoplay': 0 },
+            videoId: youtube.videoId,
+            events: {
+                'onReady': youtube._onReady,
+                'onStateChange': youtube._onStateChange,
+                //'onPlaybackQualityChange': null,
+                //'onPlaybackRateChange'
+                //'onApiChange'
+                'onError': youtube._onError
+            }
+        };
+        youtube.player = YT.Player('youtube_player', arg);
+    } else {
+        console.log("Delaying the iframe player creation until we have a videoId");
     }
-    youtube.player = new YT.Player('youtube_player', arg);
 }
 
 // --></script>

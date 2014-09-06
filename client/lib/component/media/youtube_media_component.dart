@@ -4,7 +4,7 @@ import 'dart:async';
 import 'dart:js';
 
 import 'package:angular/angular.dart';
-//import 'package:logging/logging.dart';
+import 'package:logging/logging.dart';
 
 import '../../json/branch_details.dart';
 import '../../json/film_details.dart';
@@ -19,23 +19,24 @@ import 'media_status.dart';
  * error.  This should be a timer that keeps checking if the object is
  * null or not, and when not null, will register functions.
  */
-class YouTubeMediaStatusService extends MediaStatusService {
+class YouTubeMediaStatusService extends AbstractMediaStatusService {
+    static final Logger _log = new Logger('media.YoutubeMedia');
     static final String YOUTUBE_LINK_URL = "https://youtube.com/watch?v=";
 
 
     MediaStatus _status = MediaStatus.ENDED;
-    final List<OnStatusChange> _listeners = [];
-    final BranchDetails _branchDetails;
     int _baseTimeMillis = 0;
     JsObject _yt;
     String _videoId;
 
-    YouTubeMediaStatusService(this._branchDetails) {
-        if (findYoutubeVideoId(_branchDetails) == null) {
+    YouTubeMediaStatusService(BranchDetails branchDetails) :
+            super('youtube-media', branchDetails) {
+        if (findYoutubeVideoId(branchDetails) == null) {
             throw new Exception("Invalid branch: no youtube link");
         }
-        _searchForYouTubeObj();
     }
+
+    bool get loaded => _yt != null;
 
     @override
     int get currentTimeMillis => _yt == null
@@ -62,32 +63,6 @@ class YouTubeMediaStatusService extends MediaStatusService {
         }
     }
 
-    @override
-    String get htmlTag => 'youtube-media';
-
-    @override
-    BranchDetails get branchDetails => _branchDetails;
-
-    @override
-    void addStatusChangeListener(OnStatusChange listener) {
-        if (listener != null) {
-            _listeners.add(listener);
-        }
-    }
-
-    @override
-    void removeStatusChangeListener(OnStatusChange listener) {
-        if (listener != null) {
-            _listeners.remove(listener);
-        }
-    }
-
-
-    @override
-    void forceStop() {
-        stop();
-    }
-
 
     void stop() {
         if (_yt != null) {
@@ -105,27 +80,33 @@ class YouTubeMediaStatusService extends MediaStatusService {
 
     void pause() {
         if (_yt != null) {
-            _yt.callMethod('play', []);
+            _yt.callMethod('pause', []);
         }
     }
 
 
-    void _fireEvent() {
-        for (OnStatusChange listener in _listeners) {
-            listener(this);
-        }
+    @override
+    void pageLoaded() {
+        super.pageLoaded();
+        searchForYouTubeObj();
     }
 
 
-    void _searchForYouTubeObj() {
+    void searchForYouTubeObj() {
         var obj = context['media_config'];
+        _log.info("**** media_config = ${obj}");
         if (obj == null) {
-            new Timer(new Duration(microseconds: 2), () {
-                _searchForYouTubeObj();
-            });
+            if (isPageVisible) {
+                _log.info("searching for youtube");
+                new Timer(new Duration(microseconds: 200), () {
+                    searchForYouTubeObj();
+                });
+            }
             return;
         }
         if (obj is JsObject) {
+            _log.info("found something like the youtube javascript object");
+
             // assume it's the right object
             obj.callMethod('setVideoId',
                     [ findYoutubeVideoId(branchDetails) ]);
@@ -152,12 +133,15 @@ class YouTubeMediaStatusService extends MediaStatusService {
     selector: 'youtube-media',
     templateUrl: 'packages/webriffs_client/component/media/youtube_media_component.html',
     publishAs: 'cmp')
-class YouTubeMediaComponent extends AbstractMediaStatusComponent {
-    //static final Logger _log = new Logger('media.StopwatchMedia');
-
+class YouTubeMediaComponent implements AbstractMediaStatusComponent {
+    RouteHandle _route;
     YouTubeMediaStatusService _media;
 
     bool get loaded => _media != null;
+
+    bool get youtubeLoading => _media == null
+            ? true
+            : ! _media.loaded;
 
     MediaStatus get status => _media == null
             ? MediaStatus.ENDED
@@ -166,14 +150,19 @@ class YouTubeMediaComponent extends AbstractMediaStatusComponent {
     @NgOneWay('media')
     @override
     set media(Future<MediaStatusService> serviceFuture) {
+        print("Set the media service in the youtube component");
         serviceFuture.then((MediaStatusService service) {
             if (service is YouTubeMediaStatusService) {
+                print("Media service loaded!!!");
                 _media = service;
+                if (_media.isPageVisible) {
+                    print("Forcing a service search");
+                    _media.searchForYouTubeObj();
+                }
             } else {
                 throw new Exception("Invalid media status service ${service}");
             }
         });
     }
-
 }
 

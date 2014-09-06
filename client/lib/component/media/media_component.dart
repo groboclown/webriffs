@@ -4,6 +4,8 @@ import 'dart:async';
 import 'dart:html';
 
 import 'package:angular/angular.dart';
+//import 'package:angular/core_dom/directive_injector.dart';
+import 'package:logging/logging.dart';
 
 import '../../json/branch_details.dart';
 
@@ -24,6 +26,8 @@ import 'media_status_loader.dart';
     template: '<script>var media_config = null;</script><div id="media"></div>',
     publishAs: 'cmp')
 class MediaComponent extends ShadowRootAware implements DetachAware {
+    final Logger _log = new Logger('components.MediaComponent');
+
     final Compiler _compiler;
     final Injector _injector;
     final Scope _scope;
@@ -42,6 +46,7 @@ class MediaComponent extends ShadowRootAware implements DetachAware {
                     throw new Exception(
                             "Invalid state: Already fetched BranchDetails");
                 }
+                _log.warning("Media component setting up the branch details.");
                 _realDetails = bd;
                 _realMediaFuture = loadMediaStatusService(bd);
                 _realMediaFuture.then((MediaStatusService mediaService) {
@@ -49,11 +54,13 @@ class MediaComponent extends ShadowRootAware implements DetachAware {
                 });
                 _mediaConnector.future
                     .then((MediaStatusServiceConnector connector) {
+                        _log.warning("MediaComponent connecting to connector");
                         connector.connect(_realMediaFuture);
                     });
                 _publicMedia.complete(_realMediaFuture);
                 _publicDetails.complete(bd);
             }).catchError((Object error, StackTrace stack) {
+                _log.severe("Error loading details", error, stack);
                 _publicDetails.completeError(error, stack);
             });
         }
@@ -103,10 +110,18 @@ class MediaComponent extends ShadowRootAware implements DetachAware {
             this._directives, RouteProvider routeProvider) {
         _route = routeProvider.route.newHandle();
         _route.onPreLeave.listen((RouteEvent e) {
-            if (_realMedia != null) {
-                _realMedia.forceStop();
-            }
+            media.then((MediaStatusService mss) {
+                mss.pageUnloaded();
+            });
         });
+        _route.onEnter.listen((RouteEvent e) {
+            _onEnter();
+        });
+
+        // At this point, the component is loaded and is rendering.
+        // It can begin the page loaded logic as soon as the service
+        // is loaded.
+        _onEnter();
     }
 
     void detach() {
@@ -114,21 +129,39 @@ class MediaComponent extends ShadowRootAware implements DetachAware {
         _route.discard();
     }
 
+    void _onEnter() {
+        _log.info("MediaComponent page entered");
+        media.then((MediaStatusService mss) {
+            _log.info("MediaComponent: send page loaded due to onEnter command");
+            mss.pageLoaded();
+        });
+    }
+
     void onShadowRoot(ShadowRoot shadowRoot) {
         media.then((MediaStatusService mediaService) {
+            _log.warning("Setting up the media element to " + mediaService.htmlTag);
             setRealMedia(mediaService);
             DivElement inner = shadowRoot.querySelector('#media');
             inner.appendHtml('<' + mediaService.htmlTag +
                     ' media="cmp.media"></' + mediaService.htmlTag + '>');
             ViewFactory template = _compiler([ inner ], _directives);
             Scope childScope = _scope.createChild(_scope.context);
-            template(childScope, null, [ inner ]);
+
+            // We need to create a DirectiveInjector
+            // from our injector, but this doesn't seem to be the right
+            // way.
+            DirectiveInjector directiveInjector = new
+                    DirectiveInjector(null, _injector, null, null,
+                        null, childScope, null);
+
+            template(childScope, directiveInjector, [ inner ]);
         });
     }
 
 
     void setRealMedia(MediaStatusService mediaService) {
         if (_realMedia == null) {
+            _log.warning("Media service set to " + mediaService.htmlTag);
             // Just in case the future that sets this value comes
             // after this invocation.
             _realMedia = mediaService;

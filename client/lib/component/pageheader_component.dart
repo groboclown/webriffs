@@ -48,6 +48,7 @@ class PageHeaderComponent implements DetachAware {
         });
     }
 
+    @override
     void detach() {
         // The route handle must be discarded.
         _route.discard();

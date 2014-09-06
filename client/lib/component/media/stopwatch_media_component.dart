@@ -5,22 +5,19 @@ import 'dart:async';
 import 'package:angular/angular.dart';
 //import 'package:logging/logging.dart';
 
-import '../../json/branch_details.dart';
-
 import 'media_status.dart';
 
 /**
  * Exposes the service to the wrapping component.  It's also used in the
  * component as the state and the controller.
  */
-class StopwatchMediaStatusService extends MediaStatusService {
+class StopwatchMediaStatusService extends AbstractMediaStatusService {
     Stopwatch _stopwatch = new Stopwatch();
     MediaStatus _status = MediaStatus.ENDED;
-    final List<OnStatusChange> _listeners = [];
-    final BranchDetails _branchDetails;
     int _baseTimeMillis = 0;
 
-    StopwatchMediaStatusService(this._branchDetails);
+    StopwatchMediaStatusService(branchDetails) :
+        super('stopwatch-media', branchDetails);
 
     @override
     int get currentTimeMillis => _baseTimeMillis +
@@ -29,34 +26,13 @@ class StopwatchMediaStatusService extends MediaStatusService {
     @override
     MediaStatus get status => _status;
 
-    @override
-    String get htmlTag => 'stopwatch-media';
-
-    @override
-    BranchDetails get branchDetails => _branchDetails;
-
-    @override
-    void addStatusChangeListener(OnStatusChange listener) {
-        if (listener != null) {
-            _listeners.add(listener);
-        }
-    }
-
-    @override
-    void removeStatusChangeListener(OnStatusChange listener) {
-        if (listener != null) {
-            _listeners.remove(listener);
-        }
-    }
-
-
-
     /**
      * Force a stop in the playback, such as when the user navigates away
      * from the page.
      */
     @override
-    void forceStop() {
+    void pageUnloaded() {
+        super.pageUnloaded();
         stop();
     }
 
@@ -75,28 +51,21 @@ class StopwatchMediaStatusService extends MediaStatusService {
         _stopwatch.reset();
         _baseTimeMillis = 0;
         _status = MediaStatus.ENDED;
-        _fireEvent();
+        fireChange();
     }
 
 
     void start() {
         _stopwatch.start();
         _status = MediaStatus.PLAYING;
-        _fireEvent();
+        fireChange();
     }
 
 
     void pause() {
         _stopwatch.stop();
         _status = MediaStatus.PAUSED;
-        _fireEvent();
-    }
-
-
-    void _fireEvent() {
-        for (OnStatusChange listener in _listeners) {
-            listener(this);
-        }
+        fireChange();
     }
 }
 
@@ -131,6 +100,9 @@ class StopwatchMediaComponent extends AbstractMediaStatusComponent {
                     (Timer timer) {
                         if (_media != null) {
                             time = toTimeStr(_media.currentTimeMillis);
+                            if (! _media.isPageVisible) {
+                                stop();
+                            }
                         }
                     });
             }
@@ -165,6 +137,11 @@ class StopwatchMediaComponent extends AbstractMediaStatusComponent {
         serviceFuture.then((MediaStatusService service) {
             if (service is StopwatchMediaStatusService) {
                 _media = service;
+                _media.addStatusChangeListener((m) {
+                    if (! m.isPageVisible) {
+                        stop();
+                    }
+                });
             } else {
                 throw new Exception("Invalid media status service ${service}");
             }

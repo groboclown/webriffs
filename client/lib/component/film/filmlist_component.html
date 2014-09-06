@@ -32,6 +32,8 @@
                             </span>
                         </div>
                         
+                        <create-branch film-id="film.filmId"></create-branch>
+                        
                         <div ng-if="film.expanded">
                             <div ng-repeat="branch in film.branches">
                                 <span><a href="#/branch/view/{{branch.branchId}}/{{branch.headChangeId}}">{{branch.name}}</a></span>
