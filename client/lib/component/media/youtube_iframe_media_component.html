@@ -7,12 +7,10 @@ loading...
 Youtube media viewer
   <div ng-if="cmp.youtubeLoading">loading Youtube...</div>
   <div ng-if="! cmp.youtubeLoading"> should have loaded </div>
-  <div id="youtube_player">
-  You need Flash player 8+ and JavaScript enabled to view this video.
-  </div>
-  <script type="text/javascript">//<!--
+  <div id="youtube_player"></div>
+  <script>//<!--
 // REFERENCE:
-// https://developers.google.com/youtube/js_api_reference
+// https://developers.google.com/youtube/iframe_api_reference#Loading_a_Video_Player
 var youtube = {
     // The YouTube player object.
     player: null,
@@ -88,37 +86,24 @@ var youtube = {
     
     setVideoId: function(id) {
         console.log("set the video id: " + id);
-        if (youtube.videoId !== null) {
-            console.log(" - the old video id was " + youtube.videoId);
-        }
         youtube.videoId = id;
         if (youtube.isLoaded) {
             if (youtube.isReady) {
-                // FIXME
                 youtube.player.loadVideoById(id);
             } else {
-                // FIXME
-                
                 // Rerun the ready listener, this time
                 // we have a videoId, so it will create the
                 // object.
                 console.log("video id = " + id + "; the player is loaded, but not ready.  Should not happen!");
-                onYouTubeAPIReady();
+                onYouTubeIframeAPIReady();
             }
         } else if (! youtube._initialized) {
-            console.log("loading the player with video id " + id);
-            
             youtube._initialized = true;
-            
-            var params = { allowScriptAccess: "always" };
-            var atts = { id: "youtube_player" };
-            var url = "http://www.youtube.com/v/" +
-                id  + "?enablejsapi=1&playerapiid=ytplayer&version=3";
-            swfobject.embedSWF(url, "ytapiplayer",
-                // width, height
-                "425", "356",
-                "8", null, null, params, atts);
-            
+            youtube._tag = document.createElement('script');
+            youtube._tag.src = "https://www.youtube.com/iframe_api";
+            youtube._firstScriptTag = document.getElementsByTagName('script')[0];
+            youtube._firstScriptTag.parentNode.insertBefore(
+                    youtube._tag, youtube._firstScriptTag);
         } else {
             console.log("video id = " + id + "; the player is not loaded but is initialized; the video id was probably set too quickly.  Ignoring.");
         }
@@ -129,48 +114,55 @@ var youtube = {
     
     // private initialization stuff.
     _initialized: false,
-    _onReady: function(playerId) {
+    _tag: null,
+    _firstScriptTag: null,
+    _onReady: function(event) {
         youtube.isReady = true;
         for (var i = 0; i < youtube.onPlayerReady.length; ++i) {
-            youtube.onPlayerReady[i](playerId);
+            youtube.onPlayerReady[i](event);
         }
     },
-    _onStateChange: function(newState) {
-        youtube.lastPlayerState = newState;
+    _onStateChange: function(event) {
+        youtube.lastPlayerState = event.data;
         for (var i = 0; i < youtube.onPlayerStateChange.length; ++i) {
-            youtube.onPlayerStateChange[i](newState);
+            youtube.onPlayerStateChange[i](event);
         }
     },
-    _onError: function(errcode) {
+    _onError: function(event) {
+        var errcode = event.data;
         if (errcode == 150) {
             errcode = 101;
         }
         for (var i = 0; i < youtube.onError.length; ++i) {
-            youtube.onError[i](errcode);
+            youtube.onError[i](event);
         }
     }
 };
 media_config = youtube;
 
 
-function onYouTubePlayerReady(playerId) {
+function onYouTubeIframeAPIReady() {
     youtube.isLoaded = true;
-    youtube.player = document.getElementById("youtube_player");
-    youtube.player.addEventListener("onStateChange", "onYouTubeStateChange");
-    // onPlaybackQualityChange
-    // onPlaybackRateChange
-    youtube.player.addEventListener("onError", "onYouTubeError");
-    // onApiChange
-    youtube._onReady(playerId);
-}
-
-
-function onYouTubeStateChange(newState) {
-    youtube._onStateChange(newState);
-}
-
-function onYouTubeError(errcode) {
-    youtube._onError(errcode);
+    if (youtube.videoId != null) {
+        console.log("Creating the iframe player");
+        var arg = {
+            height: '390',
+            width: '640',
+            playerVars: { 'autoplay': 0 },
+            videoId: youtube.videoId,
+            events: {
+                'onReady': youtube._onReady,
+                'onStateChange': youtube._onStateChange,
+                //'onPlaybackQualityChange': null,
+                //'onPlaybackRateChange'
+                //'onApiChange'
+                'onError': youtube._onError
+            }
+        };
+        youtube.player = YT.Player('youtube_player', arg);
+    } else {
+        console.log("Delaying the iframe player creation until we have a videoId");
+    }
 }
 
 // --></script>

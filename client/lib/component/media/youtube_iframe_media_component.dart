@@ -20,7 +20,7 @@ import 'media_status.dart';
  * null or not, and when not null, will register functions.
  */
 class YouTubeMediaStatusService extends AbstractMediaStatusService {
-    static final Logger _log = new Logger('media.YoutubeMedia');
+    static final Logger _log = new Logger('media.YoutubeIframeMedia');
     static final String YOUTUBE_LINK_URL = "https://youtube.com/watch?v=";
 
 
@@ -30,7 +30,7 @@ class YouTubeMediaStatusService extends AbstractMediaStatusService {
     String _videoId;
 
     YouTubeMediaStatusService(BranchDetails branchDetails) :
-            super('youtube-media', branchDetails) {
+            super('youtube-iframe-media', branchDetails) {
         if (findYoutubeVideoId(branchDetails) == null) {
             throw new Exception("Invalid branch: no youtube link");
         }
@@ -104,19 +104,15 @@ class YouTubeMediaStatusService extends AbstractMediaStatusService {
             }
             return;
         }
-        if (_yt == null) {
-            if (obj is JsObject) {
-                _log.info("found something like the youtube javascript object");
+        if (obj is JsObject) {
+            _log.info("found something like the youtube javascript object");
 
-                // assume it's the right object
-                obj.callMethod('setVideoId',
-                        [ findYoutubeVideoId(branchDetails) ]);
-                _yt = obj;
-            } else {
-                throw new Exception("Bad JS value for media_config");
-            }
+            // assume it's the right object
+            obj.callMethod('setVideoId',
+                    [ findYoutubeVideoId(branchDetails) ]);
+            _yt = obj;
         } else {
-            _log.info("repeat call to the searchForYouTubeObj");
+            throw new Exception("Bad JS value for media_config");
         }
     }
 
@@ -134,8 +130,8 @@ class YouTubeMediaStatusService extends AbstractMediaStatusService {
 
 
 @Component(
-    selector: 'youtube-media',
-    templateUrl: 'packages/webriffs_client/component/media/youtube_media_component.html',
+    selector: 'youtube-iframe-media',
+    templateUrl: 'packages/webriffs_client/component/media/youtube_iframe_media_component.html',
     publishAs: 'cmp')
 class YouTubeMediaComponent implements AbstractMediaStatusComponent {
     RouteHandle _route;
