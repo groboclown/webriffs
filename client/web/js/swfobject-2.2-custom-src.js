@@ -515,9 +515,6 @@ var swfobject = function() {
 			el = doc.getElementById(id);
 		}
 		catch (e) {}
-		if (el == null && shadowDom) {
-		    return shadowDom.getElementById(id);
-		}
 		return el;
 	}
 	

@@ -43,20 +43,12 @@ class YouTubeMediaStatusService extends AbstractMediaStatusService {
     MediaStatus _status = MediaStatus.ENDED;
     int _baseTimeMillis = 0;
     JsObject _yt;
-    String _videoId;
-    DivElement _youtubeElement = null;
-    final Completer<DivElement> youtubeElementCompleter =
-            new Completer<DivElement>();
 
     YouTubeMediaStatusService(BranchDetails branchDetails) :
             super('youtube-media', branchDetails) {
         if (findYoutubeVideoId(branchDetails) == null) {
             throw new Exception("Invalid branch: no youtube link");
         }
-        youtubeElementCompleter.future.then((DivElement dv) {
-            _youtubeElement = dv;
-            searchForYouTubeObj();
-        });
     }
 
     bool get loaded => _yt != null;
@@ -115,10 +107,20 @@ class YouTubeMediaStatusService extends AbstractMediaStatusService {
     }
 
 
-    void searchForYouTubeObj() {
-        if (_youtubeElement == null) {
-            return;
+    @override
+    void pageUnloaded() {
+        print("*** Flash page unloading call ***");
+        super.pageUnloaded();
+        DivElement outerContainer = querySelector("#outer_media_container");
+        if (outerContainer != null) {
+            print("Removing the flash player");
+            outerContainer.innerHtml = "<div id='media_container'></div>";
         }
+        _yt = null;
+    }
+
+
+    void searchForYouTubeObj() {
         var obj = context['media_config'];
         _log.info("**** media_config = ${obj}");
         if (obj == null) {
@@ -136,9 +138,7 @@ class YouTubeMediaStatusService extends AbstractMediaStatusService {
 
                 // assume it's the right object
                 obj.callMethod('setVideoId', [
-                        findYoutubeVideoId(branchDetails),
-                        new JsObject.fromBrowserObject(_youtubeElement)
-                    ]);
+                    findYoutubeVideoId(branchDetails) ]);
                 _yt = obj;
             } else {
                 throw new Exception("Bad JS value for media_config");
@@ -165,7 +165,7 @@ class YouTubeMediaStatusService extends AbstractMediaStatusService {
     selector: 'youtube-media',
     templateUrl: 'packages/webriffs_client/component/media/youtube_media_component.html',
     publishAs: 'cmp')
-class YouTubeMediaComponent extends ShadowRootAware implements AbstractMediaStatusComponent {
+class YouTubeMediaComponent implements AbstractMediaStatusComponent {
     RouteHandle _route;
     YouTubeMediaStatusService _media;
 
@@ -198,16 +198,6 @@ class YouTubeMediaComponent extends ShadowRootAware implements AbstractMediaStat
             } else {
                 throw new Exception("Invalid media status service ${service}");
             }
-        });
-    }
-
-    void onShadowRoot(ShadowRoot shadowRoot) {
-        _mediaCompleter.future.then((YouTubeMediaStatusService yt) {
-            DivElement inner = shadowRoot.querySelector('#youtube_player');
-            if (inner == null) {
-                throw new Exception("Could not find youtube player div");
-            }
-            yt.youtubeElementCompleter.complete(inner);
         });
     }
 }

@@ -1,15 +1,9 @@
-Youtube media viewer
-
 <div ng-if="! cmp.loaded">
 loading...
 </div>
 <div ng-if="cmp.loaded">
-Youtube media viewer
   <div ng-if="cmp.youtubeLoading">loading Youtube...</div>
-  <div ng-if="! cmp.youtubeLoading"> should have loaded </div>
-  <div id="youtube_player">
-  You need Flash player 8+ and JavaScript enabled to view this video.
-  </div>
+  <div ng-if="! cmp.youtubeLoading"> should have loaded YouTube video </div>
   <script type="text/javascript">//<!--
 // REFERENCE:
 // https://developers.google.com/youtube/js_api_reference
@@ -86,10 +80,7 @@ var youtube = {
     
     videoId: null,
     
-    setVideoId: function(id, jsObj) {
-        if (! jsObj) {
-            jsObj = "youtube_player"
-        }
+    setVideoId: function(id) {
         console.log("set the video id: " + id);
         if (youtube.videoId !== null) {
             console.log(" - the old video id was " + youtube.videoId);
@@ -113,11 +104,16 @@ var youtube = {
             
             youtube._initialized = true;
             
+            var obj = document.getElementById("media_container");
+            if (obj === null) {
+                throw new Exception("No such element media_container");
+            }
+            
             var params = { allowScriptAccess: "always" };
             var atts = { id: "my_youtube_player" };
             var url = "http://www.youtube.com/v/" +
                 id  + "?enablejsapi=1&playerapiid=ytplayer&version=3";
-            swfobject.embedSWF(url, jsObj,
+            swfobject.embedSWF(url, obj,
                 // width, height
                 "425", "356",
                 "8", null, null, params, atts);
