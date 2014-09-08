@@ -115,7 +115,7 @@ $data = WebRiffs\AdminLayer::getLinkNamed($db, 'YouTube');
 if ($data === null) {
     $data = WebRiffs\AdminLayer::createLink($db, 'YouTube',
             'Google YouTube', 'https://youtube.com/watch?v=',
-            '^[a-zA-Z0-9]+$');
+            '^[a-zA-Z0-9][a-zA-Z0-9_-]+$');
     $result['create_link_youtube'] = $data;
 }
 
@@ -155,6 +155,13 @@ $result['create-slacker-2011'] = array(
     'branch_id' => $idList1[2],
     'change_id' => $idList1[3]
 );
+$slacker2011Id = $idList1[1];
+$slacker2011BranchId = $idList1[2];
+$slacker2011ChangeId = $idList1[3];
+WebRiffs\FilmLayer::saveLinkForFilm($db, $slacker2011Id, "YouTube",
+// Just the intro scene
+"6N4V_8kVVDk");
+
 
 $idList2 = WebRiffs\FilmLayer::createFilm($db, $userData, "Slacker", 1991,
     WebRiffs\BranchLayer::$DEFAULT_TEMPLATE_ACCESS_NAME);
@@ -172,14 +179,14 @@ WebRiffs\FilmLayer::saveLinkForFilm($db, $slacker1991Id, "wikipedia-en",
     "Slacker_(film)");
 WebRiffs\FilmLayer::saveLinkForFilm($db, $slacker1991Id, "YouTube",
     "jB4xlYKAVCQ");
-//sZSkyWDF6UY
+//alternatively: sZSkyWDF6UY
+//alternatively: XG-bd-z56y8 for the linklater commentary
 
 // ---------------------------------------------------------------------------
 // Create tags for the branch (header updates)
 $tags = array('Theatrical Release', 'Direction Notes');
 WebRiffs\BranchLayer::updateAlltagsOnBranch($db, $userData['User_Id'],
     $userData['Ga_User_Id'], $slacker1991BranchId, $tags);
-
 
 // ---------------------------------------------------------------------------
 // Create a quip in a branch and submit the change

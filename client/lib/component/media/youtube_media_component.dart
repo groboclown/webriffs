@@ -103,17 +103,18 @@ class YouTubeMediaStatusService extends AbstractMediaStatusService {
     @override
     void pageLoaded() {
         super.pageLoaded();
+        print("*** YouTube page loading ****");
         searchForYouTubeObj();
     }
 
 
     @override
     void pageUnloaded() {
-        print("*** Flash page unloading call ***");
+        print("*** YouTube page unloading call ***");
         super.pageUnloaded();
         DivElement outerContainer = querySelector("#outer_media_container");
         if (outerContainer != null) {
-            print("Removing the flash player");
+            print("Removing the YouTube player");
             outerContainer.innerHtml = "<div id='media_container'></div>";
         }
         _yt = null;
@@ -161,6 +162,14 @@ class YouTubeMediaStatusService extends AbstractMediaStatusService {
 }
 
 
+/**
+ * The iframe version of the youtube player API looks to be cleaner,
+ * as it doesn't mean explicit messing around with SWF components
+ * (and can optionally show native HTML 5 videos).  However,
+ * it doesn't seem to work correctly.
+ *
+ * templateUrl: 'packages/webriffs_client/component/media/youtube_iframe_media_component.html',
+ */
 @Component(
     selector: 'youtube-media',
     templateUrl: 'packages/webriffs_client/component/media/youtube_media_component.html',

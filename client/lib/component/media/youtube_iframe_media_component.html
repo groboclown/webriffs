@@ -1,13 +1,9 @@
-Youtube media viewer
-
 <div ng-if="! cmp.loaded">
 loading...
 </div>
 <div ng-if="cmp.loaded">
-Youtube media viewer
   <div ng-if="cmp.youtubeLoading">loading Youtube...</div>
   <div ng-if="! cmp.youtubeLoading"> should have loaded </div>
-  <div id="youtube_player"></div>
   <script>//<!--
 // REFERENCE:
 // https://developers.google.com/youtube/iframe_api_reference#Loading_a_Video_Player
@@ -145,6 +141,13 @@ function onYouTubeIframeAPIReady() {
     youtube.isLoaded = true;
     if (youtube.videoId != null) {
         console.log("Creating the iframe player");
+        
+        var obj = document.getElementById("media_container");
+        if (obj === null) {
+            throw new Exception("No such element media_container");
+        }
+        
+        
         var arg = {
             height: '390',
             width: '640',
@@ -159,7 +162,7 @@ function onYouTubeIframeAPIReady() {
                 'onError': youtube._onError
             }
         };
-        youtube.player = YT.Player('youtube_player', arg);
+        youtube.player = YT.Player('#media_container', arg);
     } else {
         console.log("Delaying the iframe player creation until we have a videoId");
     }

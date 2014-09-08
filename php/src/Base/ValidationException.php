@@ -19,5 +19,8 @@ class ValidationException extends Tonic\Exception
     {
         parent::__construct();
         $this->problems =& $problems;
+        if ($problems) {
+            $this->message .= ': ' . print_r($problems, true);
+        }
     }
 }

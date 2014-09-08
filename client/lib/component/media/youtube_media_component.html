@@ -81,6 +81,8 @@ var youtube = {
     videoId: null,
     
     setVideoId: function(id) {
+        youtube._validateState();
+        
         console.log("set the video id: " + id);
         if (youtube.videoId !== null) {
             console.log(" - the old video id was " + youtube.videoId);
@@ -91,13 +93,10 @@ var youtube = {
                 // FIXME
                 youtube.player.loadVideoById(id);
             } else {
-                // FIXME
-                
                 // Rerun the ready listener, this time
                 // we have a videoId, so it will create the
                 // object.
-                console.log("video id = " + id + "; the player is loaded, but not ready.  Should not happen!");
-                onYouTubeAPIReady();
+                throw new Exception("video id = " + id + "; the player is loaded, but not ready.");
             }
         } else if (! youtube._initialized) {
             console.log("loading the player with video id " + id);
@@ -146,6 +145,19 @@ var youtube = {
         }
         for (var i = 0; i < youtube.onError.length; ++i) {
             youtube.onError[i](errcode);
+        }
+    },
+    _validateState: function() {
+        if (youtube.player === null) {
+            youtube.isReady = false;
+            youtube.isLoaded = false;
+            youtube._initialized = false;
+        } else if (! youtube.player['loadVideoById']) {
+            console.log("Out-of-date version of the player");
+            youtube.isReady = false;
+            youtube.isLoaded = false;
+            youtube.player = null;
+            youtube._initialized = false;
         }
     }
 };
