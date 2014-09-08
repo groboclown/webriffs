@@ -2,6 +2,7 @@ library youtube_media;
 
 import 'dart:async';
 import 'dart:js';
+import 'dart:html';
 
 import 'package:angular/angular.dart';
 import 'package:logging/logging.dart';
@@ -14,6 +15,21 @@ import 'media_status.dart';
 /**
  * Exposes the service to the wrapping component.  It's also used in the
  * component as the state and the controller.
+ *
+ * There's a major issue with this.  The embedded youtube player div will
+ * end up being deep in the shadow DOM (for the branch viewer, it's in
+ * `document.querySelector("view-branch").shadowRoot.
+ * querySelector("media-controller").shadowRoot.
+ * querySelector("youtube-media").shadowRoot.querySelector("#youtube_player")`).
+ * However, the swfobject doesn't know about  the shadow DOM, and can't find
+ * this dom element.  This means we either put the player at the top level
+ * and have it make massive breaks to the way the UI is setup, or we
+ * alter the swfobject code to be able to take a DOM object instead of
+ * a reference to the object.
+ *
+ * This will also affect how the swf element is discovered.
+ *
+ *
  *
  * FIXME wire up the object to the player's list of callbacks on state and
  * error.  This should be a timer that keeps checking if the object is
@@ -28,12 +44,19 @@ class YouTubeMediaStatusService extends AbstractMediaStatusService {
     int _baseTimeMillis = 0;
     JsObject _yt;
     String _videoId;
+    DivElement _youtubeElement = null;
+    final Completer<DivElement> youtubeElementCompleter =
+            new Completer<DivElement>();
 
     YouTubeMediaStatusService(BranchDetails branchDetails) :
             super('youtube-media', branchDetails) {
         if (findYoutubeVideoId(branchDetails) == null) {
             throw new Exception("Invalid branch: no youtube link");
         }
+        youtubeElementCompleter.future.then((DivElement dv) {
+            _youtubeElement = dv;
+            searchForYouTubeObj();
+        });
     }
 
     bool get loaded => _yt != null;
@@ -93,6 +116,9 @@ class YouTubeMediaStatusService extends AbstractMediaStatusService {
 
 
     void searchForYouTubeObj() {
+        if (_youtubeElement == null) {
+            return;
+        }
         var obj = context['media_config'];
         _log.info("**** media_config = ${obj}");
         if (obj == null) {
@@ -109,8 +135,10 @@ class YouTubeMediaStatusService extends AbstractMediaStatusService {
                 _log.info("found something like the youtube javascript object");
 
                 // assume it's the right object
-                obj.callMethod('setVideoId',
-                        [ findYoutubeVideoId(branchDetails) ]);
+                obj.callMethod('setVideoId', [
+                        findYoutubeVideoId(branchDetails),
+                        new JsObject.fromBrowserObject(_youtubeElement)
+                    ]);
                 _yt = obj;
             } else {
                 throw new Exception("Bad JS value for media_config");
@@ -137,7 +165,7 @@ class YouTubeMediaStatusService extends AbstractMediaStatusService {
     selector: 'youtube-media',
     templateUrl: 'packages/webriffs_client/component/media/youtube_media_component.html',
     publishAs: 'cmp')
-class YouTubeMediaComponent implements AbstractMediaStatusComponent {
+class YouTubeMediaComponent extends ShadowRootAware implements AbstractMediaStatusComponent {
     RouteHandle _route;
     YouTubeMediaStatusService _media;
 
@@ -151,6 +179,9 @@ class YouTubeMediaComponent implements AbstractMediaStatusComponent {
             ? MediaStatus.ENDED
             : _media.status;
 
+    Completer<YouTubeMediaStatusService> _mediaCompleter =
+            new Completer<YouTubeMediaStatusService>();
+
     @NgOneWay('media')
     @override
     set media(Future<MediaStatusService> serviceFuture) {
@@ -158,6 +189,7 @@ class YouTubeMediaComponent implements AbstractMediaStatusComponent {
         serviceFuture.then((MediaStatusService service) {
             if (service is YouTubeMediaStatusService) {
                 print("Media service loaded!!!");
+                _mediaCompleter.complete(service);
                 _media = service;
                 if (_media.isPageVisible) {
                     print("Forcing a service search");
@@ -166,6 +198,16 @@ class YouTubeMediaComponent implements AbstractMediaStatusComponent {
             } else {
                 throw new Exception("Invalid media status service ${service}");
             }
+        });
+    }
+
+    void onShadowRoot(ShadowRoot shadowRoot) {
+        _mediaCompleter.future.then((YouTubeMediaStatusService yt) {
+            DivElement inner = shadowRoot.querySelector('#youtube_player');
+            if (inner == null) {
+                throw new Exception("Could not find youtube player div");
+            }
+            yt.youtubeElementCompleter.complete(inner);
         });
     }
 }

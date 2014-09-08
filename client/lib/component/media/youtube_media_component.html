@@ -86,7 +86,10 @@ var youtube = {
     
     videoId: null,
     
-    setVideoId: function(id) {
+    setVideoId: function(id, jsObj) {
+        if (! jsObj) {
+            jsObj = "youtube_player"
+        }
         console.log("set the video id: " + id);
         if (youtube.videoId !== null) {
             console.log(" - the old video id was " + youtube.videoId);
@@ -111,10 +114,10 @@ var youtube = {
             youtube._initialized = true;
             
             var params = { allowScriptAccess: "always" };
-            var atts = { id: "youtube_player" };
+            var atts = { id: "my_youtube_player" };
             var url = "http://www.youtube.com/v/" +
                 id  + "?enablejsapi=1&playerapiid=ytplayer&version=3";
-            swfobject.embedSWF(url, "ytapiplayer",
+            swfobject.embedSWF(url, jsObj,
                 // width, height
                 "425", "356",
                 "8", null, null, params, atts);
@@ -155,7 +158,7 @@ media_config = youtube;
 
 function onYouTubePlayerReady(playerId) {
     youtube.isLoaded = true;
-    youtube.player = document.getElementById("youtube_player");
+    youtube.player = document.getElementById("my_youtube_player");
     youtube.player.addEventListener("onStateChange", "onYouTubeStateChange");
     // onPlaybackQualityChange
     // onPlaybackRateChange
