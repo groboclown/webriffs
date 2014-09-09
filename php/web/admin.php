@@ -4,7 +4,12 @@
 </head>
 <body>
 <h1>TEMPORARY ADMIN PAGE</h1>
+<h2>It's dangerous to go alone.</h2>
 <?php
+
+// Record to the web logs that this page was reached.  Admins - this can mean
+// an attempt at a security breach.
+error_log("INITIAL SITE SETUP PAGE ACCESSED!");
 
 // ==========================================================================
 // This page walks through all the configuration steps.  It should be read
@@ -35,10 +40,12 @@ rename it to 'admin.php' and try again.
 
 // ---------------------------------------------------------------------------
 // The name of the file is right.
+
 ?>
 <p>
 This page is for the initial setup of the site.  Follow through all the
-instructions on this page.
+instructions on this page.  You may need to check your web server log file
+if an error occurs during setup.
 </p>
 
 
@@ -56,9 +63,6 @@ if (! is_file($siteConfPhpFile)) {
 You don't have a <code>site.conf.php</code> file.  It should be located at
 </p>
 <pre><?= $siteConfPhpFile ?></pre>
-<p>
-We'll try to set it up.
-</p>
 <?php
     // ------------------------------------------------------------------------
     // Does the template file exist?
@@ -66,7 +70,7 @@ We'll try to set it up.
     if (! is_file($siteConfPhpTemplateFile)) {
 ?>
 <p>
-You also don't have the template file it's based on (<?= $siteConfPhpTemplateFile ?>).
+You also don't have the template file it's based on (<code><?= $siteConfPhpTemplateFile ?></code>).
 That's fine, but it means that you need to find that file and either put it
 on your website, or configure it yourself and add it to your website as the
 <code>site.conf.php</code> file (see above for path).
@@ -95,6 +99,9 @@ your site.
         }
         
 ?>
+<p>
+We're going to try to set it up.
+</p>
 
 <p>
 To setup this file, we need some information from you about your site.
@@ -104,6 +111,8 @@ To setup this file, we need some information from you about your site.
 <form action="admin.php" method="post">
 <input type="hidden" name="x" value="set site conf">
 
+<div style="border: solid 1px black;padding: 0.5em;">
+<span><strong>Web Server Configuration</strong></span>
 <div style="border: solid 1px black;">
 <p>
 <strong>Site path</strong> defines the path that users will use when reaching
@@ -117,6 +126,10 @@ address of this admin page, but you may want it to be different.
 <label for="sitepath">Site path: </label><input id="sitepath" name="sitepath" type="text" value="<?=$sitePath?>">
 </p>
 </div>
+</div>
+
+<div style="border: solid 1px black;padding: 0.5em;">
+<span><strong>MySQL Database Setup</strong></span>
 
 <div style="border: solid 1px black;">
 <strong>Database host</strong> refers to the hostname of the database that
@@ -152,6 +165,7 @@ setup.
 <br>
 <label for="dbpass">Database Normal Password: </label><input id="dbpass" name="dbpass" type="password">
 </p>
+</div>
 </div>
 <p>
 <input type="submit" value="Setup the site config file">
@@ -338,7 +352,7 @@ start it over.
 $data = null;
 try {
     $userDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $stmt = $userDb->prepare("SELECT COUNT(*) FROM V_QUIP_CHANGE_TAG");
+    $stmt = $userDb->prepare("SELECT COUNT(*) FROM V_QUIP_USER_PENDING");
     $res = $stmt->execute(array());
     // FIXME should check the result value.
 } catch (\Exception $e) {
@@ -368,7 +382,7 @@ the user account.
                     if (is_file($f)) {
                         $sql = file_get_contents($f);
                         error_log("running sql ".$f);
-                        $stmt = $db->prepare($sql);
+                        $stmt = $userDb->prepare($sql);
                         $stmt->execute(array());
                     }
                 }
@@ -438,7 +452,7 @@ webserver log to see the source of the issue.  You may need to start over.
 
 
 $sourceId = null;
-$needSource = true;
+$needsSource = true;
 if (sizeof($data) > 0) {
     // Because of our query, this should be the case.  But let's be certain.
     $row = $data[0];
@@ -522,7 +536,19 @@ if there's any other problems.
 <?php
 }
 
-
+if ($needsSource) {
+?>
+<p>We successfully created the new source ID,
+and it looks like your site config is compatible.
+Fantastic!  We're almost done.</p>
+<?php
+} else {
+?>
+<p>There is an existing authentication source which is
+compatible with your site config.
+Fantastic!  We're almost done.</p>
+<?php
+}
 
 // ===========================================================================
 // ===========================================================================
@@ -531,9 +557,26 @@ if there's any other problems.
 
 require_once(__DIR__."/../lib/Tonic/Exception.php");
 //require_once(__DIR__."/../lib/Tonic/Resource.php");
+require_once(__DIR__."/../src/Base/BaseDataAccess.php");
 require_once(__DIR__."/../src/Base/DboBase.php");
 require_once(__DIR__."/../src/Base/ValidationException.php");
+require_once(__DIR__."/../src/WebRiffs/Access.php");
 require_once(__DIR__."/../src/WebRiffs/AdminLayer.php");
+
+$filenames = array(
+    __DIR__.'/../dbo/GroboAuth/*.php',
+    __DIR__.'/../dbo/GroboVersion/*.php',
+    __DIR__.'/../dbo/WebRiffs/*.php',
+);
+foreach ($filenames as $glob) {
+    $globs = glob(str_replace('[', '[[]', $glob));
+    #error_log(print_r($globs, true));
+    if ($globs) {
+        foreach ($globs as $filename) {
+            require_once $filename;
+        }
+    }
+}
 
 try {
     $data = WebRiffs\AdminLayer::getLinkNamed($userDb, 'wikipedia-en');
@@ -541,14 +584,24 @@ try {
         WebRiffs\AdminLayer::createLink($userDb, 'wikipedia-en',
             'Open Encyclopedia (English)', 'http://en.wikipedia.org/wiki/',
             // Note: this leaves out articles in international characters.
-            '^[a-zA-Z0-9\\$_-\\(\\)]+$');
+            '^[a-zA-Z0-9\\$_-\\(\\)]+$',
+            False);
     }
     
     $data = WebRiffs\AdminLayer::getLinkNamed($userDb, 'imdb.com');
     if ($data === null) {
         WebRiffs\AdminLayer::createLink($userDb, 'imdb.com',
             'International Movie Database', 'http://imdb.com/title/',
-            '^[a-zA-Z0-9]+$');
+            '^[a-zA-Z0-9]+$',
+            False);
+    }
+
+    $data = WebRiffs\AdminLayer::getLinkNamed($userDb, 'YouTube');
+    if ($data === null) {
+        $data = WebRiffs\AdminLayer::createLink($userDb, 'YouTube',
+                'Google YouTube', 'https://youtube.com/watch?v=',
+                '^[a-zA-Z0-9][a-zA-Z0-9_-]+$',
+                True);
     }
 } catch (\Exception $e) {
     error_log("Database create link Exception: ".$e->getMessage());
@@ -608,7 +661,7 @@ user.  This is the place where you put the user information.
     try {
         $userId = WebRiffs\AuthenticationLayer::createUser($userDb, $username,
                 $siteConfig['sources']['local']['id'], $username, $encPassword,
-                $email, WebRiffs\Access::$ACCESS_ADMIN);
+                $email, WebRiffs\Access::$PRIVILEGE_ADMIN);
     } catch (\Exception $e) {
         error_log("Database create user Exception: ".$e->getMessage());
         error_log($e->getTraceAsString());

@@ -83,7 +83,7 @@ class AdminLayer {
                  array("name" => "internal error, multiple links with that name")
             );
         }
-        $rows[0]['Is_Media'] = intval($row['Is_Media']) == 0 ? FALSE : TRUE;
+        $rows[0]['Is_Media'] = intval($rows[0]['Is_Media']) == 0 ? FALSE : TRUE;
         return $rows[0];
     }
 
