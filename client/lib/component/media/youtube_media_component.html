@@ -3,7 +3,7 @@ loading...
 </div>
 <div ng-if="cmp.loaded">
   <div ng-if="cmp.youtubeLoading">loading Youtube...</div>
-  <div ng-if="! cmp.youtubeLoading"> should have loaded YouTube video </div>
+  <div ng-if="! cmp.youtubeLoading"> (you should see the YouTube video) </div>
   <script type="text/javascript">//<!--
 // REFERENCE:
 // https://developers.google.com/youtube/js_api_reference
@@ -83,23 +83,20 @@ var youtube = {
     setVideoId: function(id) {
         youtube._validateState();
         
-        console.log("set the video id: " + id);
-        if (youtube.videoId !== null) {
-            console.log(" - the old video id was " + youtube.videoId);
-        }
+        //console.log("set the video id: " + id);
+        //if (youtube.videoId !== null) {
+        //    console.log(" - the old video id was " + youtube.videoId);
+        //}
         youtube.videoId = id;
         if (youtube.isLoaded) {
             if (youtube.isReady) {
-                // FIXME
                 youtube.player.loadVideoById(id);
             } else {
-                // Rerun the ready listener, this time
-                // we have a videoId, so it will create the
-                // object.
-                throw new Exception("video id = " + id + "; the player is loaded, but not ready.");
+                throw new Exception("video id = " + id +
+                        "; the player is loaded, but not ready.");
             }
         } else if (! youtube._initialized) {
-            console.log("loading the player with video id " + id);
+            //console.log("loading the player with video id " + id);
             
             youtube._initialized = true;
             
@@ -117,8 +114,9 @@ var youtube = {
                 "425", "356",
                 "8", null, null, params, atts);
             
-        } else {
-            console.log("video id = " + id + "; the player is not loaded but is initialized; the video id was probably set too quickly.  Ignoring.");
+        //} else {
+        //    console.log("video id = " + id +
+        //        "; the player is not loaded but is initialized; the video id was probably set too quickly.  Ignoring.");
         }
     },
     

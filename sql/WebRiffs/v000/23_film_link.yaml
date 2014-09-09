@@ -30,6 +30,12 @@ table:
                 - constraint:
                     type: not null
         - column:
+            name: Is_Playback_Media
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+        - column:
             name: Uri
             type: nvarchar(300)
             constraints:

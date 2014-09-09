@@ -30,6 +30,7 @@
                     <span>{{link.name}}</span>
                     <span>{{link.desc}}</span>
                     <span>{{link.urlPrefix}}<input type="text" ng-model="link.uri"></span>
+                    <span ng-if="link.isMedia">Media source: <input type="checkbox" ng-model="link.isPlaybackMedia"></span>
                     <span><button ng-click="link.cancel()"
                         ng-disabled="link.isUnchanged">X</button></span>
                     <span><input type="submit" ng-click="cmp.saveLink(link)"

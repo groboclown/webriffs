@@ -271,18 +271,37 @@ class FilmLayer {
                 array(
                     'unknown' => 'there was an unknown problem finding the film links'
                 )));
-        // FIXME remove the linkTypeId - it's not needed by the clients,
+        // remove the linkTypeId - it's not needed by the clients,
         // and could be considered info leak.
-        return $data['result'];
+        $rows = $data['result'];
+        foreach ($rows as &$row) {
+            unset($row['Link_Type_Id']);
+            $row['Is_Playback_Media'] =
+                ($row['Is_Playback_Media'] == 0) ? FALSE : TRUE;
+        }
+        
+        return $rows;
     }
     
     
-    public static function saveLinkForFilm($db, $filmId, $linkName, $uri) {
+    public static function saveLinkForFilm($db, $filmId, $linkName, $uri,
+            $isPlaybackMedia) {
+        $errors = array();
         if (! is_integer($filmId)) {
-            throw new Base\ValidationException(array(
-                'film_id' => 'invalid film id format'
-            ));
+            $errors['film_id'] = 'invalid film id format';
         }
+        if (! is_bool($isPlaybackMedia)) {
+            $errors['is_playback_media'] = 'invalid is_playback_media';
+        }
+        // the $linkName is checked in the call to fetch that link.
+        if (! is_string($uri) || strlen($uri) <= 0 || strlen($uri) > 300) {
+            $errors['uri'] = 'invalid uri string';
+        }
+        if (sizeof($errors) > 0) {
+            throw new Base\ValidationException($errors);
+        }
+        
+        
         $filmId = intval($filmId);
         // quick existence check
         $data = Film::$INSTANCE->countBy_Film_Id($db, $filmId);
@@ -298,7 +317,7 @@ class FilmLayer {
                 ));
         }
         
-        $data = LinkType::$INSTANCE->readBy_Name($db, $linkName);
+        $data = AdminLayer::getLinkNamed($db, $linkName);
         FilmLayer::checkError($data,
             new Base\ValidationException(
                 array(
@@ -310,12 +329,23 @@ class FilmLayer {
                     'link type' => 'invalid link type name'
                 ));
         }
+        if ($isPlaybackMedia && ! $data['result'][0]['Is_Media']) {
+            throw new Base\ValidationException(
+                array(
+                    'is_playback_media' => 'link is not a media type, so the film cannot use it as a media source'
+                ));
+        }
+        
+        
         $regex = $data['result'][0]['Validation_Regex'];
         // test for both 0 and false
         if ($uri != null && ! preg_match('/'.$regex.'/', $uri)) {
             $matches = array();
             $ret = preg_match('/'.$regex.'/', $uri, $matches);
-            error_log("bad match: return: ".($ret===false ? 'false' : $ret).", match: ".print_r($matches, true).", uri: ".$uri.", regex: ".$regex);
+            error_log("bad match: return: ".
+                    ($ret===false ? 'false' : $ret).
+                    ", match: ".print_r($matches, true).
+                    ", uri: ".$uri.", regex: ".$regex);
             throw new Base\ValidationException(
                 array(
                     'uri' => 'uri does not match allowed patterns for this link type'
@@ -329,7 +359,7 @@ class FilmLayer {
                 array(
                     'unknown' => 'there was an unknown problem inserting the uri'
                 )));
-        // This value doesn't really mean anything
+        // The key for this object doesn't really mean anything
         //if ($data['rowcount'] != 1) {
         //    error_log('upsert rowcount = '.$data['rowcount']);
         //    throw new Base\ValidationException(

@@ -10,9 +10,11 @@ class LinkRecord {
     final String urlPrefix;
     final String name;
     final String desc;
+    final bool isMedia;
     String serverUri;
     String errorUri;
     String uri;
+    bool isPlaybackMedia;
     String error;
     bool get hasError => uri == errorUri && error != null;
 
@@ -25,12 +27,14 @@ class LinkRecord {
 
     factory LinkRecord.fromJson(Map<String, dynamic> row) {
         return new LinkRecord(row['Film_Id'], row['Url_Prefix'],
-                row['Name'], row['Description'], row['Uri']);
+                row['Name'], row['Description'], row['Uri'],
+                row['Is_Media'], row['Is_Playback_Media']);
     }
 
 
     LinkRecord(this.filmId, this.urlPrefix,
-           this.name, this.desc, this.serverUri) {
+           this.name, this.desc, this.serverUri, this.isMedia,
+           this.isPlaybackMedia) {
         this.uri = serverUri;
     }
 
@@ -38,6 +42,7 @@ class LinkRecord {
     Map<String, dynamic> toJson() {
         Map<String, dynamic> ret = {};
         ret['Uri'] = uri;
+        ret['Is_Playback_Media'] = isPlaybackMedia;
         return ret;
     }
 

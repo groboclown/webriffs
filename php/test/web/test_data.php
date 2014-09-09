@@ -98,7 +98,7 @@ if ($data === null) {
     $data = WebRiffs\AdminLayer::createLink($db, 'wikipedia-en',
         'Open Encyclopedia (English)', 'http://en.wikipedia.org/wiki/',
         // Note: this leaves out articles in international characters.
-        '^[a-zA-Z0-9$_\-()]+$');
+        '^[a-zA-Z0-9$_\-()]+$', False);
         #'^[a-zA-Z0-9\$_-\(\)]+$');
     $result['create_link_wikipedia'] = $data;
 }
@@ -107,7 +107,7 @@ $data = WebRiffs\AdminLayer::getLinkNamed($db, 'imdb.com');
 if ($data === null) {
     $data = WebRiffs\AdminLayer::createLink($db, 'imdb.com',
         'International Movie Database', 'http://imdb.com/title/',
-        '^[a-zA-Z0-9]+$');
+        '^[a-zA-Z0-9]+$', False);
     $result['create_link_imdb'] = $data;
 }
 
@@ -115,7 +115,7 @@ $data = WebRiffs\AdminLayer::getLinkNamed($db, 'YouTube');
 if ($data === null) {
     $data = WebRiffs\AdminLayer::createLink($db, 'YouTube',
             'Google YouTube', 'https://youtube.com/watch?v=',
-            '^[a-zA-Z0-9][a-zA-Z0-9_-]+$');
+            '^[a-zA-Z0-9][a-zA-Z0-9_-]+$', True);
     $result['create_link_youtube'] = $data;
 }
 
@@ -160,7 +160,7 @@ $slacker2011BranchId = $idList1[2];
 $slacker2011ChangeId = $idList1[3];
 WebRiffs\FilmLayer::saveLinkForFilm($db, $slacker2011Id, "YouTube",
 // Just the intro scene
-"6N4V_8kVVDk");
+"6N4V_8kVVDk", False);
 
 
 $idList2 = WebRiffs\FilmLayer::createFilm($db, $userData, "Slacker", 1991,
@@ -178,7 +178,7 @@ WebRiffs\FilmLayer::saveLinkForFilm($db, $slacker1991Id, "imdb.com",
 WebRiffs\FilmLayer::saveLinkForFilm($db, $slacker1991Id, "wikipedia-en",
     "Slacker_(film)");
 WebRiffs\FilmLayer::saveLinkForFilm($db, $slacker1991Id, "YouTube",
-    "jB4xlYKAVCQ");
+    "jB4xlYKAVCQ", True);
 //alternatively: sZSkyWDF6UY
 //alternatively: XG-bd-z56y8 for the linklater commentary
 

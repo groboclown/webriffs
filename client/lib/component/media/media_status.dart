@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:logging/logging.dart';
 
 import '../../json/branch_details.dart';
+import '../../json/film_details.dart';
 
 
 class MediaStatus {
@@ -63,6 +64,20 @@ abstract class MediaStatusService {
 
 
 
+/**
+ * Based on the given [LinkRecord] (which must have the `isPlaybackMedia`
+ * flag set), returns either `null` (it's not a match) or the
+ * [MediaStatusService] associated with this link.
+ */
+typedef Future<MediaStatusService> MediaStatusServiceFactory(
+    BranchDetails branchDetails, LinkRecord link);
+
+
+
+/**
+ * Used by the wrapping UI component to communicate with the MediaStatusService
+ * when the service can be loaded at some future point.
+ */
 class MediaStatusServiceConnector implements MediaStatusService {
     final Logger _log = new Logger('components.MediaStatusServiceConnector');
     final Completer<MediaStatusService> _media =

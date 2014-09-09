@@ -152,12 +152,18 @@ class YouTubeMediaStatusService extends AbstractMediaStatusService {
 
     static String findYoutubeVideoId(BranchDetails details) {
         for (LinkRecord link in details.filmLinks) {
-            if (link.isDefined &&
+            if (link.isDefined && link.isPlaybackMedia &&
                     link.urlPrefix == YOUTUBE_LINK_URL) {
                 return link.serverUri;
             }
         }
         return null;
+    }
+
+
+    static bool isYoutubeLink(LinkRecord link) {
+        return link.isDefined && link.isPlaybackMedia &&
+                link.urlPrefix == YOUTUBE_LINK_URL;
     }
 }
 
@@ -210,4 +216,19 @@ class YouTubeMediaComponent implements AbstractMediaStatusComponent {
         });
     }
 }
+
+final MediaStatusServiceFactory YOUTUBE_SERVICE_FACTORY =
+    (BranchDetails branch, LinkRecord link) {
+        if (YouTubeMediaStatusService.findYoutubeVideoId(branch) != null) {
+                return new Future<MediaStatusService>.value(
+                        new YouTubeMediaStatusService(branch));
+        }
+        return false;
+    };
+
+
+
+
+
+
 

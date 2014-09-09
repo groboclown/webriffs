@@ -31,6 +31,12 @@ table:
                 - constraint:
                     type: not null
         - column:
+            name: Is_Media
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+        - column:
             name: Url_Prefix
             type: nvarchar(200)
             constraints:

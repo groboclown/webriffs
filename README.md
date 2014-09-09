@@ -62,15 +62,40 @@ The authentication, film, and branch creation/editing is present.  The quip stor
 
  * The User Interface is just the bare minimum to show the data.  Later, a massive undertaking will begin to style and shape the html.
  * User authentication is complete.
- * Films 
+ * Films can be created, and can have branches.
  * Branch editing is still under development.
  * There's currently no way to recover a lost password.
  * Administrative tools are non-existent beyond site set-up.
- * Currently there's only support for a "stopwatch" video timer.  Eventually, this will allow for embeddable video playback services such as YouTube and Twitch.
+ * Support for multiple media time code captures:
+ * * A "stopwatch" video timer, for DVDs or other media.
+ * * YouTube videos.
 
 ## Known Bugs
 
- * The "Add a Film" page can be accessed even if the user doesn't have the authorization to create it.  This needs to check the user access when showing the create button.
- * The "Edit this branch" link on the "View Branch" page is flaky.  It appears at odd times.  If you log out, the link is still on the page.
- * Need to add sercurity checks at the top of each page, to see if the user has access to that functionality. 
+ * Need to add security checks at the top of each page, to see if the user has access to that functionality.  This is partially implemented.
+ * Log in and log out does not trigger a security refresh for the current page.
+ * Security checks for editing a branch should check if the user can edit the quips on the branch, rather than if the user can edit the branch header information.
  
+
+# Architecture Issues
+
+I'm still pondering some fundamental questions about the data design for the
+package.
+
+## Media Association
+
+Right now, a Film can have a set of links associated with it.  If one of those
+links matches up with a known embedded media provider (e.g. YouTube), then that
+player is embedded with the given link.  This means that a Film is associated
+with one specific media format.  If we have one film that has several different
+edits, each edit would need to be its own Film.
+
+Instead, this could be done per branch.  This way, we could have one film
+(say, _Blade Runner_), and one branch per different edit of that film.  This
+would mean, though, that the time codes in one branch could only correctly be
+shared with another branch if they share the same media link.
+
+I'm working now on automatic conversion between playback formats, to make this
+less of a problem.  That way, you can watch the same riffs on both NTSC, PAL,
+and the original film version.  If it's the same edit, then hopefully the times
+will line up.

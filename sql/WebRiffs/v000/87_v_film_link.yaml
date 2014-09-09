@@ -6,9 +6,11 @@ view:
           f.Film_Id Film_Id
           , fl.Link_Type_Id Link_Type_Id
           , fl.Uri Uri
+          , fl.Is_Playback_Media Is_Playback_Media
           , lt.Name Name
           , lt.Description Description
           , lt.Url_Prefix Url_Prefix
+          , lt.Is_Media Is_Media
         FROM FILM f
         CROSS JOIN LINK_TYPE lt
         LEFT OUTER JOIN FILM_LINK fl
@@ -41,6 +43,12 @@ view:
                 - constraint:
                     type: no update
         - column:
+            name: Is_Playback_Media
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+        - column:
             name: Name
             type: nvarchar(200)
             constraints:
@@ -58,6 +66,12 @@ view:
         - column:
             name: Url_Prefix
             type: nvarchar(200)
+            constraints:
+                - constraint:
+                    type: not null
+        - column:
+            name: Is_Media
+            type: int
             constraints:
                 - constraint:
                     type: not null

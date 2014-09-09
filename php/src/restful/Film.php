@@ -203,8 +203,10 @@ class FilmObjLink extends Resource {
         
         $filmId = $this->validateId($this->filmid, "filmId");
         $linkTypeName = $this->linktypename;
-        // FIXME validate input text of $linkTypeName -  non-null and such.
+        $this->checkThat(is_string($linkTypeName), "linktypename");
+        
         $uri = $this->loadRequestString("Uri");
+        $isPlaybackMedia = $this->loadRequestString("Is_Playback_Media");
         $this->validate();
         
         $db = $this->getDB();

@@ -38,7 +38,10 @@ class AdminLayer {
                     'unknown' => 'there was an unknown problem finding the links'
                 )));
         $rows = $data['result'];
-        
+        foreach ($rows as &$row) {
+            $row['Is_Media'] = intval($row['Is_Media']) == 0 ? FALSE : TRUE;
+        }
+
         $data = LinkType::$INSTANCE->countAll($db);
         AdminLayer::checkError($data,
             new Base\ValidationException(
@@ -59,6 +62,12 @@ class AdminLayer {
      *      values.
      */
     public static function getLinkNamed($db, $name) {
+        if (! is_string($name) || strlen($name) > 200) {
+            throw new Base\ValidationException(array(
+                "link name" => "link name cannot be more than 200 characters long"
+                ));
+        }
+        
         $data = LinkType::$INSTANCE->readBy_Name($db, $name);
         AdminLayer::checkError($data,
             new Base\ValidationException(
@@ -74,6 +83,7 @@ class AdminLayer {
                  array("name" => "internal error, multiple links with that name")
             );
         }
+        $rows[0]['Is_Media'] = intval($row['Is_Media']) == 0 ? FALSE : TRUE;
         return $rows[0];
     }
 
@@ -84,7 +94,7 @@ class AdminLayer {
      * @return int the link_id for the link
      */
     public static function createLink($db, $name, $description,
-            $urlPrefix, $validationRegex) {
+            $urlPrefix, $validationRegex, $isMedia) {
         //public function create($db, $Name, $Description, $Url_Prefix, $Validation_Regex) {
         $errors = array();
         if (! is_string($name) || strlen($name) > 200) {
@@ -99,17 +109,21 @@ class AdminLayer {
         if (! is_string($validationRegex) || strlen($validationRegex) > 500) {
             $errors["validation_regex"] = "validation_regex cannot be more than 500 characters long";
         }
+        if (! is_bool($isMedia)) {
+            $errors["is_media"] = "is_media must be either True or False";
+        }
         if (sizeof($errors) > 0) {
             throw new Base\ValidationException($errors);
         }
-        $data = LinkType::$INSTANCE->create($db, $name, $description, $urlPrefix,
-            $validationRegex);
+        $isMedia = ($isMedia == TRUE) ? 1 : 0;
+        $data = LinkType::$INSTANCE->create($db, $name, $description,
+            $isMedia, $urlPrefix, $validationRegex);
         AdminLayer::checkError($data, new Base\ValidationException(array(
             'unknown' => 'problem creating the link.  Is the name already used?'
         )));
         return intval($data['result']);
     }
-    
+
 
     // ----------------------------------------------------------------------
     private static function checkError($returned, $exception) {

@@ -4,7 +4,6 @@ import 'dart:async';
 import 'dart:html';
 
 import 'package:angular/angular.dart';
-//import 'package:angular/core_dom/directive_injector.dart';
 import 'package:logging/logging.dart';
 
 import '../../json/branch_details.dart';
