@@ -179,6 +179,7 @@ setup.
     } elseif ($_POST["x"] == "set site conf") {
         // --------------------------------------------------------------------
         // The user posted the request
+        $sitePath = $_POST["sitepath"];
         $dbhost = $_POST["dbhost"];
         $dbname = $_POST["dbname"];
         $dbUser = $_POST["dbuser"];
@@ -231,6 +232,7 @@ Check to make sure the file permissions are correct on it, and try again.
         // use "1" as a reasonable initial source id.
         $sourceId = 1;
         
+        $templateFile = str_replace("@path@", $sitePath, $templateFile);
         $templateFile = str_replace("@dsn@", $dsn, $templateFile);
         $templateFile = str_replace("@dbuser@", $dbUser, $templateFile);
         $templateFile = str_replace("@dbpassword@", $dbPassword, $templateFile);
@@ -540,13 +542,13 @@ if ($needsSource) {
 ?>
 <p>We successfully created the new source ID,
 and it looks like your site config is compatible.
-Fantastic!  We're almost done.</p>
+Neat!  We're almost done.</p>
 <?php
 } else {
 ?>
 <p>There is an existing authentication source which is
 compatible with your site config.
-Fantastic!  We're almost done.</p>
+Awesome!  We're almost done.</p>
 <?php
 }
 
@@ -684,11 +686,20 @@ User created.  Let's see what we have in store for you next.
 } else {
 ?>
 <p>
-You reached this page in error.  Try reloading your browser and see if that
-fixes things.
-</p></body></html>
+It looks like your database was already setup with the initial data.
+As far as this robot can tell, your site is back to a normal state.
+</p>
+<p>
+However, if you came back here because your data is in a weird state and you
+want to recreate your database, you'll need to first drop the database then
+recreate it.  If you're back here and there's something else wrong, then
+please report a bug to the WebRiffs homepage.
+</p>
+<p>
+Regardless of the reason you see this, we're going to move on.  Progress
+waits for no one!
+</p>
 <?php
-    die;
 }
 
 
@@ -706,7 +717,8 @@ if (rename(__FILE__, __DIR__.'/.ht_admin.php')) {
 <p>
 This site is now configured.  You will not be able to revisit this page,
 because we just renamed it to '.ht_admin.php' for security reasons.  If you
-need to rerun the administrative scripts, you'll need to refresh everything.
+need to rerun the administrative scripts, you'll need to refresh
+<em>everything</em>.
 <p>
 <p>
 <a href="index.html">Click here to visit your new site!</a>

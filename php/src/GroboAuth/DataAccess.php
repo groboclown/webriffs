@@ -546,7 +546,9 @@ class DataAccess {
         $data = $data['result'];
         if (sizeof($data) <= 0) {
             error_log(
-                "no rows for [" . $userAgent . "] [" . $remoteAddress . "] [" .
+                "Possible Cookie Theft or Expired Session: no active session for [" .
+                     $userAgent . "] [" .
+                     $remoteAddress . "] [" .
                      $forwardedFor . "] [" . $authorizationChallenge . "]");
             return false;
         }
@@ -556,7 +558,8 @@ class DataAccess {
                 DataAccess::expireSession($db, $row['Ga_Session_Id']);
             }
             error_log(
-                "multiple rows for [" . $userAgent . "] [" . $remoteAddress .
+                "FATAL: data integrety error - multiple rows for [" .
+                     $userAgent . "] [" . $remoteAddress .
                      "] [" . $forwardedFor . "] [" . $authorizationChallenge .
                      "]");
             return false;

@@ -190,6 +190,7 @@ class Resource extends Base\Resource {
         }
         if (array_key_exists('authenticated', $this->container) &&
                 ! $this->container['authenticated']) {
+            //error_log("Not authorized: previous check already failed");
             return false;
         }
     
@@ -199,6 +200,7 @@ class Resource extends Base\Resource {
     
         if (! array_key_exists(Resource::COOKIE_NAME, $_COOKIE)) {
             // No authentication cookie was sent.
+            //error_log("Not authorized: no cookie");
             return false;
         }
         $cookie = $_COOKIE[Resource::COOKIE_NAME];
@@ -218,6 +220,7 @@ class Resource extends Base\Resource {
             setcookie(Resource::COOKIE_NAME,
                 $cookie, time() - 3600,
                 $this->container['path'], '', false, true);
+            //error_log("Not authorized: invalid authorization cookie");
             return false;
         }
     

@@ -100,8 +100,8 @@ class AuthenticationLayer {
      * authentication code.
      */
     public static function login($db, $username, $sourceId, $authenticationCode,
-        $authenticationCheckFunction, $User_Agent, $Remote_Address,
-        $Forwarded_For, $sessionRenewalMinutes) {
+            $authenticationCheckFunction, $User_Agent, $Remote_Address,
+            $Forwarded_For, $sessionRenewalMinutes) {
         //error_log("checking login for [".$username."] [".$sourceId."] [".$authenticationCode."] [".$User_Agent."]");
         if (!AuthenticationLayer::isValidUsername($username)) {
             throw new Base\ValidationException(
@@ -143,9 +143,9 @@ class AuthenticationLayer {
         $isAdmin = intval($userData['Is_Site_Admin']) == 0 ? false : true;
         $createdOn = $userData['Created_On'];
         $lastUpdatedOn = $userData['Last_Updated_On'];
-        error_log(
-            "pulled in data [" . $userId . "] [" . $gaUserId . "] [" . $contact .
-                 "] [" . $isAdmin . "]");
+        //error_log(
+        //    "pulled in data [" . $userId . "] [" . $gaUserId . "] [" . $contact .
+        //         "] [" . $isAdmin . "]");
         
         $userSourceData = GroboAuth\DataAccess::getUserSource($db, $gaUserId,
             $sourceId);
@@ -159,15 +159,15 @@ class AuthenticationLayer {
         }
         
         $userSourceId = intval($userSourceData['Ga_User_Source_Id']);
-        error_log("found user source " . $userSourceId);
+        //error_log("found user source " . $userSourceId);
         
         $loginValid = $authenticationCheckFunction($userSourceData['Username'],
             $authenticationCode, $userSourceData['Authentication_Code']);
-        error_log("found validation result: " . $loginValid);
+        //error_log("found validation result: " . $loginValid);
         
-        // FIXME limitation in the code: we can only record login attempts
-        // for valid user/source pairs.  If someone is brute forcing the system,
-        // we won't record it.
+        // FIXME limitation in the code and data model: we can only record
+        // login attempts for valid user/source pairs.  If someone is brute
+        // forcing the system, we won't record it.
         
 
 
@@ -235,8 +235,6 @@ class AuthenticationLayer {
             $Forwarded_For = "";
         }
         
-        // Note: do not catch exceptions here; that represents a really bad
-        // situation.
         $retData = GroboAuth\DataAccess::getUserForSession($db, $User_Agent,
             $Remote_Address, $Forwarded_For, $authenticationChallenge,
             $sessionRenewalMinutes, 10);
