@@ -29,7 +29,10 @@ class EditBranchComponent extends ViewBranchComponent {
     final ServerStatusService _server;
     final UserService _user;
 
-    final QuipDetails pendingQuip = new QuipDetails.pending();
+    final StreamController<QuipDetails> _changePendingQuipEvents =
+            new StreamController<QuipDetails>();
+    Stream<QuipDetails> get quipChangedEvents =>
+            _changePendingQuipEvents.stream;
 
 
     // FIXME include header editing with the branchinfoedit component.
@@ -54,20 +57,6 @@ class EditBranchComponent extends ViewBranchComponent {
             _user = user,
             super.direct(server, user, branchId, null, branchDetails,
                     quipPaging);
-
-    void savePendingQuip() {
-        // save the quip to the server, add it to our pending quip list,
-        // and clear out the pending quip.
-        _log.warning("Saving not implemented");
-    }
-
-    void setPendingQuipTime() {
-        if (mediaStatusService.isConnected) {
-            pendingQuip.timestamp = mediaStatusService.currentTimeMillis;
-        } else {
-            _log.warning('media service is not connected');
-        }
-    }
 
 
     Future<BranchDetails> _loadEditBranchChange(ServerStatusService server) {

@@ -1,16 +1,23 @@
+<!-- TODO merge the branch playback and the branch edit -->
+
 <div>
 <a ng-href="#/film/view/{{cmp.filmId}}" ng-if="cmp.loaded">Film Details</a>
 <a ng-href="#/branch/changes/{{cmp.branchId}}" ng-if="cmp.branchId != null">Branch History</a>
 </div>
 
-<div ng-if="! cmp.canEditQuips">
+<div ng-if="! cmp.canReadQuips">
+You do not have permissions to view the contents of this branch.
+</div>
+
+<div ng-if="cmp.canReadQuips && ! cmp.canEditQuips">
 Unfortunately, you don't have permissions to edit the contents of this branch.
 </div>
+
 <div ng-if="cmp.canEditQuips">
     
     <div ng-if="cmp.loaded">
         <div><span>{{cmp.filmName}}</span> <span>({{cmp.filmReleaseYear}})</span>
-            <span ng-if="cmp.urlChangeId != 0">(revision {{cmp.changeId}})</span>
+            <span ng-if="cmp.urlChangeId &gt; 0">(revision {{cmp.changeId}})</span>
         </div>
         <div>{{cmp.branchName}}</div>
         <div>{{cmp.description}}</div>
@@ -18,7 +25,7 @@ Unfortunately, you don't have permissions to edit the contents of this branch.
     </div>
     <div ng-if="! cmp.loaded">
         <span ng-if="cmp.loadError">Problem loading branch.  You may not have
-        permission to see it.</span>
+        permission to see it, or it may not exist.</span>
         <span ng-if="! cmp.loadError">loading...</span>
     </div>
 
@@ -28,24 +35,12 @@ Unfortunately, you don't have permissions to edit the contents of this branch.
         connector="cmp.mediaStatusService"
         branch-details="cmp.branchDetails"></media-controller>
     
+    <edit-quip
+        branch="cmp.branchDetails"
+        media="cmp.mediaStatusService"
+        updates="cmp.quipChangedEvents"></edit-quip>
     <div>
         <!-- filter controls -->
-    </div>
-    <div>
-        <!-- new quip to add -->
-        <form onsubmit="return false;">
-            Add a quip:
-            <div>
-            Time: <input type="text" ng-model="cmp.pendingQuip.timestamp">
-            <button ng-click="cmp.setPendingQuipTime()">Set</button>
-            </div>
-            <div>
-            <input type="text" ng-model="cmp.pendingQuip.text">
-            </div>
-            <div>
-            Quip: <input type="submit" ng-click="cmp.savePendingQuip()">
-            </div>
-        </form>
     </div>
     <page-control page-state="cmp.quipPaging">
         <table>

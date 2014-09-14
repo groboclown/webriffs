@@ -14,6 +14,9 @@ import '../piece_edit.dart';
  * handles editing or viewing the branch header information: the branch name,
  * description, labels, and permissions.  It handles can-view and can-edit
  * access rights, so the wrapper doesn't need to worry about it.
+ *
+ * FIXME this should only allow editing if the user is looking at the most
+ * recent branch.  Historical viewing shouldn't allow editing.
  */
 @Component(
     selector: 'branch-header',
@@ -208,6 +211,9 @@ class BranchHeaderComponent extends BasicSingleRequestComponent {
                         "/branch/${_branchDetails.branchId}/version",
                         token, data: _branchDetails.toSaveJson())
                 , "edit_branch").then((_) {
+                    // FIXME on a successful save, the page should be
+                    // reloaded to point to the new head revision.
+
                     _savePending = false;
                 }));
         }

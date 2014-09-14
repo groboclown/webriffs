@@ -16,16 +16,19 @@ import '../media/media_status.dart';
  * The UI component for editing a quip.
  */
 @Component(
-    selector: 'edit-branch',
-    templateUrl: 'packages/webriffs_client/component/branch/editbranch_component.html',
+    selector: 'edit-quip',
+    templateUrl: 'packages/webriffs_client/component/branch/editquip_component.html',
     publishAs: 'cmp')
 class EditQuipComponent {
     final ServerStatusService _server;
     final UserService _user;
     final SpeechRecognitionApi _recognition;
 
-    @NgOneWay('quip')
-    QuipDetails pendingQuip;
+    QuipDetails pendingQuip = new QuipDetails.pending();
+
+
+    @NgOneWay('updates')
+    Stream quipChangedEvents;
 
 
     Completer<BranchDetails> _branchDetails = new Completer();
