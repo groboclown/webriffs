@@ -61,8 +61,13 @@ class ViewBranchComponent {
             _branchDetails.description;
     String get updatedOn => _branchDetails == null ? null :
             _branchDetails.updatedOn;
-    bool get canEdit => _branchDetails == null ? false :
+    bool get canReadQuips => _branchDetails == null ? false :
+            _branchDetails.userCanReadQuips;
+    bool get canEditHeader => _branchDetails == null ? false :
             _branchDetails.userCanEditBranch;
+    bool get canEditQuips => _branchDetails == null ? false :
+            (_branchDetails.userCanEditQuips ||
+                    _branchDetails.userCanEditQuipTags);
     bool get canDelete => _branchDetails == null ? false :
             _branchDetails.userCanDeleteBranch;
 

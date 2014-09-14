@@ -53,6 +53,9 @@ class BranchDetails {
 
     List<LinkRecord> filmLinks = [];
 
+    bool _loading = false;
+    bool get loading => _loading;
+
 
 
     factory BranchDetails.fromJson(Map<String, dynamic> json, bool isHead) {
@@ -71,11 +74,28 @@ class BranchDetails {
 
 
     /**
+     * Returns the JSON related to the branch header values (for saving).
+     */
+    Map<String, dynamic> toSaveJson() {
+        var ret = <String, dynamic> {
+            'Branch_Name': name,
+            'Description': description,
+            'tags': new List.from(
+                tags.map(
+                    (BranchTagDetails btd) => btd.toSaveJson()))
+        };
+
+        return ret;
+    }
+
+
+    /**
      * Load the details from the server.  This will return as a future with
      * the server response, so errors can be handled appropriately.  On an
      * error, this object will not be updated.
      */
     Future<ServerResponse> updateFromServer(ServerStatusService server) {
+        _loading = true;
         int reqChange = changeId;
         if (requestingHeadRevision) {
             reqChange = -1;
@@ -86,6 +106,8 @@ class BranchDetails {
                     update(response.jsonData);
                 }
                 return response;
+            }).whenComplete(() {
+                _loading = false;
             });
     }
 
@@ -184,5 +206,9 @@ class BranchTagDetails {
 
 
     BranchTagDetails(this.name);
+
+    dynamic toSaveJson() {
+        return name;
+    }
 }
 

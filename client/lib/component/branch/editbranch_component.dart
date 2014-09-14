@@ -24,7 +24,7 @@ import 'viewbranch_component.dart';
     templateUrl: 'packages/webriffs_client/component/branch/editbranch_component.html',
     publishAs: 'cmp')
 class EditBranchComponent extends ViewBranchComponent {
-    static final Logger _log = new Logger('media.StopwatchMedia');
+    static final Logger _log = new Logger('media.EditBranchComponent');
 
     final ServerStatusService _server;
     final UserService _user;

@@ -142,12 +142,51 @@ abstract class RequestHandlingComponent implements AsyncComponent {
 }
 
 
+class ResponseException implements Exception {
+    final ServerResponse response;
+    final Exception error;
+    final String message;
+    final Map<String, String> parameters;
+
+    factory ResponseException.server(ServerResponse response) {
+        return new ResponseException._(
+                response, null, response.message, response.parameterNotes);
+    }
+
+    factory ResponseException.exception(Exception exception) {
+        return new ResponseException._(
+                null, exception, exception.toString(),
+                new Map<String, String>());
+    }
+
+    ResponseException._(this.response, this.error, this.message,
+            this.parameters);
+
+    @override
+    String toString() {
+        String ret = message;
+        if (parameters != null && parameters.isNotEmpty) {
+            ret += " [";
+            parameters.keys.reduce((String full, String next) =>
+                    full == null
+                    ? (next + ": " + parameters[next])
+                    : ("; " + next + ": " + parameters[next]));
+            ret += " ]";
+        }
+        return ret;
+    }
+}
+
 
 /**
  * Handles single, interruptable requests to the server.
  *
+ * The internal error handling and loading status is specially crafted
+ * to be set _around_ the returned [Future] objects.  This allows calls into
+ * [#getFor] and [#addRequestFor] to chain [Future] calls make subsequent
+ * requests to the server.
  */
-abstract class SingleRequestComponent implements AsyncComponent {
+abstract class BasicSingleRequestComponent implements AsyncComponent {
     final SingleRequest _server;
     bool _hasError = false;
     String _errorMessage = null;
@@ -170,72 +209,123 @@ abstract class SingleRequestComponent implements AsyncComponent {
     String get error => _errorMessage;
 
 
-    SingleRequestComponent(ServerStatusService server) :
+    BasicSingleRequestComponent(ServerStatusService server) :
         _server = new SingleRequest(server);
 
 
-    Future<ServerResponse> get(String url, [ String csrfToken ]) {
-        return addRequest((ServerStatusService server) {
+    Future<ServerResponse> getWithToken(String url, String action) {
+        return addRequestFor((ServerStatusService server) {
+            return server.createCsrfToken(action).then((String token) =>
+                    server.get(url,  token));
+        });
+    }
+
+
+    Future<ServerResponse> getFor(String url, [ String csrfToken ]) {
+        return addRequestFor((ServerStatusService server) {
             return server.get(url, csrfToken);
         });
     }
 
 
-    Future<ServerResponse> addRequest(MakeSingleRequest request,
-            [ Duration delay = null ]) {
-        // We don't start loading the data until the request is run.
-
-        return _server.add((ServerStatusService server) {
-            _loaded = false;
-            _loading = true;
-            _hasError = false;
-            _errorMessage = null;
-            return request(server);
-        }, delay).then((ServerResponse resp) {
-            if (resp.wasError) {
-                _hasError = true;
-                _errorMessage = resp.message;
-                _loaded = false;
-                _loading = false;
-                return resp;
-            } else {
-                _hasError = false;
-                _errorMessage = null;
-                Future<ServerResponse> ret = onSuccess(resp);
-                if (ret == null) {
-                    _loaded = true;
-                    _loading = false;
-                    return resp;
-                } else {
-                    return ret.then((ServerResponse r) {
-                        _loaded = true;
-                        _loading = false;
-                        return r;
-                    }, onError: (Exception e) {
-                        onError(e);
-                    }).catchError((Exception e) {
-                        onError(e);
-                    });
-                }
-            }
-        }, onError: (Exception e) {
-            onError(e);
-        }).catchError((Exception e) {
-            onError(e);
+    Future<ServerResponse> addRequestWithToken(MakeCsrfRequest request,
+            String action) {
+        return addRequestFor((ServerStatusService server) {
+            return server.createCsrfToken(action).then((String token) =>
+                    request(server, token));
         });
     }
 
 
-    Future<ServerResponse> onSuccess(ServerResponse resp);
+    /**
+     * The Future returned by this method will run once the requested
+     * service returns data.  Only after all of the returned Future code
+     * completes does this component mark itself as being finished.
+     */
+    Future<ServerResponse> addRequestFor(MakeSingleRequest request,
+            [ Duration delay ]) {
+        // We don't start loading the data until the request is run.
+
+        // The code should only mark this response as being completed when
+        // the returned future completes.  We do that by returning one
+        // Future that is wrapped up with other Futures.
+
+        // We return a Completer that begins once the server response returns.
+        Completer<ServerResponse> returned = new Completer<ServerResponse>();
+
+        Future<ServerResponse> service = _server
+            .add((ServerStatusService server) {
+                    _loaded = false;
+                    _loading = true;
+                    _hasError = false;
+                    _errorMessage = null;
+                    return request(server);
+                }, delay)
+            .then((ServerResponse resp) {
+                if (resp.wasError) {
+                    var err = new ResponseException.server(resp);
+                    returned.completeError(err);
+                    throw err;
+                }
+                _hasError = false;
+                _errorMessage = null;
+                returned.complete(resp);
+            }, onError: (Exception e) {
+                var err = new ResponseException.exception(e);
+                returned.completeError(err);
+                throw err;
+            });
+
+        Future complete = Future.wait([ service, returned.future ])
+            .then((_) {
+                _loaded = true;
+                _loading = false;
+                _hasError = false;
+                _errorMessage = null;
+            })
+            .catchError((Exception e) {
+                _loaded = false;
+                _loading = false;
+                _hasError = true;
+                _errorMessage = e.toString();
+            });
+
+        return returned.future;
+    }
+}
 
 
-    void onError(Exception e) {
-        _hasError = true;
-        _errorMessage = e.toString();
-        _loaded = false;
-        _loading = false;
+/**
+ * A [BasicSingleRequestComponent] that only deals with one kind of request.
+ * The requests are handled by the overridden methods
+ * [#onSuccess] and [#onError].
+ */
+abstract class SingleRequestComponent extends BasicSingleRequestComponent {
+    SingleRequestComponent(ServerStatusService server) :
+        super(server);
+
+    Future<ServerResponse> onSuccess(ServerResponse response);
+
+    Future<ServerResponse> get(String url, [ String csrfToken = null ]) {
+        return getFor(url, csrfToken)
+            .then((ServerResponse response) => onSuccess(response))
+            .catchError((Exception e) {
+                onError(e);
+            });
     }
 
+    Future<ServerResponse> addRequest(MakeSingleRequest request,
+            [ Duration delay ]) {
+        return addRequestFor(request, delay)
+            .then((ServerResponse response) => onSuccess(response))
+            .catchError((Exception e) {
+                onError(e);
+            });
+    }
+
+    void onError(Exception e) {
+        // do nothing
+    }
 }
 
 

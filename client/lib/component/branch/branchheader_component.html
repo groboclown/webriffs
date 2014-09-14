@@ -1,0 +1,46 @@
+<div>
+  <async-status parent="cmp"></async-status>
+  <div>
+    <piece-editor piece="cmp.nameEdit" can-edit="cmp.canEditName">
+        <span ng-if="cmp.nameEdit.isEditing">
+          <label for="branch.name">Branch Name</label>
+          <input id="branch.name" type="text" ng-model="cmp.nameEdit.editValue"
+              ng-minlength="1"
+              ng-maxlength="200"
+              placeholder="{{cmp.nameEdit.original}}"
+              required>
+        </span>
+        <h2 ng-if="! cmp.nameEdit.isEditing">{{cmp.nameEdit.original}}</h2>
+    </piece-editor>
+  </div>
+
+  <div>
+    <piece-editor piece="cmp.descriptionEdit" can-edit="cmp.canEditDescription">
+        <div ng-if="cmp.descriptionEdit.isEditing">
+          <label for="branch.description">Description</label><br>
+          <textarea id="branch.description"
+              ng-model="cmp.descriptionEdit.editValue"
+              ng-minlength="0"
+              ng-maxlength="2048">{{cmp.descriptionEdit.original}}</textarea>
+        </div>
+        <div ng-if="! cmp.descriptionEdit.isEditing">{{cmp.descriptionEdit.original}}</div>
+    </piece-editor>
+  </div>
+  
+  <div>
+    <piece-editor piece="cmp.tagsEdit" can-edit="cmp.canEditTags">
+      <span ng-if="cmp.tagsEdit.isEditing">
+      (tag editor goes here)
+      </span>
+      <span ng-if="! cmp.tagsEdit.isEditing">
+        <span ng-repeat="tag in cmp.tagsEdit.original">
+            {{tag.name}}
+        </span>
+      </span>
+    </piece-editor>
+  </div>
+
+  <div ng-if="cmp.isSavePending">
+      <span ng-click="cmp.save()">Save</span>
+  </div>
+</div>

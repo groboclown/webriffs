@@ -1,0 +1,15 @@
+<span>
+<content></content>
+<span ng-if="cmp.piece.isEditing && cmp.canEdit">
+<!-- Enabled checkmark for save -->
+<span ng-click="cmp.piece.save()" ng-if="cmp.piece.isValidChange">&#10003;</span>
+<!-- Disabled checkmark, slightly lighter and different color -->
+<span ng-if="! cmp.piece.isValidChange" style="font-color: gray;">&#10004;</span>
+<!-- "X" to cancel -->
+<span ng-click="cmp.piece.cancel()">&#10005;</span>
+<span ng-if="cmp.piece.isValidationError"><span style="font-color: orange;">&#9754;</span> {{cmp.piece.validationError}} </span>
+</span>
+<!-- Pencil to start editing -->
+<span ng-if="! cmp.piece.isEditing && cmp.canEdit" ng-click="cmp.piece.edit()">&#9998;</span>
+<span ng-if="cmp.piece.isServerError"><span style="font-color: red;">#[</span> {{cmp.piece.serverError}} <span style="font-color: red;">]</span></span>
+</span>

@@ -4,53 +4,60 @@
     <a ng-href="#/branch/changes/{{cmp.branchId}}" ng-if="cmp.branchId != null">Branch History</a>
     </div>
     
-    <div ng-if="cmp.loaded">
-        <div><span>{{cmp.filmName}}</span> <span>({{cmp.filmReleaseYear}})</span>
-            <span ng-if="cmp.urlChangeId != 0">(revision {{cmp.changeId}})</span>
-        </div>
-        <div>{{cmp.branchName}}</div>
-        <div>{{cmp.description}}</div>
-        <div>Last updated on {{cmp.updatedOn}}</div>
-        
-        <div ng-if="cmp.canEdit">
-            <a ng-href="#/branch/edit/{{cmp.branchId}}">Edit this branch</a>
-        </div>
-    </div>
     <div ng-if="! cmp.loaded">
         <span ng-if="cmp.loadError">Problem loading branch.  You may not have
         permission to see it.</span>
         <span ng-if="! cmp.loadError">loading...</span>
     </div>
+    <div ng-if="cmp.loaded">
+        <div><span>{{cmp.filmName}}</span> <span>({{cmp.filmReleaseYear}})</span>
+            <span ng-if="cmp.urlChangeId != 0">(revision {{cmp.changeId}})</span>
+        </div>
+        <branch-header branch="cmp.branchDetails"></branch-header>
+        <div>Last updated on {{cmp.updatedOn}}</div>
+        
+        <div ng-if="cmp.canEditQuips">
+            <a ng-href="#/branch/edit/{{cmp.branchId}}">Edit this branch</a>
+        </div>
+    </div>
     
     <branch-updates current-branch="cmp.branchDetails"></branch-updates>
     
-    <media-controller branch-details="cmp.branchDetails"></media-controller>
+    <media-controller
+        connector="cmp.mediaStatusService"
+        branch-details="cmp.branchDetails"></media-controller>
     
-    <div>
-        <!-- filter controls -->
+    
+    <div ng-if="! cmp.canReadQuips">
+    You do not have permissions to view the contents of this branch.
     </div>
-    <page-control page-state="cmp.quipPaging">
-        <table>
-            <thead>
-                <tr>
-                    <!-- FIXME add sorting controls -->
-                    <th>Time</th>
-                    <th>Text</th>
-                    <th>Tags</th>
-                </tr>
-            </thead>
-            <tbody ng-if="cmp.quipPaging.loadedSuccessful">
-                <tr ng-repeat="quip in cmp.quips">
-                    <!-- FIXME handle committed timestamp -->
-                    <td>{{quip.timestamp}}</td>
-                    <td>{{quip.text}}</td>
-                    <td>
-                        <span ng-repeat="tag in quip.tags">
-                            {{tag.name}}
-                        </span>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </page-control>
+    <div ng-if="cmp.canReadQuips">
+        <div>
+            <!-- filter controls -->
+        </div>
+        <page-control page-state="cmp.quipPaging">
+            <table>
+                <thead>
+                    <tr>
+                        <!-- FIXME add sorting controls -->
+                        <th>Time</th>
+                        <th>Text</th>
+                        <th>Tags</th>
+                    </tr>
+                </thead>
+                <tbody ng-if="cmp.quipPaging.loadedSuccessful">
+                    <tr ng-repeat="quip in cmp.quips">
+                        <!-- FIXME handle committed timestamp -->
+                        <td>{{quip.timestamp}}</td>
+                        <td>{{quip.text}}</td>
+                        <td>
+                            <span ng-repeat="tag in quip.tags">
+                                {{tag.name}}
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </page-control>
+    </div>
 </div>

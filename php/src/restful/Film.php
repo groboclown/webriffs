@@ -370,19 +370,19 @@ class BranchObjChanges extends Resource {
     
     
     /**
+     * Edit the branch header.
+     *
      * @method POST
      * @csrf edit_branch
      */
     function update() {
         $branchId = $this->validateId($this->branchid, "branchId");
         
-        // FIXME match argument names with the rest of the API
         $branchName = Validation::normalizeBranchName(
-                $this->loadRequestString('name'), $this);
-        $desc = $this->loadRequestString('description', FALSE) || "";
+                $this->loadRequestString('Branch_Name'), $this);
+        $desc = $this->loadRequestString('Description', FALSE) or "";
         
         $this->validate();
-        
         
         $userId = null;
         $gaUserId = null;
@@ -394,8 +394,9 @@ class BranchObjChanges extends Resource {
         }
         
         $tags = array();
-        if (!! $data->{'tags'} && is_array($data->{'tags'})) {
-            foreach ($data->{'tags'} as $tag) {
+        $data = $this->getRequestData();
+        if (array_key_exists('tags', $data) && is_array($data['tags'])) {
+            foreach ($data['tags'] as $tag) {
                 if (!! $tag && is_string($tag)) {
                     $tag = trim($tag);
                     if (strlen($tag) > 0) {
@@ -407,6 +408,8 @@ class BranchObjChanges extends Resource {
         
         $this->validate();
         
+        // DEBUG
+        error_log("Film.php: description: [".$desc."]");
         WebRiffs\BranchLayer::updateBranchHeader($this->getDB(), $branchId,
             $userId, $gaUserId, $branchName, $desc, $tags);
         

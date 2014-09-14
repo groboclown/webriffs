@@ -521,6 +521,7 @@ class BranchLayer {
                 $branchId, $gaUserId);
         $idSet = GroboVersion\DataAccess::addItemToChange($db, $branchItemId,
                 $branchChangeId);
+        
         $data = FilmBranchVersion::$INSTANCE->create($db, $idSet[0],
                 $newName, $newDescription);
         BranchLayer::checkError($data,

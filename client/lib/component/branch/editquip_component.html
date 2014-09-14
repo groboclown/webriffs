@@ -3,10 +3,10 @@
 <a ng-href="#/branch/changes/{{cmp.branchId}}" ng-if="cmp.branchId != null">Branch History</a>
 </div>
 
-<div ng-if="! cmp.canEditQuips">
-Unfortunately, you don't have permissions to edit the contents of this branch.
+<div ng-if="! cmp.canEdit">
+Unfortunately, you don't have permissions to edit this branch.
 </div>
-<div ng-if="cmp.canEditQuips">
+<div ng-if="cmp.canEdit">
     
     <div ng-if="cmp.loaded">
         <div><span>{{cmp.filmName}}</span> <span>({{cmp.filmReleaseYear}})</span>

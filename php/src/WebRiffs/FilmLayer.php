@@ -317,19 +317,8 @@ class FilmLayer {
                 ));
         }
         
-        $data = AdminLayer::getLinkNamed($db, $linkName);
-        FilmLayer::checkError($data,
-            new Base\ValidationException(
-                array(
-                    'unknown' => 'there was an unknown problem finding the link type'
-                )));
-        if ($data['rowcount'] != 1) {
-            throw new Base\ValidationException(
-                array(
-                    'link type' => 'invalid link type name'
-                ));
-        }
-        if ($isPlaybackMedia && ! $data['result'][0]['Is_Media']) {
+        $link = AdminLayer::getLinkNamed($db, $linkName);
+        if ($isPlaybackMedia && ! $link['Is_Media']) {
             throw new Base\ValidationException(
                 array(
                     'is_playback_media' => 'link is not a media type, so the film cannot use it as a media source'
@@ -337,7 +326,7 @@ class FilmLayer {
         }
         
         
-        $regex = $data['result'][0]['Validation_Regex'];
+        $regex = $link['Validation_Regex'];
         // test for both 0 and false
         if ($uri != null && ! preg_match('/'.$regex.'/', $uri)) {
             $matches = array();
@@ -351,9 +340,10 @@ class FilmLayer {
                     'uri' => 'uri does not match allowed patterns for this link type'
                 ));
         }
-        $linkId = $data['result'][0]['Link_Type_Id'];
+        $linkId = $link['Link_Type_Id'];
         
-        $data = FilmLink::$INSTANCE->upsert($db, $filmId, $linkId, $uri);
+        $data = FilmLink::$INSTANCE->upsert($db, $filmId, $linkId,
+                $isPlaybackMedia, $uri);
         FilmLayer::checkError($data,
             new Base\ValidationException(
                 array(

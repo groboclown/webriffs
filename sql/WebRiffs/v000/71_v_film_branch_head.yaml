@@ -22,7 +22,7 @@ view:
             V_BRANCH_HEAD bh
         INNER JOIN
             GV_ITEM_VERSION iv
-                ON iv.Gv_Item_Id = bh.Gv_Item_Id
+                ON iv.Gv_Item_Version_Id = bh.Gv_Item_Version_Id
         INNER JOIN
             GV_CHANGE c
                 ON c.Gv_Branch_Id = bh.Gv_Branch_Id
