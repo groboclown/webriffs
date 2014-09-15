@@ -71,7 +71,8 @@ class CreateBranchComponent extends RequestHandlingComponent {
                     (ServerStatusService server, String token) {
                 return _server.put('/film/' + filmId.toString() + '/branch',
                         token, data: {
-                            'name': lookupName.name
+                            'Name': lookupName.name
+                            // 'Description'
                         });
             });
         } else {
