@@ -13,4 +13,8 @@ class PieceEditComponent {
 
     @NgOneWay('can-edit')
     bool canEdit;
+
+    // FIXME add bits about whether the piece is being validated / saved / etc
+    // (the future is still active), and have that tie with the usability of
+    // the UI elements.
 }

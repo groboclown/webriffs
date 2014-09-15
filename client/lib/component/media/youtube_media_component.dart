@@ -39,10 +39,12 @@ class YouTubeMediaStatusService extends AbstractMediaStatusService {
     static final Logger _log = new Logger('media.YoutubeMedia');
     static final String YOUTUBE_LINK_URL = "https://youtube.com/watch?v=";
 
+    static const int MAX_SEARCH_COUNT = 4;
 
     MediaStatus _status = MediaStatus.ENDED;
-    int _baseTimeMillis = 0;
     JsObject _yt;
+    int _searchCount = 0;
+    bool youTubeFailedToLoad = false;
 
     YouTubeMediaStatusService(BranchDetails branchDetails) :
             super('youtube-media', branchDetails) {
@@ -104,6 +106,8 @@ class YouTubeMediaStatusService extends AbstractMediaStatusService {
     void pageLoaded() {
         super.pageLoaded();
         print("*** YouTube page loading ****");
+        _searchCount = 0;
+        youTubeFailedToLoad = false;
         searchForYouTubeObj();
     }
 
@@ -126,10 +130,17 @@ class YouTubeMediaStatusService extends AbstractMediaStatusService {
         _log.info("**** media_config = ${obj}");
         if (obj == null) {
             if (isPageVisible) {
-                _log.info("searching for youtube");
-                new Timer(new Duration(microseconds: 200), () {
-                    searchForYouTubeObj();
-                });
+                if (++_searchCount > MAX_SEARCH_COUNT) {
+                    // If we don't add this, then the search will eventually
+                    // cause an endless loop in Angular reporting that the
+                    // model didn't stabalize.
+                    youTubeFailedToLoad = true;
+                } else {
+                    _log.info("searching for youtube");
+                    new Timer(new Duration(microseconds: 2000), () {
+                        searchForYouTubeObj();
+                    });
+                }
             }
             return;
         }
@@ -138,8 +149,10 @@ class YouTubeMediaStatusService extends AbstractMediaStatusService {
                 _log.info("found something like the youtube javascript object");
 
                 // assume it's the right object
-                obj.callMethod('setVideoId', [
-                    findYoutubeVideoId(branchDetails) ]);
+                var vidid = findYoutubeVideoId(branchDetails);
+                obj.callMethod('setVideoId', [ vidid ]);
+                _log.info("Called setVideoId(${vidid})");
+                _log.info(obj['name']);
                 _yt = obj;
             } else {
                 throw new Exception("Bad JS value for media_config");
@@ -186,9 +199,13 @@ class YouTubeMediaComponent implements AbstractMediaStatusComponent {
 
     bool get loaded => _media != null;
 
+    bool get youTubeFailedToLoad => _media == null
+            ? false
+            : _media.youTubeFailedToLoad;
+
     bool get youtubeLoading => _media == null
             ? true
-            : ! _media.loaded;
+            : ((! _media.loaded) && ! _media.youTubeFailedToLoad);
 
     MediaStatus get status => _media == null
             ? MediaStatus.ENDED

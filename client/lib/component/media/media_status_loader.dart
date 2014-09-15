@@ -30,12 +30,16 @@ Future<MediaStatusService> loadMediaStatusService(BranchDetails branch) {
     // Check the links on the branch's film.
     // Use those to determine which media type to display.
 
+    // FIXME DEBUG
+    print("Loading media for branch " + branch.name);
+
     for (LinkRecord link in branch.filmLinks)
     {
         if (link.isPlaybackMedia) {
             for (MediaStatusServiceFactory factory in MEDIA_STATUS_FACTORIES) {
                 var service = factory(branch, link);
                 if (service != null) {
+                    print("Loaded service for " + link.serverUri);
                     return service;
                 }
             }
@@ -44,6 +48,7 @@ Future<MediaStatusService> loadMediaStatusService(BranchDetails branch) {
 
 
     // Default: show a stopwatch.
+    print("Loading default stopwatch service");
     return new Future<MediaStatusService>.value(
             new StopwatchMediaStatusService(branch));
 }

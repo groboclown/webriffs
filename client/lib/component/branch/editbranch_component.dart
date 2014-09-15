@@ -10,6 +10,7 @@ import '../../service/user.dart';
 import '../../service/server.dart';
 import '../../json/branch_details.dart';
 import '../../json/quip_details.dart';
+import '../../util/event_util.dart';
 
 import 'quip_paging.dart';
 import 'viewbranch_component.dart';
@@ -29,10 +30,8 @@ class EditBranchComponent extends ViewBranchComponent {
     final ServerStatusService _server;
     final UserService _user;
 
-    final StreamController<QuipDetails> _changePendingQuipEvents =
-            new StreamController<QuipDetails>();
-    Stream<QuipDetails> get quipChangedEvents =>
-            _changePendingQuipEvents.stream;
+    final StreamController<QuipDetails> _changePendingQuipEvents;
+    final StreamProvider<QuipDetails> quipChangedEvents;
 
 
     // FIXME include header editing with the branchinfoedit component.
@@ -46,15 +45,21 @@ class EditBranchComponent extends ViewBranchComponent {
 
         QuipPaging quips = new QuipPaging.pending(server, branchId);
 
+        StreamController<QuipDetails> quipEvents =
+                new StreamController<QuipDetails>();
+
         return new EditBranchComponent._(server, user, branchId,
-                branchDetails, quips);
+                branchDetails, quips, quipEvents);
     }
 
     EditBranchComponent._(ServerStatusService server, UserService user,
             int branchId, Future<BranchDetails> branchDetails,
-            QuipPaging quipPaging) :
+            QuipPaging quipPaging, StreamController<QuipDetails> quipEvents) :
             _server = server,
             _user = user,
+            _changePendingQuipEvents = quipEvents,
+            quipChangedEvents =
+                new StreamControllerStreamProvider<QuipDetails>(quipEvents),
             super.direct(server, user, branchId, null, branchDetails,
                     quipPaging);
 

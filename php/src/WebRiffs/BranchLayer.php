@@ -392,8 +392,8 @@ class BranchLayer {
     public static function getBranchDetails($db, $userId, $branchId, $changeId) {
         if (! BranchLayer::canAccessBranch($db, $userId, $branchId,
                 Access::$BRANCH_READ)) {
-            # FIXME debug
-            error_log("Cannot access branch ".$branchId);
+            // debug
+            //error_log("Cannot access branch ".$branchId);
             
             return false;
         }
@@ -412,8 +412,8 @@ class BranchLayer {
                     'unknown' => 'there was an unknown problem finding the branch'
                 )));
         if (sizeof($data['result']) <= 0) {
-            # FIXME debug
-            error_log("no such branch (".$branchId.") at that version (".$changeId.")");
+            // debug
+            //error_log("no such branch (".$branchId.") at that version (".$changeId.")");
             
             return false;
         }
@@ -426,7 +426,7 @@ class BranchLayer {
         $result = $data['result'][0];
         $filmId = intval($result['Film_Id']);
         
-        if ($changeId <= 0) {
+        if ($changeId < 0) {
             $data = VBranchTagHead::$INSTANCE->readBy_Gv_Branch_Id($db, $branchId);
         } else {
             $data = VBranchTagVersion::$INSTANCE->readBy_Gv_Branch_Id_x_Gv_Change_Id(

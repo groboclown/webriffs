@@ -5,15 +5,18 @@
 <a ng-href="#/branch/changes/{{cmp.branchId}}" ng-if="cmp.branchId != null">Branch History</a>
 </div>
 
-<div ng-if="! cmp.canReadQuips">
+<div class="bug">BUG if you log in or out, the permissions on this page
+don't refresh.  You need to refresh the page (F5).</div>
+
+<div ng-if="! cmp.canReadQuips && cmp.loaded">
 You do not have permissions to view the contents of this branch.
 </div>
 
-<div ng-if="cmp.canReadQuips && ! cmp.canEditQuips">
+<div ng-if="cmp.canReadQuips && ! cmp.canEditQuips && cmp.loaded">
 Unfortunately, you don't have permissions to edit the contents of this branch.
 </div>
 
-<div ng-if="cmp.canEditQuips">
+<div ng-if="cmp.canEditQuips" class="component">
     
     <div ng-if="cmp.loaded">
         <div><span>{{cmp.filmName}}</span> <span>({{cmp.filmReleaseYear}})</span>
@@ -31,6 +34,7 @@ Unfortunately, you don't have permissions to edit the contents of this branch.
 
     <branch-updates current-branch="cmp.branchDetails"></branch-updates>
     
+    <div class="bug">BUG the media controller doesn't seem to load the right controller.</div>
     <media-controller
         connector="cmp.mediaStatusService"
         branch-details="cmp.branchDetails"></media-controller>

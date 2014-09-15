@@ -189,6 +189,13 @@ class BranchHeaderComponent extends BasicSingleRequestComponent {
     }
 
 
+    void cancel() {
+        nameEdit.cancel();
+        descriptionEdit.cancel();
+        tagsEdit.cancel();
+    }
+
+
     /**
      * Perform the real save on the data.
      */

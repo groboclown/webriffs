@@ -1,5 +1,5 @@
-<div ng-if="cmp.isLoggedIn">
-
+<div ng-if="cmp.isLoggedIn" class="component">
+  <div class="bug">BUG: The film creation is currently broken.</div>
   <form onsubmit="return false;">
     <filminfo-edit film-info="cmp.filmInfo"></filminfo-edit>
     <input type="submit" ng-click="cmp.createFilm()" ng-disabled="cmp.disabled" value="Submit">

@@ -2,3 +2,11 @@
 .beforeload {
     display: none !important;
 }
+
+.bug {
+    color: purple;
+}
+
+.component {
+    border: 1px solid darkgray;
+}

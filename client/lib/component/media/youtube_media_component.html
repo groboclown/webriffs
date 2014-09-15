@@ -1,9 +1,13 @@
+<div class="component">
 <div ng-if="! cmp.loaded">
 loading...
 </div>
 <div ng-if="cmp.loaded">
   <div ng-if="cmp.youtubeLoading">loading Youtube...</div>
-  <div ng-if="! cmp.youtubeLoading"> (you should see the YouTube video) </div>
+  <div ng-if="! cmp.youtubeLoading"> (you should see the YouTube video)
+  <span class="bug">BUG: allow switching to a stopwatch if the video doesn't show</span>
+  </div>
+  <div ng-if="cmp.youTubeFailedToLoad">Could not load YouTube video.  Is there a problem with your network?</div>
   <script type="text/javascript">//<!--
 // REFERENCE:
 // https://developers.google.com/youtube/js_api_reference
@@ -81,22 +85,23 @@ var youtube = {
     videoId: null,
     
     setVideoId: function(id) {
+        console.log("set the video id: " + id);
         youtube._validateState();
         
-        //console.log("set the video id: " + id);
         //if (youtube.videoId !== null) {
         //    console.log(" - the old video id was " + youtube.videoId);
         //}
         youtube.videoId = id;
         if (youtube.isLoaded) {
             if (youtube.isReady) {
+                console.log("Set the video id in the loaded player");
                 youtube.player.loadVideoById(id);
             } else {
                 throw new Exception("video id = " + id +
                         "; the player is loaded, but not ready.");
             }
         } else if (! youtube._initialized) {
-            //console.log("loading the player with video id " + id);
+            console.log("loading the player with video id " + id);
             
             youtube._initialized = true;
             
@@ -109,16 +114,19 @@ var youtube = {
             var atts = { id: "my_youtube_player" };
             var url = "http://www.youtube.com/v/" +
                 id  + "?enablejsapi=1&playerapiid=ytplayer&version=3";
+            console.log("Youtube player url: " + url);
             swfobject.embedSWF(url, obj,
                 // width, height
                 "425", "356",
                 "8", null, null, params, atts);
             
-        //} else {
-        //    console.log("video id = " + id +
-        //        "; the player is not loaded but is initialized; the video id was probably set too quickly.  Ignoring.");
+        } else {
+            console.log("video id = " + id +
+                "; the player is not loaded but is initialized; the video id was probably set too quickly.  Ignoring.");
         }
     },
+    
+    name: "YouTube Media Player",
     
     isReady: false,
     isLoaded: false,
@@ -163,6 +171,7 @@ media_config = youtube;
 
 
 function onYouTubePlayerReady(playerId) {
+    console.log("onYouTubePlayerReady");
     youtube.isLoaded = true;
     youtube.player = document.getElementById("my_youtube_player");
     youtube.player.addEventListener("onStateChange", "onYouTubeStateChange");
@@ -183,4 +192,5 @@ function onYouTubeError(errcode) {
 }
 
 // --></script>
+</div>
 </div>

@@ -82,9 +82,11 @@ class CreateUserComponent {
     }
 
 
-    bool hasError() {
-        return (usernameError != null || passwordError != null || contactError != null || passwordMatchError != null);
-    }
+    bool get hasError =>
+        (usernameError != null ||
+        passwordError != null ||
+        contactError != null ||
+        passwordMatchError != null);
 
 
     _checkPasswordAndMatch(pw, pm) {
@@ -115,7 +117,7 @@ class CreateUserComponent {
 
 
     void submit() {
-        if (hasError()) {
+        if (hasError) {
             _log.info("error - cannot sumit");
         } else {
             _log.finest("sumit data: contact = [" +

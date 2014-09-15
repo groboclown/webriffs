@@ -137,11 +137,6 @@ class StopwatchMediaComponent extends AbstractMediaStatusComponent {
         serviceFuture.then((MediaStatusService service) {
             if (service is StopwatchMediaStatusService) {
                 _media = service;
-                _media.addStatusChangeListener((m) {
-                    if (! m.isPageVisible) {
-                        stop();
-                    }
-                });
             } else {
                 throw new Exception("Invalid media status service ${service}");
             }

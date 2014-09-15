@@ -11,6 +11,7 @@ import '../../json/branch_details.dart';
 import '../../json/quip_details.dart';
 import '../../util/speech_recognition.dart';
 import '../media/media_status.dart';
+import '../../util/event_util.dart';
 
 /**
  * The UI component for editing a quip.
@@ -26,9 +27,13 @@ class EditQuipComponent {
 
     QuipDetails pendingQuip = new QuipDetails.pending();
 
-
     @NgOneWay('updates')
-    Stream quipChangedEvents;
+    set quipChangedEvents(StreamProvider<QuipDetails> sp) {
+        sp.stream.forEach((QuipDetails qd) {
+            // FIXME update the pending quip to be this.
+
+        });
+    }
 
 
     Completer<BranchDetails> _branchDetails = new Completer();

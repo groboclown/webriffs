@@ -334,7 +334,7 @@ def test_setup(config):
     pass
 
 
-@depends(clean, generate_sql, generate_dbo, copy_dart, copy_php)
+@depends(generate_client_js, copy_client, copy_dart, copy_php)
 def dart(config):
     pass
 
