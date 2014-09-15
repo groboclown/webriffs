@@ -7,6 +7,8 @@ client/web/css/packages
 client/web/css/packages/
 client/web/view/packages
 client/web/view/packages/
+client/web/js/packages
+client/web/js/packages/
 client/web/img/packages
 client/web/img/packages/
 client/test/packages
