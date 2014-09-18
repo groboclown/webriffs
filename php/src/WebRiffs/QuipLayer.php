@@ -81,10 +81,10 @@ class QuipLayer {
         
         if ($changeId <= 0) {
             // Get the head revision
-            $rowData = VQuipHead::$INSTANCE->readBy_Gv_Branch_Id_x_Gv_Change_Id(
-                 $db, $branchId, $changeId);
-            $countData = VQuipHead::$INSTANCE->countBy_Gv_Branch_Id_x_Gv_Change_Id(
-                 $db, $branchId, $changeId);
+            $rowData = VQuipHead::$INSTANCE->readBy_Gv_Branch_Id(
+                 $db, $branchId);
+            $countData = VQuipHead::$INSTANCE->countBy_Gv_Branch_Id(
+                 $db, $branchId);
         } else {
             $rowData = VQuipVersion::$INSTANCE->readBy_Gv_Branch_Id_x_Gv_Change_Id(
                  $db, $branchId, $changeId);
@@ -98,6 +98,13 @@ class QuipLayer {
                 )));
         
         $rows = $rowData['result'];
+        foreach ($rows as &$row) {
+            // split up the tags correctly
+            // FIXME check the syntax of this command
+            $outtags = split('/,/', substr($row['Tags'], 1, strlen($row['Tags']) - 1));
+            $row['Tags'] = $outtags;
+        }
+        
         $count = $countData['result'];
         
         return Base\PageResponse::createPageResponse($paging, $count, $rows);
@@ -105,10 +112,9 @@ class QuipLayer {
 
 
     public static function pageCommittedPendingQuips($db, $userId, $branchId,
-            $changeId, Base\PageRequest $paging = null) {
+            Base\PageRequest $paging = null) {
         if (! QuipLayer::canAccessBranch($db, $userId, $branchId,
                 Access::$BRANCH_READ)) {
-            // This is a bit of a data leak
             throw new Tonic\UnauthorizedException();
         }
     
@@ -122,7 +128,7 @@ class QuipLayer {
         $wheres = array();
     
         // TODO No "where" support right now.  That will be checking the tags,
-        // eventually
+        // eventually.  Tags are searched with a '%,(tagname),%' syntax.
     
         QuipLayer::checkError($data,
         new Base\ValidationException(
@@ -130,12 +136,13 @@ class QuipLayer {
                 'unknown' => 'there was an unknown problem reading the branch tags'
             )));
     
+        // FIXME
         if ($changeId <= 0) {
             // Get the head revision
-            $rowData = VQuipHead::$INSTANCE->readBy_Gv_Branch_Id_x_Gv_Change_Id(
-                    $db, $branchId, $changeId);
-            $countData = VQuipHead::$INSTANCE->countBy_Gv_Branch_Id_x_Gv_Change_Id(
-                    $db, $branchId, $changeId);
+            $rowData = VQuipHead::$INSTANCE->readBy_Gv_Branch_Id(
+                    $db, $branchId);
+            $countData = VQuipHead::$INSTANCE->countBy_Gv_Branch_Id(
+                    $db, $branchId);
         } else {
             $rowData = VQuipVersion::$INSTANCE->readBy_Gv_Branch_Id_x_Gv_Change_Id(
                     $db, $branchId, $changeId);
@@ -149,6 +156,13 @@ class QuipLayer {
                 )));
     
         $rows = $rowData['result'];
+        foreach ($rows as &$row) {
+            // split up the tags correctly
+            // FIXME check the syntax of this command
+            $outtags = split('/,/', substr($row['Tags'], 1, strlen($row['Tags']) - 1));
+            $row['Tags'] = $outtags;
+        }
+        
         $count = $countData['result'];
     
         return Base\PageResponse::createPageResponse($paging, $count, $rows);
@@ -322,10 +336,121 @@ class QuipLayer {
     }
     
     
+    /**
+     * Save the quip.  If this is a new quip, then the quipid should be null.
+     *
+     *
+     * @param unknown $db
+     * @param unknown $userId
+     * @param unknown $gaUserId
+     * @param unknown $branchId
+     * @param unknown $quipId
+     * @param unknown $quipText
+     * @param unknown $timeMillis
+     * @param unknown $tags
+     * @throws Base\ValidationException
+     */
     public static function saveQuip($db, $userId, $gaUserId, $branchId,
-            $quipId, $quipText, &$tags) {
-        // FIXME
+            $quipId, $quipText, $timeMillis, &$tags) {
+        if (! is_intval($timeMillis) || $timeMillis < 0) {
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'time must be positive integer'
+                ));
+        }
+        
+        // This will check for both the existence of the pending change
+        // and the branch.
+        $data = UserBranchPendingVersion::$INSTANCE->readBy_User_Id_x_Gv_Branch_Id(
+                $db, $userId, $branchId);
+        QuipLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'problem fetching the pending change'
+                )));
+        if ($data['rowcount'] != 1) {
+            throw new Base\ValidationException(
+                array(
+                    'unknown' => 'no pending change for branch'
+                ));
+        }
+        $pendingChange = intval($data['result'][0]['Pending_Change_Id']);
+
+        if ($quipId === null) {
+            $quipId = GroboVersion\DataAccess::createItem($db);
+        }
+        
+        // This will raise an error if the quipId is not valid.
+        // $changeData[0] = item version id
+        // $changeData[1] = change version id
+        $changeData = GroboVersion\DataAccess::addItemToChange($db,
+            $quipId, FALSE);
+        
+        $outtags = array();
+        $tagstr = ',';
+        foreach ($tags as $tag) {
+            $tformTag = QuipLayer::normalizeTagName($tag);
+            if (strlen($tformTag) <= 0 || strlen($tformTag) > 64) {
+                throw new Base\ValidationException(
+                    array(
+                        'unknown' => 'invalid tag name ['.$tag.']'
+                    ));
+            }
+            $outtags[] = $tformTag;
+            $tagstr .= $tformTag . ',';
+        }
+        if (sizeof($outtags) > 20) {
+            throw new Base\ValidationException(
+                    array(
+                        'unknown' => 'too many tags (maximum 20)'
+                    ));
+        }
+        
+        $data = QuipVersion::$INSTANCE->create($db, $changeData[0],
+                $quipText, $tagstr, $timeMillis);
+        QuipLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'saving quip update'
+                )));
+        
+        return array(
+            'Gv_Item_Id' => $quipId,
+            //'Gv_Item_Version_Id' => $changeData[0],
+            'Gv_Branch_Id' => $branchId,
+            'Text_Value' => $quipText,
+            'Timestamp_Millis' => $timeMillis,
+            'Tags' => $outtags
+        );
     }
+    
+    
+    public static function deleteQuip($db, $userId, $gaUserId, $branchId,
+            $quipId) {
+        // This will check for both the existence of the pending change
+        // and the branch.
+        $data = UserBranchPendingVersion::$INSTANCE->readBy_User_Id_x_Gv_Branch_Id(
+                $db, $userId, $branchId);
+        QuipLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'problem fetching the pending change'
+                )));
+        if ($data['rowcount'] != 1) {
+            throw new Base\ValidationException(
+                array(
+                    'unknown' => 'no pending change for branch'
+                ));
+        }
+        $pendingChange = intval($data['result'][0]['Pending_Change_Id']);
+        
+        // This will raise an error if the quipId is not valid.
+        // $changeData[0] = item version id
+        // $changeData[1] = change version id
+        $changeData = GroboVersion\DataAccess::addItemToChange($db,
+            $quipId, $pendingChange, TRUE);
+    }
+    
 
     // ----------------------------------------------------------------------
     
@@ -342,7 +467,7 @@ class QuipLayer {
 QuipLayer::$QUIP_SORT_COLUMNS = array(
     "timestamp" => "Timestamp_Millis"
             
-    // FIXME eventually this will add tags to the filters.
 );
 
+// FIXME eventually this will add tags to the filters.
 QuipLayer::$QUIP_FILTERS = array();

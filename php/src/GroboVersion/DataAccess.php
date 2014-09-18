@@ -238,8 +238,7 @@ class DataAccess {
      *            true if the item is being deleted, false
      *            (default) otherwise.
      * @return array(int, int) the new item version ([0]), and the change
-     *         version
-     *         id ([1]).
+     *         version id ([1]).
      */
     public static function addItemToChange($db, $itemId, $changeId,
             $deleted = false) {

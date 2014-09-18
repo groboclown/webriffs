@@ -199,11 +199,19 @@ $baseChangeId = $data[1];
 $result['pending-quip-change'] = $data;
 
 // TEST This should return the same as the previous call
-$data = WebRiffs\QuipLayer::createPendingChange($db, $userData['User_Id'],
-    $userData['Ga_User_Id'], $slacker1991BranchId, 1);
-if ($pendingChangeId != $data[0]) {
-    $result['create-pending-change'] = 'Error: created multiple changes';
-}
+//$data = WebRiffs\QuipLayer::createPendingChange($db, $userData['User_Id'],
+//    $userData['Ga_User_Id'], $slacker1991BranchId, 1);
+//if ($pendingChangeId != $data[0]) {
+//    $result['create-pending-change'] = 'Error: created multiple changes';
+//}
+
+$tags = array('director', 'film_notes');
+$data = WebRiffs\QuipLayer::saveQuip($db, $userData['User_Id'],
+    $userData['Ga_User_Id'], $slacker1991BranchId, null,
+    "Movie start", 0, $tags);
+$result['slacker1991-quip1'] = $data['Gv_Item_Id'];
+
+// TEST
 
 
 // ---------------------------------------------------------------------------

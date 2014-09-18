@@ -12,26 +12,7 @@ view:
           
           , qv.Text_Value Text_Value
           
-          , qv.Tag_1  Tag_1
-          , qv.Tag_2  Tag_2
-          , qv.Tag_3  Tag_3
-          , qv.Tag_4  Tag_4
-          , qv.Tag_5  Tag_5
-          , qv.Tag_6  Tag_6
-          , qv.Tag_7  Tag_7
-          , qv.Tag_8  Tag_8
-          , qv.Tag_9  Tag_9
-          , qv.Tag_10 Tag_10
-          , qv.Tag_11 Tag_11
-          , qv.Tag_12 Tag_12
-          , qv.Tag_13 Tag_13
-          , qv.Tag_14 Tag_14
-          , qv.Tag_15 Tag_15
-          , qv.Tag_16 Tag_16
-          , qv.Tag_17 Tag_17
-          , qv.Tag_18 Tag_18
-          , qv.Tag_19 Tag_19
-          , qv.Tag_20 Tag_20
+          , qv.Tags Tags
           
           , qv.Timestamp_Millis Timestamp_Millis
           , qv.Updated_On
@@ -89,69 +70,9 @@ view:
             constraints:
                 - constraint:
                     type: not null
-
         - column:
-            name: Tag_1
-            type: nvarchar(64)
-        - column:
-            name: Tag_2
-            type: nvarchar(64)
-        - column:
-            name: Tag_3
-            type: nvarchar(64)
-        - column:
-            name: Tag_4
-            type: nvarchar(64)
-        - column:
-            name: Tag_5
-            type: nvarchar(64)
-        - column:
-            name: Tag_6
-            type: nvarchar(64)
-        - column:
-            name: Tag_7
-            type: nvarchar(64)
-        - column:
-            name: Tag_8
-            type: nvarchar(64)
-        - column:
-            name: Tag_9
-            type: nvarchar(64)
-        - column:
-            name: Tag_10
-            type: nvarchar(64)
-        - column:
-            name: Tag_11
-            type: nvarchar(64)
-        - column:
-            name: Tag_12
-            type: nvarchar(64)
-        - column:
-            name: Tag_13
-            type: nvarchar(64)
-        - column:
-            name: Tag_14
-            type: nvarchar(64)
-        - column:
-            name: Tag_15
-            type: nvarchar(64)
-        - column:
-            name: Tag_16
-            type: nvarchar(64)
-        - column:
-            name: Tag_17
-            type: nvarchar(64)
-        - column:
-            name: Tag_18
-            type: nvarchar(64)
-        - column:
-            name: Tag_19
-            type: nvarchar(64)
-        - column:
-            name: Tag_20
-            type: nvarchar(64)
-
-
+            name: Tags
+            type: varchar(1301)
         - column:
             name: Timestamp_Millis
             type: int

@@ -26,46 +26,8 @@ view:
             , qup.Text_Value Pending_Text_Value
             , quv.Text_Value Committed_Text_Value
             
-            , qup.Tag_1  Pending_Tag_1
-            , quv.Tag_1  Committed_Tag_1
-            , qup.Tag_2  Pending_Tag_2
-            , quv.Tag_2  Committed_Tag_2
-            , qup.Tag_3  Pending_Tag_3
-            , quv.Tag_3  Committed_Tag_3
-            , qup.Tag_4  Pending_Tag_4
-            , quv.Tag_4  Committed_Tag_4
-            , qup.Tag_5  Pending_Tag_5
-            , quv.Tag_5  Committed_Tag_5
-            , qup.Tag_6  Pending_Tag_6
-            , quv.Tag_6  Committed_Tag_6
-            , qup.Tag_7  Pending_Tag_7
-            , quv.Tag_7  Committed_Tag_7
-            , qup.Tag_8  Pending_Tag_8
-            , quv.Tag_8  Committed_Tag_8
-            , qup.Tag_9  Pending_Tag_9
-            , quv.Tag_9  Committed_Tag_9
-            , qup.Tag_10 Pending_Tag_10
-            , quv.Tag_10 Committed_Tag_10
-            , qup.Tag_11 Pending_Tag_11
-            , quv.Tag_11 Committed_Tag_11
-            , qup.Tag_12 Pending_Tag_12
-            , quv.Tag_12 Committed_Tag_12
-            , qup.Tag_13 Pending_Tag_13
-            , quv.Tag_13 Committed_Tag_13
-            , qup.Tag_14 Pending_Tag_14
-            , quv.Tag_14 Committed_Tag_14
-            , qup.Tag_15 Pending_Tag_15
-            , quv.Tag_15 Committed_Tag_15
-            , qup.Tag_16 Pending_Tag_16
-            , quv.Tag_16 Committed_Tag_16
-            , qup.Tag_17 Pending_Tag_17
-            , quv.Tag_17 Committed_Tag_17
-            , qup.Tag_18 Pending_Tag_18
-            , quv.Tag_18 Committed_Tag_18
-            , qup.Tag_19 Pending_Tag_19
-            , quv.Tag_19 Committed_Tag_19
-            , qup.Tag_20 Pending_Tag_20
-            , quv.Tag_20 Committed_Tag_20
+            , qup.Tags Pending_Tags
+            , quv.Tags Committed_Tags
             
             , COALESCE(qup.Timestamp_Millis, quv.Timestamp_Millis) Timestamp_Millis
             , qup.Timestamp_Millis Pending_Timestamp_Millis
@@ -163,126 +125,11 @@ view:
                     type: not null
 
         - column:
-            name: Pending_Tag_1
-            type: nvarchar(64)
+            name: Pending_Tags
+            type: varchar(1301)
         - column:
-            name: Committed_Tag_1
-            type: nvarchar(64)
-        - column:
-            name: Pending_Tag_2
-            type: nvarchar(64)
-        - column:
-            name: Committed_Tag_2
-            type: nvarchar(64)
-        - column:
-            name: Pending_Tag_3
-            type: nvarchar(64)
-        - column:
-            name: Committed_Tag_3
-            type: nvarchar(64)
-        - column:
-            name: Pending_Tag_4
-            type: nvarchar(64)
-        - column:
-            name: Committed_Tag_4
-            type: nvarchar(64)
-        - column:
-            name: Pending_Tag_5
-            type: nvarchar(64)
-        - column:
-            name: Committed_Tag_5
-            type: nvarchar(64)
-        - column:
-            name: Pending_Tag_6
-            type: nvarchar(64)
-        - column:
-            name: Committed_Tag_6
-            type: nvarchar(64)
-        - column:
-            name: Pending_Tag_7
-            type: nvarchar(64)
-        - column:
-            name: Committed_Tag_7
-            type: nvarchar(64)
-        - column:
-            name: Pending_Tag_8
-            type: nvarchar(64)
-        - column:
-            name: Committed_Tag_8
-            type: nvarchar(64)
-        - column:
-            name: Pending_Tag_9
-            type: nvarchar(64)
-        - column:
-            name: Committed_Tag_9
-            type: nvarchar(64)
-        - column:
-            name: Pending_Tag_10
-            type: nvarchar(64)
-        - column:
-            name: Committed_Tag_10
-            type: nvarchar(64)
-        - column:
-            name: Pending_Tag_11
-            type: nvarchar(64)
-        - column:
-            name: Committed_Tag_11
-            type: nvarchar(64)
-        - column:
-            name: Pending_Tag_12
-            type: nvarchar(64)
-        - column:
-            name: Committed_Tag_12
-            type: nvarchar(64)
-        - column:
-            name: Pending_Tag_13
-            type: nvarchar(64)
-        - column:
-            name: Committed_Tag_13
-            type: nvarchar(64)
-        - column:
-            name: Pending_Tag_14
-            type: nvarchar(64)
-        - column:
-            name: Committed_Tag_14
-            type: nvarchar(64)
-        - column:
-            name: Pending_Tag_15
-            type: nvarchar(64)
-        - column:
-            name: Committed_Tag_15
-            type: nvarchar(64)
-        - column:
-            name: Pending_Tag_16
-            type: nvarchar(64)
-        - column:
-            name: Committed_Tag_16
-            type: nvarchar(64)
-        - column:
-            name: Pending_Tag_17
-            type: nvarchar(64)
-        - column:
-            name: Committed_Tag_17
-            type: nvarchar(64)
-        - column:
-            name: Pending_Tag_18
-            type: nvarchar(64)
-        - column:
-            name: Committed_Tag_18
-            type: nvarchar(64)
-        - column:
-            name: Pending_Tag_19
-            type: nvarchar(64)
-        - column:
-            name: Committed_Tag_19
-            type: nvarchar(64)
-        - column:
-            name: Pending_Tag_20
-            type: nvarchar(64)
-        - column:
-            name: Committed_Tag_20
-            type: nvarchar(64)
-
+            name: Committed_Tags
+            type: varchar(1301)
 
         - column:
             name: Timestamp_Millis

@@ -705,8 +705,12 @@ class BranchLayer {
     //  - trim whitespace at the start and end of the string.
     //  - replace connected whitespace in the middle with a single underscore
     //  - lowercase it.
+    //  - remove all non-alphanumeric and underscore characters
+    // FIXME include unicode characters
     public static function normalizeTagName($tagName) {
-        return strtolower(preg_replace('/\s+/', '_', trim($tagName)));
+        return preg_replace(
+                '/[^a-z0-9_]/', '',
+                strtolower(preg_replace('/\s+/', '_', trim($tagName))));
     }
     
     

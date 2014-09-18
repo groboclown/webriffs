@@ -40,71 +40,17 @@ table:
                     type: not null
 
         # Tags are directly associated with the
-        # quip versions, rather than as independent objects.  This makes
-        # queries and server requests much lighter weight, at the cost of
-        # some ugly sql, and a hard-coded limit to the number of tags.
-        # The tags here are not stored in a central repository and then
-        # referenced via foreign keys.
+        # quip versions, rather than as independent objects.  These are
+        # stored as a single string, with each tag separated by a comma.
+        # For now, tags can only be the characters a-z0-9_, so we can have
+        # a large varchar to store them.
+        # Searches on tags would be '%,(tag),%', so the tag string must be
+        # enclosed in commas.
+        # Tags can be a maximum of 64 characters long, with a maximum of 20
+        # tags, so that makes 1 + ((64 + 1) * 20) = 1301 characters
         - column:
-            name: Tag_1
-            type: nvarchar(64)
-        - column:
-            name: Tag_2
-            type: nvarchar(64)
-        - column:
-            name: Tag_3
-            type: nvarchar(64)
-        - column:
-            name: Tag_4
-            type: nvarchar(64)
-        - column:
-            name: Tag_5
-            type: nvarchar(64)
-        - column:
-            name: Tag_6
-            type: nvarchar(64)
-        - column:
-            name: Tag_7
-            type: nvarchar(64)
-        - column:
-            name: Tag_8
-            type: nvarchar(64)
-        - column:
-            name: Tag_9
-            type: nvarchar(64)
-        - column:
-            name: Tag_10
-            type: nvarchar(64)
-        - column:
-            name: Tag_11
-            type: nvarchar(64)
-        - column:
-            name: Tag_12
-            type: nvarchar(64)
-        - column:
-            name: Tag_13
-            type: nvarchar(64)
-        - column:
-            name: Tag_14
-            type: nvarchar(64)
-        - column:
-            name: Tag_15
-            type: nvarchar(64)
-        - column:
-            name: Tag_16
-            type: nvarchar(64)
-        - column:
-            name: Tag_17
-            type: nvarchar(64)
-        - column:
-            name: Tag_18
-            type: nvarchar(64)
-        - column:
-            name: Tag_19
-            type: nvarchar(64)
-        - column:
-            name: Tag_20
-            type: nvarchar(64)
+            name: Tags
+            type: varchar(1301)
 
 
         - column:
