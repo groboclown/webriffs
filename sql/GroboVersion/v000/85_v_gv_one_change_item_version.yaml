@@ -1,0 +1,130 @@
+# All the item versions that are associated with only one change.
+# This is used for deleting item versions that have their corresponding
+# pending change deleted.
+
+view:
+    viewName: V_GV_ONE_CHANGE_ITEM_VERSION
+    query: "
+        SELECT
+            iv.Gv_Item_Id Gv_Item_Id
+            , iv.Gv_Item_Version_Id Gv_Item_Version_Id
+            , cv.Gv_Change_Version_Id Gv_Change_Version_Id
+            , cv.Gv_Change_Id Gv_Change_Id
+            , c.Gv_Branch_Id Gv_Branch_Id
+            , c.Ga_User_Id Ga_User_Id
+            , c.Active_State Active_State
+        FROM
+            V_GV_ITEM_VERSION_CHANGE_COUNT ivcc
+        INNER JOIN
+            GV_ITEM_VERSION iv
+                ON ivcc.Gv_Item_Version_Id = iv.Gv_Item_Version_Id
+        INNER JOIN
+            GV_CHANGE_VERSION cv
+                ON iv.Gv_Item_Version_Id = cv.Gv_Item_Version_Id
+        INNER JOIN
+            GV_CHANGE c
+                ON cv.Gv_Change_Id = c.Gv_Change_Id
+        WHERE
+            ivcc.Change_Count = 1
+        "
+    columns:
+        - column:
+            name: Gv_Item_Version_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    table: GV_ITEM_VERSION
+                    column: Gv_Item_Version_Id
+        - column:
+            name: Gv_Change_Version_Id
+            type: int
+            autoIncrement: true
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_CHANGE_VERSION
+                    column: Gv_Change_Version_Id
+        - column:
+            name: Gv_Item_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    table: GV_ITEM
+                    column: Gv_Item_Id
+        - column:
+            name: Gv_Change_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    table: GV_CHANGE
+                    column: Gv_Change_Id
+        - column:
+            name: Gv_Branch_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    table: GV_BRANCH
+                    column: Gv_Branch_Id
+                    relationship: owner
+        - column:
+            name: Active_State
+            type: tinyint
+            constraints:
+                - constraint:
+                    type: not null
+        - column:
+            name: Ga_User_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    table: GA_USER
+                    column: Ga_User_Id
+    extend:
+        - sql:
+            name: delete_versions_for_change
+            type: delete
+            execute: "
+              DELETE iv.* FROM GV_ITEM_VERSION iv
+              INNER JOIN V_GV_ONE_CHANGE_ITEM_VERSION ociv
+                  ON iv.Gv_Item_Version_Id = ociv.Gv_Item_Version_Id
+              WHERE ociv.Gv_Change_Id = {Gv_Change_Id}
+              "
+            arguments:
+                - argument:
+                    name: Gv_Change_Id
+                    type: int
+
+        - sql:
+            name: delete_pending_versions_for_user_x_branch
+            type: delete
+            execute: "
+              DELETE iv.* FROM GV_ITEM_VERSION iv
+              INNER JOIN V_GV_ONE_CHANGE_ITEM_VERSION ociv
+                  ON iv.Gv_Item_Version_Id = ociv.Gv_Item_Version_Id
+              WHERE ociv.Ga_User_Id = {Ga_User_Id}
+                AND ociv.Gv_Branch_Id = {Gv_Branch_Id}
+                AND ociv.Active_State = 0
+              "
+            arguments:
+                - argument:
+                    name: Ga_User_Id
+                    type: int
+                - argument:
+                    name: Gv_Branch_Id
+                    type: int
+                    

@@ -134,3 +134,22 @@ table:
                 - argument:
                     name: newChangeId
                     type: int
+        - sql:
+            name: delete_pending_changes_for_user_x_branch
+            type: delete
+            execute: "
+              DELETE cv.* FROM GV_CHANGE_VERSION cv
+                  INNER JOIN GV_CHANGE c
+                      ON cv.Gv_Change_Id = c.Gv_Change_Id
+              WHERE c.Ga_User_Id = {Ga_User_Id}
+                AND c.Gv_Branch_Id = {Gv_Branch_Id}
+                AND c.Active_State = 0
+              "
+            arguments:
+                - argument:
+                    name: Ga_User_Id
+                    type: int
+                - argument:
+                    name: Gv_Branch_Id
+                    type: int
+                    

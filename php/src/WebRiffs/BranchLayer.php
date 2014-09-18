@@ -7,6 +7,8 @@ use Base;
 use Tonic;
 use GroboVersion;
 
+require_once 'Access.php';
+
 
 /**
  * Manages the business logic related to the branches.

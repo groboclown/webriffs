@@ -1,0 +1,32 @@
+# Discovers the number of changes associated with each item version.
+
+view:
+    viewName: V_GV_ITEM_VERSION_CHANGE_COUNT
+    query: "
+        SELECT
+            iv.Gv_Item_Version_Id Gv_Item_Version_Id
+            , COUNT(cv.Gv_Change_Id) Change_Count
+        FROM
+            GV_ITEM_VERSION iv
+        INNER JOIN
+            GV_CHANGE_VERSION cv
+                ON iv.Gv_Item_Version_Id = cv.Gv_Item_Version_Id
+        GROUP BY iv.Gv_Item_Version_Id
+        "
+    columns:
+        - column:
+            name: Gv_Item_Version_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: not null
+                - constraint:
+                    type: foreign key
+                    table: GV_ITEM_VERSION
+                    column: Gv_Item_Version_Id
+        - column:
+            name: Change_Count
+            type: int
+            constraints:
+                - constraint:
+                    type: not null

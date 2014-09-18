@@ -105,7 +105,7 @@ class BranchObjChanges extends Resource {
         $this->validate();
         
         // DEBUG
-        error_log("Film.php: description: [".$desc."]");
+        //error_log("Film.php: description: [".$desc."]");
         WebRiffs\BranchLayer::updateBranchHeader($this->getDB(), $branchId,
             $userId, $gaUserId, $branchName, $desc, $tags);
         

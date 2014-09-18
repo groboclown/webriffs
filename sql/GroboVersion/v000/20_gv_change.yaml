@@ -99,3 +99,20 @@ table:
                 - dialect:
                     platforms: mysql
                     sql: "UNLOCK TABLES"
+        - sql:
+            name: delete_pending_changes_for_user_x_branch
+            type: delete
+            execute: "
+              DELETE FROM GV_CHANGE
+              WHERE c.Ga_User_Id = {Ga_User_Id}
+                AND c.Gv_Branch_Id = {Gv_Branch_Id}
+                AND c.Active_State = 0
+              "
+            arguments:
+                - argument:
+                    name: Ga_User_Id
+                    type: int
+                - argument:
+                    name: Gv_Branch_Id
+                    type: int
+                    

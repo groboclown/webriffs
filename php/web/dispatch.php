@@ -114,7 +114,10 @@ try {
             $conn = new PDO($c['db_config']['dsn'],
                 $c['db_config']['username'],
                 $c['db_config']['password']);
-            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            // We handle the exceptions ourselves, to allow for more flexible
+            // error handling.  It does mean that the code needs to be more
+            // careful, so that it can identify the errors.
+            //$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             return $conn;
         };
         

@@ -589,26 +589,36 @@ class DataAccess {
     }
     
     
-    /*
-     * Returns all the items in the change.
+    /**
+     * Delete all the pending changes the user has on a particular branch.
      *
-     * @param PBO $db
-     * @param int $changeId
-     * @return array() of rows, with each row containing elements
-     *         Gv_Change_Version_Id,
-     *         Gv_Item_Version_Id, Gv_Change_Id, Created_On, Last_Updated_On
-    public static function getItemsInChange($db, $changeId, $rowStart, $rowEnd) {
-        $data = GvChangeVersion::$INSTANCE->readBy_Gv_Change_Id($db, $changeId,
-            false, $rowStart, $rowEnd);
+     * @param unknown $db
+     * @param unknown $gaUserId
+     * @param unknown $gvBranchId
+     */
+    public static function deletePendingChangesForUserBranch($db, $gaUserId, $gvBranchId) {
+        $data = VGvOneChangeItemVersion::$INSTANCE->runDeletePendingVersionsForUserXBranch(
+                 $db, $gaUserId, $gvBranchId);
         DataAccess::checkError($data,
             new Base\ValidationException(
                 array(
-                    'unknown' => 'there was an unknown problem searching the change'
+                    'unknown' => 'there was an unknown problem deleting item versions'
                 )));
-        return $data['result'];
+        $data = GvChangeVersion::$INSTANCE->runDeletePendingChangesForUserXBranch(
+                 $db, $gaUserId, $gvBranchId);
+        DataAccess::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem deleting change versions'
+                )));
+        $data = GvChange::$INSTANCE->runDeletePendingChangesForUserXBranch(
+                 $db, $gaUserId, $gvBranchId);
+        DataAccess::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem deleting changes'
+                )));
     }
-
-     */
 
     // ----------------------------------------------------------------------
     private static function checkError($returned, $exception) {

@@ -40,7 +40,7 @@ view:
         INNER JOIN
             V_QUIP_VERSION qv
                 ON ubpv.Gv_Branch_Id = qv.Gv_Branch_Id
-                AND ubpv.Gv_Change_Id = qv.Gv_Change_Id
+                AND ubpv.Base_Change_Id = qv.Gv_Change_Id
         "
     columns:
         - column:

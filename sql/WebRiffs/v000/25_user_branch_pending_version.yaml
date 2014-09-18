@@ -36,12 +36,23 @@ table:
                 - constraint:
                     type: no update
         - column:
-            name: Gv_Change_Id
+            name: Base_Change_Id
             type: int
             constraints:
                 - constraint:
                     type: foreign key
-                    name: User_Branch_Pending_Version__Gv_Change_Id_FK
+                    name: User_Branch_Pending_Version__Base_Change_Id_FK
+                    table: GV_CHANGE
+                    column: Gv_Change_Id
+                - constraint:
+                    type: not null
+        - column:
+            name: Pending_Change_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    name: User_Branch_Pending_Version__Pending_Change_Id_FK
                     table: GV_CHANGE
                     column: Gv_Change_Id
                 - constraint:

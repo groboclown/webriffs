@@ -32,7 +32,8 @@ foreach ($filenames as $glob) {
 $db = new PDO($siteConfig['db_config']['dsn'],
         $siteConfig['db_config']['username'],
         $siteConfig['db_config']['password']);
-$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+// We handle the db errors ourselves to allow for more flexible handling
+//$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 
 // ---------------------------------------------------------------------------
@@ -191,8 +192,18 @@ WebRiffs\BranchLayer::updateAlltagsOnBranch($db, $userData['User_Id'],
 // ---------------------------------------------------------------------------
 // Create a quip in a branch and submit the change
 
+$data = WebRiffs\QuipLayer::createPendingChange($db, $userData['User_Id'],
+    $userData['Ga_User_Id'], $slacker1991BranchId, 1);
+$pendingChangeId = $data[0];
+$baseChangeId = $data[1];
+$result['pending-quip-change'] = $data;
 
-
+// TEST This should return the same as the previous call
+$data = WebRiffs\QuipLayer::createPendingChange($db, $userData['User_Id'],
+    $userData['Ga_User_Id'], $slacker1991BranchId, 1);
+if ($pendingChangeId != $data[0]) {
+    $result['create-pending-change'] = 'Error: created multiple changes';
+}
 
 
 // ---------------------------------------------------------------------------
