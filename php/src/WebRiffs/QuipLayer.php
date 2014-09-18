@@ -17,6 +17,11 @@ class QuipLayer {
     public static $DEFAULT_QUIP_SORT_COLUMN = 'timestamp';
     public static $QUIP_FILTERS;
     
+    public static $PENDING_QUIP_SORT_COLUMNS;
+    public static $DEFAULT_PENDING_QUIP_SORT_COLUMN = 'pending_timestamp';
+    public static $PENDING_QUIP_FILTERS;
+    
+    
     /**
      * Maximum number of tags allowable on a quip
      *
@@ -73,28 +78,29 @@ class QuipLayer {
         // TODO No "where" support right now.  That will be checking the tags,
         // eventually
         
-        QuipLayer::checkError($data,
-            new Base\ValidationException(
-                array(
-                    'unknown' => 'there was an unknown problem reading the branch tags'
-                )));
-        
         if ($changeId <= 0) {
             // Get the head revision
             $rowData = VQuipHead::$INSTANCE->readBy_Gv_Branch_Id(
-                 $db, $branchId);
+                 $db, $branchId,
+                 $paging->order, $paging->startRow, $paging->endRow);
             $countData = VQuipHead::$INSTANCE->countBy_Gv_Branch_Id(
                  $db, $branchId);
         } else {
             $rowData = VQuipVersion::$INSTANCE->readBy_Gv_Branch_Id_x_Gv_Change_Id(
-                 $db, $branchId, $changeId);
+                 $db, $branchId, $changeId,
+                 $paging->order, $paging->startRow, $paging->endRow);
             $countData = VQuipVersion::$INSTANCE->countBy_Gv_Branch_Id_x_Gv_Change_Id(
                  $db, $branchId, $changeId);
         }
-        QuipLayer::checkError($data,
+        QuipLayer::checkError($rowData,
             new Base\ValidationException(
                 array(
-                    'unknown' => 'there was an unknown problem reading the branch tags'
+                    'unknown' => 'there was an unknown problem reading the quips'
+                )));
+        QuipLayer::checkError($countData,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem reading the quip count'
                 )));
         
         $rows = $rowData['result'];
@@ -113,54 +119,45 @@ class QuipLayer {
 
     public static function pageCommittedPendingQuips($db, $userId, $branchId,
             Base\PageRequest $paging = null) {
-        if (! QuipLayer::canAccessBranch($db, $userId, $branchId,
+        if (! BranchLayer::canAccessBranch($db, $userId, $branchId,
                 Access::$BRANCH_READ)) {
             throw new Tonic\UnauthorizedException();
         }
     
         if ($paging == null) {
             $paging = Base\PageRequest::parseGetRequest(
-                    QuipLayer::$QUIP_FILTERS,
-                    QuipLayer::$DEFAULT_QUIP_SORT_COLUMN,
-                    QuipLayer::$QUIP_SORT_COLUMNS);
+                    QuipLayer::$PENDING_QUIP_FILTERS,
+                    QuipLayer::$DEFAULT_PENDING_QUIP_SORT_COLUMN,
+                    QuipLayer::$PENDING_QUIP_SORT_COLUMNS);
         }
     
         $wheres = array();
     
         // TODO No "where" support right now.  That will be checking the tags,
         // eventually.  Tags are searched with a '%,(tagname),%' syntax.
-    
-        QuipLayer::checkError($data,
-        new Base\ValidationException(
-            array(
-                'unknown' => 'there was an unknown problem reading the branch tags'
-            )));
-    
-        // FIXME
-        if ($changeId <= 0) {
-            // Get the head revision
-            $rowData = VQuipHead::$INSTANCE->readBy_Gv_Branch_Id(
-                    $db, $branchId);
-            $countData = VQuipHead::$INSTANCE->countBy_Gv_Branch_Id(
-                    $db, $branchId);
-        } else {
-            $rowData = VQuipVersion::$INSTANCE->readBy_Gv_Branch_Id_x_Gv_Change_Id(
-                    $db, $branchId, $changeId);
-            $countData = VQuipVersion::$INSTANCE->countBy_Gv_Branch_Id_x_Gv_Change_Id(
-                    $db, $branchId, $changeId);
-        }
-        QuipLayer::checkError($data,
+        
+        $rowData = VQuipUserAll::$INSTANCE->readBy_User_Id_x_Gv_Branch_Id(
+                $db, $userId, $branchId,
+                $paging->order, $paging->startRow, $paging->endRow);
+        $countData = VQuipUserAll::$INSTANCE->countBy_User_Id_x_Gv_Branch_Id(
+                $db, $userId, $branchId);
+        QuipLayer::checkError($rowData,
             new Base\ValidationException(
                 array(
-                    'unknown' => 'there was an unknown problem reading the branch tags'
+                    'unknown' => 'there was an unknown problem reading the quips'
                 )));
-    
+        QuipLayer::checkError($countData,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem reading the quip count'
+                )));
+        
         $rows = $rowData['result'];
         foreach ($rows as &$row) {
             // split up the tags correctly
-            // FIXME check the syntax of this command
-            $outtags = split('/,/', substr($row['Tags'], 1, strlen($row['Tags']) - 1));
-            $row['Tags'] = $outtags;
+            $row['Pending_Tags'] = QuipLayer::splitTags($row['Pending_Tags']);
+            
+            $row['Committed_Tags'] = QuipLayer::splitTags($row['Committed_Tags']);
         }
         
         $count = $countData['result'];
@@ -352,7 +349,7 @@ class QuipLayer {
      */
     public static function saveQuip($db, $userId, $gaUserId, $branchId,
             $quipId, $quipText, $timeMillis, &$tags) {
-        if (! is_intval($timeMillis) || $timeMillis < 0) {
+        if ($timeMillis < 0) {
             new Base\ValidationException(
                 array(
                     'unknown' => 'time must be positive integer'
@@ -384,7 +381,7 @@ class QuipLayer {
         // $changeData[0] = item version id
         // $changeData[1] = change version id
         $changeData = GroboVersion\DataAccess::addItemToChange($db,
-            $quipId, FALSE);
+            $quipId, $pendingChange, FALSE);
         
         $outtags = array();
         $tagstr = ',';
@@ -458,6 +455,12 @@ class QuipLayer {
     public static function normalizeTagName($tagName) {
         return BranchLayer::normalizeTagName($tagName);
     }
+
+
+    public static function splitTags($tagstr) {
+        $outtags = split(',', substr($tagstr, 1, strlen($tagstr) - 2));
+        return $outtags;
+    }
     
     
     private static function checkError($returned, $exception) {
@@ -471,3 +474,14 @@ QuipLayer::$QUIP_SORT_COLUMNS = array(
 
 // FIXME eventually this will add tags to the filters.
 QuipLayer::$QUIP_FILTERS = array();
+
+
+
+
+QuipLayer::$PENDING_QUIP_SORT_COLUMNS = array(
+    "pending_timestamp" => "Pending_Timestamp_Millis",
+    "committed_timestamp" => "Committed_Timestamp_Millis"
+);
+
+// FIXME eventually this will add tags to the filters.
+QuipLayer::$PENDING_QUIP_FILTERS = array();

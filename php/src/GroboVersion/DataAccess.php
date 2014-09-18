@@ -340,7 +340,7 @@ class DataAccess {
         $rows = $data['result'];
         if (sizeof($rows) <= 0) {
             // might lead to leaking information
-            throw new Exception("unknown change id " . $changeId);
+            throw new \Exception("unknown change id " . $changeId);
         }
         if (sizeof($rows) > 1) {
             // multiple change IDs - should be impossible

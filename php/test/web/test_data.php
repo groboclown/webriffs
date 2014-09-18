@@ -212,7 +212,18 @@ $data = WebRiffs\QuipLayer::saveQuip($db, $userData['User_Id'],
 $result['slacker1991-quip1'] = $data['Gv_Item_Id'];
 
 // TEST
+$data = WebRiffs\QuipLayer::pageCommittedPendingQuips($db, $userData['User_Id'],
+    $slacker1991BranchId);
+$result['slacker1991-quips1-query'] = $data;
 
+$data = WebRiffs\QuipLayer::commitPendingChange($db, $userData['User_Id'],
+    $userData['Ga_User_Id'], $slacker1991BranchId);
+$result['slacker1991-commited-change'] = $data;
+
+
+$data = WebRiffs\QuipLayer::pageCommittedQuips($db, $userData['User_Id'],
+    $slacker1991BranchId, -1);
+$result['slacker1991-committed-quips'] = $data;
 
 // ---------------------------------------------------------------------------
 
