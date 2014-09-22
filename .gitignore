@@ -39,4 +39,5 @@ php/conf/*.php
 .project
 .settings/
 .pydevproject
+.buildpath
 */*.iml
