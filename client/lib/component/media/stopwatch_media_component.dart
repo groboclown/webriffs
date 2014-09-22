@@ -147,10 +147,11 @@ class StopwatchMediaComponent extends AbstractMediaStatusComponent {
     void adjustTime(int millisChange) {
         if (_media != null) {
             int newTime = _media.currentTimeMillis + millisChange;
-            if (newTime >= 0) {
-                _media.setTime(newTime);
-                time = toTimeStr(newTime);
+            if (newTime < 0) {
+                newTime = 0;
             }
+            _media.setTime(newTime);
+            time = toTimeStr(newTime);
         }
     }
 
