@@ -17,9 +17,23 @@ TODO: add NTSC, PAL, or "actual" playback modes, to adjust the timings.
         <span>{{cmp.time}}</span>
     </div>
     <div>
-        <span ng-if="cmp.status.playing" ng-click="cmp.pause()">Pause</span>
-        <span ng-if="cmp.status.waiting" ng-click="cmp.start()">Play</span>
-        <span ng-click="cmp.stop()">Stop</span>
+        <span ng-if="cmp.status.playing" ng-click="cmp.pause()">[ Pause ]</span>
+        <span ng-if="cmp.status.waiting" ng-click="cmp.start()">[ Play ]</span>
+        <span ng-click="cmp.stop()">[ Stop ]</span>
+    </div>
+    <div>
+        <div>
+            <span ng-click="cmp.adjustTime(500)">[+ .5 sec]</span>
+            <span ng-click="cmp.adjustTime(1000)">[+ 1 sec]</span>
+            <span ng-click="cmp.adjustTime(5000)">[+ 5 sec]</span>
+            <span ng-click="cmp.adjustTime(10000)">[+ 10 sec]</span>
+        </div>
+        <div>
+            <span ng-click="cmp.adjustTime(-500)">[- .5 sec]</span>
+            <span ng-click="cmp.adjustTime(-1000)">[- 1 sec]</span>
+            <span ng-click="cmp.adjustTime(-5000)">[- 5 sec]</span>
+            <span ng-click="cmp.adjustTime(-10000)">[- 10 sec]</span>
+        </div>
     </div>
     <div>
         <input type="text" ng-model="cmp.timeField">
