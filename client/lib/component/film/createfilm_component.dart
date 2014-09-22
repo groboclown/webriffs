@@ -52,8 +52,8 @@ class CreateFilmComponent extends RequestHandlingComponent {
             csrfRequest(_server, 'create_film',
                     (ServerStatusService server, String token) {
                 return _server.put('/film', token, data: {
-                            'name': filmInfo.filmName,
-                            'year': filmInfo.releaseYear
+                            'Name': filmInfo.filmName,
+                            'Release_Year': filmInfo.releaseYear
                     });
             });
         } else {
