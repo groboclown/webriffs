@@ -5,22 +5,16 @@
 <a ng-href="#/branch/changes/{{cmp.branchId}}" ng-if="cmp.branchId != null">Branch History</a>
 </div>
 
-<div class="bug">BUG if you log in or out, the permissions on this page
-don't refresh.  You need to refresh the page (F5).</div>
-
 <div ng-if="! cmp.canReadQuips && cmp.loaded">
 You do not have permissions to view the contents of this branch.
 </div>
 
-<div ng-if="cmp.canReadQuips && ! cmp.canEditQuips && cmp.loaded">
-Unfortunately, you don't have permissions to edit the contents of this branch.
-</div>
-
-<div ng-if="cmp.canEditQuips" class="component">
+<div ng-if="cmp.canReadQuips" class="component">
     
     <div ng-if="cmp.loaded">
         <div><span>{{cmp.filmName}}</span> <span>({{cmp.filmReleaseYear}})</span>
-            <span ng-if="cmp.urlChangeId &gt; 0">(revision {{cmp.changeId}})</span>
+            <span ng-if="cmp.urlChangeId &gt;= 0">(revision {{cmp.changeId}})</span>
+            <span ng-if="cmp.urlChangeId &lt; 0">(pending changes)</span>
         </div>
         <div>{{cmp.branchName}}</div>
         <div>{{cmp.description}}</div>
@@ -39,7 +33,10 @@ Unfortunately, you don't have permissions to edit the contents of this branch.
         connector="cmp.mediaStatusService"
         branch-details="cmp.branchDetails"></media-controller>
     
+    
     <edit-quip
+        ng-if="cmp.canEditQuips"
+    
         branch="cmp.branchDetails"
         media="cmp.mediaStatusService"
         updates="cmp.quipChangedEvents"></edit-quip>

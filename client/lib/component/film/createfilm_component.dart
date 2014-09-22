@@ -76,7 +76,7 @@ class CreateFilmComponent extends RequestHandlingComponent {
             int changeId = response.jsonData['Change_Id'];
 
             // redirect to the edit page
-            _route.go('Edit Your Branch', {
+            _route.go('Branch Playback', {
                 'branchId': branchId
             });
         } else {

@@ -22,11 +22,10 @@ to the play page to view that. -->
     
     <branch-updates current-branch="cmp.branchDetails"></branch-updates>
     
-    <div class="bug">TODO join the edit/playback links together when the two pages are joined together</div>
     <div ng-if="cmp.canEditQuips">
-        <a ng-href="#/branch/edit/{{cmp.branchId}}">Edit this branch</a>
+        <a ng-href="#/branch/play/{{cmp.branchId}}">Play and edit this branch</a>
     </div>
-    <div ng-if="cmp.canReadQuips">
+    <div ng-if="cmp.canReadQuips && ! cmp.canEditQuips">
         <a ng-href="#/branch/play/{{cmp.branchId}}/{{cmp.changeId}}">Play back this branch.</a>
     </div>
     <div ng-if="! cmp.canReadQuips">

@@ -14,7 +14,7 @@ import '../../json/branch_details.dart';
  * Generic parts of a UI component that interacts with the branch details.
  * Contains helpers for the branch loading and user permissions.
  */
-class AbstractBranchComponent {
+abstract class AbstractBranchComponent {
     final ServerStatusService _server;
     final UserService _user;
     final Future<BranchDetails> branchDetails;
@@ -56,7 +56,7 @@ class AbstractBranchComponent {
             _branchDetails.userCanDeleteBranch;
 
     static List<int> parseRouteParameters(RouteProvider routeProvider) {
-        var ret = <int>[ -1, -1 ];
+        var ret = <int>[ -1, null ];
         if (routeProvider.parameters.containsKey('branchId')) {
             ret[0] = int.parse(routeProvider.parameters['branchId']);
         }
@@ -67,7 +67,7 @@ class AbstractBranchComponent {
     }
 
 
-    AbstractBranchComponent.direct(this._server, this._user, this.branchId,
+    AbstractBranchComponent(this._server, this._user, this.branchId,
             this.urlChangeId, this.branchDetails) {
         branchDetails.then((BranchDetails bd) {
             if (bd == null) {

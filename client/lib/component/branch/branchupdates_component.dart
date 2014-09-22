@@ -13,6 +13,9 @@ import '../../util/paging.dart';
 /**
  * List of the updates to the branch that happened after the currently
  * viewed change.
+ *
+ * FIXME this will need to take into account the updates for a pending
+ * edit.  This includes quip changes.
  */
 @Component(
     selector: 'branch-updates',

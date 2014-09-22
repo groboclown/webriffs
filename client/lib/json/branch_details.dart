@@ -152,7 +152,13 @@ class BranchDetails {
         updatedOn = uo;
         tags = btd;
 
-
+        userCanEditBranch = false;
+        userCanDeleteBranch = false;
+        userCanEditBranchTags = false;
+        userCanEditBranchPermissions = false;
+        userCanReadQuips = false;
+        userCanEditQuips = false;
+        userCanEditQuipTags = false;
         if (json.containsKey('access') && json['access'] is Map) {
             Map<String, dynamic> access = json['access'];
             if (access.containsKey('branch-write') && access['branch-write']) {
