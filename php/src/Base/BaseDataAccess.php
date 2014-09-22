@@ -17,8 +17,13 @@ class BaseDataAccess {
             $backtrace = 'Database access error (' . $returned["errorcode"] . ' ' .
                  $returned["error"] . '):';
             foreach (debug_backtrace() as $stack) {
-                $backtrace .= '\n    ' . $stack['function'] . '(' .
-                     implode(', ', $stack['args']) . ') [' . $stack['file'] .
+                $args = array();
+                foreach ($stack['args'] as $arg) {
+                    $args[] = print_r($stack['args'], TRUE);
+                }
+                $backtrace .= "\n    " . $stack['function'] .
+                     '(' . implode(', ', $args) .
+                     ') [' . $stack['file'] .
                      ' @ ' . $stack['line'] . ']';
             }
             error_log($backtrace);

@@ -49,7 +49,7 @@ class FilmLayer {
      * @param
      *            array userInfo must be the user session, so we don't need to
      *            check its value.
-     * @return array contains the (projectId, filmId, branchId, changeId)
+     * @return array contains the (projectId, filmId, branchId)
      */
     public static function createFilm($db, $userInfo, $name, $year, $accessTemplate) {
         
@@ -133,16 +133,13 @@ class FilmLayer {
                 )));
         $filmId = intval($data['result']);
         
-        $branchData = BranchLayer::createBranchById($db, $projectId, $filmId,
+        $branchId = BranchLayer::createBranchById($db, $projectId, $filmId,
             $userId, $gaUserId, FilmLayer::$INITIAL_BRANCH_NAME,
             FilmLayer::$INITIAL_BRANCH_DESCRIPTION, $accessTemplate);
-        $branchId = $branchData[0];
-        $changeId = $branchData[1];
         return array(
             $projectId,
             $filmId,
-            $branchId,
-            $changeId
+            $branchId
         );
     }
 

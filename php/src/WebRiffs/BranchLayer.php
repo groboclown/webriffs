@@ -57,6 +57,7 @@ class BranchLayer {
      * @param String $branchName
      * @param String $accessTemplate can be null; defaults to
      *      $DEFAULT_TEMPLATE_ACCESS_NAME
+     * @return int branch ID
      */
     public static function createBranch($db, $filmId, $userId, $gaUserId,
             $branchName, $description, $accessTemplate) {
@@ -155,15 +156,7 @@ class BranchLayer {
             $branchName, $description, $tags, false);
         
         
-        // Add change for the user to start using.
-        $changeId = GroboVersion\DataAccess::createChange($db,
-                $branchId, $gaUserId);
-        
-        
-        return array(
-            $branchId,
-            $changeId
-        );
+        return $branchId;
     }
 
 

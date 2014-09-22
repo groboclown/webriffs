@@ -104,9 +104,9 @@ table:
             type: delete
             execute: "
               DELETE FROM GV_CHANGE
-              WHERE c.Ga_User_Id = {Ga_User_Id}
-                AND c.Gv_Branch_Id = {Gv_Branch_Id}
-                AND c.Active_State = 0
+              WHERE Ga_User_Id = {Ga_User_Id}
+                AND Gv_Branch_Id = {Gv_Branch_Id}
+                AND Active_State = 0
               "
             arguments:
                 - argument:

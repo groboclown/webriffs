@@ -81,13 +81,13 @@ class QuipLayer {
         if ($changeId <= 0) {
             // Get the head revision
             $rowData = VQuipHead::$INSTANCE->readBy_Gv_Branch_Id(
-                 $db, $branchId,
+                 $db, $branchId, null,
                  $paging->order, $paging->startRow, $paging->endRow);
             $countData = VQuipHead::$INSTANCE->countBy_Gv_Branch_Id(
                  $db, $branchId);
         } else {
             $rowData = VQuipVersion::$INSTANCE->readBy_Gv_Branch_Id_x_Gv_Change_Id(
-                 $db, $branchId, $changeId,
+                 $db, $branchId, $changeId, null,
                  $paging->order, $paging->startRow, $paging->endRow);
             $countData = VQuipVersion::$INSTANCE->countBy_Gv_Branch_Id_x_Gv_Change_Id(
                  $db, $branchId, $changeId);
@@ -106,9 +106,8 @@ class QuipLayer {
         $rows = $rowData['result'];
         foreach ($rows as &$row) {
             // split up the tags correctly
-            // FIXME check the syntax of this command
-            $outtags = split('/,/', substr($row['Tags'], 1, strlen($row['Tags']) - 1));
-            $row['Tags'] = $outtags;
+            $row['Tags'] = QuipLayer::splitTags($row['Tags']);
+            $row['Timestamp_Millis'] = intval($row['Timestamp_Millis']);
         }
         
         $count = $countData['result'];
@@ -458,6 +457,9 @@ class QuipLayer {
 
 
     public static function splitTags($tagstr) {
+        if (strlen($tagstr) <= 2) {
+            return array();
+        }
         $outtags = split(',', substr($tagstr, 1, strlen($tagstr) - 2));
         return $outtags;
     }

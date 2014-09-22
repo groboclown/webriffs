@@ -153,27 +153,23 @@ $idList1 = WebRiffs\FilmLayer::createFilm($db, $userData, "Slacker 2011", 2011,
     WebRiffs\BranchLayer::$DEFAULT_TEMPLATE_ACCESS_NAME);
 $result['create-slacker-2011'] = array(
     'film_id' => $idList1[1],
-    'branch_id' => $idList1[2],
-    'change_id' => $idList1[3]
+    'branch_id' => $idList1[2]
 );
 $slacker2011Id = $idList1[1];
 $slacker2011BranchId = $idList1[2];
-$slacker2011ChangeId = $idList1[3];
 WebRiffs\FilmLayer::saveLinkForFilm($db, $slacker2011Id, "YouTube",
-// Just the intro scene
-"6N4V_8kVVDk", False);
+    // Just the intro scene
+    "6N4V_8kVVDk", False);
 
 
 $idList2 = WebRiffs\FilmLayer::createFilm($db, $userData, "Slacker", 1991,
     WebRiffs\BranchLayer::$DEFAULT_TEMPLATE_ACCESS_NAME);
 $result['create-slacker-1991'] = array(
     'film_id' => $idList2[1],
-    'branch_id' => $idList2[2],
-    'change_id' => $idList2[3]
+    'branch_id' => $idList2[2]
 );
 $slacker1991Id = $idList2[1];
 $slacker1991BranchId = $idList2[2];
-$slacker1991ChangeId = $idList2[3];
 WebRiffs\FilmLayer::saveLinkForFilm($db, $slacker1991Id, "imdb.com",
     "tt0102943", False);
 WebRiffs\FilmLayer::saveLinkForFilm($db, $slacker1991Id, "wikipedia-en",
@@ -223,7 +219,32 @@ $result['slacker1991-commited-change'] = $data;
 
 $data = WebRiffs\QuipLayer::pageCommittedQuips($db, $userData['User_Id'],
     $slacker1991BranchId, -1);
-$result['slacker1991-committed-quips'] = $data;
+$result['slacker1991-committed-quips1'] = $data;
+
+
+
+$data = WebRiffs\QuipLayer::createPendingChange($db, $userData['User_Id'],
+    $userData['Ga_User_Id'], $slacker1991BranchId, 1);
+$pendingChangeId = $data[0];
+$baseChangeId = $data[1];
+$result['pending-quip-change2'] = $data;
+$data = WebRiffs\QuipLayer::saveQuip($db, $userData['User_Id'],
+    $userData['Ga_User_Id'], $slacker1991BranchId, null,
+    "One minute mark", 60000, $tags);
+$result['slacker1991-quip2'] = $data['Gv_Item_Id'];
+$data = WebRiffs\QuipLayer::commitPendingChange($db, $userData['User_Id'],
+        $userData['Ga_User_Id'], $slacker1991BranchId);
+$result['slacker1991-commited-change2'] = $data;
+$data = WebRiffs\QuipLayer::pageCommittedQuips($db, $userData['User_Id'],
+        $slacker1991BranchId, -1);
+$result['slacker1991-committed-quips2'] = $data;
+$data = WebRiffs\QuipLayer::createPendingChange($db, $userData['User_Id'],
+        $userData['Ga_User_Id'], $slacker1991BranchId, 1);
+$data = WebRiffs\QuipLayer::pageCommittedPendingQuips($db, $userData['User_Id'],
+        $slacker1991BranchId);
+$result['slacker1991-quips3-query'] = $data;
+WebRiffs\QuipLayer::deletePendingChange($db, $userData['User_Id'],
+        $userData['Ga_User_Id'], $slacker1991BranchId);
 
 // ---------------------------------------------------------------------------
 
