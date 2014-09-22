@@ -24,6 +24,8 @@ IsErrorCheckerFunc UNAUTHORIZED_IS_NOT_ERROR = (int code) {
 class UserService {
     ServerStatusService _server;
     Future _loaded;
+    final StreamController<UserInfo> _loginChange;
+
 
     UserInfo info;
     bool loggedIn = false;
@@ -33,8 +35,14 @@ class UserService {
     bool get canCreateBranch => info != null && info.canCreateBranch;
 
 
-    UserService(this._server) {
+    UserService(this._server) :
+        _loginChange = new StreamController<UserInfo>() {
         _loaded = Future.wait([loadUserDetails()]);
+    }
+
+
+    Stream<UserInfo> createUserChangedEventStream() {
+        return _loginChange.stream;
     }
 
 
@@ -48,6 +56,7 @@ class UserService {
         return _server.post('/authentication/current', null,
                 isErrorChecker: UNAUTHORIZED_IS_NOT_ERROR)
             .then((ServerResponse response) {
+                bool baseStatus = loggedIn;
                 if (response.status == 412 || response.wasError) {
                     loggedIn = false;
                     info = null;
@@ -55,6 +64,9 @@ class UserService {
                     // response status is 200-299
                     loggedIn = true;
                     info = new UserInfo.fromJson(response.jsonData);
+                }
+                if (baseStatus != loggedIn) {
+                    _loginChange.sink.add(info);
                 }
                 return response;
             });

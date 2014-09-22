@@ -30,6 +30,11 @@ class EditBranchComponent extends ViewBranchComponent {
     final ServerStatusService _server;
     final UserService _user;
 
+    final QuipPaging quipPaging;
+
+    bool get noQuips => quipPaging.quips.length <= 0;
+
+
     final StreamController<QuipDetails> _changePendingQuipEvents;
     final StreamProvider<QuipDetails> quipChangedEvents;
 
@@ -54,14 +59,13 @@ class EditBranchComponent extends ViewBranchComponent {
 
     EditBranchComponent._(ServerStatusService server, UserService user,
             int branchId, Future<BranchDetails> branchDetails,
-            QuipPaging quipPaging, StreamController<QuipDetails> quipEvents) :
+            this.quipPaging, StreamController<QuipDetails> quipEvents) :
             _server = server,
             _user = user,
             _changePendingQuipEvents = quipEvents,
             quipChangedEvents =
                 new StreamControllerStreamProvider<QuipDetails>(quipEvents),
-            super.direct(server, user, branchId, null, branchDetails,
-                    quipPaging);
+            super.direct(server, user, branchId, null, branchDetails);
 
 
     Future<BranchDetails> _loadEditBranchChange(ServerStatusService server) {

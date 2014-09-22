@@ -1,6 +1,9 @@
 library quip_details;
 
 
+/**
+ * Details about a single quip.
+ */
 class QuipDetails {
     static final int MAX_TAG_COUNT = 20;
 

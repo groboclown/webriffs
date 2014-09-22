@@ -211,4 +211,3 @@ class BranchTagDetails {
         return name;
     }
 }
-

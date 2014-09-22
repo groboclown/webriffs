@@ -1,5 +1,5 @@
 
-library viewbranch_component;
+library abstract_branch_component;
 
 import 'dart:async';
 
@@ -9,27 +9,15 @@ import '../../service/server.dart';
 import '../../service/user.dart';
 import '../../json/branch_details.dart';
 
-import '../media/media_status.dart';
-
-import 'quip_paging.dart';
 
 /**
- * The UI component view the details of a branch.
+ * Generic parts of a UI component that interacts with the branch details.
+ * Contains helpers for the branch loading and user permissions.
  */
-@Component(
-    selector: 'view-branch',
-    templateUrl: 'packages/webriffs_client/component/branch/viewbranch_component.html',
-    publishAs: 'cmp')
-class ViewBranchComponent {
+class AbstractBranchComponent {
     final ServerStatusService _server;
     final UserService _user;
     final Future<BranchDetails> branchDetails;
-
-    /**
-     * Communication layer between the real service, when it finally is
-     * initialized, and whatever it may be, and this outer component.
-     */
-    final MediaStatusServiceConnector mediaStatusService;
 
     BranchDetails _branchDetails;
     final int branchId;
@@ -67,22 +55,20 @@ class ViewBranchComponent {
     bool get canDelete => _branchDetails == null ? false :
             _branchDetails.userCanDeleteBranch;
 
-
-    factory ViewBranchComponent(ServerStatusService server, UserService user,
-            RouteProvider routeProvider) {
-        int branchId = int.parse(routeProvider.parameters['branchId']);
-        int changeId = int.parse(routeProvider.parameters['changeId']);
-
-        Future<BranchDetails> branchDetails = loadBranchDetails(server,
-                branchId, changeId);
-
-        return new ViewBranchComponent.direct(server, user, branchId, changeId,
-                branchDetails);
+    static List<int> parseRouteParameters(RouteProvider routeProvider) {
+        var ret = <int>[ -1, -1 ];
+        if (routeProvider.parameters.containsKey('branchId')) {
+            ret[0] = int.parse(routeProvider.parameters['branchId']);
+        }
+        if (routeProvider.parameters.containsKey('changeId')) {
+            ret[1] = int.parse(routeProvider.parameters['changeId']);
+        }
+        return ret;
     }
 
-    ViewBranchComponent.direct(this._server, this._user, this.branchId,
-            this.urlChangeId, this.branchDetails) :
-            this.mediaStatusService = new MediaStatusServiceConnector() {
+
+    AbstractBranchComponent.direct(this._server, this._user, this.branchId,
+            this.urlChangeId, this.branchDetails) {
         branchDetails.then((BranchDetails bd) {
             if (bd == null) {
                 // Either an error or there is no such branch.
@@ -92,6 +78,14 @@ class ViewBranchComponent {
                 _branchDetails = bd;
                 _loadError = false;
             }
+        });
+
+        // Reload the details about the branch if the user login state changes.
+        // This allows the UI to properly display when the user permissions
+        // change.  Note that the branch user permissions are only loaded with
+        // the branch details, so this is necessary to keep the two in sync.
+        _user.createUserChangedEventStream().forEach((_) {
+            reloadDetails();
         });
     }
 
