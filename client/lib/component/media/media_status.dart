@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 import '../../json/branch_details.dart';
 import '../../json/film_details.dart';
 
+import 'alert_controller.dart';
 
 class MediaStatus {
     static const PLAYING = const MediaStatus._(true);
@@ -40,13 +41,15 @@ abstract class MediaStatusService {
     int get currentTimeMillis;
     MediaStatus get status;
     BranchDetails get branchDetails;
+    MediaAlertController get alertController;
+    set alertController(MediaAlertController controller);
 
     /**
      * The AngularDart HTML tag name (without the brackets) for the component.
      */
     String get htmlTag;
 
-
+    // FIXME the proper Dart way for handling events is to use a Stream.
     void addStatusChangeListener(OnStatusChange listener);
     void removeStatusChangeListener(OnStatusChange listener);
 
@@ -87,7 +90,6 @@ class MediaStatusServiceConnector implements MediaStatusService {
     Future<MediaStatusService> get connection => _media.future;
 
     bool get isConnected => _media.isCompleted;
-
 
     void connect(Future<MediaStatusService> mediaFuture) {
         _log.info("Connecting to a future media service");
@@ -133,6 +135,16 @@ class MediaStatusServiceConnector implements MediaStatusService {
                 ? null
                 : _realMedia.htmlTag;
 
+    @override
+    MediaAlertController get alertController => _realMedia == null
+            ? null
+            : _realMedia.alertController;
+
+    @override
+    set alertController(MediaAlertController controller) =>
+            _media.future.then((MediaStatusService media) {
+                media.alertController = controller;
+            });
 
     @override
     void addStatusChangeListener(OnStatusChange listener) {
@@ -172,6 +184,7 @@ abstract class AbstractMediaStatusService implements MediaStatusService {
     final String _htmlTag;
     final List<OnStatusChange> _listeners = [];
     bool _pageVisible = false;
+    MediaAlertController _alertController;
 
     bool get isPageVisible => _pageVisible;
 
@@ -182,6 +195,18 @@ abstract class AbstractMediaStatusService implements MediaStatusService {
      * The AngularDart HTML tag name (without the brackets) for the component.
      */
     String get htmlTag => _htmlTag;
+
+    @override
+    MediaAlertController get alertController => _alertController;
+
+    @override
+    set alertController(MediaAlertController controller) {
+        if (_alertController != null) {
+            _alertController.stop();
+        }
+        _alertController = controller;
+    }
+
 
     AbstractMediaStatusService(this._htmlTag, this._branchDetails) {
         if (_htmlTag == null) {
@@ -208,7 +233,6 @@ abstract class AbstractMediaStatusService implements MediaStatusService {
 
     @override
     void pageLoaded() {
-        print("**** media status - page loaded");
         _pageVisible = true;
         fireChange();
     }
@@ -224,6 +248,16 @@ abstract class AbstractMediaStatusService implements MediaStatusService {
             listener(this);
         }
     }
+
+    void onStart() {
+        _alertController.start(() => currentTimeMillis);
+        fireChange();
+    }
+
+    void onStop() {
+        _alertController.stop();
+        fireChange();
+    }
 }
 
 
@@ -237,6 +271,8 @@ abstract class AbstractMediaStatusService implements MediaStatusService {
  *
  */
 abstract class AbstractMediaStatusComponent {
+    // Rather than set the annotation in the parent class, we require the
+    // children to declare it.
     //@NgOneWay('media')
     set media(Future<MediaStatusService> service);
 }

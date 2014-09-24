@@ -39,32 +39,36 @@ You do not have permissions to view the contents of this branch.
     
         branch="cmp.branchDetails"
         media="cmp.mediaStatusService"
-        updates="cmp.quipChangedEvents"></edit-quip>
+        updates="cmp.requestEditEvents"></edit-quip>
     <div>
         <!-- filter controls -->
     </div>
-    <page-control page-state="cmp.quipPaging">
-        <table>
-            <thead>
-                <tr>
-                    <!-- FIXME add sorting controls -->
-                    <th>Time</th>
-                    <th>Text</th>
-                    <th>Tags</th>
-                </tr>
-            </thead>
-            <tbody ng-if="cmp.quipPaging.loadedSuccessful">
-                <tr ng-repeat="quip in cmp.quips">
-                    <!-- FIXME handle committed timestamp -->
-                    <td>{{quip.timestamp}}</td>
-                    <td>{{quip.text}}</td>
-                    <td>
-                        <span ng-repeat="tag in quip.tags">
-                            {{tag.name}}
-                        </span>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </page-control>
+    <table>
+        <thead>
+            <tr>
+                <th ng-if="cmp.canEditQuips">&nbsp;</th>
+                <th>Time</th>
+                <th>Text</th>
+                <th>Tags</th>
+            </tr>
+        </thead>
+        <tbody ng-if="cmp.quipPaging.loading">
+            <tr>
+                <td colspan="3">loading ...</td>
+            </tr>
+        </tbody>
+        <tbody ng-if="cmp.quipPaging.loadedSuccessful">
+            <tr ng-repeat="quip in cmp.quipPaging.quips">
+                <td ng-if="cmp.canEditQuips"
+                    ng-click="cmp.editQuip(quip)">&#9998;</td>
+                <td>{{quip.timestamp}}</td>
+                <td>{{quip.text}}</td>
+                <td>
+                    <span ng-repeat="tag in quip.tags">
+                        {{tag.name}}
+                    </span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </div>

@@ -24,11 +24,11 @@ import 'abstract_branch_component.dart';
  * `mediaStatusService` field.
  *
  * FIXME add "is editing" mode for quips.  This is turned on and off only by
- *      the presence of a pending change on the branch.  This will mean an
- *      extension to the branch details to get that additional info, maybe?
- *      It should be in a request that returns BEFORE the branch details
- *      future returns.  Changing this state may have large implications on
- *      the displayed UI.
+ *  the presence of a pending change on the branch.  This will mean an
+ *  extension to the branch details to get that additional info, maybe?
+ *  It should be in a request that returns BEFORE the branch details
+ *  future returns.  Changing this state may have large implications on
+ *  the displayed UI.
  *
  * FIXME should not have the change ID as part of the UI.  Instead, it
  * should be just a notion of determining what has changed based on what
@@ -37,6 +37,9 @@ import 'abstract_branch_component.dart';
  * and by whom, and then pushes those down to consumers (Stream events).
  * When a user is editing, they are in a "pending merge" state, to allow for
  * an easier merge click-through.
+ *
+ * The change ID can be part of the UI if the user wants to look at historical
+ * versions of the branch.
  *
  *
  */
@@ -58,11 +61,11 @@ class EditBranchComponent extends AbstractBranchComponent {
 
     final QuipPaging quipPaging;
 
-    bool get noQuips => quipPaging.quips.length <= 0;
+    bool get noQuips => quipPaging.quips.isEmpty;
 
 
-    final StreamController<QuipDetails> _changePendingQuipEvents;
-    final StreamProvider<QuipDetails> quipChangedEvents;
+    final StreamController<QuipDetails> _requestEditQuipEvents;
+    final StreamProvider<QuipDetails> requestEditEvents;
 
 
     factory EditBranchComponent(ServerStatusService server, UserService user,
@@ -78,7 +81,7 @@ class EditBranchComponent extends AbstractBranchComponent {
         QuipPaging quips = new QuipPaging.pending(server, branchId);
 
         StreamController<QuipDetails> quipEvents =
-                new StreamController<QuipDetails>();
+                new StreamController<QuipDetails>.broadcast();
 
         return new EditBranchComponent._(server, user, branchId, changeId,
                 branchDetails, quips, quipEvents);
@@ -89,11 +92,16 @@ class EditBranchComponent extends AbstractBranchComponent {
             this.quipPaging, StreamController<QuipDetails> quipEvents) :
             _server = server,
             _user = user,
-            _changePendingQuipEvents = quipEvents,
-            quipChangedEvents =
+            _requestEditQuipEvents = quipEvents,
+            requestEditEvents =
                 new StreamControllerStreamProvider<QuipDetails>(quipEvents),
             mediaStatusService = new MediaStatusServiceConnector(),
             super(server, user, branchId, changeId, branchDetails);
+
+
+    void editQuip(QuipDetails quip) {
+
+    }
 
 
     /**

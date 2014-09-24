@@ -13,6 +13,8 @@ import '../../util/speech_recognition.dart';
 import '../media/media_status.dart';
 import '../../util/event_util.dart';
 
+import 'quip_paging.dart';
+
 /**
  * The UI component for editing a quip.
  */
@@ -25,10 +27,17 @@ class EditQuipComponent {
     final UserService _user;
     final SpeechRecognitionApi _recognition;
 
+    QuipPaging _masterList;
+
+    @NgOneWay('list')
+    set masterList(QuipPaging qp) {
+        _masterList = qp;
+    }
+
     QuipDetails pendingQuip = new QuipDetails.pending();
 
     @NgOneWay('updates')
-    set quipChangedEvents(StreamProvider<QuipDetails> sp) {
+    set editedQuipChangedEvents(StreamProvider<QuipDetails> sp) {
         sp.stream.forEach((QuipDetails qd) {
             // FIXME update the pending quip to be this.
 
@@ -78,6 +87,8 @@ class EditQuipComponent {
         _branchDetails.future.then((BranchDetails branch) {
             if (canEditQuip) {
                 // FIXME push the save
+
+                // FIXME add quip to master list
             } else {
                 // FIXME report error
             }
@@ -90,6 +101,10 @@ class EditQuipComponent {
         //} else {
         //    _log.warning('media service is not connected');
         }
+    }
+
+    void setPendingQuipTimeAs(String timestr) {
+        // FIXME parse the time string
     }
 
 }

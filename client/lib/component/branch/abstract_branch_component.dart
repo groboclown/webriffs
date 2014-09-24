@@ -54,6 +54,8 @@ abstract class AbstractBranchComponent {
                     _branchDetails.userCanEditQuipTags);
     bool get canDelete => _branchDetails == null ? false :
             _branchDetails.userCanDeleteBranch;
+    bool get canEditPermissions => _branchDetails == null ? false :
+            _branchDetails.userCanEditBranchPermissions;
 
     static List<int> parseRouteParameters(RouteProvider routeProvider) {
         var ret = <int>[ -1, null ];

@@ -5,61 +5,86 @@ import 'dart:async';
 
 import '../../service/server.dart';
 import '../../util/async_component.dart';
+import '../../util/paging.dart';
 import '../../json/quip_details.dart';
 
+import '../media/alert_controller.dart';
 
 
 /**
  * A deep cache for the quips.  It pages the quips in, but keeps a longer list
  * of the quips in memory than what the server returns.  The actual control
  * over when to page, and which data to clear, is up to the owning component.
+ * It also manages the incremental updates to quips from the server.
  *
- * This uses the PagingComponent to help with the loading of the data and the
+ * This uses the [PagingComponent] to help with the loading of the data and the
  * error / loading state.
+ *
+ * For now, the [QuipPanging] loads all the quips at the start.  Eventually,
+ * this should be more of a streaming service.
  */
-class QuipPaging extends PagingComponent {
+class QuipPaging implements AsyncComponent {
     final ServerStatusService _server;
-    int _previousBuffer = 50;
-    int _nextBuffer = 50;
-
-    int get previousBuffer => _previousBuffer;
-
-    int get nextBuffer => _nextBuffer;
-
-    // FIXME need a better storage for the quips.  They need to be stored such
-    // that N items are saved to reduce paging from the server.  When a get
-    // request is made for an item that is "near" the end of the current
-    // cache (in either direction), a request should be made to pull in the
-    // next ones.
-
-    // The forward/backwards cache should be configurable depending if the user
-    // is in edit or view or playback mode.
-
+    final List<QuipDetails> quips = [];
+    final List<QuipDetails> _pendingSave = [];
+    final QuipMediaAlertController mediaAlertController =
+            new QuipMediaAlertController();
+    final StreamController<QuipPaging> _onLoad =
+            new StreamController.broadcast();
     final int branchId;
-    final int changeId;
-    final List<QuipDetails> quips;
+
+    /**
+     * Updated with each change that's loaded in.  For pending changes, this
+     * is `null`.
+     */
+    int changeId;
+
+
+    Stream<QuipPaging> get onLoad => _onLoad.stream;
+
+    bool _loadedError = false;
+    bool _loading = false;
+    bool _notLoaded = true;
+    String _error = null;
+
+    @override
+    bool get loadedError => _loadedError;
+
+    @override
+    bool get loadedSuccessful => ! _loadedError;
+
+    @override
+    bool get loading => _loading;
+
+    @override
+    bool get notLoaded => _notLoaded;
+
+    @override
+    String get error => _error;
+
+    bool get hasPendingSave => _pendingSave.isNotEmpty;
+
+    int _percentLoaded;
+
+    int get percentLoaded => _percentLoaded;
+
 
     factory QuipPaging(ServerStatusService server, int branchId, int changeId) {
-        String path = "/branch/${branchId}/version/${changeId}/quip";
-
-        return new QuipPaging._(server, branchId, changeId, path);
+        return new QuipPaging._(server, branchId, changeId);
     }
 
     /**
      * Fetch the quips that the user has pending a commit.
      */
     factory QuipPaging.pending(ServerStatusService server, int branchId) {
-        String path = "/branch/${branchId}/pending/quip";
-
-        return new QuipPaging._(server, branchId, null, path);
+        return new QuipPaging._(server, branchId, null);
     }
 
 
-    QuipPaging._(ServerStatusService server, this.branchId, this.changeId,
-            String path) :
-        quips = [],
-        _server = server,
-        super(server, path, null, false);
+    QuipPaging._(this._server, this.branchId, this.changeId) {
+        reload();
+
+    }
 
 
     /**
@@ -99,6 +124,7 @@ class QuipPaging extends PagingComponent {
         // FIXME
     }
 
+
     void _updatedTime(QuipDetails quip) {
         // update the location of the quip in the list.
         // Should perform a binary search for the current location of this
@@ -109,22 +135,59 @@ class QuipPaging extends PagingComponent {
         _mergeQuips([ quip ]);
     }
 
-    /**
-     * FIXME This has an issue where it can't remove quips if the user is
-     * looking at the head revision.  This can be solved by *forcing* the
-     * user to always look at a specific version.
-     */
+
     @override
-    Future<ServerResponse> onSuccess(Iterable data) {
-        // The incoming quips should all be sorted already.
-        var newQuips = <QuipDetails>[];
-        data.forEach((Map<String, dynamic> json) {
-            newQuips.add(new QuipDetails.fromJson(branchId, json));
+    void reload() {
+        if (_loading) {
+            return;
+        }
+
+        _loadedError = false;
+        _loading = true;
+        _notLoaded = true;
+        _error = null;
+        _percentLoaded = 0;
+        quips.clear();
+        mediaAlertController.nextIndex = 0;
+
+        String path = null;
+        if (changeId == null) {
+            path = "/branch/${branchId}/pending/quip";
+        } else {
+            path = "/branch/${branchId}/version/${changeId}/quip";
+        }
+        PageState pg = new PageState(_server, path, (PageState pageState,
+                Iterable<dynamic> data, ServerResponse response) {
+            _loadedError = pageState.hasError;
+            _error = pageState.errorMessage;
+            if (_loadedError) {
+                _loading = false;
+                _notLoaded = true;
+            } else {
+                List<QuipDetails> loadedQuips = [];
+                for (dynamic jsonData in data) {
+                    loadedQuips.add(
+                            new QuipDetails.fromJson(branchId, jsonData));
+                }
+                _mergeQuips(loadedQuips);
+
+                if (pageState.pageLastIndex >= pageState.recordCount) {
+                    _loading = false;
+                    _notLoaded = false;
+                    _percentLoaded = 100;
+                } else {
+                    _percentLoaded =
+                            pageState.pageLastIndex ~/ pageState.recordCount;
+
+                    pageState.updateFromServer(
+                            nextPage: pageState.currentPage + 1);
+                }
+
+            }
+            _onLoad.add(this);
         });
 
-        _mergeQuips(newQuips);
-
-        return null;
+        pg.updateFromServer(newRecordsPerPage: 100);
     }
 
 
@@ -133,13 +196,11 @@ class QuipPaging extends PagingComponent {
      * list.
      */
     void _mergeQuips(List<QuipDetails> newQuips) {
-        // These quips should be in the middle of the current list,
-        // so a merge sort should be most appropriate.  The efficient method
-        // would be to check the size of the incoming quips, and estimate the
-        // pre/post sizes that should remain.
+        // Use a merge sort on the two sorted lists.
+        // This could be optimized by performing a pseudo-binary search
+        // look-ahead to see where the next insertion point would be.
 
-        // For now, though, we'll just save everything by merging the two
-        // sorted lists.
+        // FIXME update the QuipMediaAlertController index.
 
         int origPos = 0;
         int newPos = 0;
@@ -161,3 +222,66 @@ class QuipPaging extends PagingComponent {
 
     }
 }
+
+
+typedef void QuipDisplayHandler(QuipDetails quip);
+
+
+/**
+ * An extension to the [BaseMediaAlertController] that includes tight
+ * integration with the [QuipPaging] class to reduce the overhead of two lists
+ * of quips.
+ */
+class QuipMediaAlertController extends BaseMediaAlertController {
+    // FIXME tight integration with the QuipPaging to be memory efficient
+    // when displaying the quips.
+
+    QuipDisplayHandler _handler;
+    List<QuipDetails> _quips;
+    int nextIndex;
+
+
+    void setHandler(QuipDisplayHandler handler) {
+        if (_handler != null) {
+            throw new Exception("already set");
+        }
+        _handler = handler;
+    }
+
+    void setQuips(List<QuipDetails> quips) {
+        if (_quips != null) {
+            throw new Exception("already set");
+        }
+        _quips = quips;
+    }
+
+    @override
+    void handleSkipBackwardsTo(int time) {
+        super.handleSkipBackwardsTo(time);
+        while (nextIndex > 0 && _quips[nextIndex].timestamp > time) {
+            nextIndex--;
+        }
+    }
+
+    @override
+    void handleSkipForwardsTo(int time) {
+        super.handleSkipForwardsTo(time);
+        while (nextIndex < _quips.length &&
+                _quips[nextIndex].timestamp < time) {
+            nextIndex++;
+        }
+    }
+
+
+    @override
+    void handleTimeEvent(int currentTime, int allowedToRunUpToThreshold) {
+        super.handleTimeEvent(currentTime, allowedToRunUpToThreshold);
+        while (nextIndex < _quips.length &&
+                _quips[nextIndex].timestamp < allowedToRunUpToThreshold) {
+            _handler(_quips[nextIndex]);
+            nextIndex++;
+        }
+    }
+}
+
+

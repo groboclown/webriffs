@@ -16,6 +16,8 @@ typedef Future<ServerResponse> PageLoaded(PageState pageState,
  * component should have its own current values for sorting and filters and
  * current page value to represent what the user selects, so that the
  * changing of the UI elements can be separate from the submission.
+ *
+ * FIXME instead of a callback ("PageLoaded"), this should use a Stream.
  */
 class PageState {
     final SingleRequest _server;
@@ -156,6 +158,7 @@ class PageState {
                 _errorMessage = e.toString();
                 _paramNotes = null;
                 _loadedFromServer = true;
+                return _on_loaded(this, null, null);
             }).catchError((Exception e) {
                 // TODO add logging
 
@@ -163,6 +166,7 @@ class PageState {
                 _errorMessage = e.toString();
                 _paramNotes = null;
                 _loadedFromServer = true;
+                return _on_loaded(this, null, null);
             });
     }
 

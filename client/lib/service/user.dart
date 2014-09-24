@@ -36,7 +36,7 @@ class UserService {
 
 
     UserService(this._server) :
-        _loginChange = new StreamController<UserInfo>() {
+        _loginChange = new StreamController<UserInfo>.broadcast() {
         _loaded = Future.wait([loadUserDetails()]);
     }
 

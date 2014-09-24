@@ -31,4 +31,13 @@ to the play page to view that. -->
     <div ng-if="! cmp.canReadQuips">
     You do not have permissions to view the contents of this branch.
     </div>
+    
+    
+    <div ng-if="cmp.canDelete" class="bug">
+    BUG add "delete branch" button here.
+    </div>
+    
+    <div ng-if="cmp.canEditPermissions" class="bug">
+    BUG add "change access permissions" UI here.
+    </div>
 </div>
