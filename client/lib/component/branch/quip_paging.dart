@@ -164,12 +164,11 @@ class QuipPaging implements AsyncComponent {
                 _loading = false;
                 _notLoaded = true;
             } else {
-                List<QuipDetails> loadedQuips = [];
-                for (dynamic jsonData in data) {
-                    loadedQuips.add(
-                            new QuipDetails.fromJson(branchId, jsonData));
+                if (data != null) {
+                    _mergeQuips(
+                        data.map((dynamic jsonData) =>
+                            new QuipDetails.fromJson(branchId, jsonData)));
                 }
-                _mergeQuips(loadedQuips);
 
                 if (pageState.pageLastIndex >= pageState.recordCount) {
                     _loading = false;
@@ -187,7 +186,7 @@ class QuipPaging implements AsyncComponent {
             _onLoad.add(this);
         });
 
-        pg.updateFromServer(newRecordsPerPage: 100);
+        pg.updateFromServer(newRecordsPerPage: 100, newSortOrder: 'A');
     }
 
 

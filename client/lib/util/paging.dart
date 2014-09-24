@@ -148,7 +148,11 @@ class PageState {
                 _loadedFromServer = true;
                 Iterable<dynamic> data = null;
                 if (! _hasError) {
-                    data = _fromJson(response.jsonData);
+                    if (response.jsonData == null) {
+                        data = null;
+                    } else {
+                        data = _fromJson(response.jsonData);
+                    }
                 }
                 return _on_loaded(this, data, response);
             }, onError: (Exception e) {
