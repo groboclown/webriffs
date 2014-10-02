@@ -12,7 +12,7 @@ import '../../json/branch_details.dart';
 import '../../json/quip_details.dart';
 import '../../util/event_util.dart';
 
-import '../media/media_status.dart';
+import '../media/alert_controller.dart';
 
 import 'quip_paging.dart';
 import 'abstract_branch_component.dart';
@@ -52,16 +52,22 @@ class EditBranchComponent extends AbstractBranchComponent {
 
     final ServerStatusService _server;
     final UserService _user;
-
-    /**
-     * Communication layer between the real service, when it finally is
-     * initialized, and whatever it may be, and this outer component.
-     */
-    final MediaStatusServiceConnector mediaStatusService;
+    final int requestedChangeId;
 
     final QuipPaging quipPaging;
 
+    QuipMediaAlertController get mediaAlertController =>
+            quipPaging.mediaAlertController;
+
     bool get noQuips => quipPaging.quips.isEmpty;
+
+    // If the user can't edit the quips, or the user requested to see an old
+    // version, then don't allow edits.
+    bool get isEditable => canEditQuips && requestedChangeId < 0;
+
+
+    final VideoPlayerTimeProvider videoTimeProvider =
+            new VideoPlayerTimeProvider();
 
 
     final StreamController<QuipDetails> _requestEditQuipEvents;
@@ -75,32 +81,38 @@ class EditBranchComponent extends AbstractBranchComponent {
         int branchId = ids[0];
         int changeId = ids[1];
 
-        Future<BranchDetails> branchDetails = loadBranchDetails(server,
-                branchId, -1);
+        if (changeId == null) {
+            // User didn't specify a change id, so use the "get the current"
+            // as the change id.
+            changeId = -1;
+        }
 
-        QuipPaging quips = new QuipPaging.pending(server, branchId);
+        Future<BranchDetails> branchDetails = loadBranchDetails(server,
+                branchId, changeId);
+
+        QuipPaging quips = new QuipPaging(server, branchId, changeId);
 
         StreamController<QuipDetails> quipEvents =
                 new StreamController<QuipDetails>.broadcast();
 
         return new EditBranchComponent._(server, user, branchId, changeId,
-                branchDetails, quips, quipEvents);
+                branchDetails, quips, quipEvents, changeId);
     }
 
     EditBranchComponent._(ServerStatusService server, UserService user,
             int branchId, int changeId, Future<BranchDetails> branchDetails,
-            this.quipPaging, StreamController<QuipDetails> quipEvents) :
+            this.quipPaging, StreamController<QuipDetails> quipEvents,
+            this.requestedChangeId) :
             _server = server,
             _user = user,
             _requestEditQuipEvents = quipEvents,
             requestEditEvents =
                 new StreamControllerStreamProvider<QuipDetails>(quipEvents),
-            mediaStatusService = new MediaStatusServiceConnector(),
             super(server, user, branchId, changeId, branchDetails);
 
 
     void editQuip(QuipDetails quip) {
-
+        _requestEditQuipEvents.add(quip);
     }
 
 

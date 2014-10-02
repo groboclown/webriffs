@@ -1,14 +1,46 @@
 /**
  * Sets up time-based alerts to trigger events based on the media.
  */
-library alert_controller;
+library media_controller;
 
 import 'dart:async';
+import 'package:videoplay/api.dart';
 
+import '../../util/time_format.dart';
+
+import 'stopwatch_media.dart';
 
 typedef void OnTimedAlert(int millisecondTime);
 
-typedef int TimeProvider();
+
+abstract class MediaTimeProvider {
+    Duration get serverTime;
+    String get displayTime;
+    TimeDialation get dialation;
+    int convertToServerTime(String timestr);
+}
+
+
+class VideoPlayerTimeProvider implements MediaTimeProvider {
+    VideoPlayer player;
+
+    @override
+    Duration get serverTime => player == null ? null : player.playbackTime;
+
+    @override
+    TimeDialation get dialation => player == null
+        ? TimeDialation.NATIVE
+        : player is StopwatchMedia
+            ? (player as StopwatchMedia).timeDialation
+            : TimeDialation.NATIVE;
+
+    String get displayTime => player == null ? "" :
+        dialation.displayString(player.playbackTime.inMilliseconds / 1000.0);
+
+    int convertToServerTime(String timestr) => player == null ? null :
+        (dialation.parseDisplay(timestr) * 1000.0).toInt();
+}
+
 
 
 /**
@@ -40,7 +72,18 @@ abstract class MediaAlertRegistry {
 abstract class MediaAlertController implements MediaAlertRegistry {
     void stop();
 
-    void start(TimeProvider provider, [ Duration interval ]);
+    void start(VideoPlayer provider, [ Duration interval ]);
+
+    static void connectPlayer(VideoPlayer player,
+            MediaAlertController controller, [ Duration interval ]) {
+        player.statusChangeEvents.listen((VideoPlayerEvent e) {
+            if (e.status == VideoPlayerStatus.PLAYING) {
+                controller.start(e.videoPlayer, interval);
+            } else {
+                controller.stop();
+            }
+        });
+    }
 }
 
 
@@ -67,7 +110,7 @@ class BaseMediaAlertController implements MediaAlertController {
     /** all repeating alerts. */
     final List<RepeatMediaAlertEvent> _repeaters = [];
     Timer _timer;
-    TimeProvider _current;
+    VideoPlayer _current;
     int _previousCheckedTime = 0;
 
     int get previousCheckedTime => _previousCheckedTime;
@@ -144,14 +187,14 @@ class BaseMediaAlertController implements MediaAlertController {
 
 
     @override
-    void start(TimeProvider provider, [ Duration interval ]) {
-        if (provider == null) {
-            throw new Exception("null provider");
+    void start(VideoPlayer player, [ Duration interval ]) {
+        if (player == null) {
+            throw new Exception("null player");
         }
         if (_current != null) {
             throw new Exception("still running");
         }
-        _current = provider;
+        _current = player;
 
         if (interval == null) {
             interval = new Duration(milliseconds: 50);
@@ -165,7 +208,7 @@ class BaseMediaAlertController implements MediaAlertController {
                 _timer.cancel();
                 return;
             }
-            int currentTime = _current();
+            int currentTime = _current.playbackTime.inMilliseconds;
             if (currentTime == _previousCheckedTime) {
                 return;
             }

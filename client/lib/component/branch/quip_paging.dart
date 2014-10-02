@@ -109,6 +109,7 @@ class QuipPaging implements AsyncComponent {
             quips.remove(quip);
         } else {
             // FIXME
+            throw new Exception("not completed yet");
         }
     }
 
@@ -122,6 +123,7 @@ class QuipPaging implements AsyncComponent {
         }
 
         // FIXME
+        throw new Exception("not completed yet");
     }
 
 

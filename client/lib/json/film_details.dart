@@ -11,6 +11,7 @@ class LinkRecord {
     final String name;
     final String desc;
     final bool isMedia;
+    final String mediaProvider;
     String serverUri;
     String errorUri;
     String uri;
@@ -28,13 +29,14 @@ class LinkRecord {
     factory LinkRecord.fromJson(Map<String, dynamic> row) {
         return new LinkRecord(row['Film_Id'], row['Url_Prefix'],
                 row['Name'], row['Description'], row['Uri'],
-                row['Is_Media'], row['Is_Playback_Media']);
+                row['Is_Media'], row['Is_Playback_Media'],
+                row['Media_Provider']);
     }
 
 
     LinkRecord(this.filmId, this.urlPrefix,
            this.name, this.desc, this.serverUri, this.isMedia,
-           this.isPlaybackMedia) {
+           this.isPlaybackMedia, this.mediaProvider) {
         this.uri = serverUri;
     }
 

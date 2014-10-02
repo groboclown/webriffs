@@ -94,7 +94,7 @@ class AdminLayer {
      * @return int the link_id for the link
      */
     public static function createLink($db, $name, $description,
-            $urlPrefix, $validationRegex, $isMedia) {
+            $urlPrefix, $validationRegex, $mediaProvider) {
         //public function create($db, $Name, $Description, $Url_Prefix, $Validation_Regex) {
         $errors = array();
         if (! is_string($name) || strlen($name) > 200) {
@@ -109,15 +109,15 @@ class AdminLayer {
         if (! is_string($validationRegex) || strlen($validationRegex) > 500) {
             $errors["validation_regex"] = "validation_regex cannot be more than 500 characters long";
         }
-        if (! is_bool($isMedia)) {
-            $errors["is_media"] = "is_media must be either True or False";
+        if ($mediaProvider != null && (! is_string($mediaProvider) || strlen($mediaProvider) > 30)) {
+            $errors["media_provider"] = "media_provider cannot be more than 30 characters long";
         }
         if (sizeof($errors) > 0) {
             throw new Base\ValidationException($errors);
         }
-        $isMedia = ($isMedia == TRUE) ? 1 : 0;
+        $isMedia = ($mediaProvider == null) ? 0 : 1;
         $data = LinkType::$INSTANCE->create($db, $name, $description,
-            $isMedia, $urlPrefix, $validationRegex);
+            $isMedia, $mediaProvider, $urlPrefix, $validationRegex);
         AdminLayer::checkError($data, new Base\ValidationException(array(
             'unknown' => 'problem creating the link.  Is the name already used?'
         )));

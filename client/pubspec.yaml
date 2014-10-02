@@ -1,7 +1,12 @@
 name: webriffs_client
+version: 0.1.0
+author: Groboclown <matt@groboclown.net>
+environment:
+  sdk: 1.6.0
 dependencies:
+  angular: '>=0.14.0'
   browser: any
-  angular: ">=0.14.0"
+  videoplay: '>=0.2.0 <1.0.0'
   web_components: any
 dev_dependencies:
   unittest: any

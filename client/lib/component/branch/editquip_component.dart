@@ -10,8 +10,10 @@ import '../../service/server.dart';
 import '../../json/branch_details.dart';
 import '../../json/quip_details.dart';
 import '../../util/speech_recognition.dart';
-import '../media/media_status.dart';
 import '../../util/event_util.dart';
+import '../../util/time_format.dart';
+
+import '../media/alert_controller.dart';
 
 import 'quip_paging.dart';
 
@@ -29,6 +31,9 @@ class EditQuipComponent {
 
     QuipPaging _masterList;
 
+    @NgOneWay('time')
+    MediaTimeProvider timeProvider;
+
     @NgOneWay('list')
     set masterList(QuipPaging qp) {
         _masterList = qp;
@@ -38,9 +43,11 @@ class EditQuipComponent {
 
     @NgOneWay('updates')
     set editedQuipChangedEvents(StreamProvider<QuipDetails> sp) {
-        sp.stream.forEach((QuipDetails qd) {
-            // FIXME update the pending quip to be this.
+        sp.stream.listen((QuipDetails qd) {
+            // NOTE: this just overwrites any non-saved changes in the
+            // previous pending quip.
 
+            pendingQuip = qd;
         });
     }
 
@@ -57,17 +64,6 @@ class EditQuipComponent {
     }
 
 
-    MediaStatusServiceConnector _mediaStatusService;
-
-    @NgOneWay('media')
-    set mediaStatusService(MediaStatusServiceConnector mediaStatusService) {
-        this._mediaStatusService = mediaStatusService;
-    }
-
-    bool get isMediaConnected => _mediaStatusService == null
-            ? false
-            : _mediaStatusService.isConnected;
-
     bool get canEditQuip => _realBranchDetails == null
             ? false
             : _realBranchDetails.userCanEditQuips;
@@ -81,6 +77,18 @@ class EditQuipComponent {
             _user = user,
             _recognition = createSpeechRecognition();
 
+
+    // FIXME look at whether this should be pushed down to the QuipDetails
+    // display level, or if AngularDart is smart enough to automatically
+    // update this value.
+    // Pass in the QuipDetails.timestamp as the value here.
+    String quipTime(int timestamp) {
+        double time = timestamp / 1000.0;
+        if (timeProvider != null) {
+            return timeProvider.dialation.displayString(time);
+        }
+        return TimeDialation.NATIVE.displayString(time);
+    }
 
 
     void savePendingQuip() {
@@ -96,15 +104,15 @@ class EditQuipComponent {
     }
 
     void setPendingQuipTime() {
-        if (isMediaConnected) {
-            pendingQuip.timestamp = _mediaStatusService.currentTimeMillis;
+        if (timeProvider != null) {
+            pendingQuip.timestamp = timeProvider.serverTime.inMilliseconds;
         //} else {
         //    _log.warning('media service is not connected');
         }
     }
 
     void setPendingQuipTimeAs(String timestr) {
-        // FIXME parse the time string
+        pendingQuip.timestamp = timeProvider.convertToServerTime(timestr);
     }
 
 }

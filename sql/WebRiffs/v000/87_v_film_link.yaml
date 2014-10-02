@@ -11,6 +11,7 @@ view:
           , lt.Description Description
           , lt.Url_Prefix Url_Prefix
           , lt.Is_Media Is_Media
+          , lt.Media_Provider Media_Provider
         FROM FILM f
         CROSS JOIN LINK_TYPE lt
         LEFT OUTER JOIN FILM_LINK fl
@@ -75,4 +76,7 @@ view:
             constraints:
                 - constraint:
                     type: not null
+        - column:
+            name: Media_Provider
+            type: nvarchar(30)
                     

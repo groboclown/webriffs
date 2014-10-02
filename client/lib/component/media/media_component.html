@@ -1,0 +1,48 @@
+<div ng-if="! cmp.loaded">
+loading media...
+</div>
+<div ng-if="cmp.loadedPlayer">
+    <div id="media"></div>
+</div>
+<div ng-if="cmp.loadedStopwatch" class="component">
+
+
+
+
+
+  <form onsubmit="return false;">
+    <div>
+        <span ng-if="cmp.stopwatch.status.playing">Playing</span>
+        <span ng-if="cmp.stopwatch.status.waiting"></span>
+        <span>{{cmp.stopwatch.time}}</span>
+        <span>(playing back {{cmp.stopwatch.dialation}})</span>
+        <span class="bug">TODO: select between all the different playback speeds (NTSC, PAL, etc)</span>
+    </div>
+    <div>
+        <span ng-if="cmp.stopwatch.status.playing" ng-click="cmp.stopwatch.pause()">[ Pause ]</span>
+        <span ng-if="cmp.stopwatch.status.waiting" ng-click="cmp.stopwatch.start()">[ Play ]</span>
+    </div>
+    <div>
+        <div>
+            <span ng-click="cmp.stopwatch.adjustTime(500)">[+ .5 sec]</span>
+            <span ng-click="cmp.stopwatch.adjustTime(1000)">[+ 1 sec]</span>
+            <span ng-click="cmp.stopwatch.adjustTime(5000)">[+ 5 sec]</span>
+            <span ng-click="cmp.stopwatch.adjustTime(10000)">[+ 10 sec]</span>
+        </div>
+        <div>
+            <span ng-click="cmp.stopwatch.adjustTime(-500)">[- .5 sec]</span>
+            <span ng-click="cmp.stopwatch.adjustTime(-1000)">[- 1 sec]</span>
+            <span ng-click="cmp.stopwatch.adjustTime(-5000)">[- 5 sec]</span>
+            <span ng-click="cmp.stopwatch.adjustTime(-10000)">[- 10 sec]</span>
+        </div>
+    </div>
+    <div>
+        <input type="text" ng-model="cmp.stopwatch.timeField">
+        <input type="submit" ng-click="cmp.stopwatch.setTime()" value="Set time">
+        <span ng-if="cmp.stopwatch.hasTimeFieldFormatError">Bad time format</span>
+    </div>
+    <div>
+        <span ng-click="cmp.stopwatch.stop()">[ Reset time ]</span>
+    </div>
+  </form>
+</div>

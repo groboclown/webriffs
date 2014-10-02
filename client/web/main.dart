@@ -22,8 +22,6 @@ import 'package:webriffs_client/component/branch/viewbranch_component.dart';
 import 'package:webriffs_client/component/branch/branchupdates_component.dart';
 import 'package:webriffs_client/component/branch/branchheader_component.dart';
 import 'package:webriffs_client/component/media/media_component.dart';
-import 'package:webriffs_client/component/media/stopwatch_media_component.dart';
-import 'package:webriffs_client/component/media/youtube_media_component.dart';
 import 'package:webriffs_client/component/piece_edit_component.dart';
 //import 'package:webriffs_client/component/_component.dart';
 import 'package:webriffs_client/service/server.dart';
@@ -50,8 +48,6 @@ class WebRiffsModule extends Module {
         bind(FilmInfoEditComponent);
         bind(BranchUpdatesComponent);
         bind(MediaComponent);
-        bind(StopwatchMediaComponent);
-        bind(YouTubeMediaComponent);
         bind(PieceEditComponent);
 
         // Stateful Services

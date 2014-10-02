@@ -99,7 +99,7 @@ if ($data === null) {
     $data = WebRiffs\AdminLayer::createLink($db, 'wikipedia-en',
         'Open Encyclopedia (English)', 'http://en.wikipedia.org/wiki/',
         // Note: this leaves out articles in international characters.
-        '^[a-zA-Z0-9$_\-()]+$', False);
+        '^[a-zA-Z0-9$_\-()]+$', null);
         #'^[a-zA-Z0-9\$_-\(\)]+$');
     $result['create_link_wikipedia'] = $data;
 }
@@ -108,7 +108,7 @@ $data = WebRiffs\AdminLayer::getLinkNamed($db, 'imdb.com');
 if ($data === null) {
     $data = WebRiffs\AdminLayer::createLink($db, 'imdb.com',
         'International Movie Database', 'http://imdb.com/title/',
-        '^[a-zA-Z0-9]+$', False);
+        '^[a-zA-Z0-9]+$', null);
     $result['create_link_imdb'] = $data;
 }
 
@@ -116,10 +116,12 @@ $data = WebRiffs\AdminLayer::getLinkNamed($db, 'YouTube');
 if ($data === null) {
     $data = WebRiffs\AdminLayer::createLink($db, 'YouTube',
             'Google YouTube', 'https://youtube.com/watch?v=',
-            '^[a-zA-Z0-9][a-zA-Z0-9_-]+$', True);
+            '^[a-zA-Z0-9][a-zA-Z0-9_-]+$', 'youtube');
     $result['create_link_youtube'] = $data;
 }
 
+// FIXME add Vimeo suppport
+// FIXME add HTML 5 video support
 
 // ---------------------------------------------------------------------------
 // Create a default access template

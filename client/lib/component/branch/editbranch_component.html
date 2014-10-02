@@ -35,7 +35,7 @@ You do not have permissions to view the contents of this branch.
     
     
     <edit-quip
-        ng-if="cmp.canEditQuips"
+        ng-if="cmp.isEditable"
     
         branch="cmp.branchDetails"
         media="cmp.mediaStatusService"
@@ -46,7 +46,7 @@ You do not have permissions to view the contents of this branch.
     <table>
         <thead>
             <tr>
-                <th ng-if="cmp.canEditQuips">&nbsp;</th>
+                <th ng-if="cmp.isEditable">&nbsp;</th>
                 <th>Time</th>
                 <th>Text</th>
                 <th>Tags</th>
@@ -59,7 +59,7 @@ You do not have permissions to view the contents of this branch.
         </tbody>
         <tbody ng-if="cmp.quipPaging.loadedSuccessful">
             <tr ng-repeat="quip in cmp.quipPaging.quips">
-                <td ng-if="cmp.canEditQuips"
+                <td ng-if="cmp.isEditable"
                     ng-click="cmp.editQuip(quip)">&#9998;</td>
                 <td>{{quip.timestamp}}</td>
                 <td>{{quip.text}}</td>

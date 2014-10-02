@@ -37,6 +37,9 @@ table:
                 - constraint:
                     type: not null
         - column:
+            name: Media_Provider
+            type: nvarchar(30)
+        - column:
             name: Url_Prefix
             type: nvarchar(200)
             constraints:
