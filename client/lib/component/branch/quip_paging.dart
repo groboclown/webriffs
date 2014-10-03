@@ -238,7 +238,7 @@ class QuipMediaAlertController extends BaseMediaAlertController {
     // when displaying the quips.
 
     QuipDisplayHandler _handler;
-    List<QuipDetails> _quips;
+    List<QuipDetails> _quips = new List<QuipDetails>();
     int nextIndex;
 
 

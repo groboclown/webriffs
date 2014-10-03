@@ -30,13 +30,15 @@ You do not have permissions to view the contents of this branch.
     
     <div class="bug">BUG the media controller doesn't seem to load the right controller.</div>
     <media-controller
-        connector="cmp.mediaStatusService"
+        time="cmp.videoTimeProvider"
+        controller="cmp.mediaAlertController"
         branch-details="cmp.branchDetails"></media-controller>
     
     
     <edit-quip
         ng-if="cmp.isEditable"
     
+        time="cmp.videoTimeProvider"
         branch="cmp.branchDetails"
         media="cmp.mediaStatusService"
         updates="cmp.requestEditEvents"></edit-quip>

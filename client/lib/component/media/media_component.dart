@@ -27,9 +27,8 @@ import 'stopwatch_media.dart';
     selector: 'media-controller',
     templateUrl: 'packages/webriffs_client/component/media/media_component.html',
     publishAs: 'cmp')
-class MediaComponent extends ShadowRootAware implements DetachAware {
+class MediaComponent implements ShadowRootAware, DetachAware {
     final Logger _log = new Logger('components.MediaComponent');
-    RouteHandle _route;
 
     final StopWatchSubComponent stopwatch = new StopWatchSubComponent();
 
@@ -42,15 +41,7 @@ class MediaComponent extends ShadowRootAware implements DetachAware {
     //  - enter/exit depends upon both the player and alerts to be set.
     Completer _onReady = new Completer();
 
-    // Player depends upon the branch details being set and the
-    // time sink.  Because the branch details are passed in as a future,
-    // we'll setup a time sink then details then player create chain.
-    Completer<Sink<TimeDialation>> _timeSink =
-            new Completer<Sink<TimeDialation>>();
-    Completer<Element> _wrappingElement = new Completer<Element>();
-
     Completer<VideoPlayer> _player = new Completer<VideoPlayer>();
-    MediaAlertController _alerts;
 
     bool get isStopwatch => _providerSet && ! _hasProvider;
     bool _providerSet = false;
@@ -58,74 +49,32 @@ class MediaComponent extends ShadowRootAware implements DetachAware {
 
     bool get loadedPlayer => _realPlayer != null && ! stopwatch.loaded;
     bool get loadedStopwatch => stopwatch.loaded;
-
-    @NgOneWay('time-sink')
-    set timeSink(Sink<TimeDialation> std) {
-        // implicit: can only be set once
-        _timeSink.complete(std);
-    }
+    bool get notLoaded => _realPlayer == null;
 
 
     @NgOneWay('controller')
-    set controller(MediaAlertController mac) {
-        _alerts = mac;
-        if (_realPlayer != null) {
-            // implicit: can only be set once
-            _player.complete(_realPlayer);
-        }
-    }
+    MediaAlertController alerts;
 
 
-    set _videoPlayer(VideoPlayer player) {
-        _realPlayer = player;
-        if (_alerts != null) {
-            _player.complete(player);
-        }
-    }
-
-
+    @NgOneWay('time')
     set timeProvider(VideoPlayerTimeProvider p) {
+        print("time provider set");
         _player.future.then((VideoPlayer vp) { p.player = vp; });
     }
 
 
     @NgOneWay('branch-details')
     set branchDetails(Future<BranchDetails> details) {
-        if (_player != null) {
+        if (_details != null) {
             throw new Exception("Invalid state: branchDetails already set");
         }
         if (details == null) {
             throw new Exception("Invalid state: null details future");
         }
-
-        // See above about the chain ordering
-        _timeSink.future
-        .then((_) => details)
-        .then((BranchDetails bd) {
+        details.then((BranchDetails bd) {
+            _details = bd;
             _detailsFuture.complete(bd);
             _providerSet = true;
-            LinkRecord link = findProviderLink(bd);
-            if (link == null) {
-                _hasProvider = false;
-                stopwatch.media = new StopwatchMedia();
-                return new Future.value(stopwatch.media);
-            } else {
-                VideoPlayerProvider provider =
-                        getVideoProviderByName(link.mediaProvider);
-                VideoProviderAttributes attributes =
-                        provider.createAttributes();
-                // FIXME set width and height
-                return _wrappingElement.future.then((Element e) {
-                    return embedVideo(provider, e, link.uri, attributes);
-                });
-            }
-        })
-        .then((VideoPlayer player) {
-            _videoPlayer = player;
-        }).catchError((Object error, StackTrace stack) {
-            _log.severe("Error loading details", error, stack);
-            _detailsFuture.completeError(error, stack);
-            _player.completeError(error, stack);
         });
     }
 
@@ -138,44 +87,50 @@ class MediaComponent extends ShadowRootAware implements DetachAware {
         return _player.future;
     }
 
-    MediaComponent(RouteProvider routeProvider) {
-        _route = routeProvider.route.newHandle();
-        _route.onPreLeave.listen((RouteEvent e) {
-            media.then((VideoPlayer player) {
-                player.stop();
-            });
-        });
-        //_route.onEnter.listen((RouteEvent e) {
-        //    _onEnter();
-        //});
-
-        // At this point, the component is created and initialilzation begins.
-        // Note that the onEnter won't be called for this situation.
-        media.then((VideoPlayer player) {
-            MediaAlertController.connectPlayer(player, _alerts);
-        });
-    }
-
+    @override
     void detach() {
-        // The route handle must be discarded.
-        _route.discard();
         if (_realPlayer != null) {
             _realPlayer.destroy();
             _realPlayer = null;
         }
     }
 
-    void _onEnter() {
-        _log.info("MediaComponent page entered");
-    }
-
+    @override
     void onShadowRoot(ShadowRoot shadowRoot) {
-        // FIXME all the future stuff above to deal with the initialization time
-        // of the different components should instead be moved into here without
-        // any futures.
+        // This is called after the attach() method, so we can't use the
+        // attach - that would make the wrapping element null.
 
-        DivElement inner = shadowRoot.querySelector('#media');
-        _wrappingElement.complete(inner);
+        DivElement wrappingElement = shadowRoot.querySelector('#media');
+        if (wrappingElement == null) {
+            throw new Exception("no media dom element found");
+        }
+
+        // Each attach requires re-embedding the video player
+        _detailsFuture.future.then((BranchDetails bd) {
+            LinkRecord link = findProviderLink(bd);
+            if (link == null) {
+                _hasProvider = false;
+                stopwatch.media = new StopwatchMedia();
+                return new Future.value(stopwatch.media);
+            } else {
+                VideoPlayerProvider provider =
+                        getVideoProviderByName(link.mediaProvider);
+                VideoProviderAttributes attributes =
+                        provider.createAttributes();
+                // FIXME set width and height and other attributes
+                return embedVideo(provider, wrappingElement, link.uri,
+                        attributes);
+            }
+        })
+        .then((VideoPlayer player) {
+            _realPlayer = player;
+            MediaAlertController.connectPlayer(player, alerts);
+            _player.complete(player);
+        }).catchError((Object error, StackTrace stack) {
+            _log.severe("Error loading details", error, stack);
+            _detailsFuture.completeError(error, stack);
+            _player.completeError(error, stack);
+        });
     }
 
 
@@ -212,6 +167,8 @@ class StopWatchSubComponent {
     Timer _repeater;
 
     final TimeDisplayEdit _timeEdit = new TimeDisplayEdit();
+
+    String get timeField => _timeEdit.timeField;
 
     bool get hasTimeFieldFormatError => _timeEdit.formatError;
     String get time => _timeEdit.timeField;

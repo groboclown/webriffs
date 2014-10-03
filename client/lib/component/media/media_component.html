@@ -1,9 +1,10 @@
-<div ng-if="! cmp.loaded">
+<div ng-if="cmp.notLoaded">
 loading media...
 </div>
-<div ng-if="cmp.loadedPlayer">
-    <div id="media"></div>
-</div>
+
+<!-- This will only be used if the player is loaded -->
+<div id="media"></div>
+
 <div ng-if="cmp.loadedStopwatch" class="component">
 
 

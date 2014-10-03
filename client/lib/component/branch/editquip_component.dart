@@ -24,16 +24,22 @@ import 'quip_paging.dart';
     selector: 'edit-quip',
     templateUrl: 'packages/webriffs_client/component/branch/editquip_component.html',
     publishAs: 'cmp')
-class EditQuipComponent {
+class EditQuipComponent implements AttachAware {
     final ServerStatusService _server;
     final UserService _user;
     final SpeechRecognitionApi _recognition;
 
-    QuipPaging _masterList;
 
     @NgOneWay('time')
     MediaTimeProvider timeProvider;
 
+    QuipMediaAlertController _controller;
+    @NgOneWay('controller')
+    set controller(QuipMediaAlertController c) {
+        _controller = c;
+    }
+
+    QuipPaging _masterList;
     @NgOneWay('list')
     set masterList(QuipPaging qp) {
         _masterList = qp;
@@ -115,5 +121,12 @@ class EditQuipComponent {
         pendingQuip.timestamp = timeProvider.convertToServerTime(timestr);
     }
 
+
+    @override
+    void attach() {
+        if (_masterList != null && _controller != null) {
+            _controller.setQuips(_masterList.quips);
+        }
+    }
 }
 
