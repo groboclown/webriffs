@@ -56,6 +56,10 @@ class BranchDetails {
     bool _loading = false;
     bool get loading => _loading;
 
+    int userPendingChangeId;
+    int userBaseChangeId;
+    bool userHasPendingChange = false;
+
 
 
     factory BranchDetails.fromJson(Map<String, dynamic> json, bool isHead) {
@@ -192,6 +196,16 @@ class BranchDetails {
                     filmLinks.add(new LinkRecord.fromJson(link));
                 }
             }
+        }
+
+        userPendingChangeId = -1;
+        userBaseChangeId = -1;
+        userHasPendingChange = false;
+        if (json.containsKey('pending') && json['pending'] != null &&
+                json['pending'] is Map) {
+            userPendingChangeId = json['pending']['Pending_Change_Id'];
+            userBaseChangeId = json['pending']['Base_Change_Id'];
+            userHasPendingChange = true;
         }
     }
 }

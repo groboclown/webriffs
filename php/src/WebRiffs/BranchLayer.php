@@ -469,6 +469,26 @@ class BranchLayer {
         
         $result['film_links'] = FilmLayer::getLinksForFilm($db, $filmId);
         
+        $pending = null;
+        
+        if ($userId !== null) {
+            // Also, check to see if the user has a pending version
+            $data = UserBranchPendingVersion::$INSTANCE->
+                readBy_User_Id_x_Gv_Branch_Id($db, $userId, $branchId);
+            BranchLayer::checkError($data,
+                new Base\ValidationException(
+                    array(
+                        'unknown' => 'there was an unknown problem finding the pending changes'
+                    )));
+            if ($data['rowcount'] > 0) {
+                $pending = array(
+                    'Base_Change_Id' => $data['result'][0]['Base_Change_Id'],
+                    'Pending_Change_Id' => $data['result'][0]['Pending_Change_Id']
+                );
+            }
+        }
+        $result['pending'] = $pending;
+        
         return $result;
     }
     
@@ -545,7 +565,7 @@ class BranchLayer {
      * @param string $checkAccess
      * @return the change ID that was committed
      */
-    public static function updateAlltagsOnBranch($db, $userId, $gaUserId,
+    public static function updateAllTagsOnBranch($db, $userId, $gaUserId,
                 $branchId, &$tagList, $checkAccess = true) {
         // userId CANNOT be null
         
