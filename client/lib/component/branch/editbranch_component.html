@@ -34,6 +34,21 @@ You do not have permissions to view the contents of this branch.
         controller="cmp.mediaAlertController"
         branch-details="cmp.branchDetails"></media-controller>
     
+    <!-- quips flashing to the screen -->
+    <div>
+        <div ng-repeat="quip in cmp.shownQuips">
+            <div>
+                <span ng-if="cmp.isEditable"
+                    ng-click="cmp.editQuip(quip)">&#9998;</span>
+                <span>{{quip.timestamp}}</span>
+                <span ng-repeat="tag in quip.tags">
+                    {{tag.name}}
+                </span>
+            </div>
+            <div>{{quip.text}}</div>
+        </div>
+    </div>
+    
     
     <!-- Edit the quip -->
     <div ng-if="cmp.canEditQuips">
@@ -57,7 +72,8 @@ You do not have permissions to view the contents of this branch.
     Can't edit quips.
     <span ng-if="cmp.isEditable">But branch is editable?</span>
     </div>
-        
+    
+    
     <div>
         <!-- filter controls -->
     </div>

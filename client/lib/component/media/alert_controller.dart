@@ -22,23 +22,45 @@ abstract class MediaTimeProvider {
 
 
 class VideoPlayerTimeProvider implements MediaTimeProvider {
-    VideoPlayer player;
+    final StreamController<VideoPlayer> _stream =
+            new StreamController.broadcast();
+    Stream<VideoPlayer> get stream => _stream.stream;
+
+    VideoPlayer _player;
+
+    VideoPlayer get player => _player;
+
+    set player(VideoPlayer p) {
+        _stream.add(p);
+    }
 
     @override
-    Duration get serverTime => player == null ? null : player.playbackTime;
+    Duration get serverTime => _player == null ? null : _player.playbackTime;
 
     @override
-    TimeDialation get dialation => player == null
+    TimeDialation get dialation => _player == null
         ? TimeDialation.NATIVE
         : player is StopwatchMedia
             ? (player as StopwatchMedia).timeDialation
             : TimeDialation.NATIVE;
 
-    String get displayTime => player == null ? "" :
+    @override
+    String get displayTime => _player == null ? "" :
         dialation.displayString(player.playbackTime.inMilliseconds / 1000.0);
 
-    int convertToServerTime(String timestr) => player == null ? null :
+    @override
+    int convertToServerTime(String timestr) => _player == null ? null :
         (dialation.parseDisplay(timestr) * 1000.0).toInt();
+
+
+    void attachToAlertController(MediaAlertController controller) {
+        stream.listen((VideoPlayer vp) {
+            controller.stop();
+            if (vp != null) {
+                controller.start(vp);
+            }
+        });
+    }
 }
 
 

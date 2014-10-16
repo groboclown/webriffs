@@ -50,12 +50,22 @@ import 'abstract_branch_component.dart';
 class EditBranchComponent extends AbstractBranchComponent {
     static final Logger _log = new Logger('media.EditBranchComponent');
 
+    /** Converts the [displayDuration] into seconds, based on the number of
+     * characters in the quip. */
+    static final double DISPLAY_DURATION_SCALE = 0.02;
+
+    /** Minimum time (seconds) to allow a quip to be shown; multiplied by the
+     * [displayDuration]. */
+    static final double MIN_DISPLAY_DURATION = 2.0;
+
     final ServerStatusService _server;
     final UserService _user;
     final SpeechRecognitionApi _recognition;
     final int requestedChangeId;
 
     final QuipPaging quipPaging;
+
+    final List<QuipDetails> shownQuips = [];
 
     QuipMediaAlertController get mediaAlertController =>
             quipPaging.mediaAlertController;
@@ -65,6 +75,9 @@ class EditBranchComponent extends AbstractBranchComponent {
     // If the user can't edit the quips, or the user requested to see an old
     // version, then don't allow edits.
     bool get isEditable => canEditQuips && requestedChangeId < 0;
+
+
+    double displayDuration = 1.0;
 
 
     final VideoPlayerTimeProvider videoTimeProvider =
@@ -114,21 +127,43 @@ class EditBranchComponent extends AbstractBranchComponent {
 
         QuipPaging quips = new QuipPaging(server, branchId, changeId);
 
-        StreamController<QuipDetails> quipEvents =
-                new StreamController<QuipDetails>.broadcast();
-
         return new EditBranchComponent._(server, user, branchId, changeId,
-                branchDetails, quips, quipEvents, changeId);
+                branchDetails, quips, changeId);
     }
 
     EditBranchComponent._(ServerStatusService server, UserService user,
             int branchId, int changeId, Future<BranchDetails> branchDetails,
-            this.quipPaging, StreamController<QuipDetails> quipEvents,
-            this.requestedChangeId) :
+            this.quipPaging, this.requestedChangeId) :
             _server = server,
             _user = user,
             _recognition = createSpeechRecognition(),
-            super(server, user, branchId, changeId, branchDetails);
+            super(server, user, branchId, changeId, branchDetails) {
+
+        // Link up the alerts, the video timing, and the UI
+
+        quipPaging.mediaAlertController.setHandler((QuipDetails qd) {
+            if (qd.text == null || qd.text.length <= 0) {
+                return;
+            }
+            shownQuips.add(qd);
+
+            double secondsDuration = qd.text.trim().length *
+                    DISPLAY_DURATION_SCALE * displayDuration;
+            double minDuration = MIN_DISPLAY_DURATION * displayDuration;
+            if (secondsDuration < minDuration) {
+                secondsDuration = minDuration;
+            }
+
+            // Remove the quip after this long.
+            new Timer(new Duration(
+                    milliseconds: (secondsDuration * 1000.0).toInt()), () {
+               shownQuips.remove(qd);
+            });
+        });
+
+        videoTimeProvider.attachToAlertController(
+                quipPaging.mediaAlertController);
+    }
 
 
     void editQuip(QuipDetails quip) {
