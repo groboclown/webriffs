@@ -10,7 +10,7 @@ import '../../service/user.dart';
 import '../../service/server.dart';
 import '../../json/branch_details.dart';
 import '../../json/quip_details.dart';
-import '../../util/event_util.dart';
+import '../../util/speech_recognition.dart';
 
 import '../media/alert_controller.dart';
 
@@ -52,6 +52,7 @@ class EditBranchComponent extends AbstractBranchComponent {
 
     final ServerStatusService _server;
     final UserService _user;
+    final SpeechRecognitionApi _recognition;
     final int requestedChangeId;
 
     final QuipPaging quipPaging;
@@ -69,9 +70,30 @@ class EditBranchComponent extends AbstractBranchComponent {
     final VideoPlayerTimeProvider videoTimeProvider =
             new VideoPlayerTimeProvider();
 
+    // Should never be null.
+    QuipDetails pendingQuip = new QuipDetails.pending();
+    bool quipModified = false;
 
-    final StreamController<QuipDetails> _requestEditQuipEvents;
-    final StreamProvider<QuipDetails> requestEditEvents;
+    String get quipTime => pendingQuip.timestamp == null ? "" :
+        videoTimeProvider.dialation.displayString(
+                pendingQuip.timestamp / 1000.0);
+
+    set quipTime(String timestr) {
+        int prevTime = pendingQuip.timestamp;
+        if (timestr == null || timestr.length <= 0) {
+            pendingQuip.timestamp = null;
+        } else {
+            pendingQuip.timestamp = videoTimeProvider.convertToServerTime(timestr);
+        }
+        quipModified = quipModified || prevTime != pendingQuip.timestamp;
+    }
+
+    String get quipText => pendingQuip.text;
+
+    set quipText(String text) {
+        quipModified = quipModified || pendingQuip.text != text;
+        pendingQuip.text = text;
+    }
 
 
     factory EditBranchComponent(ServerStatusService server, UserService user,
@@ -105,14 +127,32 @@ class EditBranchComponent extends AbstractBranchComponent {
             this.requestedChangeId) :
             _server = server,
             _user = user,
-            _requestEditQuipEvents = quipEvents,
-            requestEditEvents =
-                new StreamControllerStreamProvider<QuipDetails>(quipEvents),
+            _recognition = createSpeechRecognition(),
             super(server, user, branchId, changeId, branchDetails);
 
 
     void editQuip(QuipDetails quip) {
-        _requestEditQuipEvents.add(quip);
+        // TODO if an edit is in progress, this will wipe out the changes.
+        // Have a dialog to replace it?  Probably not, as that will interrupt
+        // the flow.
+
+        pendingQuip = quip;
+    }
+
+    void setPendingQuipTime() {
+        pendingQuip.timestamp = videoTimeProvider.serverTime.inMilliseconds;
+    }
+
+    void savePendingQuip() {
+        branchDetails.then((BranchDetails branch) {
+            if (canEditQuips) {
+                quipPaging.saveQuip(pendingQuip);
+                pendingQuip = new QuipDetails.pending();
+            } else {
+                // FIXME report error
+                throw new Exception("SAVE QUIP: permission denied");
+            }
+        });
     }
 
 

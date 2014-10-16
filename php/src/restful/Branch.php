@@ -208,6 +208,7 @@ class BranchObjUserPendingBranches extends Resource {
         $gaUserId = $this->container['user']['Ga_User_Id'];
         
         // FIXME
+        return array(500);
     }
 }
 
@@ -242,6 +243,7 @@ class BranchObjUserPendingVersion extends Resource {
         
         
         // FIXME call into getBranchQuipChangesFromPending
+        return array(500);
     }
     
     
@@ -251,6 +253,7 @@ class BranchObjUserPendingVersion extends Resource {
      */
     function createPendingChange() {
         // FIXME
+        return array(500);
     }
     
     
@@ -260,6 +263,7 @@ class BranchObjUserPendingVersion extends Resource {
      */
     function deletePendingChange() {
         // FIXME
+        return array(500);
     }
     
     
@@ -275,6 +279,7 @@ class BranchObjUserPendingVersion extends Resource {
         // head, and COMMIT will add these changes into the submission
         // (which will implicitly move these revisions into a new change
         // with a top number).
+        return array(500);
     }
 }
 
@@ -303,6 +308,7 @@ class BranchObjQuipsPending extends Resource {
         // FIXME
         
         // pull from V_QUIP_USER_ALL
+        return array(500);
     }
     
     
@@ -326,6 +332,7 @@ class BranchObjQuipsPending extends Resource {
         }
         
         // FIXME
+        return array(500);
     }
     
     
@@ -369,6 +376,7 @@ class BranchObjQuipsPending extends Resource {
             // FIXME
         }
         
+        return array(500);
     }
 }
 
@@ -387,6 +395,7 @@ class BranchObjQuipItem extends Resource {
      */
     function fetch() {
         // FIXME
+        return array(500);
     }
     
     
@@ -415,6 +424,7 @@ class BranchObjQuipItem extends Resource {
             throw new Tonic\UnauthorizedException();
         }
         // FIXME
+        return array(500);
     }
     
     
@@ -438,6 +448,7 @@ class BranchObjQuipItem extends Resource {
             throw new Tonic\UnauthorizedException();
         }
         // FIXME
+        return array(500);
     }
 }
 

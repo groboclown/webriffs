@@ -83,7 +83,15 @@ class QuipPaging implements AsyncComponent {
 
     QuipPaging._(this._server, this.branchId, this.changeId) {
         reload();
+    }
 
+
+    void saveQuip(QuipDetails quip) {
+        if (quip.id == null) {
+            newQuip(quip);
+        } else {
+            updateQuip(quip);
+        }
     }
 
 
@@ -93,9 +101,18 @@ class QuipPaging implements AsyncComponent {
     void newQuip(QuipDetails pendingQuip) {
         final String path = '/branch/${branchId}/pending/quip';
         _server.createCsrfToken('create_quip').then((String csrfToken) {
-            // FIXME retrieve the ID for the just-added quip, and insert
-            // it into the passed-in object.
-            _server.put(path, csrfToken, data: pendingQuip.toJson());
+            _server.put(path, csrfToken, data: pendingQuip.toJson())
+                .then((ServerResponse resp) {
+                    if (resp.wasError) {
+                        // FIXME handle the error
+                    } else if (resp.jsonData == null) {
+                        // FIXME handle the other error
+                    } else {
+                        QuipDetails newQ = new QuipDetails.fromJson(
+                                branchId, resp.jsonData);
+                        _mergeQuips([ newQ ]);
+                    }
+                });
         });
     }
 
@@ -109,7 +126,7 @@ class QuipPaging implements AsyncComponent {
             quips.remove(quip);
         } else {
             // FIXME
-            throw new Exception("not completed yet");
+            throw new Exception("DELETE QUIP: not completed yet");
         }
     }
 
@@ -123,7 +140,7 @@ class QuipPaging implements AsyncComponent {
         }
 
         // FIXME
-        throw new Exception("not completed yet");
+        throw new Exception("UPDATE QUIP: not completed yet");
     }
 
 

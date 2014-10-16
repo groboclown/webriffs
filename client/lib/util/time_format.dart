@@ -7,11 +7,13 @@ library time_format;
 
 
 class TimeFormatException implements Exception {
-    TimeFormatException();
+    final String message;
+
+    TimeFormatException(this.message);
 
     @override
     String toString() {
-        return "TimeFormatException";
+        return "TimeFormatException($message)";
     }
 }
 
@@ -120,7 +122,7 @@ class TimeDialation {
         List<Match> matches = new List.from(exp.allMatches(timeField));
 
         if (matches.length != 1) {
-            throw new TimeFormatException();
+            throw new TimeFormatException("Invalid time format: ${timeField}");
         }
 
         Match match = matches[0];
@@ -138,7 +140,7 @@ class TimeDialation {
         _log.info("Groups:${s}");
         */
         if (match[3] == null) {
-            throw new TimeFormatException();
+            throw new TimeFormatException("unexpected internal matching error");
                 //"Unexpected regex state: [" + match[0] + "]");
         }
         seconds = double.parse(match[3]);
@@ -152,7 +154,7 @@ class TimeDialation {
                 minutes = int.parse(match[1]);
             }
         } else if (match[2] != null) {
-            throw new TimeFormatException();
+            throw new TimeFormatException("unexpected internal error");
             //    throw new Exception("Unexpected regex state: [" +
             //            match[0] + "]");
         }

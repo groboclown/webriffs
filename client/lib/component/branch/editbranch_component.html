@@ -7,6 +7,7 @@
 
 <div ng-if="! cmp.canReadQuips && cmp.loaded">
 You do not have permissions to view the contents of this branch.
+<div class="bug">BUG this message may be incorrectly shown while the page is loading.</div>
 </div>
 
 <div ng-if="cmp.canReadQuips" class="component">
@@ -28,20 +29,35 @@ You do not have permissions to view the contents of this branch.
 
     <branch-updates current-branch="cmp.branchDetails"></branch-updates>
     
-    <div class="bug">BUG the media controller doesn't seem to load the right controller.</div>
     <media-controller
         time="cmp.videoTimeProvider"
         controller="cmp.mediaAlertController"
         branch-details="cmp.branchDetails"></media-controller>
     
     
-    <edit-quip
-        ng-if="cmp.isEditable"
-    
-        time="cmp.videoTimeProvider"
-        branch="cmp.branchDetails"
-        media="cmp.mediaStatusService"
-        updates="cmp.requestEditEvents"></edit-quip>
+    <!-- Edit the quip -->
+    <div ng-if="cmp.canEditQuips">
+        Edit quip:
+        <form onsubmit="return false;">
+        <div>
+            <label for="quip_time">When </label>
+            <input id="quip_time" type="text" ng-model="cmp.quipTime">
+            <button ng-click="cmp.setPendingQuipTime()">Set from player</button>
+        </div>
+        <div>
+            <label for="quip_text">With </label>
+            <input id="quip_text" type="text" ng-model="cmp.quipText">
+        </div>
+        <div>
+            <input type="submit" ng-click="cmp.savePendingQuip()" value="Save">
+        </div>
+        </form>
+    </div>
+    <div ng-if="!cmp.canEditQuips">
+    Can't edit quips.
+    <span ng-if="cmp.isEditable">But branch is editable?</span>
+    </div>
+        
     <div>
         <!-- filter controls -->
     </div>
