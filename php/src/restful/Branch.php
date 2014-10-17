@@ -252,8 +252,24 @@ class BranchObjUserPendingVersion extends Resource {
      * @csrf create_change
      */
     function createPendingChange() {
-        // FIXME
-        return array(500);
+        $branchId = $this->validateId($this->branchid, "branchId");
+        $this->validate();
+
+        $userId = $this->container['user']['User_Id'];
+        $gaUserId = $this->container['user']['Ga_User_Id'];
+        $changeId = $this->loadRequestInt("changes", FALSE) || -1;
+        if ($changeId < 0) {
+            $changeId = WebRiffs\BranchLayer::getHeadBranchVersion(
+                    $this->getDB(), $userId, $branchId);
+        }
+        
+        // This will either create the change, or update an existing change
+        // with the new change id
+        WebRiffs\QuipLayer::createPendingChange($this->getDB(), $userId,
+            $gaUserId, $branchId, $changeId);
+        
+        // created
+        return array(201, array());
     }
     
     
@@ -320,8 +336,16 @@ class BranchObjQuipsPending extends Resource {
      */
     function create() {
         $branchId = $this->validateId($this->branchid, "branchId");
+        
+        $quipText = $this->loadRequestString("Text_Value");
+        $quipTime = $this->loadRequestInt("Timestamp_Millis");
         $this->validate();
-                
+        
+        
+        // FIXME add quip tags
+        $quipTags = array();
+        
+        
         $userId = null;
         $gaUserId = null;
         if ($this->isUserAuthenticated()) {
@@ -331,8 +355,12 @@ class BranchObjQuipsPending extends Resource {
             throw new Tonic\UnauthorizedException();
         }
         
-        // FIXME
-        return array(500);
+        
+        $ret = WebRiffs\QuipLayer::saveQuip($this->getDB(),
+            $userId, $gaUserId, $branchId, null, $quipText, $quipTime,
+            $quipTags);
+        
+        return array(201, $ret);
     }
     
     

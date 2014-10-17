@@ -105,8 +105,10 @@ class QuipPaging implements AsyncComponent {
                 .then((ServerResponse resp) {
                     if (resp.wasError) {
                         // FIXME handle the error
+                        throw new Exception("Server error");
                     } else if (resp.jsonData == null) {
                         // FIXME handle the other error
+                        throw new Exception("no json data  returned");
                     } else {
                         QuipDetails newQ = new QuipDetails.fromJson(
                                 branchId, resp.jsonData);
@@ -222,18 +224,27 @@ class QuipPaging implements AsyncComponent {
 
         int origPos = 0;
         int newPos = 0;
-        while (origPos < quips.length && newPos < newQuips.length) {
+        while (origPos < quips.length || newPos < newQuips.length) {
             if (origPos >= quips.length) {
+print("Inserting quip ${newPos} at ${origPos} (end of list)");
                 quips.add(newQuips[newPos++]);
                 origPos++;
             } else if (newPos >= newQuips.length) {
                 // finished processing the new quips
                 origPos = quips.length;
+            } else if (newQuips[newPos] == null) {
+print("What?!?!?!? ${newQuips}");
+                throw new Exception("no null quips should be added!");
+            } else if (newQuips[newPos].id == null) {
+                // FIXME may be eliminated in the future
+                throw new Exception("Must not merge uncommited quips");
             } else if (quips[origPos].id == newQuips[newPos].id) {
+print("updating existing quip ${newQuips[newPos].id}");
                 quips[origPos++] = newQuips[newPos++];
             } else if (quips[origPos].timestamp < newQuips[newPos].timestamp) {
                 origPos++;
             } else { // if (quips[origPos].timestamp >= newQuips[newPos].timestamp) {
+print("Inserting quip ${newPos} at ${origPos} (middle)");
                 quips.insert(origPos++, newQuips[newPos++]);
             }
         }

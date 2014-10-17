@@ -44,6 +44,8 @@ class QuipDetails {
                 q._tags.add(new QuipTag(t));
             }
         }
+
+        return q;
     }
 
     set text(String t) {

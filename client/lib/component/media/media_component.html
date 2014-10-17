@@ -37,6 +37,7 @@ loading media...
             <span ng-click="cmp.stopwatch.adjustTime(-10000)">[- 10 sec]</span>
         </div>
     </div>
+    <span class="bug">TODO: disable setting time if there's a time format error</span>
     <div>
         <input type="text" ng-model="cmp.stopwatch.timeField">
         <input type="submit" ng-click="cmp.stopwatch.setTime()" value="Set time">

@@ -29,6 +29,13 @@ You do not have permissions to view the contents of this branch.
 
     <branch-updates current-branch="cmp.branchDetails"></branch-updates>
     
+    <div ng-if="cmp.hasPendingChange">
+        You have changes saved on the server that haven't been committed
+        to the branch.
+        <button ng-click="cmp.commitChanges()">Commit Changes</button>
+        <span ng-click="cmp.abandonChanges()">Abandon Changes</span>
+    </div>
+    
     <media-controller
         time="cmp.videoTimeProvider"
         controller="cmp.mediaAlertController"
@@ -53,6 +60,7 @@ You do not have permissions to view the contents of this branch.
     <!-- Edit the quip -->
     <div ng-if="cmp.canEditQuips">
         Edit quip:
+<div class="bug">BUG this should not directly edit the time and text in the quip; they should be pushed to the object on save.</div>
         <form onsubmit="return false;">
         <div>
             <label for="quip_time">When </label>
@@ -95,7 +103,7 @@ You do not have permissions to view the contents of this branch.
             <tr ng-repeat="quip in cmp.quipPaging.quips">
                 <td ng-if="cmp.isEditable"
                     ng-click="cmp.editQuip(quip)">&#9998;</td>
-                <td>{{quip.timestamp}}</td>
+                <td>{{cmp.getQuipTime(quip)}}</td>
                 <td>{{quip.text}}</td>
                 <td>
                     <span ng-repeat="tag in quip.tags">

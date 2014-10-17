@@ -47,7 +47,7 @@ class TimeDialation {
     }
 
     /**
-     * Converts from the actual (server) time to the displayed time.
+     * Converts from the actual (server) time in seconds to the displayed time.
      */
     double toDisplay(double actual) {
         return actual * actualToDisplayRatio;

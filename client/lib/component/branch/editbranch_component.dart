@@ -179,10 +179,26 @@ class EditBranchComponent extends AbstractBranchComponent {
     }
 
     void savePendingQuip() {
+        // FIXME cache up changes and push them in intervals to make fewer
+        // requests to the server.
+
+
         branchDetails.then((BranchDetails branch) {
-            if (canEditQuips) {
-                quipPaging.saveQuip(pendingQuip);
-                pendingQuip = new QuipDetails.pending();
+            // FIXME handle tags
+            if (branch.userCanEditQuips) {
+                if (! branch.userHasPendingChange) {
+                    _server.createCsrfToken("create_change")
+                    .then((String csrf) =>
+                        _server.put("/branch/${branchId}/pending", csrf,
+                                data: { 'changes': -1 }))
+                    .then((ServerResponse response) {
+                        quipPaging.saveQuip(pendingQuip);
+                        pendingQuip = new QuipDetails.pending();
+                    });
+                } else {
+                    quipPaging.saveQuip(pendingQuip);
+                    pendingQuip = new QuipDetails.pending();
+                }
             } else {
                 // FIXME report error
                 throw new Exception("SAVE QUIP: permission denied");
@@ -208,6 +224,11 @@ class EditBranchComponent extends AbstractBranchComponent {
 
                 return branchDetails;
             });
+    }
+
+
+    String getQuipTime(QuipDetails qd) {
+        return videoTimeProvider.dialation.displayString(qd.timestamp / 1000.0);
     }
 }
 

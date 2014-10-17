@@ -31,6 +31,7 @@ class VideoPlayerTimeProvider implements MediaTimeProvider {
     VideoPlayer get player => _player;
 
     set player(VideoPlayer p) {
+        _player = p;
         _stream.add(p);
     }
 

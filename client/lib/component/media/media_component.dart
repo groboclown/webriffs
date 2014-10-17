@@ -169,15 +169,12 @@ class StopWatchSubComponent {
     final TimeDisplayEdit _timeEdit = new TimeDisplayEdit();
 
     String get timeField => _timeEdit.timeField;
+    set timeField(String s) { _timeEdit.timeField = s; }
+
+    String get time => _media.timeDialation.displayString(
+            _media.playbackTime.inMilliseconds / 1000.0);
 
     bool get hasTimeFieldFormatError => _timeEdit.formatError;
-    String get time => _timeEdit.timeField;
-    set time(String t) {
-        _timeEdit.timeField = t;
-        if (_media != null) {
-            _media.setTime((_timeEdit.actualSeconds * 1000.0).toInt());
-        }
-    }
 
     String get dialation => _timeEdit.dialation.name;
 
@@ -225,7 +222,6 @@ class StopWatchSubComponent {
         }
     }
 
-
     void adjustTime(int millisChange) {
         if (_media != null) {
             int newTime = _media.playbackTime.inMilliseconds + millisChange;
@@ -234,6 +230,12 @@ class StopWatchSubComponent {
             }
             _media.setTime(newTime);
             _timeEdit.actualSeconds = newTime / 1000.0;
+        }
+    }
+
+    void setTime() {
+        if (_media != null && ! hasTimeFieldFormatError) {
+            _media.setTime((_timeEdit.actualSeconds * 1000.0).toInt());
         }
     }
 }

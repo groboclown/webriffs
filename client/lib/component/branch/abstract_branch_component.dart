@@ -60,6 +60,9 @@ abstract class AbstractBranchComponent {
             _branchDetails.userCanEditQuipTags;
     bool get canEditQuipText => _branchDetails == null ? false :
             _branchDetails.userCanEditQuips;
+    bool get hasPendingChange => _branchDetails == null ? false :
+            _branchDetails.userHasPendingChange;
+
 
     static List<int> parseRouteParameters(RouteProvider routeProvider) {
         var ret = <int>[ -1, null ];
