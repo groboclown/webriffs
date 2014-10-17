@@ -34,15 +34,17 @@ class QuipDetails {
         int quipId = json['Gv_Item_Id'];
         int versionId = json['Gv_Item_Version_Id'];
         QuipDetails q = new QuipDetails(branchId, quipId);
-        q._text = json['Text_Value'];
+        if (json.containsKey('Pending_Text_Value')) {
+            q._text = json['Pending_Text_Value'];
+        } else {
+            q._text = json['Text_Value'];
+        }
         q._timestamp = q._committedTimestamp = json['Timestamp_Millis'];
 
-        for (int i = 1; i <= MAX_TAG_COUNT; ++i) {
-            String t = json['TAG_' + i.toString()];
-            if (t != null) {
-                t = t.trim();
-                q._tags.add(new QuipTag(t));
-            }
+        if (json.containsKey('Pending_Tags')) {
+            q._tags.addAll(json['Pending_Tags']);
+        } else {
+            q._tags.addAll(json['Tags']);
         }
 
         return q;

@@ -96,7 +96,12 @@ You do not have permissions to view the contents of this branch.
         </thead>
         <tbody ng-if="cmp.quipPaging.loading">
             <tr>
-                <td colspan="3">loading ...</td>
+                <td colspan="3">loading {{cmp.quipPaging.percentLoaded}}%...</td>
+            </tr>
+        </tbody>
+        <tbody ng-if="cmp.quipPaging.loadedError">
+            <tr>
+                <td colspan="3">Error loading the quips ({{cmp.quipPaging.error}})</td>
             </tr>
         </tbody>
         <tbody ng-if="cmp.quipPaging.loadedSuccessful">

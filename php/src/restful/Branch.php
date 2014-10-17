@@ -278,24 +278,44 @@ class BranchObjUserPendingVersion extends Resource {
      * @csrf delete_change
      */
     function deletePendingChange() {
-        // FIXME
-        return array(500);
+        $branchId = $this->validateId($this->branchid, "branchId");
+        $action = $this->loadRequestString("action");
+        $this->validate();
+
+        $userId = $this->container['user']['User_Id'];
+        $gaUserId = $this->container['user']['Ga_User_Id'];
+        
+        WebRiffs\QuipLayer::deletePendingChange($this->getDB(),
+                    $userId, $gaUserId, $branchId);
+        
+        return array(202, array());
     }
     
     
     /**
-     * @method UPDATE
-     * @csrf update_change
+     * @method POST
+     * @csrf commit_change
      */
-    function updateChange() {
-        // FIXME
+    function commitChange() {
+        $branchId = $this->validateId($this->branchid, "branchId");
+        $action = $this->loadRequestString("action");
+        $this->checkThat($action != "commit" && $action != "merge",
+            "action");
+        $this->validate();
+
+        $userId = $this->container['user']['User_Id'];
+        $gaUserId = $this->container['user']['Ga_User_Id'];
         
-        // This is either a MERGE or COMMIT.
-        // MERGE will move the user's branched-from change to the current
-        // head, and COMMIT will add these changes into the submission
-        // (which will implicitly move these revisions into a new change
-        // with a top number).
-        return array(500);
+        if ($action == "commit") {
+            $change = WebRiffs\QuipLayer::commitPendingChange($this->getDB(),
+                    $userId, $gaUserId, $branchId);
+            return array(201, array("Committed_Change_Id" => $change));
+        } else {
+            // FIXME Add MERGE support.
+            // MERGE will move the user's branched-from change to the current
+            // head
+            return array(500, array("message" => "unsupported action"));
+        }
     }
 }
 
@@ -319,12 +339,21 @@ class BranchObjQuipsPending extends Resource {
      * the head revision.
      *
      * @method GET
+     * @authenticated
      */
     function fetch() {
-        // FIXME
+        $branchId = $this->validateId($this->branchid, "branchId");
+        $this->validate();
         
-        // pull from V_QUIP_USER_ALL
-        return array(500);
+        $userId = $this->container['user']['User_Id'];
+        
+        $ret = WebRiffs\QuipLayer::pageCommittedPendingQuips($this->getDB(),
+                $userId, $branchId);
+        
+        if (! $ret) {
+            return new Tonic\Response(Tonic\Response::NOCONTENT);
+        }
+        return array(200, $ret);
     }
     
     

@@ -82,7 +82,6 @@ class QuipPaging implements AsyncComponent {
 
 
     QuipPaging._(this._server, this.branchId, this.changeId) {
-        reload();
     }
 
 
@@ -157,6 +156,11 @@ class QuipPaging implements AsyncComponent {
     }
 
 
+    void loadChange(int newChangeId) {
+        changeId = newChangeId;
+        reload();
+    }
+
     @override
     void reload() {
         if (_loading) {
@@ -187,8 +191,8 @@ class QuipPaging implements AsyncComponent {
             } else {
                 if (data != null) {
                     _mergeQuips(
-                        data.map((dynamic jsonData) =>
-                            new QuipDetails.fromJson(branchId, jsonData)));
+                        new List.from(data.map((dynamic jsonData) =>
+                            new QuipDetails.fromJson(branchId, jsonData))));
                 }
 
                 if (pageState.pageLastIndex >= pageState.recordCount) {
@@ -226,29 +230,54 @@ class QuipPaging implements AsyncComponent {
         int newPos = 0;
         while (origPos < quips.length || newPos < newQuips.length) {
             if (origPos >= quips.length) {
-print("Inserting quip ${newPos} at ${origPos} (end of list)");
                 quips.add(newQuips[newPos++]);
                 origPos++;
             } else if (newPos >= newQuips.length) {
                 // finished processing the new quips
                 origPos = quips.length;
-            } else if (newQuips[newPos] == null) {
-print("What?!?!?!? ${newQuips}");
-                throw new Exception("no null quips should be added!");
             } else if (newQuips[newPos].id == null) {
-                // FIXME may be eliminated in the future
+                // TODO may be eliminated in the future
+                _error = "internal error";
                 throw new Exception("Must not merge uncommited quips");
             } else if (quips[origPos].id == newQuips[newPos].id) {
-print("updating existing quip ${newQuips[newPos].id}");
                 quips[origPos++] = newQuips[newPos++];
             } else if (quips[origPos].timestamp < newQuips[newPos].timestamp) {
                 origPos++;
             } else { // if (quips[origPos].timestamp >= newQuips[newPos].timestamp) {
-print("Inserting quip ${newPos} at ${origPos} (middle)");
                 quips.insert(origPos++, newQuips[newPos++]);
             }
         }
 
+    }
+
+
+    void commitChanges() {
+        // FIXME if there are pending changes that haven't been pushed to the
+        // server, push them now.
+
+        _server.createCsrfToken("update_change")
+        .then((String token) =>
+                _server.post("/branch/${branchId}/pending", token,
+                        data: { "action": "commit" }))
+        .then((ServerResponse resp) {
+
+        });
+    }
+
+
+    void abandonChanges() {
+        _server.createCsrfToken("delete_change")
+        .then((String token) =>
+                _server.delete("/branch/${branchId}/pending", token))
+        .then((ServerResponse resp) {
+            if (resp.wasError) {
+                _error = resp.message;
+            } else {
+                // We were editing a version, which means we weren't explicitly
+                // looking at a historical version.  So reload the head version.
+                loadChange(-1);
+            }
+        });
     }
 }
 

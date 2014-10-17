@@ -157,6 +157,8 @@ class QuipLayer {
             $row['Pending_Tags'] = QuipLayer::splitTags($row['Pending_Tags']);
             
             $row['Committed_Tags'] = QuipLayer::splitTags($row['Committed_Tags']);
+            
+            $row['Timestamp_Millis'] = intval($row['Timestamp_Millis']);
         }
         
         $count = $countData['result'];

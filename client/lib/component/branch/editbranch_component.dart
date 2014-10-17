@@ -85,27 +85,23 @@ class EditBranchComponent extends AbstractBranchComponent {
 
     // Should never be null.
     QuipDetails pendingQuip = new QuipDetails.pending();
-    bool quipModified = false;
 
-    String get quipTime => pendingQuip.timestamp == null ? "" :
-        videoTimeProvider.dialation.displayString(
-                pendingQuip.timestamp / 1000.0);
+    int _quipTime;
+    String _quipTimeStr;
+    String quipText;
+    bool get quipModified => (quipText != pendingQuip.text) ||
+            (_quipTime != pendingQuip.timestamp);
+    String get quipTime => _quipTimeStr;
 
     set quipTime(String timestr) {
-        int prevTime = pendingQuip.timestamp;
         if (timestr == null || timestr.length <= 0) {
-            pendingQuip.timestamp = null;
+            _quipTime = null;
+            _quipTimeStr = null;
         } else {
-            pendingQuip.timestamp = videoTimeProvider.convertToServerTime(timestr);
+            _quipTime = videoTimeProvider.convertToServerTime(timestr);
+            _quipTimeStr = videoTimeProvider.dialation.displayString(
+                _quipTime / 1000.0);
         }
-        quipModified = quipModified || prevTime != pendingQuip.timestamp;
-    }
-
-    String get quipText => pendingQuip.text;
-
-    set quipText(String text) {
-        quipModified = quipModified || pendingQuip.text != text;
-        pendingQuip.text = text;
     }
 
 
@@ -163,14 +159,18 @@ class EditBranchComponent extends AbstractBranchComponent {
 
         videoTimeProvider.attachToAlertController(
                 quipPaging.mediaAlertController);
+
+        branchDetails.then((BranchDetails bd) {
+            if (bd.userHasPendingChange) {
+                quipPaging.loadChange(null);
+            } else {
+                quipPaging.loadChange(changeId);
+            }
+        });
     }
 
 
     void editQuip(QuipDetails quip) {
-        // TODO if an edit is in progress, this will wipe out the changes.
-        // Have a dialog to replace it?  Probably not, as that will interrupt
-        // the flow.
-
         pendingQuip = quip;
     }
 
@@ -182,6 +182,16 @@ class EditBranchComponent extends AbstractBranchComponent {
         // FIXME cache up changes and push them in intervals to make fewer
         // requests to the server.
 
+        String text = quipText;
+        int time = _quipTime;
+        QuipDetails quip = pendingQuip;
+        quipText = null;
+        quipTime = null;
+        pendingQuip = new QuipDetails.pending();
+
+        if (! quipModified) {
+            return;
+        }
 
         branchDetails.then((BranchDetails branch) {
             // FIXME handle tags
@@ -192,12 +202,22 @@ class EditBranchComponent extends AbstractBranchComponent {
                         _server.put("/branch/${branchId}/pending", csrf,
                                 data: { 'changes': -1 }))
                     .then((ServerResponse response) {
-                        quipPaging.saveQuip(pendingQuip);
-                        pendingQuip = new QuipDetails.pending();
+                        branch.userHasPendingChange = true;
+
+                        quip.text = text;
+                        quip.timestamp = time;
+                        quipPaging.saveQuip(quip);
+
+                        // Change the paging change ID, because it now
+                        // references a pending change.  Note that we don't
+                        // reload the changes, because the state should now be
+                        // the same as the server.  However, we want it to
+                        // load from the right place if the user explicitly
+                        // reloads.
+                        quipPaging.changeId = null;
                     });
                 } else {
                     quipPaging.saveQuip(pendingQuip);
-                    pendingQuip = new QuipDetails.pending();
                 }
             } else {
                 // FIXME report error
@@ -229,6 +249,16 @@ class EditBranchComponent extends AbstractBranchComponent {
 
     String getQuipTime(QuipDetails qd) {
         return videoTimeProvider.dialation.displayString(qd.timestamp / 1000.0);
+    }
+
+
+    void commitChanges() {
+        quipPaging.commitChanges();
+    }
+
+
+    void abandonChanges() {
+        quipPaging.abandonChanges();
     }
 }
 
