@@ -214,7 +214,7 @@ class BaseMediaAlertController implements MediaAlertController {
         if (player == null) {
             throw new Exception("null player");
         }
-        if (_current != null) {
+        if (_current != null && _current != player) {
             throw new Exception("still running");
         }
         _current = player;

@@ -15,6 +15,10 @@ use Base;
  * viewing of a branch, so that subsequent submits won't affect the
  * current viewing.
  *
+ * FIXME this doesn't do what you may think it does.  It returns the head
+ * version information for the branch details, and does not contain any
+ * information regarding the changes to the quips or tags.
+ *
  * @uri /branch/:branchid/head
  */
 class BranchObjHeadVersion extends Resource {
@@ -259,7 +263,7 @@ class BranchObjUserPendingVersion extends Resource {
         $gaUserId = $this->container['user']['Ga_User_Id'];
         $changeId = $this->loadRequestInt("changes", FALSE) || -1;
         if ($changeId < 0) {
-            $changeId = WebRiffs\BranchLayer::getHeadBranchVersion(
+            $changeId = WebRiffs\BranchLayer::getBranchTopChangeNumber(
                     $this->getDB(), $userId, $branchId);
         }
         
@@ -279,7 +283,6 @@ class BranchObjUserPendingVersion extends Resource {
      */
     function deletePendingChange() {
         $branchId = $this->validateId($this->branchid, "branchId");
-        $action = $this->loadRequestString("action");
         $this->validate();
 
         $userId = $this->container['user']['User_Id'];
@@ -299,7 +302,7 @@ class BranchObjUserPendingVersion extends Resource {
     function commitChange() {
         $branchId = $this->validateId($this->branchid, "branchId");
         $action = $this->loadRequestString("action");
-        $this->checkThat($action != "commit" && $action != "merge",
+        $this->checkThat($action == "commit" || $action == "merge",
             "action");
         $this->validate();
 

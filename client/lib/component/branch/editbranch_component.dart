@@ -93,6 +93,7 @@ class EditBranchComponent extends AbstractBranchComponent {
             (_quipTime != pendingQuip.timestamp);
     String get quipTime => _quipTimeStr;
 
+
     set quipTime(String timestr) {
         if (timestr == null || timestr.length <= 0) {
             _quipTime = null;
@@ -175,12 +176,18 @@ class EditBranchComponent extends AbstractBranchComponent {
     }
 
     void setPendingQuipTime() {
-        pendingQuip.timestamp = videoTimeProvider.serverTime.inMilliseconds;
+        _quipTime = videoTimeProvider.serverTime.inMilliseconds;
+        _quipTimeStr = videoTimeProvider.dialation.
+                displayString(_quipTime / 1000.0);
     }
 
     void savePendingQuip() {
         // FIXME cache up changes and push them in intervals to make fewer
         // requests to the server.
+
+        if (! quipModified) {
+            return;
+        }
 
         String text = quipText;
         int time = _quipTime;
@@ -188,10 +195,6 @@ class EditBranchComponent extends AbstractBranchComponent {
         quipText = null;
         quipTime = null;
         pendingQuip = new QuipDetails.pending();
-
-        if (! quipModified) {
-            return;
-        }
 
         branchDetails.then((BranchDetails branch) {
             // FIXME handle tags
@@ -207,17 +210,11 @@ class EditBranchComponent extends AbstractBranchComponent {
                         quip.text = text;
                         quip.timestamp = time;
                         quipPaging.saveQuip(quip);
-
-                        // Change the paging change ID, because it now
-                        // references a pending change.  Note that we don't
-                        // reload the changes, because the state should now be
-                        // the same as the server.  However, we want it to
-                        // load from the right place if the user explicitly
-                        // reloads.
-                        quipPaging.changeId = null;
                     });
                 } else {
-                    quipPaging.saveQuip(pendingQuip);
+                    quip.text = text;
+                    quip.timestamp = time;
+                    quipPaging.saveQuip(quip);
                 }
             } else {
                 // FIXME report error
@@ -253,12 +250,21 @@ class EditBranchComponent extends AbstractBranchComponent {
 
 
     void commitChanges() {
-        quipPaging.commitChanges();
+        branchDetails.then((BranchDetails bd) {
+            quipPaging.commitChanges();
+            bd.userHasPendingChange = false;
+        });
     }
 
 
     void abandonChanges() {
-        quipPaging.abandonChanges();
+        branchDetails.then((BranchDetails bd) {
+            quipPaging.abandonChanges().then((bool success) {
+                if (success) {
+                    bd.userHasPendingChange = false;
+                }
+            });
+        });
     }
 }
 

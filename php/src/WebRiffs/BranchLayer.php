@@ -295,6 +295,15 @@ class BranchLayer {
     }
 
 
+    /**
+     * Retrieves the top change to the branch details; it does not reflect
+     * quip changes or tag changes.
+     *
+     * @param unknown $db
+     * @param unknown $userId
+     * @param unknown $branchId
+     * @throws Tonic\UnauthorizedException
+     */
     public static function getHeadBranchVersion($db, $userId, $branchId) {
         if (! BranchLayer::canAccessBranch($db, $userId, $branchId,
                 Access::$BRANCH_READ)) {
@@ -306,9 +315,36 @@ class BranchLayer {
         BranchLayer::checkError($rowData,
             new Base\ValidationException(
                 array(
-                    'unknown' => 'there was an unknown problem finding the branches'
+                    'unknown' => 'there was an unknown problem finding the branch'
                 )));
         return $data['result'][0];
+    }
+
+
+    /**
+     * The top change number that's associated with the branch, so it reflects
+     * changes to the branch details, the quips, and the branch tags.
+     *
+     * @param unknown $db
+     * @param unknown $userId
+     * @param unknown $branchId
+     * @return the (int) change ID
+     * @throws Tonic\UnauthorizedException
+     */
+    public static function getBranchTopChangeNumber($db, $userId, $branchId) {
+        if (! BranchLayer::canAccessBranch($db, $userId, $branchId,
+                Access::$BRANCH_READ)) {
+            throw new Tonic\UnauthorizedException();
+        }
+    
+        $data = VBranchQuipHead::$INSTANCE->readBy_Gv_Branch_Id(
+                $db, $branchId);
+        BranchLayer::checkError($rowData,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem finding the branch'
+                )));
+        return intval($data['result'][0]['Gv_Change_Id']);
     }
     
     

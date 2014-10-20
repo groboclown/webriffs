@@ -255,7 +255,7 @@ class QuipPaging implements AsyncComponent {
         // FIXME if there are pending changes that haven't been pushed to the
         // server, push them now.
 
-        _server.createCsrfToken("update_change")
+        _server.createCsrfToken("commit_change")
         .then((String token) =>
                 _server.post("/branch/${branchId}/pending", token,
                         data: { "action": "commit" }))
@@ -265,17 +265,19 @@ class QuipPaging implements AsyncComponent {
     }
 
 
-    void abandonChanges() {
-        _server.createCsrfToken("delete_change")
+    Future<bool> abandonChanges() {
+        return _server.createCsrfToken("delete_change")
         .then((String token) =>
                 _server.delete("/branch/${branchId}/pending", token))
         .then((ServerResponse resp) {
             if (resp.wasError) {
                 _error = resp.message;
+                return false;
             } else {
                 // We were editing a version, which means we weren't explicitly
                 // looking at a historical version.  So reload the head version.
                 loadChange(-1);
+                return true;
             }
         });
     }

@@ -16,7 +16,6 @@ import 'package:webriffs_client/component/film/createfilm_component.dart';
 import 'package:webriffs_client/component/film/viewfilm_component.dart';
 import 'package:webriffs_client/component/film/filminfoedit_component.dart';
 import 'package:webriffs_client/component/branch/createbranch_component.dart';
-import 'package:webriffs_client/component/branch/editquip_component.dart';
 import 'package:webriffs_client/component/branch/editbranch_component.dart';
 import 'package:webriffs_client/component/branch/viewbranch_component.dart';
 import 'package:webriffs_client/component/branch/branchupdates_component.dart';
@@ -41,7 +40,6 @@ class WebRiffsModule extends Module {
         bind(CreateFilmComponent);
         bind(ViewFilmComponent);
         bind(EditBranchComponent);
-        bind(EditQuipComponent);
         bind(ViewBranchComponent);
         bind(BranchHeaderComponent);
         bind(CreateBranchComponent);

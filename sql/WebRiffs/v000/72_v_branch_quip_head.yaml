@@ -1,0 +1,32 @@
+# The head version for a branch, which includes both the quip versions and
+# the branch details itself.  This is to pull the top version number when the
+# user requests it.
+
+view:
+    viewName: V_BRANCH_QUIP_HEAD
+    query: "
+        SELECT
+            bcv.Gv_Branch_Id Gv_Branch_Id,
+            MAX(bcv.Gv_Change_Id) Gv_Change_Id
+        FROM
+            V_GV_BRANCH_CHANGE_VERSION bcv
+        GROUP BY
+            bcv.Gv_Branch_Id
+        "
+    columns:
+        - column:
+            name: Gv_Branch_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_BRANCH
+                    column: Gv_Branch_Id
+        - column:
+            name: Gv_Change_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_CHANGE
+                    column: Gv_Change_Id

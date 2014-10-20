@@ -1,7 +1,4 @@
-# The details for the head versions of the branches for each film.  Includes
-# the simple film details, as well.
-
-# The column list needs to be kept in sync with V_FILM_BRANCH_VERSION
+# The head version for the branch details, not the quips.
 
 view:
     viewName: V_FILM_BRANCH_HEAD
