@@ -45,8 +45,7 @@ import 'abstract_branch_component.dart';
  */
 @Component(
     selector: 'edit-branch',
-    templateUrl: 'packages/webriffs_client/component/branch/editbranch_component.html',
-    publishAs: 'cmp')
+    templateUrl: 'editbranch_component.html')
 class EditBranchComponent extends AbstractBranchComponent {
     static final Logger _log = new Logger('media.EditBranchComponent');
 
@@ -67,6 +66,8 @@ class EditBranchComponent extends AbstractBranchComponent {
 
     final List<QuipDetails> shownQuips = [];
 
+    bool get hasSpeechSupport => _recognition != null;
+
     QuipMediaAlertController get mediaAlertController =>
             quipPaging.mediaAlertController;
 
@@ -76,7 +77,10 @@ class EditBranchComponent extends AbstractBranchComponent {
     // version, then don't allow edits.
     bool get isEditable => canEditQuips && requestedChangeId < 0;
 
+    bool get speechListening => _recognition == null ? false :
+        _recognition.isCapturing;
 
+    // TODO make user editable
     double displayDuration = 1.0;
 
 
@@ -154,6 +158,7 @@ class EditBranchComponent extends AbstractBranchComponent {
             double secondsDuration = qd.text.trim().length *
                     DISPLAY_DURATION_SCALE * displayDuration;
             double minDuration = MIN_DISPLAY_DURATION * displayDuration;
+// FIXME debug
 print("${qd.text.trim().length} -> ${secondsDuration}");
             if (secondsDuration < minDuration) {
                 secondsDuration = minDuration;
@@ -176,6 +181,25 @@ print("${qd.text.trim().length} -> ${secondsDuration}");
                 quipPaging.loadChange(changeId);
             }
         });
+    }
+
+    void toggleSpeechListen() {
+        if (_recognition != null && _recognition.isCapturing) {
+            _recognition.stop();
+        } else if (_recognition != null) {
+            _recognition.capture().then((SpeechRecognitionResults res) {
+                if (res != null) {
+                    String ret = "";
+                    for (SpeechRecognitionTranscriptList srtl in res.transcripts) {
+                        ret += "\n" + srtl.best.transcript;
+                    }
+                    ret = ret.trim();
+                    if (ret.length > 0) {
+                        pendingQuip.text = ret;
+                    }
+                }
+            });
+        }
     }
 
 

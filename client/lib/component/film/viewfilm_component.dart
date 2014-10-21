@@ -20,15 +20,17 @@ import 'filmlist_component.dart';
  */
 @Component(
     selector: 'view-film',
-    templateUrl: 'packages/webriffs_client/component/film/viewfilm_component.html',
-    //cssUrl: 'packages/webriffs_client/component/errorstatus_component.css',
-    publishAs: 'cmp')
+    templateUrl: 'viewfilm_component.html'
+    //cssUrl: 'viewfilm_component.css',
+    )
 class ViewFilmComponent extends PagingComponent {
     final ServerStatusService _server;
     final UserService _user;
     final int filmId;
     final String _inputFilmId;
     final FilmInfo filmInfo = new FilmInfo();
+
+    AsyncComponent get cmp => this;
 
     bool _validFilmId;
     String name;

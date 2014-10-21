@@ -1,11 +1,11 @@
-<div ng-if="cmp.isLoggedIn" class="component">
+<div ng-if="isLoggedIn" class="component">
   <form onsubmit="return false;">
-    <filminfo-edit film-info="cmp.filmInfo"></filminfo-edit>
-    <input type="submit" ng-click="cmp.createFilm()" ng-disabled="cmp.disabled" value="Submit">
+    <filminfo-edit film-info="filmInfo"></filminfo-edit>
+    <input type="submit" ng-click="createFilm()" ng-disabled="disabled" value="Submit">
   </form>
 
 </div>
-<div ng-if="cmp.notLoggedIn">
+<div ng-if="notLoggedIn">
 Only logged in users can create new film entries.  Use the forms at the
 top of the page to create a new account or log into an existing account.
 </div>

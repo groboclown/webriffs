@@ -1,17 +1,17 @@
 <div class="component">
-    <div ng-if="cmp.canConnectToServer">
+    <div ng-if="canConnectToServer">
         Connection seems fine.
-        <span ng-if="cmp.isLoading">
+        <span ng-if="isLoading">
             Loading data from server...
         </span>
     </div>
-    <div ng-if="! cmp.canConnectToServer">
+    <div ng-if="! canConnectToServer">
         Cannot connect to server.
     </div>
-    <div ng-if="cmp.criticalError != null">
-        Critical Error: {{cmp.criticalError}}
+    <div ng-if="criticalError != null">
+        Critical Error: {{criticalError}}
     </div>
-    <div ng-repeat="notice in cmp.notices">
+    <div ng-repeat="notice in notices">
         {{notice.message}} ({{notice.status}})
     </div>
 </div>

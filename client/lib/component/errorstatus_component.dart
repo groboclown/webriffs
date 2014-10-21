@@ -11,9 +11,9 @@ import '../service/server.dart';
  */
 @Component(
     selector: 'error-status',
-    templateUrl: 'packages/webriffs_client/component/errorstatus_component.html',
-    //cssUrl: 'packages/webriffs_client/component/errorstatus_component.css',
-    publishAs: 'cmp')
+    templateUrl: 'errorstatus_component.html'
+    //cssUrl: 'packages/webriffs_client/component/errorstatus_component.css'
+    )
 class ErrorComponent {
     ServerStatusService _error;
 

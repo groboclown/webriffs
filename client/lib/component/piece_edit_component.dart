@@ -5,13 +5,12 @@ import 'piece_edit.dart';
 
 @Component(
     selector: 'piece-editor',
-    templateUrl: 'packages/webriffs_client/component/piece_edit_component.html',
-    publishAs: 'cmp')
+    templateUrl: 'piece_edit_component.html')
 class PieceEditComponent {
-    @NgOneWay('piece')
+    @NgOneWayOneTime('piece')
     PieceEdit piece;
 
-    @NgOneWay('can-edit')
+    @NgOneWayOneTime('can-edit')
     bool canEdit;
 
     // FIXME add bits about whether the piece is being validated / saved / etc

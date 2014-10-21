@@ -2,49 +2,49 @@
   <async-status parent="cmp"></async-status>
   <div class="bug">BUG If the validation hasn't completed when the user clicks the okay button, the half-validated text is set.</div>
   <div>
-    <piece-editor piece="cmp.nameEdit" can-edit="cmp.canEditName">
-        <span ng-if="cmp.nameEdit.isEditing">
+    <piece-editor piece="nameEdit" can-edit="canEditName">
+        <span ng-if="nameEdit.isEditing">
           <label for="branch.name">Branch Name</label>
-          <input id="branch.name" type="text" ng-model="cmp.nameEdit.editValue"
+          <input id="branch.name" type="text" ng-model="nameEdit.editValue"
               ng-minlength="1"
               ng-maxlength="200"
-              placeholder="{{cmp.nameEdit.original}}"
+              placeholder="{{nameEdit.original}}"
               required>
         </span>
-        <span ng-if="! cmp.nameEdit.isEditing">{{cmp.nameEdit.original}}</span>
+        <span ng-if="! nameEdit.isEditing">{{nameEdit.original}}</span>
     </piece-editor>
   </div>
 
   <div>
-    <piece-editor piece="cmp.descriptionEdit" can-edit="cmp.canEditDescription">
-        <span ng-if="cmp.descriptionEdit.isEditing">
+    <piece-editor piece="descriptionEdit" can-edit="canEditDescription">
+        <span ng-if="descriptionEdit.isEditing">
           <label for="branch.description">Description</label><br>
           <textarea id="branch.description"
               style="display: inline;"
-              ng-model="cmp.descriptionEdit.editValue"
+              ng-model="descriptionEdit.editValue"
               ng-minlength="0"
-              ng-maxlength="2048">{{cmp.descriptionEdit.original}}</textarea>
+              ng-maxlength="2048">{{descriptionEdit.original}}</textarea>
         </span>
-        <span ng-if="! cmp.descriptionEdit.isEditing">{{cmp.descriptionEdit.original}}</span>
+        <span ng-if="! descriptionEdit.isEditing">{{descriptionEdit.original}}</span>
     </piece-editor>
   </div>
   
   <div>
-    <piece-editor piece="cmp.tagsEdit" can-edit="cmp.canEditTags">
-      <span ng-if="cmp.tagsEdit.isEditing">
+    <piece-editor piece="tagsEdit" can-edit="canEditTags">
+      <span ng-if="tagsEdit.isEditing">
       (tag editor goes here)
       </span>
-      <span ng-if="! cmp.tagsEdit.isEditing">
-        <span ng-repeat="tag in cmp.tagsEdit.original">
+      <span ng-if="! tagsEdit.isEditing">
+        <span ng-repeat="tag in tagsEdit.original">
             {{tag.name}}
         </span>
       </span>
     </piece-editor>
   </div>
 
-  <div ng-if="cmp.isSavePending">
-      <span ng-click="cmp.save()">Save</span>
-      <span ng-click="cmp.cancel()">Cancel</span>
+  <div ng-if="isSavePending">
+      <span ng-click="save()">Save</span>
+      <span ng-click="cancel()">Cancel</span>
       <span class="bug">BUG this needs to change if the save was submitted.</span>
   </div>
 </div>

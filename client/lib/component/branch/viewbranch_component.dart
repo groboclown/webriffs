@@ -16,8 +16,7 @@ import 'abstract_branch_component.dart';
  */
 @Component(
     selector: 'view-branch',
-    templateUrl: 'packages/webriffs_client/component/branch/viewbranch_component.html',
-    publishAs: 'cmp')
+    templateUrl: 'viewbranch_component.html')
 class ViewBranchComponent extends AbstractBranchComponent {
 
     factory ViewBranchComponent(ServerStatusService server, UserService user,

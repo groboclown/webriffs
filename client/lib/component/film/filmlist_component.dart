@@ -7,8 +7,6 @@ import 'package:angular/angular.dart';
 
 import '../../service/server.dart';
 
-import '../../json/branch_details.dart';
-
 import '../../util/async_component.dart';
 
 /**
@@ -16,13 +14,15 @@ import '../../util/async_component.dart';
  */
 @Component(
     selector: 'film-list',
-    templateUrl: 'packages/webriffs_client/component/film/filmlist_component.html',
-    //cssUrl: 'packages/webriffs_client/component/errorstatus_component.css',
-    publishAs: 'cmp')
+    templateUrl: 'filmlist_component.html'
+    //cssUrl: 'filmlist_component.css'
+    )
 class FilmListComponent extends PagingComponent {
     final ServerStatusService _server;
 
     final List<FilmRecord> films = [];
+
+    AsyncComponent get cmp => this;
 
     bool get noFilms => films.length <= 0;
 

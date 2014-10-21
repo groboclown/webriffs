@@ -1,7 +1,7 @@
 library speech_recognition;
 
 import 'dart:async';
-import 'dart:js';
+//import 'dart:js';
 import 'dart:html';
 
 

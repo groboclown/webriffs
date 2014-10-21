@@ -3,32 +3,32 @@
 to the play page to view that. -->
 
     <div>
-    <a ng-href="#/film/view/{{cmp.filmId}}" ng-if="cmp.loaded">Film Details</a>
-    <a ng-href="#/branch/changes/{{cmp.branchId}}" ng-if="cmp.branchId != null">Branch History</a>
+    <a ng-href="#/film/view/{{filmId}}" ng-if="loaded">Film Details</a>
+    <a ng-href="#/branch/changes/{{branchId}}" ng-if="branchId != null">Branch History</a>
     </div>
     
-    <div ng-if="! cmp.loaded">
-        <span ng-if="cmp.loadError">Problem loading branch.  You may not have
+    <div ng-if="! loaded">
+        <span ng-if="loadError">Problem loading branch.  You may not have
         permission to see it.</span>
-        <span ng-if="! cmp.loadError">loading...</span>
+        <span ng-if="! loadError">loading...</span>
     </div>
-    <div ng-if="cmp.loaded">
-        <div><span>{{cmp.filmName}}</span> <span>({{cmp.filmReleaseYear}})</span>
-            <span ng-if="cmp.urlChangeId != 0">(revision {{cmp.changeId}})</span>
+    <div ng-if="loaded">
+        <div><span>{{filmName}}</span> <span>({{filmReleaseYear}})</span>
+            <span ng-if="urlChangeId != 0">(revision {{changeId}})</span>
         </div>
-        <branch-header branch="cmp.branchDetails"></branch-header>
-        <div>Last updated on {{cmp.updatedOn}}</div>
+        <branch-header branch="branchDetails"></branch-header>
+        <div>Last updated on {{updatedOn}}</div>
     </div>
     
-    <branch-updates current-branch="cmp.branchDetails"></branch-updates>
+    <branch-updates current-branch="branchDetails"></branch-updates>
     
-    <div ng-if="cmp.canEditQuips">
-        <a ng-href="#/branch/play/{{cmp.branchId}}">Play and edit this branch</a>
+    <div ng-if="canEditQuips">
+        <a ng-href="#/branch/play/{{branchId}}">Play and edit this branch</a>
     </div>
-    <div ng-if="cmp.canReadQuips && ! cmp.canEditQuips">
-        <a ng-href="#/branch/play/{{cmp.branchId}}/{{cmp.changeId}}">Play back this branch.</a>
+    <div ng-if="canReadQuips && ! canEditQuips">
+        <a ng-href="#/branch/play/{{branchId}}/{{changeId}}">Play back this branch.</a>
     </div>
-    <div ng-if="! cmp.canReadQuips">
+    <div ng-if="! canReadQuips">
     You do not have permissions to view the contents of this branch.
     <div class="bug">BUG this message is shown while the page is loading, which
     may not be a correct evaluation of the state..</div>
@@ -36,11 +36,11 @@ to the play page to view that. -->
     </div>
     
     
-    <div ng-if="cmp.canDelete" class="bug">
+    <div ng-if="canDelete" class="bug">
     BUG add "delete branch" button here.
     </div>
     
-    <div ng-if="cmp.canEditPermissions" class="bug">
+    <div ng-if="canEditPermissions" class="bug">
     BUG add "change access permissions" UI here.
     </div>
 </div>

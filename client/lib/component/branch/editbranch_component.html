@@ -1,53 +1,53 @@
 <!-- TODO merge the branch playback and the branch edit -->
 
 <div>
-<a ng-href="#/film/view/{{cmp.filmId}}" ng-if="cmp.loaded">Film Details</a>
-<a ng-href="#/branch/changes/{{cmp.branchId}}" ng-if="cmp.branchId != null">Branch History</a>
+<a ng-href="#/film/view/{{filmId}}" ng-if="loaded">Film Details</a>
+<a ng-href="#/branch/changes/{{branchId}}" ng-if="branchId != null">Branch History</a>
 </div>
 
-<div ng-if="! cmp.canReadQuips && cmp.loaded">
+<div ng-if="! canReadQuips && loaded">
 You do not have permissions to view the contents of this branch.
 <div class="bug">BUG this message may be incorrectly shown while the page is loading.</div>
 </div>
 
-<div ng-if="cmp.canReadQuips" class="component">
+<div ng-if="canReadQuips" class="component">
     
-    <div ng-if="cmp.loaded">
-        <div><span>{{cmp.filmName}}</span> <span>({{cmp.filmReleaseYear}})</span>
-            <span ng-if="cmp.urlChangeId &gt;= 0">(revision {{cmp.changeId}})</span>
-            <span ng-if="cmp.urlChangeId &lt; 0">(pending changes)</span>
+    <div ng-if="loaded">
+        <div><span>{{filmName}}</span> <span>({{filmReleaseYear}})</span>
+            <span ng-if="urlChangeId &gt;= 0">(revision {{changeId}})</span>
+            <span ng-if="urlChangeId &lt; 0">(pending changes)</span>
         </div>
-        <div>{{cmp.branchName}}</div>
-        <div>{{cmp.description}}</div>
-        <div>Last updated on {{cmp.updatedOn}}</div>
+        <div>{{branchName}}</div>
+        <div>{{description}}</div>
+        <div>Last updated on {{updatedOn}}</div>
     </div>
-    <div ng-if="! cmp.loaded">
-        <span ng-if="cmp.loadError">Problem loading branch.  You may not have
+    <div ng-if="! loaded">
+        <span ng-if="loadError">Problem loading branch.  You may not have
         permission to see it, or it may not exist.</span>
-        <span ng-if="! cmp.loadError">loading...</span>
+        <span ng-if="! loadError">loading...</span>
     </div>
 
-    <branch-updates current-branch="cmp.branchDetails"></branch-updates>
+    <branch-updates current-branch="branchDetails"></branch-updates>
     
-    <div ng-if="cmp.hasPendingChange">
+    <div ng-if="hasPendingChange">
         You have changes saved on the server that haven't been committed
         to the branch.
-        <button ng-click="cmp.commitChanges()">Commit Changes</button>
-        <span ng-click="cmp.abandonChanges()">Abandon Changes</span>
+        <button ng-click="commitChanges()">Commit Changes</button>
+        <span ng-click="abandonChanges()">Abandon Changes</span>
     </div>
     
     <media-controller
-        time="cmp.videoTimeProvider"
-        controller="cmp.mediaAlertController"
-        branch-details="cmp.branchDetails"></media-controller>
+        time="videoTimeProvider"
+        controller="mediaAlertController"
+        branch-details="branchDetails"></media-controller>
     
     <!-- quips flashing to the screen -->
     <div>
         <!-- FIXME set the style based on the edit state -->
-        <div ng-repeat="quip in cmp.shownQuips" class="popup_quip">
+        <div ng-repeat="quip in shownQuips" class="popup_quip">
             <div>
-                <span ng-if="cmp.isEditable"
-                    ng-click="cmp.editQuip(quip)">&#9998;</span>
+                <span ng-if="isEditable"
+                    ng-click="editQuip(quip)">&#9998;</span>
                 <span>{{quip.timestamp}}</span>
                 <span ng-repeat="tag in quip.tags">
                     {{tag.name}}
@@ -59,22 +59,24 @@ You do not have permissions to view the contents of this branch.
     
     
     <!-- Edit the quip -->
-    <div ng-if="cmp.canEditQuips">
+    <div ng-if="canEditQuips">
         Edit quip:
 <div class="bug">BUG this should not directly edit the time and text in the quip; they should be pushed to the object on save.</div>
         <form onsubmit="return false;">
         <div>
             <label for="quip_time">When </label>
-            <input id="quip_time" type="text" ng-model="cmp.quipTime">
-            <button ng-click="cmp.setPendingQuipTime()">Set from player</button>
+            <input id="quip_time" type="text" ng-model="quipTime">
         </div>
         <div>
             <label for="quip_text">With </label>
-            <input id="quip_text" type="text" ng-model="cmp.quipText">
+            <input id="quip_text" type="text" ng-model="quipText">
         </div>
-        <div>
-            <input type="submit" ng-click="cmp.savePendingQuip()" value="Save"
-                ng-disabled="cmp.hasQuipTimeFormatError">
+        <div style="font-size:3em;">
+            <button ng-if="hasSpeechSupport"
+                ng-click="toggleSpeechListen()">&#127908;</button>
+            <button ng-click="setPendingQuipTime()">Set time to now</button>
+            <input type="submit" ng-click="savePendingQuip()" value="Save"
+                ng-disabled="hasQuipTimeFormatError">
         </div>
         </form>
     </div>
@@ -85,34 +87,34 @@ You do not have permissions to view the contents of this branch.
     <table>
         <thead>
             <tr>
-                <th ng-if="cmp.isEditable">&nbsp;</th>
+                <th ng-if="isEditable">&nbsp;</th>
                 <th>Time</th>
                 <th>Text</th>
                 <th>Tags</th>
             </tr>
         </thead>
-        <tbody ng-if="cmp.quipPaging.loading">
+        <tbody ng-if="quipPaging.loading">
             <tr>
-                <td colspan="3">loading {{cmp.quipPaging.percentLoaded}}%...</td>
+                <td colspan="3">loading {{quipPaging.percentLoaded}}%...</td>
             </tr>
         </tbody>
-        <tbody ng-if="cmp.quipPaging.loadedError">
+        <tbody ng-if="quipPaging.loadedError">
             <tr>
-                <td colspan="3">Error loading the quips ({{cmp.quipPaging.error}})</td>
+                <td colspan="3">Error loading the quips ({{quipPaging.error}})</td>
             </tr>
         </tbody>
-        <tbody ng-if="cmp.quipPaging.loadedSuccessful">
+        <tbody ng-if="quipPaging.loadedSuccessful">
             <!-- FIXME set the style based on the edit state -->
-            <tr ng-repeat="quip in cmp.quipPaging.quips">
-                <td ng-if="cmp.isEditable">
+            <tr ng-repeat="quip in quipPaging.quips">
+                <td ng-if="isEditable">
                     <!-- FIXME make this state based on the actual state -->
                     <!-- FIXME make the icons consistent across the site; this
                     differs with the meaning in the piece_edit_component.html -->
-                    <span ng-click="cmp.editQuip(quip)">&#9998;</span>
-                    <span ng-click="cmp.deleteQuip(quip)">&#10005;</span>
-                    <span ng-click="cmp.revertQuip(quip)">&#9852;</span>
+                    <span ng-click="editQuip(quip)">&#9998;</span>
+                    <span ng-click="deleteQuip(quip)">&#10005;</span>
+                    <span ng-click="revertQuip(quip)">&#9852;</span>
                 </td>
-                <td>{{cmp.getQuipTime(quip)}}</td>
+                <td>{{getQuipTime(quip)}}</td>
                 <td>{{quip.text}}</td>
                 <td>
                     <span ng-repeat="tag in quip.tags">

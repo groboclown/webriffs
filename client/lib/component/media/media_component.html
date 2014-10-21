@@ -1,4 +1,4 @@
-<div ng-if="cmp.notLoaded">
+<div ng-if="notLoaded">
 loading media...
 </div>
 
@@ -7,25 +7,25 @@ loading media...
 
 
 <!-- Otherwise, the default stopwatch will be used. -->
-<div ng-if="cmp.loadedStopwatch" class="component">
+<div ng-if="loadedStopwatch" class="component">
   <form onsubmit="return false;">
     <div>
-        <span ng-if="cmp.stopwatch.status.playing">Playing</span>
-        <span ng-if="cmp.stopwatch.status.waiting"></span>
-        <span>{{cmp.stopwatch.time}}</span>
+        <span ng-if="stopwatch.status.playing">Playing</span>
+        <span ng-if="stopwatch.status.waiting"></span>
+        <span>{{stopwatch.time}}</span>
     </div>
     <div>
-        <span ng-click="cmp.stopwatch.toggleDialationDetails()">
-            <span ng-if="cmp.stopwatch.showDialationDetails">[||]</span>
-            <span ng-if="! cmp.stopwatch.showDialationDetails">[-]</span>
+        <span ng-click="stopwatch.toggleDialationDetails()">
+            <span ng-if="stopwatch.showDialationDetails">[||]</span>
+            <span ng-if="! stopwatch.showDialationDetails">[-]</span>
         </span>
-        <span>(play back at {{cmp.stopwatch.dialation}})</span>
-        <div ng-if="cmp.stopwatch.showDialationDetails">
-            <div ng-click="cmp.stopwatch.toggleDialationHelp()">
-                <span ng-if="! cmp.stopwatch.showDialationHelp">[Show help]</span>
-                <span ng-if="cmp.stopwatch.showDialationHelp">[Hide help]</span>
+        <span>(play back at {{stopwatch.dialation}})</span>
+        <div ng-if="stopwatch.showDialationDetails">
+            <div ng-click="stopwatch.toggleDialationHelp()">
+                <span ng-if="! stopwatch.showDialationHelp">[Show help]</span>
+                <span ng-if="stopwatch.showDialationHelp">[Hide help]</span>
             </div>
-            <div ng-if="cmp.stopwatch.showDialationHelp">
+            <div ng-if="stopwatch.showDialationHelp">
         <p>
         The play back speed is very important to keeping the quips showing in
         sync with the video.  Different displays will play back a video at
@@ -44,32 +44,32 @@ loading media...
         </div>
     </div>
     <div>
-        <span ng-if="cmp.stopwatch.status.playing" ng-click="cmp.stopwatch.pause()">[ Pause ]</span>
-        <span ng-if="cmp.stopwatch.status.waiting" ng-click="cmp.stopwatch.start()">[ Play ]</span>
+        <span ng-if="stopwatch.status.playing" ng-click="stopwatch.pause()">[ Pause ]</span>
+        <span ng-if="stopwatch.status.waiting" ng-click="stopwatch.start()">[ Play ]</span>
     </div>
     <div>
         <div>
-            <span ng-click="cmp.stopwatch.adjustTime(500)">[+ .5 sec]</span>
-            <span ng-click="cmp.stopwatch.adjustTime(1000)">[+ 1 sec]</span>
-            <span ng-click="cmp.stopwatch.adjustTime(5000)">[+ 5 sec]</span>
-            <span ng-click="cmp.stopwatch.adjustTime(10000)">[+ 10 sec]</span>
+            <span ng-click="stopwatch.adjustTime(500)">[+ .5 sec]</span>
+            <span ng-click="stopwatch.adjustTime(1000)">[+ 1 sec]</span>
+            <span ng-click="stopwatch.adjustTime(5000)">[+ 5 sec]</span>
+            <span ng-click="stopwatch.adjustTime(10000)">[+ 10 sec]</span>
         </div>
         <div>
-            <span ng-click="cmp.stopwatch.adjustTime(-500)">[- .5 sec]</span>
-            <span ng-click="cmp.stopwatch.adjustTime(-1000)">[- 1 sec]</span>
-            <span ng-click="cmp.stopwatch.adjustTime(-5000)">[- 5 sec]</span>
-            <span ng-click="cmp.stopwatch.adjustTime(-10000)">[- 10 sec]</span>
+            <span ng-click="stopwatch.adjustTime(-500)">[- .5 sec]</span>
+            <span ng-click="stopwatch.adjustTime(-1000)">[- 1 sec]</span>
+            <span ng-click="stopwatch.adjustTime(-5000)">[- 5 sec]</span>
+            <span ng-click="stopwatch.adjustTime(-10000)">[- 10 sec]</span>
         </div>
     </div>
     <span class="bug">TODO: disable setting time if there's a time format error</span>
     <div>
-        <input type="text" ng-model="cmp.stopwatch.timeField">
-        <input type="submit" ng-click="cmp.stopwatch.setTime()" value="Set time"
-            ng-disabled="cmp.stopwatch.hasTimeFieldFormatError">
-        <span ng-if="cmp.stopwatch.hasTimeFieldFormatError">Bad time format</span>
+        <input type="text" ng-model="stopwatch.timeField">
+        <input type="submit" ng-click="stopwatch.setTime()" value="Set time"
+            ng-disabled="stopwatch.hasTimeFieldFormatError">
+        <span ng-if="stopwatch.hasTimeFieldFormatError">Bad time format</span>
     </div>
     <div>
-        <span ng-click="cmp.stopwatch.stop()">[ Reset time ]</span>
+        <span ng-click="stopwatch.stop()">[ Reset time ]</span>
     </div>
   </form>
 </div>

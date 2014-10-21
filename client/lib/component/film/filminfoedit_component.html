@@ -2,23 +2,23 @@
   <async-status parent="cmp"></async-status>
   <div>
       <label for="film.name">Film Title</label>
-      <input id="film.name" type="text" ng-model="cmp.filmName"
-          ng-disabled="cmp.disabled"
+      <input id="film.name" type="text" ng-model="filmName"
+          ng-disabled="disabled"
           ng-minlength="1"
           ng-maxlength="200"
           placeholder="Film name"
           required>
-      <span ng-if="! cmp.isNameValid">[bad value]</span>
+      <span ng-if="! isNameValid">[bad value]</span>
   </div>
   <div>
       <label for="film.year">Release Year</label>
-      <input id="film.year" type="number" ng-model="cmp.releaseYear"
-          ng-disabled="cmp.disabled"
+      <input id="film.year" type="number" ng-model="releaseYear"
+          ng-disabled="disabled"
           ng-minnumber="1800"
           ng-maxnumber="9999"
           required>
-      <span ng-if="! cmp.isYearValid">[bad value]</span>
+      <span ng-if="! isYearValid">[bad value]</span>
   </div>
-  <div ng-if="cmp.filmInUse">A film with that name and year already exists</div>
-  <div ng-if="cmp.isChecking">Checking if the film is available...</div>
+  <div ng-if="filmInUse">A film with that name and year already exists</div>
+  <div ng-if="isChecking">Checking if the film is available...</div>
 </div>

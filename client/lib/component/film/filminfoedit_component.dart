@@ -33,13 +33,15 @@ class FilmInfo {
  */
 @Component(
     selector: 'filminfo-edit',
-    templateUrl: 'packages/webriffs_client/component/film/filminfoedit_component.html',
-    //cssUrl: 'packages/webriffs_client/component/errorstatus_component.css',
-    publishAs: 'cmp')
+    templateUrl: 'filminfoedit_component.html'
+    //cssUrl: 'filminfoedit_component.css'
+    )
 class FilmInfoEditComponent extends SingleRequestComponent {
     final ServerStatusService _server;
 
-    @NgOneWay('film-info')
+    AsyncComponent get cmp => this;
+
+    @NgOneWayOneTime('film-info')
     FilmInfo filmInfo;
 
     FilmInfoEditComponent(ServerStatusService server) :

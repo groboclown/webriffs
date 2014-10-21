@@ -14,25 +14,26 @@ import '../../util/async_component.dart';
  */
 @Component(
     selector: 'create-branch',
-    templateUrl: 'packages/webriffs_client/component/branch/createbranch_component.html',
-    publishAs: 'cmp')
+    templateUrl: 'createbranch_component.html')
 class CreateBranchComponent extends RequestHandlingComponent {
     final ServerStatusService _server;
     final UserService _user;
     final Router _route;
     final LookUpBranchNameComponent lookupName;
 
+    AsyncComponent get cmp => this;
+
     int _filmId;
 
     int get filmId => _filmId;
 
-    @NgOneWay('film-id')
+    @NgOneWayOneTime('film-id')
     set filmId(int i) {
         _filmId = i;
         lookupName.filmId = i;
     }
 
-    @NgOneWay('always-show')
+    @NgOneWayOneTime('always-show')
     bool alwaysShowCreate = false;
 
     bool _showCreateToggle = false;

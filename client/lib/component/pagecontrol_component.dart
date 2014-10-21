@@ -8,12 +8,11 @@ import '../util/paging.dart';
 
 @Component(
     selector: 'page-control',
-    templateUrl: 'packages/webriffs_client/component/pagecontrol_component.html',
-    publishAs: 'cmp')
+    templateUrl: 'pagecontrol_component.html')
 class PageControlComponent {
     final Logger _log = new Logger('components.PageHeaderComponent');
 
-    @NgOneWay('page-state')
+    @NgOneWayOneTime('page-state')
     PageState pageState;
 
 

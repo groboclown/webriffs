@@ -20,9 +20,9 @@ import 'filminfoedit_component.dart';
  */
 @Component(
     selector: 'create-film',
-    templateUrl: 'packages/webriffs_client/component/film/createfilm_component.html',
-    //cssUrl: 'packages/webriffs_client/component/errorstatus_component.css',
-    publishAs: 'cmp')
+    templateUrl: 'createfilm_component.html'
+    //cssUrl: 'errorstatus_component.css'
+    )
 class CreateFilmComponent extends RequestHandlingComponent {
     final ServerStatusService _server;
 

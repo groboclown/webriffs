@@ -10,16 +10,15 @@ import '../util/async_component.dart';
 
 @Component(
     selector: 'async-status',
-    templateUrl: 'packages/webriffs_client/component/asyncstatus_component.html',
-    publishAs: 'cmp')
+    templateUrl: 'asyncstatus_component.html')
 class AsyncStatusComponent {
-    @NgOneWay('parent')
+    @NgOneWayOneTime('parent')
     AsyncComponent async;
 
-    @NgOneWay('show-reload')
+    @NgOneWayOneTime('show-reload')
     bool showReload = false;
 
-    @NgOneWay('show-initial-load')
+    @NgOneWayOneTime('show-initial-load')
     bool showInitialLoad = false;
 
     bool get showLoadButton => (showReload) || (showInitialLoad && notLoaded);

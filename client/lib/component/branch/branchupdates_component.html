@@ -1,14 +1,14 @@
-<div ng-if="cmp.hasUpdates" class="component">
+<div ng-if="hasUpdates" class="component">
     <!-- This should be a little alert that can be clicked on to show the
     updates. -->
-    <div>{{cmp.changesSinceCount}} new updates</div>
+    <div>{{changesSinceCount}} new updates</div>
     <div>
-      <span ng-repeat="change in cmp.changes">
+      <span ng-repeat="change in changes">
       {{change.updatedOn}} <span class="bug">BUG list who made the change</span>
       </span>
-      <span ng-if="cmp.hasMoreChangesThanFetched">...</span>
+      <span ng-if="hasMoreChangesThanFetched">...</span>
     </div>
 </div>
-<div ng-if="cmp.hasNoUpdates">
+<div ng-if="hasNoUpdates">
     <div>[viewing head version]</div>
 </div>

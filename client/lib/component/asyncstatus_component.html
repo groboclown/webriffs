@@ -1,13 +1,13 @@
 <span>
-    <span ng-if="cmp.loadedError">
-    {{cmp.error}}
+    <span ng-if="loadedError">
+    {{error}}
     </span>
     <!-- TODO show a "connection fine" icon? -->
-    <span ng-if="cmp.loadedSuccessful"></span>
-    <span ng-if="cmp.loading">
+    <span ng-if="loadedSuccessful"></span>
+    <span ng-if="loading">
     loading...
     </span>
-    <span ng-if="cmp.showLoadButton">
-        <span ng-onclick="cmp.reload()">|...|</span>
+    <span ng-if="showLoadButton">
+        <span ng-onclick="reload()">|...|</span>
     </span>
 </span>

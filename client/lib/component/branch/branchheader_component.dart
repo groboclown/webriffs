@@ -20,12 +20,13 @@ import '../piece_edit.dart';
  */
 @Component(
     selector: 'branch-header',
-    templateUrl: 'packages/webriffs_client/component/branch/branchheader_component.html',
-    //cssUrl: 'packages/webriffs_client/component/errorstatus_component.css',
-    publishAs: 'cmp')
+    templateUrl: 'branchheader_component.html'
+    //cssUrl: 'branchheader_component.css'
+    )
 class BranchHeaderComponent extends BasicSingleRequestComponent {
     final ServerStatusService _server;
 
+    AsyncComponent get cmp => this;
 
     BranchDetails _branchDetails;
 

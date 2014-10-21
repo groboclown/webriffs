@@ -2,7 +2,7 @@
     <div>
         <!-- filter controls -->
     </div>
-    <page-control page-state="cmp.current">
+    <page-control page-state="current">
         <table>
             <thead>
                 <tr>
@@ -14,13 +14,13 @@
                 </tr>
             </thead>
             
-            <tbody ng-if="! cmp.loadedSuccessful">
+            <tbody ng-if="! loadedSuccessful">
                 <tr><td colspan="3">
                 <async-status parent="cmp"></async-status>
                 </td></tr>
             </tbody>
-            <tbody ng-if="cmp.loadedSuccessful">
-                <tr ng-repeat="film in cmp.films">
+            <tbody ng-if="loadedSuccessful">
+                <tr ng-repeat="film in films">
                     <td><a href="#/film/view/{{film.filmId}}">{{film.name}}</a></td>
                     <td>{{film.releaseYear}}</td>
                     <td>
@@ -48,7 +48,7 @@
                     </td>
                 </tr>
                     
-                <tr ng-if="cmp.noFilms">
+                <tr ng-if="noFilms">
                     <td colspan="4">No relevant results.</td>
                 </tr>
             </tbody>

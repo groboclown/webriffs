@@ -1,31 +1,31 @@
-<div ng-if="! cmp.detailsLoaded">
-    <div ng-if="! cmp.validFilm">
-    Invalid film ID {{cmp.inputFilmId}}.
+<div ng-if="! detailsLoaded">
+    <div ng-if="! validFilm">
+    Invalid film ID {{inputFilmId}}.
     </div>
-    <div ng-if="cmp.validFilm">
+    <div ng-if="validFilm">
     Loading film details from the server...
     </div>
 </div>
-<div ng-if="cmp.detailsLoaded" class="component">
+<div ng-if="detailsLoaded" class="component">
     <async-status parent="cmp"></async-status>
     <div>
-    Viewing {{cmp.name}} ({{cmp.releaseYear}})
+    Viewing {{name}} ({{releaseYear}})
     </div>
 
 
-    <div ng-if="cmp.canEdit">
-        <div ng-if="cmp.isEditing">
+    <div ng-if="canEdit">
+        <div ng-if="isEditing">
             <form onsubmit="return false;">
-                <filminfo-edit film-info="cmp.filmInfo"></filminfo-edit>
-                <input type="submit" ng-click="cmp.updateFilm()" ng-disabled="cmp.filmInfoDisabled" value="Save">
-                <button ng-click="cmp.revert()">Cancel</button>
+                <filminfo-edit film-info="filmInfo"></filminfo-edit>
+                <input type="submit" ng-click="updateFilm()" ng-disabled="filmInfoDisabled" value="Save">
+                <button ng-click="revert()">Cancel</button>
             </form>
         </div>
-        <div ng-if="! cmp.isEditing">
-            <span ng-click="cmp.edit()">Edit</span>
+        <div ng-if="! isEditing">
+            <span ng-click="edit()">Edit</span>
         </div>
-        <div ng-if="cmp.isEditing">
-            <div ng-repeat="link in cmp.links">
+        <div ng-if="isEditing">
+            <div ng-repeat="link in links">
                 <form onsubmit="return false;">
                     <span>{{link.name}}</span>
                     <span>{{link.desc}}</span>
@@ -33,36 +33,36 @@
                     <span ng-if="link.isMedia">Media source: <input type="checkbox" ng-model="link.isPlaybackMedia"></span>
                     <span><button ng-click="link.cancel()"
                         ng-disabled="link.isUnchanged">X</button></span>
-                    <span><input type="submit" ng-click="cmp.saveLink(link)"
+                    <span><input type="submit" ng-click="saveLink(link)"
                         ng-disabled="link.isUnchanged" value="Save"></span>
                     <span ng-if="link.hasError">{{link.error}}</span>
                 </form>
             </div>
         </div>
     </div>
-    <div ng-if="cmp.cannotEdit">
+    <div ng-if="cannotEdit">
     You don't have permissions to edit films.
     </div>
-    <div ng-if="cmp.notLoggedIn">
+    <div ng-if="notLoggedIn">
     You must log in to edit a film.
     </div>
-    <div ng-if="! cmp.isEditing">
+    <div ng-if="! isEditing">
         Links for the film:
-        <div ng-repeat="link in cmp.links"><span ng-if="link.isDefined">
+        <div ng-repeat="link in links"><span ng-if="link.isDefined">
             <span><a ng-href="{{link.url}}">{{link.name}}</a></span>
             <span>({{link.desc}})</span>
         </span></div>
-        <div ng-if="cmp.links.isEmpty">
+        <div ng-if="links.isEmpty">
             No links.
         </div>
     </div>
     
-    <create-branch film-id="cmp.filmId"></create-branch>
+    <create-branch film-id="filmId"></create-branch>
 
     <div>
         <!-- filter controls -->
     </div>
-    <page-control page-state="cmp.pageState">
+    <page-control page-state="pageState">
         <table>
             <thead>
                 <tr>
@@ -74,13 +74,13 @@
                 </tr>
             </thead>
             
-            <tbody ng-if="! cmp.loadedSuccessful">
+            <tbody ng-if="! loadedSuccessful">
                 <tr><td colspan="2">
                 <async-status parent="cmp"></async-status>
                 </td></tr>
             </tbody>
-            <tbody ng-if="cmp.loadedSuccessful">
-                <tr ng-repeat="branch in cmp.branches">
+            <tbody ng-if="loadedSuccessful">
+                <tr ng-repeat="branch in branches">
                      <td>
                         <span><a href="#/branch/view/{{branch.branchId}}/{{branch.headChangeId}}">{{branch.name}}</a></span>
                         <span>[{{branch.headChangeId}}]</span>
@@ -90,7 +90,7 @@
                      </td>
                 </tr>
                 
-                <tr ng-if="cmp.noBranches">
+                <tr ng-if="noBranches">
                     <td colspan="2">No viewable branches exist.</td>
                 </tr>
             </tbody>

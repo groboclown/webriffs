@@ -1,46 +1,46 @@
-<div ng-if="cmp.loggedIn">
+<div ng-if="loggedIn">
     You are already logged in. There's no need to create a new user.
 </div>
-<div ng-if="! cmp.loggedIn && cmp.createdUser">
+<div ng-if="! loggedIn && createdUser">
         You just created the user.  You may now log in with your credentials.
 </div>
-<div ng-if="! cmp.createdUser && ! cmp.createdUser" class="component">
+<div ng-if="! createdUser && ! createdUser" class="component">
     <div>
         <div>
             <span>
                 <label>Username: </label>
-                <input type="text" ng-model="cmp.username">
-                <span ng-if="cmp.usernameError != null">{{ cmp.usernameError }}</span>
+                <input type="text" ng-model="username">
+                <span ng-if="usernameError != null">{{ usernameError }}</span>
             </span>
         </div>
         <div>
             <span>
                 <label>Password: </label>
-                <input type="password" ng-model="cmp.password">
-                <span ng-if="cmp.passwordError != null">{{ cmp.passwordError }}</span>
+                <input type="password" ng-model="password">
+                <span ng-if="passwordError != null">{{ passwordError }}</span>
             </span>
         </div>
         <div>
             <span>
                 <label>Renter Password: </label>
-                <input type="password" ng-model="cmp.passwordMatch">
-                <span ng-if="cmp.passwordMatchError != null">{{ cmp.passwordMatchError }}</span>
+                <input type="password" ng-model="passwordMatch">
+                <span ng-if="passwordMatchError != null">{{ passwordMatchError }}</span>
             </span>
         </div>
         <div>
             <span>
                 <label>E-Mail: </label>
-                <input type="text" ng-model="cmp.contact">
-                <span ng-if="cmp.contactError != null">{{ cmp.contactError }}</span>
+                <input type="text" ng-model="contact">
+                <span ng-if="contactError != null">{{ contactError }}</span>
             </span>
         </div>
     </div>
     <div>
-        <span ng-if="cmp.hasError">
+        <span ng-if="hasError">
             <span>No Submit</span>
         </span>
-        <span ng-if="!cmp.hasError">
-            <span ng-click="cmp.submit()">Submit</span>
+        <span ng-if="!hasError">
+            <span ng-click="submit()">Submit</span>
         </span>
     </div>
 </div>

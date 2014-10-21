@@ -7,6 +7,8 @@ import 'package:angular/angular.dart';
 import 'package:logging/logging.dart';
 import 'package:videoplay/depot.dart';
 
+import 'package:cookie/cookie.dart' as cookie;
+
 import '../../json/branch_details.dart';
 import '../../json/film_details.dart';
 
@@ -25,8 +27,7 @@ import 'stopwatch_media.dart';
  */
 @Component(
     selector: 'media-controller',
-    templateUrl: 'packages/webriffs_client/component/media/media_component.html',
-    publishAs: 'cmp')
+    templateUrl: 'media_component.html')
 class MediaComponent implements ShadowRootAware, DetachAware {
     final Logger _log = new Logger('components.MediaComponent');
 
@@ -181,8 +182,6 @@ class StopWatchSubComponent {
 
     String get dialation => _timeEdit.dialation.name;
 
-    // FIXME allow the user to set the time dialation
-
     bool get loaded => _media != null;
 
     bool showDialationDetails = false;
@@ -196,10 +195,10 @@ class StopWatchSubComponent {
     VideoPlayerTimeProvider _timeProvider;
 
     StopWatchSubComponent() {
-        String cookie = document.cookie;
-
-        // FIXME inspect the cookie to see if the time dialation is set.
-        // If so, use that.
+        String dialation = cookie.get('dialation');
+        if (dialation != null) {
+            configureDialation(double.parse(dialation));
+        }
     }
 
     void toggleDialationDetails() {
@@ -217,8 +216,24 @@ class StopWatchSubComponent {
     }
 
     void setDialation(TimeDialation td) {
-        // FIXME set the cookie value.
+        if (td == null) {
+            return;
+        }
 
+        // set the cookie value.
+        double tdVal = td.actualToDisplayRatio;
+        if (tdVal == TimeDialation.NATIVE.actualToDisplayRatio) {
+            tdVal = 0.0;
+        } else if (tdVal == TimeDialation.NTSC_DVD.actualToDisplayRatio) {
+            tdVal = -1.0;
+        } else if (tdVal == TimeDialation.PAL_DVD.actualToDisplayRatio) {
+            tdVal = -2.0;
+        } else if (tdVal == TimeDialation.NTSC_TV_ON_PAL.actualToDisplayRatio) {
+            tdVal = -3.0;
+        } else if (tdVal == TimeDialation.PAL_TV_ON_NTSC.actualToDisplayRatio) {
+            tdVal = -4.0;
+        }
+        cookie.set('dialation', tdVal.toString());
 
         // Force the reloading of the media provider when the dialation
         // reloads.

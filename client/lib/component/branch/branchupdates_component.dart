@@ -19,8 +19,7 @@ import '../../util/paging.dart';
  */
 @Component(
     selector: 'branch-updates',
-    templateUrl: 'packages/webriffs_client/component/branch/branchupdates_component.html',
-    publishAs: 'cmp')
+    templateUrl: 'branchupdates_component.html')
 class BranchUpdatesComponent implements AttachAware, DetachAware {
     static final Duration TIMER_REPEAT = new Duration(seconds: 60);
 
@@ -29,7 +28,7 @@ class BranchUpdatesComponent implements AttachAware, DetachAware {
     PageState _pageState;
     Timer _repeater;
 
-    @NgOneWay('current-branch')
+    @NgOneWayOneTime('current-branch')
     set branchDetailsFuture(Future<BranchDetails> bdf) {
         bdf.then((BranchDetails bd) {
             _branchDetails = bd;
@@ -37,7 +36,7 @@ class BranchUpdatesComponent implements AttachAware, DetachAware {
         });
     }
 
-    @NgOneWay('max-change-count')
+    @NgOneWayOneTime('max-change-count')
     int maximumChangesShown = 5;
 
     BranchDetails _branchDetails;

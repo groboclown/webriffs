@@ -1,24 +1,24 @@
-<div ng-if="cmp.canCreateBranch" class="component">
-    <div ng-if="cmp.showCreateBranch">
+<div ng-if="canCreateBranch" class="component">
+    <div ng-if="showCreateBranch">
         <form onsubmit="return false;">
-           <async-status parent="cmp.lookupName"></async-status>
+           <async-status parent="lookupName"></async-status>
            <div>
-             <input type="text" ng-model="cmp.lookupName.name"
+             <input type="text" ng-model="lookupName.name"
                  ng-minlength="1"
                  ng-maxlength="200"
                  placeholder="Branch name"
                  required>
-             <span ng-if="! cmp.lookupName.valid">Invalid name</span>
+             <span ng-if="! lookupName.valid">Invalid name</span>
            </div>
            <div>
-             <input type="submit" ng-click="cmp.createBranch()" value="Create"
-                 ng-disabled="cmp.disabled">
-             <button ng-click="cmp.cancel()">Cancel</button>
+             <input type="submit" ng-click="createBranch()" value="Create"
+                 ng-disabled="disabled">
+             <button ng-click="cancel()">Cancel</button>
            </div>
         </form>
         <async-status parent="cmp"></async-status>
     </div>
-    <div ng-if="! cmp.showCreateBranch">
-        <span ng-click="cmp.showCreateBranch = true">Create a new branch</span>
+    <div ng-if="! showCreateBranch">
+        <span ng-click="showCreateBranch = true">Create a new branch</span>
     </div>
 </div>

@@ -1,30 +1,30 @@
 <div class="component">
-    <div ng-if="cmp.loggedIn">
-        <div>Hello, {{cmp.loggedInUser}}</div>
+    <div ng-if="loggedIn">
+        <div>Hello, {{loggedInUser}}</div>
         <div>
-            <span ng-click="cmp.logOut()">Log out</span>
+            <span ng-click="logOut()">Log out</span>
         </div>
     </div>
-    <form ng-if="! cmp.loggedIn" onsubmit="return false;">
+    <form ng-if="! loggedIn" onsubmit="return false;">
         <div>
             <div>
                 <span>
                     <label for="login.username">Username: </label>
-                    <input id="login.username" type="text" ng-model="cmp.username">
-                    <span ng-if="cmp.usernameError != null">{{ cmp.usernameError }}</span>
+                    <input id="login.username" type="text" ng-model="username">
+                    <span ng-if="usernameError != null">{{ usernameError }}</span>
                 </span>
             </div>
             <div>
                 <span>
                     <label for="login.password">Password: </label>
-                    <input id="login.password" type="password" ng-model="cmp.password">
-                    <span ng-if="cmp.passwordError != null">{{ cmp.passwordError }}</span>
+                    <input id="login.password" type="password" ng-model="password">
+                    <span ng-if="passwordError != null">{{ passwordError }}</span>
                 </span>
             </div>
         </div>
         <div>
-            <input type="submit" ng-click="cmp.submit()"
-                ng-disabled="cmp.hasError()" value="Login">
+            <input type="submit" ng-click="submit()"
+                ng-disabled="hasError()" value="Login">
         </div>
         <div>
             <a href="#/user/forgot">Forgot your password?</a>
