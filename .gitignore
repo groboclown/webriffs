@@ -13,6 +13,7 @@ client/web/img/packages
 client/web/img/packages/
 client/test/packages
 client/test/packages/
+client/.pub/
 
 # Or the files created by dart2js.
 *.dart.js
