@@ -82,6 +82,7 @@ class QuipPaging implements AsyncComponent {
 
 
     QuipPaging._(this._server, this.branchId, this.changeId) {
+        mediaAlertController.setQuips(quips);
     }
 
 
@@ -293,11 +294,11 @@ typedef void QuipDisplayHandler(QuipDetails quip);
  * of quips.
  */
 class QuipMediaAlertController extends BaseMediaAlertController {
-    // FIXME tight integration with the QuipPaging to be memory efficient
-    // when displaying the quips.
+    // FIXME needs tighter integration with the QuipPaging model, for when
+    // the times are updated.  That can throw off the current index.
 
     QuipDisplayHandler _handler;
-    List<QuipDetails> _quips = new List<QuipDetails>();
+    List<QuipDetails> _quips;
     int nextIndex;
 
 
@@ -318,7 +319,11 @@ class QuipMediaAlertController extends BaseMediaAlertController {
     @override
     void handleSkipBackwardsTo(int time) {
         super.handleSkipBackwardsTo(time);
-        while (nextIndex > 0 && _quips[nextIndex].timestamp > time) {
+        // Just in case the list size changed on us.
+        if (nextIndex > _quips.length) {
+            nextIndex = _quips.length;
+        }
+        while (nextIndex > 0 && _quips[nextIndex - 1].timestamp > time) {
             nextIndex--;
         }
     }
@@ -338,6 +343,7 @@ class QuipMediaAlertController extends BaseMediaAlertController {
         super.handleTimeEvent(currentTime, allowedToRunUpToThreshold);
         while (nextIndex < _quips.length &&
                 _quips[nextIndex].timestamp < allowedToRunUpToThreshold) {
+            print("=== time event ${currentTime} for ${_quips[nextIndex].text}");
             _handler(_quips[nextIndex]);
             nextIndex++;
         }

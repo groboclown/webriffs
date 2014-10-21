@@ -43,7 +43,8 @@ You do not have permissions to view the contents of this branch.
     
     <!-- quips flashing to the screen -->
     <div>
-        <div ng-repeat="quip in cmp.shownQuips">
+        <!-- FIXME set the style based on the edit state -->
+        <div ng-repeat="quip in cmp.shownQuips" class="popup_quip">
             <div>
                 <span ng-if="cmp.isEditable"
                     ng-click="cmp.editQuip(quip)">&#9998;</span>
@@ -72,15 +73,11 @@ You do not have permissions to view the contents of this branch.
             <input id="quip_text" type="text" ng-model="cmp.quipText">
         </div>
         <div>
-            <input type="submit" ng-click="cmp.savePendingQuip()" value="Save">
+            <input type="submit" ng-click="cmp.savePendingQuip()" value="Save"
+                ng-disabled="cmp.hasQuipTimeFormatError">
         </div>
         </form>
     </div>
-    <div ng-if="!cmp.canEditQuips">
-    Can't edit quips.
-    <span ng-if="cmp.isEditable">But branch is editable?</span>
-    </div>
-    
     
     <div>
         <!-- filter controls -->
@@ -105,9 +102,16 @@ You do not have permissions to view the contents of this branch.
             </tr>
         </tbody>
         <tbody ng-if="cmp.quipPaging.loadedSuccessful">
+            <!-- FIXME set the style based on the edit state -->
             <tr ng-repeat="quip in cmp.quipPaging.quips">
-                <td ng-if="cmp.isEditable"
-                    ng-click="cmp.editQuip(quip)">&#9998;</td>
+                <td ng-if="cmp.isEditable">
+                    <!-- FIXME make this state based on the actual state -->
+                    <!-- FIXME make the icons consistent across the site; this
+                    differs with the meaning in the piece_edit_component.html -->
+                    <span ng-click="cmp.editQuip(quip)">&#9998;</span>
+                    <span ng-click="cmp.deleteQuip(quip)">&#10005;</span>
+                    <span ng-click="cmp.revertQuip(quip)">&#9852;</span>
+                </td>
                 <td>{{cmp.getQuipTime(quip)}}</td>
                 <td>{{quip.text}}</td>
                 <td>

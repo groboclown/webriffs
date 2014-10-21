@@ -57,7 +57,7 @@ class VideoPlayerTimeProvider implements MediaTimeProvider {
     void attachToAlertController(MediaAlertController controller) {
         stream.listen((VideoPlayer vp) {
             controller.stop();
-            if (vp != null) {
+            if (vp != null && vp.status.playing) {
                 controller.start(vp);
             }
         });
@@ -224,22 +224,26 @@ class BaseMediaAlertController implements MediaAlertController {
         }
 
         // TODO experiment with different look-ahead times.
-        int lookAhead = interval.inMilliseconds ~/ 3;
+        int lookAhead = (interval.inMilliseconds * 2) ~/ 3;
 
         _timer = new Timer.periodic(interval, (Timer timer) {
             if (_current == null) {
-                _timer.cancel();
+print("=== Cancel Timer");
+                timer.cancel();
                 return;
             }
             int currentTime = _current.playbackTime.inMilliseconds;
             if (currentTime == _previousCheckedTime) {
+print("=== Same time as before");
                 return;
             }
             if (currentTime - _previousCheckedTime < 0) {
+print("=== Backwards in time");
                 handleSkipBackwardsTo(currentTime);
             }
             if (currentTime > _previousCheckedTime +
                     interval.inMilliseconds + lookAhead) {
+print("=== Forwards in time");
                 handleSkipForwardsTo(currentTime);
             }
             handleTimeEvent(currentTime, currentTime + lookAhead);

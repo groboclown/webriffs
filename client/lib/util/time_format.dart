@@ -22,9 +22,21 @@ class TimeFormatException implements Exception {
 
 
 class TimeDialation {
-    // FIXME add default implementations for NTSC and PAL
+    static const double NTSC_FPS = (24.0 * 1000.0 / 1001.0);
+    static const double PAL_FPS = 25.0;
+    static const double STANDARD_FILM_FPS = 24.0;
 
     static const NATIVE = const TimeDialation("native (1:1)", 1.0);
+    static const NTSC_DVD = const TimeDialation("NTSC Film (24:23.97)",
+            STANDARD_FILM_FPS / NTSC_FPS);
+    static const PAL_DVD = const TimeDialation("PAL Film (24:25)",
+            STANDARD_FILM_FPS/ PAL_FPS);
+    static const NTSC_TV_ON_PAL = const TimeDialation(
+            "NTSC TV on a PAL TV (23.97:25)",
+            NTSC_FPS / PAL_FPS);
+    static const PAL_TV_ON_NTSC = const TimeDialation(
+            "PAL TV on an NTSC TV (25:23.97)",
+            PAL_FPS / NTSC_FPS);
 
     static const String NULL_DISPLAYED_TIME = "0:00:00.00";
 

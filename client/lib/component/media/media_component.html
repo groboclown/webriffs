@@ -2,22 +2,46 @@
 loading media...
 </div>
 
-<!-- This will only be used if the player is loaded -->
+<!-- This will only be used if the video player is defined for the film. -->
 <div id="media"></div>
 
+
+<!-- Otherwise, the default stopwatch will be used. -->
 <div ng-if="cmp.loadedStopwatch" class="component">
-
-
-
-
-
   <form onsubmit="return false;">
     <div>
         <span ng-if="cmp.stopwatch.status.playing">Playing</span>
         <span ng-if="cmp.stopwatch.status.waiting"></span>
         <span>{{cmp.stopwatch.time}}</span>
-        <span>(playing back {{cmp.stopwatch.dialation}})</span>
-        <span class="bug">TODO: select between all the different playback speeds (NTSC, PAL, etc)</span>
+    </div>
+    <div>
+        <span ng-click="cmp.stopwatch.toggleDialationDetails()">
+            <span ng-if="cmp.stopwatch.showDialationDetails">[||]</span>
+            <span ng-if="! cmp.stopwatch.showDialationDetails">[-]</span>
+        </span>
+        <span>(play back at {{cmp.stopwatch.dialation}})</span>
+        <div ng-if="cmp.stopwatch.showDialationDetails">
+            <div ng-click="cmp.stopwatch.toggleDialationHelp()">
+                <span ng-if="! cmp.stopwatch.showDialationHelp">[Show help]</span>
+                <span ng-if="cmp.stopwatch.showDialationHelp">[Hide help]</span>
+            </div>
+            <div ng-if="cmp.stopwatch.showDialationHelp">
+        <p>
+        The play back speed is very important to keeping the quips showing in
+        sync with the video.  Different displays will play back a video at
+        different rates, so you need to know what you're using to view the
+        video - selecting the wrong one can mean that by the 1 hour mark,
+        comments may be up to 6 minutes out of sync!  If you're viewing the
+        video on a computer, then you should probably stick to the native
+        (1:1) ratio.  If you're watching a British TV show (PAL) in the U.S.A.
+        (NTSC), then you want the PAL TV on NTSC (25:24.96) ratio.  For a more
+        in-depth study of this issue, see
+        <a href="http://www.paradiso-design.net/videostandards.html">this
+        page on video standards</a>.
+        </p>
+            </div>
+            <span class="bug">TODO: select between all the different playback speeds (NTSC, PAL, etc)</span>
+        </div>
     </div>
     <div>
         <span ng-if="cmp.stopwatch.status.playing" ng-click="cmp.stopwatch.pause()">[ Pause ]</span>
@@ -40,7 +64,8 @@ loading media...
     <span class="bug">TODO: disable setting time if there's a time format error</span>
     <div>
         <input type="text" ng-model="cmp.stopwatch.timeField">
-        <input type="submit" ng-click="cmp.stopwatch.setTime()" value="Set time">
+        <input type="submit" ng-click="cmp.stopwatch.setTime()" value="Set time"
+            ng-disabled="cmp.stopwatch.hasTimeFieldFormatError">
         <span ng-if="cmp.stopwatch.hasTimeFieldFormatError">Bad time format</span>
     </div>
     <div>

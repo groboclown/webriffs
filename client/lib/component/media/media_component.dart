@@ -58,7 +58,7 @@ class MediaComponent implements ShadowRootAware, DetachAware {
 
     @NgOneWay('time')
     set timeProvider(VideoPlayerTimeProvider p) {
-        print("time provider set");
+        stopwatch.setTimeProvider(p);
         _player.future.then((VideoPlayer vp) { p.player = vp; });
     }
 
@@ -149,7 +149,10 @@ class MediaComponent implements ShadowRootAware, DetachAware {
 
 
 
-
+/**
+ * This component uses cookies to store the user's preferences for the
+ * time dialation.
+ */
 class StopWatchSubComponent {
     //static final Logger _log = new Logger('media.StopwatchMedia');
 
@@ -182,9 +185,69 @@ class StopWatchSubComponent {
 
     bool get loaded => _media != null;
 
+    bool showDialationDetails = false;
+
+    bool showDialationHelp = false;
+
     VideoPlayerStatus get status => _media == null
             ? VideoPlayerStatus.ENDED
             : _media.status;
+
+    VideoPlayerTimeProvider _timeProvider;
+
+    StopWatchSubComponent() {
+        String cookie = document.cookie;
+
+        // FIXME inspect the cookie to see if the time dialation is set.
+        // If so, use that.
+    }
+
+    void toggleDialationDetails() {
+        showDialationDetails = ! showDialationDetails;
+    }
+
+
+    void toggleDialationHelp() {
+        showDialationHelp = ! showDialationHelp;
+    }
+
+
+    void setTimeProvider(VideoPlayerTimeProvider tp) {
+        _timeProvider = tp;
+    }
+
+    void setDialation(TimeDialation td) {
+        // FIXME set the cookie value.
+
+
+        // Force the reloading of the media provider when the dialation
+        // reloads.
+
+        // TODO check to make sure this propigates down to the quips; if not,
+        // it may force a page reload.
+        _media.timeDialation = td;
+        _timeProvider.player = _media;
+    }
+
+
+    void configureDialation(double ratio) {
+        // First, check for standard ratios.
+        if (ratio == null || (ratio < 0.05 && ratio > -0.05)) { // NULL or 0
+            setDialation(TimeDialation.NATIVE);
+        } else if (ratio < -0.95 && ratio > -1.05) { // -1
+            setDialation(TimeDialation.NTSC_DVD);
+        } else if (ratio < -1.95 && ratio > -2.05) { // -2
+            setDialation(TimeDialation.PAL_DVD);
+        } else if (ratio < -2.95 && ratio > -3.05) { // -3
+            setDialation(TimeDialation.NTSC_TV_ON_PAL);
+        } else if (ratio < -3.95 && ratio > -4.05) { // -4
+            setDialation(TimeDialation.PAL_TV_ON_NTSC);
+        } else if (ratio < 0) {
+            // Problem : bad ratio; do nothing
+        } else {
+            setDialation(new TimeDialation("Custom", ratio));
+        }
+    }
 
     void start() {
         if (_media != null) {

@@ -52,11 +52,11 @@ class EditBranchComponent extends AbstractBranchComponent {
 
     /** Converts the [displayDuration] into seconds, based on the number of
      * characters in the quip. */
-    static final double DISPLAY_DURATION_SCALE = 0.02;
+    static final double DISPLAY_DURATION_SCALE = 0.1;
 
     /** Minimum time (seconds) to allow a quip to be shown; multiplied by the
      * [displayDuration]. */
-    static final double MIN_DISPLAY_DURATION = 2.0;
+    static final double MIN_DISPLAY_DURATION = 4.0;
 
     final ServerStatusService _server;
     final UserService _user;
@@ -86,12 +86,15 @@ class EditBranchComponent extends AbstractBranchComponent {
     // Should never be null.
     QuipDetails pendingQuip = new QuipDetails.pending();
 
+    // TODO look at using time_format.dart/TimeDisplayEdit
     int _quipTime;
     String _quipTimeStr;
     String quipText;
     bool get quipModified => (quipText != pendingQuip.text) ||
             (_quipTime != pendingQuip.timestamp);
     String get quipTime => _quipTimeStr;
+    String _quipTimeError = null;
+    bool get hasQuipTimeFormatError => _quipTimeError != null;
 
 
     set quipTime(String timestr) {
@@ -99,9 +102,13 @@ class EditBranchComponent extends AbstractBranchComponent {
             _quipTime = null;
             _quipTimeStr = null;
         } else {
-            _quipTime = videoTimeProvider.convertToServerTime(timestr);
-            _quipTimeStr = videoTimeProvider.dialation.displayString(
-                _quipTime / 1000.0);
+            try {
+                _quipTime = videoTimeProvider.convertToServerTime(timestr);
+                _quipTimeStr = videoTimeProvider.dialation.displayString(
+                    _quipTime / 1000.0);
+            } catch (e) {
+                _quipTimeError = "Invalid time format";
+            }
         }
     }
 
@@ -147,6 +154,7 @@ class EditBranchComponent extends AbstractBranchComponent {
             double secondsDuration = qd.text.trim().length *
                     DISPLAY_DURATION_SCALE * displayDuration;
             double minDuration = MIN_DISPLAY_DURATION * displayDuration;
+print("${qd.text.trim().length} -> ${secondsDuration}");
             if (secondsDuration < minDuration) {
                 secondsDuration = minDuration;
             }
