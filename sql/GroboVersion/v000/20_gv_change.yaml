@@ -1,9 +1,10 @@
 # Stores the changed items.  It can be in one of three states:
-# - Committed - the change is put into the branch and can be publicly viewed.
+# - Committed - the change is put into the branch and can be publicly viewed
+#     (state = 1).
 # - Pending - the change is being altered by one individual, and usually can't
-#     be seen by others.
+#     be seen by others (state = 0).
 # - Deleted - the pending change was committed, causing a new committed change
-#     to be added, and the old one was removed.
+#     to be added, and the old one was removed (state = 2).
 
 
 table:

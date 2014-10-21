@@ -1,47 +1,28 @@
-# The pending (not-submitted) user quips along with the pending-version
-# (committed) for the branch.
-
-# This will be sorted on the pending quips, but it still needs a full sort
-# on the Timestamp_Millis.
+# The user's base change version quips that haven't been changed.
 
 view:
-    viewName: V_QUIP_USER_ALL
+    viewName: V_QUIP_USER_UNCHANGED
     query: "
         SELECT
-            qup.User_Id User_Id
-            , qup.Gv_Branch_Id Gv_Branch_Id
-            , qup.Gv_Change_Id Gv_Change_Id
+            quv.User_Id User_Id
+            , quv.Gv_Branch_Id Gv_Branch_Id
+            , quv.Gv_Change_Id Gv_Change_Id
             
-            , qup.Gv_Item_Id Gv_Item_Id
-            
-            , (CASE WHEN quv.Gv_Change_Id IS NULL THEN 0 ELSE 1 END) +
-              (CASE WHEN qup.Gv_Change_Id IS NULL THEN 0 ELSE 2 END)
-                  Populated_State
-            
-            , COALESCE(qup.Gv_Item_Version_Id, quv.Gv_Item_Version_Id)
-                  Gv_Item_Version_Id
-            , qup.Gv_Item_Version_Id Pending_Gv_Item_Version_Id
+            , quv.Gv_Item_Id Gv_Item_Id
             , quv.Gv_Item_Version_Id Committed_Gv_Item_Version_Id
-            
-            , qup.Text_Value Pending_Text_Value
             , quv.Text_Value Committed_Text_Value
-            
-            , qup.Tags Pending_Tags
             , quv.Tags Committed_Tags
-            
-            , COALESCE(qup.Timestamp_Millis, quv.Timestamp_Millis) Timestamp_Millis
-            , qup.Timestamp_Millis Pending_Timestamp_Millis
             , quv.Timestamp_Millis Committed_Timestamp_Millis
-            
-            , COALESCE(qup.Updated_On, quv.Updated_On) Updated_On
-            , qup.Updated_On Pending_Updated_On
             , quv.Updated_On Committed_Updated_On
-        FROM V_QUIP_USER_PENDING qup
+        FROM V_QUIP_USER_VERSION quv
         
         LEFT OUTER JOIN
-            V_QUIP_USER_VERSION quv
+            V_QUIP_USER_PENDING qup
                 ON qup.Gv_Item_Id = quv.Gv_Item_Id
                   AND qup.Gv_Branch_Id = quv.Gv_Branch_Id
+                  AND quv.User_Id = qup.User_Id
+        
+        WHERE qup.Gv_Item_Id is NULL
         "
     columns:
         - column:

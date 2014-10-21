@@ -1,0 +1,123 @@
+# The pending (not-submitted) user quips along with the previous version
+# pulled from the pending-version
+# (committed) for the branch, or null if it is a new quip.
+
+view:
+    viewName: V_QUIP_USER_NEW_CHANGED
+    query: "
+        SELECT
+            qup.User_Id User_Id
+            , qup.Gv_Branch_Id Gv_Branch_Id
+            , qup.Gv_Change_Id Gv_Change_Id
+            
+            , qup.Gv_Item_Id Gv_Item_Id
+            
+            , qup.Gv_Item_Version_Id Pending_Gv_Item_Version_Id
+            , quv.Gv_Item_Version_Id Committed_Gv_Item_Version_Id
+            
+            , qup.Text_Value Pending_Text_Value
+            , quv.Text_Value Committed_Text_Value
+            
+            , qup.Tags Pending_Tags
+            , quv.Tags Committed_Tags
+            
+            , qup.Timestamp_Millis Pending_Timestamp_Millis
+            , quv.Timestamp_Millis Committed_Timestamp_Millis
+            
+            , qup.Updated_On Pending_Updated_On
+            , quv.Updated_On Committed_Updated_On
+        FROM V_QUIP_USER_PENDING qup
+        
+        LEFT OUTER JOIN
+            V_QUIP_USER_VERSION quv
+                ON qup.Gv_Branch_Id = quv.Gv_Branch_Id
+                  AND qup.User_Id = quv.User_Id
+                  AND qup.Gv_Item_Id = quv.Gv_Item_Id
+        "
+    columns:
+        - column:
+            name: User_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: USER
+                    column: User_Id
+        - column:
+            name: Gv_Branch_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_BRANCH
+                    column: Gv_Branch_Id
+        - column:
+            name: Gv_Change_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_CHANGE
+                    column: Gv_Change_Id
+        - column:
+            name: Gv_Item_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_ITEM
+                    column: Gv_Item_Id
+        - column:
+            name: Pending_Gv_Item_Version_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_ITEM_VERSION
+                    column: Gv_Item_Version_Id
+        - column:
+            name: Committed_Gv_Item_Version_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_ITEM_VERSION
+                    column: Gv_Item_Version_Id
+                    
+        - column:
+            name: Pending_Text_Value
+            type: nvarchar(2048)
+            constraints:
+                - constraint:
+                    type: not null
+        - column:
+            name: Committed_Text_Value
+            type: nvarchar(2048)
+            constraints:
+                - constraint:
+                    type: not null
+
+        - column:
+            name: Pending_Tags
+            type: varchar(1301)
+        - column:
+            name: Committed_Tags
+            type: varchar(1301)
+
+        - column:
+            name: Pending_Timestamp_Millis
+            type: int
+        - column:
+            name: Committed_Timestamp_Millis
+            type: int
+
+        - column:
+            name: Pending_Updated_On
+            type: timestamp
+        - column:
+            name: Committed_Updated_On
+            type: timestamp
+    constraints:
+        - constraint:
+            type: fake index
+            columns: User_Id, Gv_Branch_Id

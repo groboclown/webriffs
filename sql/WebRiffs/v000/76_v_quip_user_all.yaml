@@ -1,0 +1,192 @@
+# The pending (not-submitted) user quips along with the pending-version
+# (committed) for the branch.
+
+# This will be sorted on the pending quips, but it still needs a full sort
+# on the Timestamp_Millis.
+
+view:
+    viewName: V_QUIP_USER_ALL
+    query: "
+        SELECT
+            qunc.User_Id User_Id
+            , qunc.Gv_Branch_Id Gv_Branch_Id
+            , qunc.Gv_Change_Id Gv_Change_Id
+            
+            , qunc.Gv_Item_Id Gv_Item_Id
+            
+            , CASE
+                WHEN (qunc.Committed_Gv_Item_Version_Id IS NULL)
+                    THEN 1
+                ELSE 3
+              END
+                  Populated_State
+            
+            , COALESCE(qunc.Pending_Gv_Item_Version_Id, qunc.Committed_Gv_Item_Version_Id)
+                  Gv_Item_Version_Id
+            , qunc.Pending_Gv_Item_Version_Id Pending_Gv_Item_Version_Id
+            , qunc.Committed_Gv_Item_Version_Id Committed_Gv_Item_Version_Id
+            
+            , COALESCE(qunc.Pending_Text_Value, qunc.Committed_Text_Value) Text_Value
+            , qunc.Pending_Text_Value Pending_Text_Value
+            , qunc.Committed_Text_Value Committed_Text_Value
+            
+            , COALESCE(qunc.Pending_Tags, qunc.Committed_Tags) Tags
+            , qunc.Pending_Tags Pending_Tags
+            , qunc.Committed_Tags Committed_Tags
+            
+            , COALESCE(qunc.Pending_Timestamp_Millis, quv.Committed_Timestamp_Millis) Timestamp_Millis
+            , qup.Pending_Timestamp_Millis Pending_Timestamp_Millis
+            , quv.Committed_Timestamp_Millis Committed_Timestamp_Millis
+            
+            , COALESCE(qunc.Pending_Updated_On, qunc.Committed_Updated_On) Updated_On
+            , qunc.Pending_Updated_On Pending_Updated_On
+            , quv.Committed_Updated_On Committed_Updated_On
+        FROM V_QUIP_USER_NEW_CHANGED qunc
+        
+    UNION
+    
+    SELECT
+        quu.User_Id User_Id
+        , quu.Gv_Branch_Id Gv_Branch_Id
+        , quu.Gv_Change_Id Gv_Change_Id
+        
+        , quu.Gv_Item_Id Gv_Item_Id
+
+        , 2 Populated_State
+        
+        , quu.Committed_Gv_Item_Version_Id Gv_Item_Version_Id
+        , NULL Pending_Gv_Item_Version_Id
+        , quu.Committed_Gv_Item_Version_Id Committed_Gv_Item_Version_Id
+        
+        , quu.Committed_Text_Value Text_Value
+        , NULL Pending_Text_Value
+        , quu.Committed_Text_Value Committed_Text_Value
+        
+        , quu.Committed_Tags Tags
+        , NULL Pending_Tags
+        , quu.Committed_Tags Committed_tags
+        
+        , quu.Committed_Timestamp_Millis Timestamp_Millis
+        , NULL Pending_Timestamp_Millis
+        , quu.Committed_Timestamp_Millis Committed_Timestamp_Millis
+        
+        , quu.Committed_Updated_On Updated_On
+        , NULL Pending_Updated_On
+        , quu.Committed_Updated_On Committed_Updated_On
+        
+    FROM 
+        V_QUIP_USER_UNCHANGED quu
+        "
+    columns:
+        - column:
+            name: User_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: USER
+                    column: User_Id
+        - column:
+            name: Gv_Branch_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_BRANCH
+                    column: Gv_Branch_Id
+        - column:
+            name: Gv_Change_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_CHANGE
+                    column: Gv_Change_Id
+        - column:
+            name: Gv_Item_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_ITEM
+                    column: Gv_Item_Id
+        - column:
+            name: Populated_State
+            type: int
+            comment: "
+            1 = only in the pending set;
+            2 = only in the committed set;
+            3 = both pending and committed.
+              "
+            constraints:
+                - constraint:
+                    type: not null
+        - column:
+            name: Gv_Item_Version_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_ITEM_VERSION
+                    column: Gv_Item_Version_Id
+        - column:
+            name: Pending_Gv_Item_Version_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_ITEM_VERSION
+                    column: Gv_Item_Version_Id
+        - column:
+            name: Committed_Gv_Item_Version_Id
+            type: int
+            constraints:
+                - constraint:
+                    type: foreign key
+                    table: GV_ITEM_VERSION
+                    column: Gv_Item_Version_Id
+        - column:
+            name: Text_Value
+            type: nvarchar(2048)
+            constraints:
+                - constraint:
+                    type: not null
+        - column:
+            name: Pending_Text_Value
+            type: nvarchar(2048)
+        - column:
+            name: Committed_Text_Value
+            type: nvarchar(2048)
+
+        - column:
+            name: Tags
+            type: varchar(1301)
+        - column:
+            name: Pending_Tags
+            type: varchar(1301)
+        - column:
+            name: Committed_Tags
+            type: varchar(1301)
+
+        - column:
+            name: Timestamp_Millis
+            type: int
+        - column:
+            name: Pending_Timestamp_Millis
+            type: int
+        - column:
+            name: Committed_Timestamp_Millis
+            type: int
+        - column:
+            name: Updated_On
+            type: timestamp
+        - column:
+            name: Pending_Updated_On
+            type: timestamp
+        - column:
+            name: Committed_Updated_On
+            type: timestamp
+    constraints:
+        - constraint:
+            type: fake index
+            columns: User_Id, Gv_Branch_Id

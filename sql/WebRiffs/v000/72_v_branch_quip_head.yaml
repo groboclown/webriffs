@@ -1,17 +1,20 @@
-# The head version for a branch, which includes both the quip versions and
-# the branch details itself.  This is to pull the top version number when the
-# user requests it.
+# The head version for a branch's quips.  This is to pull the top version
+# number when the user requests it.
 
 view:
     viewName: V_BRANCH_QUIP_HEAD
     query: "
         SELECT
-            bcv.Gv_Branch_Id Gv_Branch_Id,
-            MAX(bcv.Gv_Change_Id) Gv_Change_Id
+            qv.Gv_Branch_Id Gv_Branch_Id,
+            MAX(qv.Gv_Change_Id) Gv_Change_Id
         FROM
-            V_GV_BRANCH_CHANGE_VERSION bcv
+            V_Q_VERSION qv
+        INNER JOIN GV_CHANGE ch
+            ON qv.Gv_Change_Id = ch.Gv_Change_Id
+        WHERE
+            ch.Active_State = 1
         GROUP BY
-            bcv.Gv_Branch_Id
+            qv.Gv_Branch_Id
         "
     columns:
         - column:
