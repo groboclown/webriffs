@@ -48,7 +48,7 @@ You do not have permissions to view the contents of this branch.
             <div>
                 <span ng-if="isEditable"
                     ng-click="editQuip(quip)">&#9998;</span>
-                <span>{{quip.timestamp}}</span>
+                <span>{{getQuipTime(quip)}}</span>
                 <span ng-repeat="tag in quip.tags">
                     {{tag.name}}
                 </span>

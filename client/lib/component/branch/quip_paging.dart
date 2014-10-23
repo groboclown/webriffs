@@ -33,6 +33,8 @@ class QuipPaging implements AsyncComponent {
             new StreamController.broadcast();
     final int branchId;
 
+    final QuipUpdateComponent quipUpdates;
+
     /**
      * Updated with each change that's loaded in.  For pending changes, this
      * is `null`.
@@ -81,16 +83,19 @@ class QuipPaging implements AsyncComponent {
     }
 
 
-    QuipPaging._(this._server, this.branchId, this.changeId) {
+    QuipPaging._(ServerStatusService server, int branchId, this.changeId) :
+            _server = server,
+            branchId = branchId,
+            quipUpdates = new QuipUpdateComponent(server, branchId) {
         mediaAlertController.setQuips(quips);
     }
 
 
-    void saveQuip(QuipDetails quip) {
+    Future saveQuip(QuipDetails quip) {
         if (quip.id == null) {
-            newQuip(quip);
+            return newQuip(quip);
         } else {
-            updateQuip(quip);
+            return updateQuip(quip);
         }
     }
 
@@ -98,37 +103,25 @@ class QuipPaging implements AsyncComponent {
     /**
      * User added a new quip.  Insert it into the list and save to the server.
      */
-    void newQuip(QuipDetails pendingQuip) {
-        final String path = '/branch/${branchId}/pending/quip';
-        _server.createCsrfToken('create_quip').then((String csrfToken) {
-            _server.put(path, csrfToken, data: pendingQuip.toJson())
-                .then((ServerResponse resp) {
-                    if (resp.wasError) {
-                        // FIXME handle the error
-                        throw new Exception("Server error");
-                    } else if (resp.jsonData == null) {
-                        // FIXME handle the other error
-                        throw new Exception("no json data  returned");
-                    } else {
-                        QuipDetails newQ = new QuipDetails.fromJson(
-                                branchId, resp.jsonData);
-                        _mergeQuips([ newQ ]);
-                    }
-                });
-        });
+    Future newQuip(QuipDetails pendingQuip) {
+        return quipUpdates.newQuip(pendingQuip)
+            .then((QuipDetails newQuip) {
+                _mergeQuips([ newQuip ]);
+            });
     }
 
 
-    void deleteQuip(QuipDetails quip) {
+    Future deleteQuip(QuipDetails quip) {
         if (quip.id == null && quip.changed) {
             // There's a potential issue here with this logic.  There's the
             // situation where a save could be in-transit for a new object,
             // and the user clicks on delete for it.
             // FIXME handle this situation!
             quips.remove(quip);
+            return new Future.value();
         } else {
-            // FIXME
-            throw new Exception("DELETE QUIP: not completed yet");
+            quip.pendingDelete = true;
+            return quipUpdates.deleteQuip(quip);
         }
     }
 
@@ -136,13 +129,16 @@ class QuipPaging implements AsyncComponent {
     /**
      * Save the existing quip to the server.
      */
-    void updateQuip(QuipDetails quip) {
-        if (quip.committedTimestamp != quip.timestamp) {
-            _updatedTime(quip);
-        }
+    Future updateQuip(QuipDetails quip) {
+        return new Future(() {
+            // Updating the time in our list may take a long time, so
+            // move it into a future.
+            if (quip.committedTimestamp != quip.timestamp) {
+                _updatedTime(quip);
+            }
 
-        // FIXME
-        throw new Exception("UPDATE QUIP: not completed yet");
+            return quipUpdates.updateQuip(quip);
+        });
     }
 
 
@@ -252,24 +248,13 @@ class QuipPaging implements AsyncComponent {
     }
 
 
-    void commitChanges() {
-        // FIXME if there are pending changes that haven't been pushed to the
-        // server, push them now.
-
-        _server.createCsrfToken("commit_change")
-        .then((String token) =>
-                _server.post("/branch/${branchId}/pending", token,
-                        data: { "action": "commit" }))
-        .then((ServerResponse resp) {
-
-        });
+    Future commitChanges() {
+        return quipUpdates.commitChanges();
     }
 
 
     Future<bool> abandonChanges() {
-        return _server.createCsrfToken("delete_change")
-        .then((String token) =>
-                _server.delete("/branch/${branchId}/pending", token))
+        return quipUpdates.abandonChanges()
         .then((ServerResponse resp) {
             if (resp.wasError) {
                 _error = resp.message;
@@ -351,3 +336,103 @@ class QuipMediaAlertController extends BaseMediaAlertController {
 }
 
 
+
+/**
+ * Handles the server requests related to updating the state of the quips,
+ * and the user pending change management.
+ */
+class QuipUpdateComponent extends BasicSingleRequestComponent {
+    final int branchId;
+
+    final List<QuipDetails> failedCreate = [];
+    final List<QuipDetails> failedUpdate = [];
+    final List<QuipDetails> failedDelete = [];
+
+
+    QuipUpdateComponent(ServerStatusService server, this.branchId) :
+        super(server);
+
+    @override
+    void reload() {}
+
+
+    Future<ServerResponse> createPendingChange() {
+        return addRequestWithToken((ServerStatusService server, String csrf) =>
+            server.put("/branch/${branchId}/pending", csrf,
+                data: { 'changes': -1 }),
+            "create_change");
+    }
+
+
+    Future<ServerResponse> commitChanges() {
+        // TODO if there are pending changes that haven't been pushed to the
+        // server, push them now.
+
+        return addRequestWithToken((ServerStatusService server, String csrf) =>
+            server.post("/branch/${branchId}/pending", csrf,
+                    data: { "action": "commit" }),
+            "commit_change");
+    }
+
+
+    Future<ServerResponse> abandonChanges() {
+        return addRequestWithToken((ServerStatusService server, String csrf) =>
+            server.delete("/branch/${branchId}/pending", csrf),
+            "delete_change");
+    }
+
+
+    /**
+     * User added a new quip.  Insert it into the list and save to the server.
+     */
+    Future<QuipDetails> newQuip(QuipDetails pendingQuip) {
+        return addRequestWithToken((ServerStatusService server, String csrf) =>
+                server.put('/branch/${branchId}/pending/quip', csrf,
+                    data: pendingQuip.toJson()),
+                "create_quip")
+            .then((ServerResponse resp) {
+                if (resp.wasError) {
+                    failedCreate.add(pendingQuip);
+                    throw new Exception("Server error: ${resp.message}");
+                } else if (resp.jsonData == null) {
+                    throw new Exception("Server rejected quip.");
+                } else {
+                    QuipDetails newQ = new QuipDetails.fromJson(
+                            branchId, resp.jsonData);
+                    return newQ;
+                }
+            });
+    }
+
+
+    Future<ServerResponse> updateQuip(QuipDetails quip) {
+        return addRequestWithToken((ServerStatusService server, String csrf) =>
+            server.post('/branch/${branchId}/pending/quip/${quip.id}', csrf,
+                data: quip.toJson()),
+            "update_quip")
+        .then((ServerResponse resp) {
+            if (resp.wasError) {
+                failedUpdate.add(quip);
+            }
+            return resp;
+        });
+    }
+
+
+    Future<ServerResponse> deleteQuip(QuipDetails quip) {
+        return addRequestWithToken((ServerStatusService server, String csrf) =>
+            server.delete('/branch/${branchId}/pending/quip/${quip.id}', csrf),
+            "delete_quip")
+        .then((ServerResponse resp) {
+            if (resp.wasError) {
+                failedDelete.add(quip);
+            }
+            return resp;
+        });
+    }
+
+
+    Future<ServerResponse> massUpdates(List<QuipDetails> changed) {
+        throw new UnimplementedError();
+    }
+}

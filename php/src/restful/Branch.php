@@ -317,7 +317,7 @@ class BranchObjUserPendingVersion extends Resource {
             // FIXME Add MERGE support.
             // MERGE will move the user's branched-from change to the current
             // head
-            return array(500, array("message" => "unsupported action"));
+            return array(406, array("message" => "unsupported action"));
         }
     }
 }
@@ -452,6 +452,7 @@ class BranchObjQuipItem extends Resource {
      * returned (no content).
      *
      * @method GET
+     * @authenticated
      */
     function fetch() {
         // FIXME

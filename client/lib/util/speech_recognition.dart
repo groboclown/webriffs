@@ -196,13 +196,17 @@ class JsLowSpeechService extends LowSpeechService {
 
         _js['maxAlternatives'] = 5;
 
+        _js['interimResults'] = true;
+
         // FIXME this should only be set to true if the site is on http.
         _js['continuous'] = true;
 
         _js['onStart'] = () {
+print("+++ Speech: onStart");
             _startEvents.add("");
         };
         _js['onEnd'] = () {
+print("+++ Speech: onEnd");
             if (_running) {
                 // restart at most once a second
                 Duration sinceStart = _startTime.difference(new DateTime.now());
@@ -217,6 +221,7 @@ class JsLowSpeechService extends LowSpeechService {
             }
         };
         _js['onError'] = (JsObject event) {
+print("+++ Speech: onError: ${event}");
             // FIXME if the error is severe enough, it means we just stop
             // trying to connect.
 
@@ -224,10 +229,12 @@ class JsLowSpeechService extends LowSpeechService {
                     _startTime));
         };
         _js['onResult'] = (JsObject event) {
+print("+++ Speech: onResult: ${event}");
             List<String> alternatives = [];
             JsObject res = event['results'][event['resultIndex']];
             for (int i = 0; i < res['length']; i++) {
                 String text = res.callMethod('item', [ i ]);
+print("      [${text}]");
                 alternatives.add(text.trim());
             }
             _resultEvents.add(new SpeechResult(alternatives, res['isFinal']));
@@ -237,6 +244,7 @@ class JsLowSpeechService extends LowSpeechService {
 
     @override
     void start() {
+print("+++ Speech: starting capture");
         _running = true;
         _startTime = new DateTime.now();
         _js.callMethod('start', []);
@@ -245,6 +253,7 @@ class JsLowSpeechService extends LowSpeechService {
 
     @override
     void end() {
+print("+++ Speech: ending capture");
         _running = false;
         _js.callMethod('abort', []);
     }

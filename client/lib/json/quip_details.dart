@@ -15,6 +15,8 @@ class QuipDetails {
     int _committedTimestamp = null;
     bool _changed = false;
 
+    bool pendingDelete = false;
+
 
     int get id => _quipId;
     String get text => _text;

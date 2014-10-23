@@ -238,6 +238,18 @@ class EditBranchComponent extends AbstractBranchComponent {
 
     void editQuip(QuipDetails quip) {
         pendingQuip = quip;
+        quipText = quip.text;
+        _quipTimeStr = getQuipTime(quip);
+        _quipTimeError = null;
+        _quipTime = quip.timestamp;
+    }
+
+    void deleteQuip(QuipDetails quip) {
+        branchDetails.then((BranchDetails branch) {
+            if (branch.userCanEditQuips) {
+
+            }
+        });
     }
 
     void setPendingQuipTime() {
