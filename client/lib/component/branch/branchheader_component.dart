@@ -20,7 +20,7 @@ import '../piece_edit.dart';
  */
 @Component(
     selector: 'branch-header',
-    templateUrl: 'branchheader_component.html'
+    templateUrl: 'packages/webriffs_client/component/branch/branchheader_component.html'
     //cssUrl: 'branchheader_component.css'
     )
 class BranchHeaderComponent extends BasicSingleRequestComponent {

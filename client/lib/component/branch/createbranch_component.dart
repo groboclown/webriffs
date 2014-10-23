@@ -14,7 +14,7 @@ import '../../util/async_component.dart';
  */
 @Component(
     selector: 'create-branch',
-    templateUrl: 'createbranch_component.html')
+    templateUrl: 'packages/webriffs_client/component/branch/createbranch_component.html')
 class CreateBranchComponent extends RequestHandlingComponent {
     final ServerStatusService _server;
     final UserService _user;

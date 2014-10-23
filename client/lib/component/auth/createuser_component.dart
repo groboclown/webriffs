@@ -9,7 +9,7 @@ import '../../service/server.dart';
 
 @Component(
     selector: 'create-user',
-    templateUrl: 'createuser_component.html')
+    templateUrl: 'packages/webriffs_client/component/auth/createuser_component.html')
 class CreateUserComponent {
     final Logger _log = new Logger('components.CreateUserComponent');
 

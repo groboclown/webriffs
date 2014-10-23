@@ -19,7 +19,7 @@ import '../../util/paging.dart';
  */
 @Component(
     selector: 'branch-updates',
-    templateUrl: 'branchupdates_component.html')
+    templateUrl: 'packages/webriffs_client/component/branch/branchupdates_component.html')
 class BranchUpdatesComponent implements AttachAware, DetachAware {
     static final Duration TIMER_REPEAT = new Duration(seconds: 60);
 

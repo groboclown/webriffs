@@ -5,7 +5,7 @@ import 'piece_edit.dart';
 
 @Component(
     selector: 'piece-editor',
-    templateUrl: 'piece_edit_component.html')
+    templateUrl: 'packages/webriffs_client/component/piece_edit_component.html')
 class PieceEditComponent {
     @NgOneWayOneTime('piece')
     PieceEdit piece;

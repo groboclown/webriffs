@@ -14,7 +14,7 @@ import '../../util/async_component.dart';
  */
 @Component(
     selector: 'film-list',
-    templateUrl: 'filmlist_component.html'
+    templateUrl: 'packages/webriffs_client/component/film/filmlist_component.html'
     //cssUrl: 'filmlist_component.css'
     )
 class FilmListComponent extends PagingComponent {

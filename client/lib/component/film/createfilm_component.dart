@@ -20,7 +20,7 @@ import 'filminfoedit_component.dart';
  */
 @Component(
     selector: 'create-film',
-    templateUrl: 'createfilm_component.html'
+    templateUrl: 'packages/webriffs_client/component/film/createfilm_component.html'
     //cssUrl: 'errorstatus_component.css'
     )
 class CreateFilmComponent extends RequestHandlingComponent {

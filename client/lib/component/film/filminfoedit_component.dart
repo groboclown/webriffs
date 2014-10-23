@@ -33,7 +33,7 @@ class FilmInfo {
  */
 @Component(
     selector: 'filminfo-edit',
-    templateUrl: 'filminfoedit_component.html'
+    templateUrl: 'packages/webriffs_client/component/film/filminfoedit_component.html'
     //cssUrl: 'filminfoedit_component.css'
     )
 class FilmInfoEditComponent extends SingleRequestComponent {

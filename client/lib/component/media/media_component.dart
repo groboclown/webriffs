@@ -27,7 +27,7 @@ import 'stopwatch_media.dart';
  */
 @Component(
     selector: 'media-controller',
-    templateUrl: 'media_component.html')
+    templateUrl: 'packages/webriffs_client/component/media/media_component.html')
 class MediaComponent implements ShadowRootAware, DetachAware {
     final Logger _log = new Logger('components.MediaComponent');
 

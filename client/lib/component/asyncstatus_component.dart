@@ -10,7 +10,7 @@ import '../util/async_component.dart';
 
 @Component(
     selector: 'async-status',
-    templateUrl: 'asyncstatus_component.html')
+    templateUrl: 'packages/webriffs_client/component/asyncstatus_component.html')
 class AsyncStatusComponent {
     @NgOneWayOneTime('parent')
     AsyncComponent async;

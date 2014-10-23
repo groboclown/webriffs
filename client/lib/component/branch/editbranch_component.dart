@@ -45,7 +45,7 @@ import 'abstract_branch_component.dart';
  */
 @Component(
     selector: 'edit-branch',
-    templateUrl: 'editbranch_component.html')
+    templateUrl: 'packages/webriffs_client/component/branch/editbranch_component.html')
 class EditBranchComponent extends AbstractBranchComponent {
     static final Logger _log = new Logger('media.EditBranchComponent');
 

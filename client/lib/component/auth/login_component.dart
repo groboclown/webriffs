@@ -14,7 +14,7 @@ import '../../service/user.dart';
  */
 @Component(
     selector: 'login',
-    templateUrl: 'login_component.html'
+    templateUrl: 'packages/webriffs_client/component/auth/login_component.html'
     //cssUrl: 'login_component.css'
     )
 class LoginComponent {

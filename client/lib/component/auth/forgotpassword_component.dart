@@ -12,7 +12,7 @@ import '../../service/user.dart';
  */
 @Component(
     selector: 'forgot-my-password',
-    templateUrl: 'forgotpassword_component.html'
+    templateUrl: 'packages/webriffs_client/component/auth/forgotpassword_component.html'
      //cssUrl: 'forgotpassword_component.css'
     )
 class ForgotPasswordComponent {
