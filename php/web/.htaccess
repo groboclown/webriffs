@@ -2,7 +2,6 @@
     RewriteEngine On
     RewriteBase /webriffs/
     RewriteRule ^api/ dispatch.php [END]
-    #RewriteRule ^/webriffs/api/ dispatch.php
 </IfModule>
 
 AddType application/dart .dart

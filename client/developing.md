@@ -62,8 +62,42 @@ files, you only want the web directory exposed.
 You'll definitely want the `ErrorLog` pointing to a file you can easily read,
 because you'll be checking that for the PHP error messages.
 
-_TODO finish.  Include how to setup the client pub files in one place and the
-php files elsewhere._
+#### Proxy to the Dart server
+
+The normal usage for the application will be for the client (Dart) files to
+coexist with the PHP files.  The `php/web/.htaccess` file maps this out.
+However, for developing the client side, there's a much more efficient method.
+This requires enabling the `mod_proxy` and `mod_proxy_http` extensions.
+
+You'll need to add the Proxy settings into the `httpd.conf` file, as these
+settings cannot live in a `.htaccess` file.
+
+    <IfModule mod_proxy.c>
+        ProxyRequests Off
+        
+        # Exclude the mapped PHP files
+        ProxyPass /webriffs/*.php !
+        ProxyPass /webriffs/api/ !
+        
+        ProxyPass /webriffs/ http://localhost:8080/
+        ProxyVia Block
+    </IfModule>
+    
+This will pass the non-php requests to the underlying Dart `pub serve`
+service.
+
+
+### Dart Setup
+
+The Dart client files are a bit different than the rest of the system, due to
+Dart having its own built-in build system.  All of these commands are run from
+the `client` directory.
+
+The client Dart package needs to be setup with the correct library dependencies.
+This requires having an active Internet connection.
+
+    `pub get`
+
 
 
 ## Build
@@ -95,18 +129,3 @@ These will drop the existing SQL database and recreate it with the generated
 SQL files.  That means **all existing data will be wiped clean.**  It will
 also run the test data PHP script to generate a bit of initial sample data
 to play with.
-
-### Dart Setup
-
-The Dart client files are a bit different than the rest of the system, due to
-Dart having its own built-in build system.  All of these commands are run from
-the `client` directory.
-
-The client Dart package needs to be setup with the correct library dependencies.
-This requires having an active Internet connection.
-
-    `pub get`
-
-
-
-    

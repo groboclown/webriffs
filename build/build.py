@@ -181,9 +181,10 @@ def generate_dbo(config):
         run_sqlmigrate(config, 'genPhpDboLayer.py', 'Base\\DboParent',
             dn, d, outdir)
 
-        outdir = clean_dir(config['exports.dir'], 'mock_dbo', dn)
-        run_sqlmigrate(config, 'genPhpDboMocks.py', 'Base\\DboParent',
-            dn, d, outdir)
+        # The mocks aren't used
+        # outdir = clean_dir(config['exports.dir'], 'mock_dbo', dn)
+        # run_sqlmigrate(config, 'genPhpDboMocks.py', 'Base\\DboParent',
+        #    dn, d, outdir)
 
 
 @depends(setup)
@@ -301,7 +302,6 @@ def copy_php(config):
              verbose = True,
              dry_run = False)
 
-
 @depends(init)
 def fake_setup(config):
     """
@@ -322,20 +322,9 @@ def copy_php_test(config):
          todir(config['exports.dir'], 'web'),
          update = True, verbose = True, dry_run = False)
 
-
 @depends(clean, generate_sql, generate_dbo,
          lint_client, generate_client_js, copy_client, copy_dart, copy_php)
 def all(config):
-    pass
-
-
-@depends(clean, generate_sql, generate_dbo, copy_dart, copy_php_test)
-def test_setup(config):
-    pass
-
-
-@depends(generate_client_js, copy_client, copy_dart, copy_php)
-def dart(config):
     pass
 
 
