@@ -2,7 +2,7 @@ library speech_recognition;
 
 import 'dart:async';
 import 'dart:js';
-
+import 'dart:html';
 
 
 /**
@@ -12,9 +12,185 @@ import 'dart:js';
  *
  * This API is still being tested - most of this should be just something
  * that the browser handles.
+ *
+ * **Lifecycle:**
+ *
+ * 1. Create a new instance when the user selects that they want to use voice
+ *  control.
+ * 2. call [start()] when the user wants to capture voice.
+ * 3. call [end()] when the user finishes the voice capture.
+ * 4. call [close()] when the voice control is no longer needed.
  */
-class SpeechController {
+class VoiceCaptureController {
+    final LowSpeechService _service;
+    final List<SpeechPhrase> _phrases = [];
 
+    SpeechError _error = null;
+    SpeechError get error => _error;
+    bool get hasFatalError => _error != null &&
+            _error.fatal;
+    String get errorText => _error == null ? null : _error.error;
+
+    Iterable<SpeechPhrase> get phrases => _phrases;
+
+    Completer<String> _capturing = null;
+    bool _captureState = false;
+    bool get isCapturing => _captureState;
+
+    int _insertIndex = 0;
+
+    String _interim = "";
+    String get interimTranscript => _interim;
+
+    String _final = "";
+    String get finalTranscript => _final;
+
+    VoiceCaptureController(this._service) {
+        _service.resultEvents
+        .handleError((SpeechError err) {
+            _error = err;
+        }).listen((SpeechResult res) {
+            // Still have some potential capture in progress, even if the
+            // user requested a stop.
+            _updatePhrase(res);
+        });
+        _service.start();
+    }
+
+    /**
+     * Start capturing the speech input.  When the [end()] method is called,
+     * this will trigger a stop request, which will cause the returned future
+     * to complete with the final text.
+     */
+    Future<String> start() {
+        if (! _service.isCapturing) {
+            throw new Exception("service is closed");
+        }
+        if (isCapturing) {
+            throw new Exception("illegal state - already capturing");
+        }
+        _insertIndex = 0;
+        _capturing = new Completer<String>();
+        _captureState = true;
+        return _capturing.future;
+    }
+
+    /**
+     * User command to complete the current voice input.  More may happen
+     * later.
+     */
+    void end() {
+        if (! isCapturing) {
+            // Just stop
+            return;
+        }
+        _captureState = false;
+        for (SpeechPhrase sp in _phrases) {
+            if (! sp.isFinal) {
+                // text still in progress; keep capturing
+                return;
+            }
+        }
+        _endCapture(false);
+    }
+
+
+    void cancel() {
+        if (! isCapturing) {
+            return;
+        }
+        _captureState = false;
+        if (_capturing != null) {
+            _endCapture(true);
+            // don't clear the error
+        }
+    }
+
+
+    void editPhrase(SpeechPhrase phrase) {
+        throw new UnimplementedError();
+    }
+
+    void removePhrase(SpeechPhrase phrase) {
+        throw new UnimplementedError();
+    }
+
+    void close() {
+        cancel();
+        _service.end();
+    }
+
+    void _updatePhrase(SpeechResult result) {
+        if (_capturing == null) {
+            return;
+        }
+        if (result == null) {
+            // handle end of stream
+            _endCapture(false);
+            return;
+        }
+
+        // Clear out any previous errors, since we now have a valid phrase.
+        _error = null;
+
+        // Check if we're editing a phrase, inserting a phrase, updating
+        // a phrase, or adding a phrase.
+
+        bool active = true;
+        for (SpeechPhrase sp in _phrases) {
+            if (active) {
+                if (sp.source.index == result.index) {
+                    // update
+                    sp.reviseWith(result);
+                    active = false;
+                } else if (sp.isEditing) {
+                    // edit
+                    sp.reviseWith(result);
+                    active = false;
+                    // Finish the edit
+                    _insertIndex = _phrases.length;
+                }
+            }
+        }
+
+        if (active && _insertIndex >= 0) {
+            _phrases.insert(_insertIndex++, new SpeechPhrase(result));
+        }
+
+        // Now update the text construction
+        _interim = "";
+        _final = "";
+        bool foundInterim = false;
+        for (SpeechPhrase sp in _phrases) {
+            if (sp.isFinal) {
+                _final += " " + sp.best;
+                _interim += " " + sp.best;
+            } else {
+                _interim += " ?" + sp.best + "?";
+                foundInterim = true;
+            }
+        }
+
+        if (! foundInterim && ! _captureState) {
+            // Officially end the capture.
+            _endCapture(false);
+        }
+    }
+
+    void _endCapture(bool isCancel) {
+        if (isCancel) {
+            _capturing.completeError(
+                    new SpeechError("abort", new DateTime.now()));
+        } else if (_error != null) {
+            _capturing.completeError(_error);
+        } else {
+            _capturing.complete(finalTranscript);
+        }
+        _capturing = null;
+        _phrases.clear();
+        _interim = "";
+        _final = "";
+    }
 }
 
 
@@ -26,18 +202,28 @@ class SpeechController {
 class SpeechPhrase {
     static int _phraseCount = 0;
     int _index;
+
+    /// The index order for the phrase; if the text is replaced with something
+    /// else, then this remains the same index.
     int get index => _index;
+
     SpeechResult _source;
     SpeechResult get source => _source;
-    final List<SpeechResult> choices = [];
     String selection;
-    bool get isFinal => source.isFinal;
+    Iterable<String> get choices => _source.alternatives;
+    String get best => _source.best;
+    bool get hasMultiple => _source.hasMultiple;
+    bool get isFinal => _source.isFinal;
     bool isEditing = false;
     bool isDeleted = false;
 
     SpeechPhrase(SpeechResult s) {
         _index = _phraseCount++;
-        //reviseWith(s);
+        reviseWith(s);
+    }
+
+    void reviseWith(SpeechResult s) {
+        _source = s;
     }
 
 }
@@ -100,10 +286,11 @@ abstract class LowSpeechService {
 class SpeechResult {
     final List<String> alternatives;
     final bool isFinal;
+    final int index;
     String get best => alternatives.isEmpty ? null : alternatives[0];
     bool get hasMultiple => alternatives.length > 1;
 
-    SpeechResult(this.alternatives, this.isFinal);
+    SpeechResult(this.alternatives, this.isFinal, this.index);
 }
 
 
@@ -114,6 +301,7 @@ class SpeechError {
     final bool aborted;
     bool get other => (! networkProblem && ! blocked &&
             ! userDenied && ! aborted);
+    bool get fatal => networkProblem || blocked || userDenied;
     final String error;
 
     factory SpeechError(String err, DateTime startTime) {
@@ -201,12 +389,10 @@ class JsLowSpeechService extends LowSpeechService {
         // FIXME this should only be set to true if the site is on http.
         _js['continuous'] = true;
 
-        _js['onStart'] = () {
-print("+++ Speech: onStart");
+        _js['onstart'] = (Event e) {
             _startEvents.add("");
         };
-        _js['onEnd'] = () {
-print("+++ Speech: onEnd");
+        _js['onend'] = (Event e) {
             if (_running) {
                 // restart at most once a second
                 Duration sinceStart = _startTime.difference(new DateTime.now());
@@ -218,33 +404,47 @@ print("+++ Speech: onEnd");
                             start();
                         });
                 }
+            } else {
+                // FIXME this isn't the most elegant approach.
+                _resultEvents.add(null);
             }
         };
-        _js['onError'] = (JsObject event) {
-print("+++ Speech: onError: ${event}");
+        _js['onerror'] = (ErrorEvent event) {
             // FIXME if the error is severe enough, it means we just stop
             // trying to connect.
 
-            _resultEvents.addError(new SpeechError(event['error'] as String,
-                    _startTime));
-        };
-        _js['onResult'] = (JsObject event) {
-print("+++ Speech: onResult: ${event}");
-            List<String> alternatives = [];
-            JsObject res = event['results'][event['resultIndex']];
-            for (int i = 0; i < res['length']; i++) {
-                String text = res.callMethod('item', [ i ]);
-print("      [${text}]");
-                alternatives.add(text.trim());
+            SpeechError error = new SpeechError(event.error,
+                    _startTime);
+            if (error.blocked || error.userDenied || error.networkProblem) {
+                _running = false;
             }
-            _resultEvents.add(new SpeechResult(alternatives, res['isFinal']));
+
+            _resultEvents.addError(error);
+        };
+        _js['onresult'] = (SpeechRecognitionEvent event) {
+            if (event.results == null) {
+                // probably not a valid voice recognition api
+                _resultEvents.addError(
+                        new SpeechError('no-speech', _startTime));
+                return;
+            }
+            List<SpeechRecognitionResult> results = event.results;
+            for (var ri = event.resultIndex; ri < results.length; ri++) {
+                SpeechRecognitionResult res = results[ri];
+                List<String> alternatives = [];
+                for (int i = 0; i < res.length; i++) {
+                    String text = res.item(i).transcript;
+                    alternatives.add(text.trim());
+                }
+                _resultEvents.add(
+                        new SpeechResult(alternatives, res.isFinal, ri));
+            }
         };
     }
 
 
     @override
     void start() {
-print("+++ Speech: starting capture");
         _running = true;
         _startTime = new DateTime.now();
         _js.callMethod('start', []);
@@ -253,7 +453,6 @@ print("+++ Speech: starting capture");
 
     @override
     void end() {
-print("+++ Speech: ending capture");
         _running = false;
         _js.callMethod('abort', []);
     }

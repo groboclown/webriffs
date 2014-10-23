@@ -10,6 +10,6 @@
 <span ng-if="piece.isValidationError"><span style="font-color: orange;">&#9754;</span> {{piece.validationError}} </span>
 </span>
 <!-- Pencil to start editing -->
-<span ng-if="! piece.isEditing && cmp.canEdit" ng-click="piece.edit()">&#9998;</span>
+<span ng-if="! piece.isEditing && canEdit" ng-click="piece.edit()">&#9998;</span>
 <span ng-if="piece.isServerError"><span style="font-color: red;">#[</span> {{piece.serverError}} <span style="font-color: red;">]</span></span>
 </span>

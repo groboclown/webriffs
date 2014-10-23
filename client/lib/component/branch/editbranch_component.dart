@@ -77,12 +77,20 @@ class EditBranchComponent extends AbstractBranchComponent {
     // version, then don't allow edits.
     bool get isEditable => canEditQuips && requestedChangeId < 0;
 
-    bool speechEntry = false;
+    VoiceCaptureController _voiceCapture;
 
-    bool speechCapturing = false;
-
-    bool get speechListening => _recognition == null ? false :
-        _recognition.isCapturing;
+    bool get speechEntry => _voiceCapture != null;
+    bool get speechListening => _voiceCapture == null ? false :
+        (! _voiceCapture.hasFatalError && _voiceCapture.isCapturing);
+    String get heardText => _voiceCapture == null ? null :
+        _voiceCapture.interimTranscript;
+    Iterable<SpeechPhrase> get heardPhrases => _voiceCapture == null ? [] :
+        _voiceCapture.phrases;
+    String get speechErrorText => _voiceCapture == null ? null :
+        _voiceCapture.errorText;
+    SpeechError get speechError => _voiceCapture == null ? null :
+        _voiceCapture.error;
+    bool get hasSpeechError => speechError != null;
 
     // TODO make user editable
     double displayDuration = 1.0;
@@ -103,7 +111,6 @@ class EditBranchComponent extends AbstractBranchComponent {
     String get quipTime => _quipTimeStr;
     String _quipTimeError = null;
     bool get hasQuipTimeFormatError => _quipTimeError != null;
-    final List<SpeechResult> spoken = [];
 
 
     set quipTime(String timestr) {
@@ -185,54 +192,43 @@ class EditBranchComponent extends AbstractBranchComponent {
                 quipPaging.loadChange(changeId);
             }
         });
-
-        if (_recognition != null) {
-            _recognition.resultEvents.listen((SpeechResult r) {
-                spoken.add(r);
-            });
-        }
     }
 
     void startSpeechListen() {
-        if (_recognition != null) {
-            speechEntry = true;
-            speechCapturing = false;
-            spoken.clear();
-            _recognition.start();
+        if (_recognition != null && _voiceCapture == null) {
+            _voiceCapture = new VoiceCaptureController(_recognition);
         }
     }
 
     void stopSpeechListen() {
         cancelVoiceCapture();
-        speechEntry = false;
-        speechCapturing = false;
-        spoken.clear();
-        if (_recognition != null) {
-            _recognition.end();
+        if (_voiceCapture != null) {
+            _voiceCapture.close();
+            _voiceCapture = null;
         }
     }
 
 
     void startVoiceCapture() {
         setPendingQuipTime();
-        spoken.clear();
-        if (_recognition != null) {
-            speechEntry = true;
-            speechCapturing = true;
+        if (_voiceCapture != null && ! _voiceCapture.isCapturing) {
+            _voiceCapture.start().then((String text) {
+                text = text.trim();
+                if (text.length > 0) {
+                    quipText = text;
+                    savePendingQuip();
+                }
+            });
         }
     }
 
     void saveVoiceCapture() {
-        if (spoken.isNotEmpty && speechCapturing) {
-            quipText = spoken.map((SpeechResult r) => r.best).join(', ');
-        }
-        cancelVoiceCapture();
+        _voiceCapture.end();
     }
 
     void cancelVoiceCapture() {
         cancelEditQuip();
-        spoken.clear();
-        speechCapturing = false;
+        _voiceCapture.cancel();
     }
 
 
@@ -247,7 +243,7 @@ class EditBranchComponent extends AbstractBranchComponent {
     void deleteQuip(QuipDetails quip) {
         branchDetails.then((BranchDetails branch) {
             if (branch.userCanEditQuips) {
-
+                quipPaging.deleteQuip(quip);
             }
         });
     }
@@ -265,8 +261,8 @@ class EditBranchComponent extends AbstractBranchComponent {
     }
 
     void savePendingQuip() {
-        // FIXME cache up changes and push them in intervals to make fewer
-        // requests to the server.
+        // The caching of quips for group pushes to the server is handled by
+        // the paging structure.
 
         if (! quipModified) {
             return;
@@ -283,11 +279,7 @@ class EditBranchComponent extends AbstractBranchComponent {
             // FIXME handle tags
             if (branch.userCanEditQuips) {
                 if (! branch.userHasPendingChange) {
-                    _server.createCsrfToken("create_change")
-                    .then((String csrf) =>
-                        _server.put("/branch/${branchId}/pending", csrf,
-                                data: { 'changes': -1 }))
-                    .then((ServerResponse response) {
+                    quipPaging.createPendingChange().then((_) {
                         branch.userHasPendingChange = true;
 
                         quip.text = text;
@@ -333,8 +325,12 @@ class EditBranchComponent extends AbstractBranchComponent {
 
 
     void commitChanges() {
-        branchDetails.then((BranchDetails bd) {
+        branchDetails
+        .then((BranchDetails bd) {
             quipPaging.commitChanges();
+            return bd;
+        })
+        .then((BranchDetails bd) {
             bd.userHasPendingChange = false;
         });
     }

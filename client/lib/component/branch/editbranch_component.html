@@ -61,16 +61,28 @@ You do not have permissions to view the contents of this branch.
     <!-- Edit the quip -->
     <div ng-if="canEditQuips">
         <div ng-if="speechEntry" style="border:2px solid black; background: #f80;">
-            <div ng-if="speechCapturing">
+            <div ng-if="hasSpeechError">
+                <span ng-if="speechError.networkProblem">
+                Could not connect to the speech recognition service.
+                </span>
+                <span ng-if="speechError.blocked">
+                The browser is preventing the speech recognition from running.
+                You may have blocked it from listening to the microphone, or
+                maybe you need to plugged in and turned on your microphone?
+                </span>
+                <span ng-if="speechError.userDenied">
+                You seem to have explicitly denied the page from listening to
+                the microphone.  Check your browser settings to re-enable it.
+                </span>
+            </div>
+            <div ng-if="speechListening">
                 <div>
                 Speak the quip for {{quipTime}}
                 <span ng-click="stopSpeechListen()">[ Stop voice entry ]</span>
                 </div>
                 
                 <div>
-                    <span ng-repeat="res in spoken">
-                    {{res.best}}
-                    </span>
+                {{heardText}}
                 </div>
                 
                 <div>
@@ -78,7 +90,7 @@ You do not have permissions to view the contents of this branch.
                     <span ng-click="cancelVoiceCapture()">[ Cancel ]</span>
                 </div>
             </div>
-            <div ng-if="! speechCapturing">
+            <div ng-if="! speechListening">
                 <span ng-click="stopSpeechListen()">[ Stop voice entry ]</span>
                 <button ng-click="startVoiceCapture()">Start</button>
             </div>

@@ -248,7 +248,12 @@ class QuipPaging implements AsyncComponent {
     }
 
 
-    Future commitChanges() {
+    Future<ServerResponse> createPendingChange() {
+        return quipUpdates.createPendingChange();
+    }
+
+
+    Future<ServerResponse> commitChanges() {
         return quipUpdates.commitChanges();
     }
 
