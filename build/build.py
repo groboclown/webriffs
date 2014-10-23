@@ -92,7 +92,7 @@ def init(config):
             os.path.join(config['sql.dir'], 'WebRiffs')
     )
     config['sql-migration.src.dir'] = os.path.join(config['root.dir'],
-            'sql-migration', 'src')
+            'presquel.gsm.d', 'src')
     smp = [config['sql-migration.src.dir']]
     smp.extend(sys.path)
     config['sql-migration.path'] = os.pathsep.join(smp)
