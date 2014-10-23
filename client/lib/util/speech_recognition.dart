@@ -1,217 +1,258 @@
 library speech_recognition;
 
 import 'dart:async';
-//import 'dart:js';
-import 'dart:html';
+import 'dart:js';
 
 
-SpeechRecognitionApi createSpeechRecognition() {
-    // Check for native Dart support
-    if (SpeechRecognition.supported) {
-        return new DartSpeechRecognition();
+
+/**
+ * A high level controller for managing voice input into a single input.
+ * The input is split into phrases that represent a bit of voice that the
+ * user gave.  These phrases can then be edited as desired.
+ *
+ * This API is still being tested - most of this should be just something
+ * that the browser handles.
+ */
+class SpeechController {
+
+}
+
+
+
+/**
+ * Represents a single phrase that the user spoke.  This can be then edited
+ * or removed as necessary.
+ */
+class SpeechPhrase {
+    static int _phraseCount = 0;
+    int _index;
+    int get index => _index;
+    SpeechResult _source;
+    SpeechResult get source => _source;
+    final List<SpeechResult> choices = [];
+    String selection;
+    bool get isFinal => source.isFinal;
+    bool isEditing = false;
+    bool isDeleted = false;
+
+    SpeechPhrase(SpeechResult s) {
+        _index = _phraseCount++;
+        //reviseWith(s);
     }
 
-    /*
-    // Check for experimental Safari and Chrome support
-    if (context['webkitSpeechRecognition']) {
-        return new JsSpeechRecognition('webkitSpeechRecognition');
-    }
-    if (context['speechRecognition']) {
-        return new JsSpeechRecognition(context['speechRecognition']);
-    }
-    if (context['SpeechRecognition']) {
-        return new JsSpeechRecognition(context['SpeechRecognition']);
-    }
-    */
+}
 
-    // TODO check for the PocketSphinx support
+
+
+LowSpeechService createSpeechService() {
+    // For now, ignore the native Dart support because that's Chrome only.
+    //if (SpeechRecognition.supported) {
+
+    for (String nativeName in NATIVE_SPEECH_API_NAME) {
+        if (context.hasProperty(nativeName)) {
+            try {
+                JsFunction func = context[nativeName];
+                JsObject obj = new JsObject(func, []);
+print("++++++++ using speech ${nativeName}");
+                return new JsLowSpeechService(obj);
+            } catch (e, stack) {
+print("++++++++ native speech API ${nativeName} exists, but cannot be created.");
+print(e.toString());
+print(stack.toString());
+                // keep going
+            }
+        }
+    }
 
     // Browser doesn't support a speech recognition API.
+print("No speech API supported");
     return null;
 }
 
-class SpeechRecognitionTranscript {
-    final String transcript;
-    final double confidence;
 
-    SpeechRecognitionTranscript(this.transcript, this.confidence);
-}
-
-class SpeechRecognitionTranscriptList {
-    final List<SpeechRecognitionTranscript> alternatives;
-
-    SpeechRecognitionTranscriptList(this.alternatives);
-
-    SpeechRecognitionTranscript get best => alternatives.first;
-}
-
-
-
-class SpeechRecognitionResults {
-    final Iterable<SpeechRecognitionTranscriptList> transcripts;
-
-    SpeechRecognitionResults(this.transcripts);
-}
-
-abstract class SpeechRecognitionApi {
+/**
+ * Low-level speech API.
+ */
+abstract class LowSpeechService {
     bool get isCapturing;
 
-    String get nativeDialect;
-    set nativeDialect(String dialect);
+    Stream get startEvents;
 
     /**
-     * Begins capturing the audio.  If the object is already capturing, then
-     * this will raise an exception.
+     * Errors in the speech service are posted as errors in this stream.
+     * Error objects will be of type [SpeechError].
      */
-    Future<SpeechRecognitionResults> capture({ String dialect: null });
+    Stream<SpeechResult> get resultEvents;
 
-    /**
-     * Force stopping the capture stream.  If no capture is active, then
-     * this will do nothing.
-     */
-    void stop();
+    String get lang;
+    set lang(String lg);
 
-    /**
-     * Notices for when any capturing actually begins.  Useful for triggering
-     * UI events.
-     */
-    Stream get onStart;
+    List<String> get supportedLanguages;
 
-    /**
-     * Notices for when the capturing actually stops.  Useful for triggering
-     * UI events.
-     */
-    Stream get onStop;
-
-
-    Iterable<String> get supportedDialects;
+    void start();
+    void end();
 }
 
 
+/**
+ * A single capture.  Contains a list of alternatives, in order of confidence.
+ */
+class SpeechResult {
+    final List<String> alternatives;
+    final bool isFinal;
+    String get best => alternatives.isEmpty ? null : alternatives[0];
+    bool get hasMultiple => alternatives.length > 1;
 
-abstract class AbstractSpeechRecognitionApi implements SpeechRecognitionApi {
-    Completer<SpeechRecognitionResults> _active;
-    List<SpeechRecognitionTranscriptList> _transcripts;
-    String _nativeDialect;
-    StreamController _startEvents = new StreamController();
-    StreamController _stopEvents = new StreamController();
+    SpeechResult(this.alternatives, this.isFinal);
+}
 
-    @override
-    String get nativeDialect => _nativeDialect;
 
-    @override
-    set nativeDialect(String dialect) => _nativeDialect = dialect;
+class SpeechError {
+    final bool networkProblem;
+    final bool blocked;
+    final bool userDenied;
+    final bool aborted;
+    bool get other => (! networkProblem && ! blocked &&
+            ! userDenied && ! aborted);
+    final String error;
 
-    @override
-    bool get isCapturing => _active != null;
-
-    Future<SpeechRecognitionResults> _beginCapture() {
-        if (isCapturing) {
-            throw new Exception("already capturing");
+    factory SpeechError(String err, DateTime startTime) {
+        bool net = false;
+        bool block = false;
+        bool denied = false;
+        bool abort = false;
+        if (err == 'network') {
+            net = true;
+        } else if (err == 'not-allowed' || err == 'service-not-allowed') {
+            // did the user block the access?
+            if (startTime == null || startTime.difference(new DateTime.now()).
+                    inMilliseconds > -200) {
+                block = true;
+            } else {
+                denied = true;
+            }
+        } else if (err == 'aborted' || err == 'no-speech') {
+            abort = true;
         }
-        _active = new Completer<SpeechRecognitionResults>();
-        _transcripts = [];
-        return _active.future;
+        return new SpeechError._(err, net, block, denied, abort);
     }
 
-
-    @override
-    Stream get onStart => _startEvents.stream;
-
-    @override
-    Stream get onStop => _stopEvents.stream;
-
-
-    Sink get _startSink => _startEvents.sink;
-
-    Sink get _stopSink => _stopEvents.sink;
-
-
-    void _onCaptureTranscript(SpeechRecognitionTranscriptList transcript) {
-        _transcripts.add(transcript);
-    }
-
-
-    void _onCaptureComplete() {
-        _active.complete(new SpeechRecognitionResults(_transcripts));
-        _active = null;
-        _transcripts = null;
-    }
-
-
-    void _onCaptureError(Object error) {
-        _active.completeError(error);
-    }
+    SpeechError._(this.error, this.networkProblem, this.blocked,
+            this.userDenied, this.aborted);
 }
 
 
-class DartSpeechRecognition extends AbstractSpeechRecognitionApi {
-    final SpeechRecognition _recog;
-    Completer<SpeechRecognitionResults> _active;
+List<String> NATIVE_SPEECH_API_NAME = [
+    'SpeechRecognition',
+    'webkitSpeechRecognition',
+    'mozSpeechRecognition',
+    'msSpeechRecognition',
+    'oSpeechRecognition'
+];
 
-    DartSpeechRecognition() :
-            _recog = new SpeechRecognition() {
-        nativeDialect = _recog.lang;
-        _recog.onEnd.forEach((Event e) {
-            if (isCapturing) {
-                _onCaptureComplete();
-            }
-            _stopSink.add(null);
-        });
-        _recog.onError.forEach((Event e) {
-            if (isCapturing) {
-                Object val = null;
-                if (e is ErrorEvent) {
-                    val = e.error;
-                }
-                _onCaptureError(val);
-            }
-            _stopSink.add(null);
-        });
-        _recog.onResult.forEach((SpeechRecognitionEvent e) {
-            for (SpeechRecognitionResult r in e.results) {
-                if (r.isFinal) {
-                    // Just grab the first result; don't take any other
-                    // alternatives.
-                    var transcripts = <SpeechRecognitionTranscript>[];
-                    for (int i = 0; i < r.length; ++i) {
-                        var transcript = new SpeechRecognitionTranscript(
-                                r.item(i).transcript,
-                                r.item(i).confidence);
-                    }
-                    _onCaptureTranscript(
-                            new SpeechRecognitionTranscriptList(transcripts));
-                }
-            }
-        });
-        _recog.onNoMatch.forEach((SpeechRecognitionEvent e) {
-            _onCaptureTranscript(new SpeechRecognitionTranscriptList([]));
-        });
 
-        _recog.onStart.forEach((_) => _startSink.add(null));
+/**
+ * Low-level speech API.
+ */
+class JsLowSpeechService extends LowSpeechService {
+    final JsObject _js;
+    bool _running = false;
+    DateTime _startTime;
+    final StreamController _startEvents = new StreamController.broadcast();
+    final StreamController<SpeechResult> _resultEvents =
+            new StreamController<SpeechResult>.broadcast();
+
+    @override
+    bool get isCapturing => _running;
+
+    @override
+    Stream get startEvents => _startEvents.stream;
+
+    @override
+    Stream<SpeechResult> get resultEvents => _resultEvents.stream;
+
+
+    @override
+    String get lang => _js['lang'];
+
+
+    @override
+    set lang(String lg) {
+        _js['lang'] = lg;
     }
 
+    final List<String> grammars = [];
 
-    Future<SpeechRecognitionResults> capture({ String dialect: null }) {
-        Future<SpeechRecognitionResults> ret = _beginCapture();
-        _recog.continuous = true;
-        _recog.interimResults = false;
-        _recog.lang = (dialect == null)
-            ? nativeDialect
-            : dialect;
-        _recog.start();
-        return ret;
-    }
+    @override
+    List<String> get supportedLanguages => grammars;
 
-    void stop() {
-        if (isCapturing) {
-            _recog.stop();
+
+    JsLowSpeechService(this._js) {
+        JsObject speechGrammars = _js['grammars'];
+        int grammarLength = speechGrammars['length'];
+        for (int i = 0; i < grammarLength; i++) {
+            grammars.add(speechGrammars.callMethod('item', [ i ]));
         }
+
+        _js['maxAlternatives'] = 5;
+
+        // FIXME this should only be set to true if the site is on http.
+        _js['continuous'] = true;
+
+        _js['onStart'] = () {
+            _startEvents.add("");
+        };
+        _js['onEnd'] = () {
+            if (_running) {
+                // restart at most once a second
+                Duration sinceStart = _startTime.difference(new DateTime.now());
+                if (sinceStart.inMilliseconds < -1000) {
+                    start();
+                } else {
+                    new Timer(new Duration(milliseconds: 1000) - sinceStart,
+                        () {
+                            start();
+                        });
+                }
+            }
+        };
+        _js['onError'] = (JsObject event) {
+            // FIXME if the error is severe enough, it means we just stop
+            // trying to connect.
+
+            _resultEvents.addError(new SpeechError(event['error'] as String,
+                    _startTime));
+        };
+        _js['onResult'] = (JsObject event) {
+            List<String> alternatives = [];
+            JsObject res = event['results'][event['resultIndex']];
+            for (int i = 0; i < res['length']; i++) {
+                String text = res.callMethod('item', [ i ]);
+                alternatives.add(text.trim());
+            }
+            _resultEvents.add(new SpeechResult(alternatives, res['isFinal']));
+        };
     }
 
-    Iterable<String> get supportedDialects =>
-            _recog.grammars.map((SpeechGrammar g) => g.src);
+
+    @override
+    void start() {
+        _running = true;
+        _startTime = new DateTime.now();
+        _js.callMethod('start', []);
+    }
+
+
+    @override
+    void end() {
+        _running = false;
+        _js.callMethod('abort', []);
+    }
+
 }
+
+
+
 
 /*
 class JsSpeechRecognition extends AbstractSpeechRecognitionApi {

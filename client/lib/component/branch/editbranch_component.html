@@ -60,8 +60,34 @@ You do not have permissions to view the contents of this branch.
     
     <!-- Edit the quip -->
     <div ng-if="canEditQuips">
+        <div ng-if="speechEntry" style="border:2px solid black; background: #f80;">
+            <div ng-if="speechCapturing">
+                <div>
+                Speak the quip for {{quipTime}}
+                <span ng-click="stopSpeechListen()">[ Stop voice entry ]</span>
+                </div>
+                
+                <div>
+                    <span ng-repeat="res in spoken">
+                    {{res.best}}
+                    </span>
+                </div>
+                
+                <div>
+                    <button ng-click="saveVoiceCapture()">Save</button>
+                    <span ng-click="cancelVoiceCapture()">[ Cancel ]</span>
+                </div>
+            </div>
+            <div ng-if="! speechCapturing">
+                <span ng-click="stopSpeechListen()">[ Stop voice entry ]</span>
+                <button ng-click="startVoiceCapture()">Start</button>
+            </div>
+        </div>
+        <div ng-if="! speechEntry">
         Edit quip:
 <div class="bug">BUG this should not directly edit the time and text in the quip; they should be pushed to the object on save.</div>
+        <button ng-if="hasSpeechSupport"
+            ng-click="startSpeechListen()">&#127908; Use your voice</button>
         <form onsubmit="return false;">
         <div>
             <label for="quip_time">When </label>
@@ -72,13 +98,14 @@ You do not have permissions to view the contents of this branch.
             <input id="quip_text" type="text" ng-model="quipText">
         </div>
         <div style="font-size:3em;">
-            <button ng-if="hasSpeechSupport"
-                ng-click="toggleSpeechListen()">&#127908;</button>
             <button ng-click="setPendingQuipTime()">Set time to now</button>
             <input type="submit" ng-click="savePendingQuip()" value="Save"
                 ng-disabled="hasQuipTimeFormatError">
         </div>
         </form>
+        </div>
+    
+    
     </div>
     
     <div>

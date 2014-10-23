@@ -59,7 +59,7 @@ class EditBranchComponent extends AbstractBranchComponent {
 
     final ServerStatusService _server;
     final UserService _user;
-    final SpeechRecognitionApi _recognition;
+    final LowSpeechService _recognition;
     final int requestedChangeId;
 
     final QuipPaging quipPaging;
@@ -76,6 +76,10 @@ class EditBranchComponent extends AbstractBranchComponent {
     // If the user can't edit the quips, or the user requested to see an old
     // version, then don't allow edits.
     bool get isEditable => canEditQuips && requestedChangeId < 0;
+
+    bool speechEntry = false;
+
+    bool speechCapturing = false;
 
     bool get speechListening => _recognition == null ? false :
         _recognition.isCapturing;
@@ -99,6 +103,7 @@ class EditBranchComponent extends AbstractBranchComponent {
     String get quipTime => _quipTimeStr;
     String _quipTimeError = null;
     bool get hasQuipTimeFormatError => _quipTimeError != null;
+    final List<SpeechResult> spoken = [];
 
 
     set quipTime(String timestr) {
@@ -144,7 +149,7 @@ class EditBranchComponent extends AbstractBranchComponent {
             this.quipPaging, this.requestedChangeId) :
             _server = server,
             _user = user,
-            _recognition = createSpeechRecognition(),
+            _recognition = createSpeechService(),
             super(server, user, branchId, changeId, branchDetails) {
 
         // Link up the alerts, the video timing, and the UI
@@ -158,8 +163,7 @@ class EditBranchComponent extends AbstractBranchComponent {
             double secondsDuration = qd.text.trim().length *
                     DISPLAY_DURATION_SCALE * displayDuration;
             double minDuration = MIN_DISPLAY_DURATION * displayDuration;
-// FIXME debug
-print("${qd.text.trim().length} -> ${secondsDuration}");
+
             if (secondsDuration < minDuration) {
                 secondsDuration = minDuration;
             }
@@ -181,25 +185,54 @@ print("${qd.text.trim().length} -> ${secondsDuration}");
                 quipPaging.loadChange(changeId);
             }
         });
-    }
 
-    void toggleSpeechListen() {
-        if (_recognition != null && _recognition.isCapturing) {
-            _recognition.stop();
-        } else if (_recognition != null) {
-            _recognition.capture().then((SpeechRecognitionResults res) {
-                if (res != null) {
-                    String ret = "";
-                    for (SpeechRecognitionTranscriptList srtl in res.transcripts) {
-                        ret += "\n" + srtl.best.transcript;
-                    }
-                    ret = ret.trim();
-                    if (ret.length > 0) {
-                        pendingQuip.text = ret;
-                    }
-                }
+        if (_recognition != null) {
+            _recognition.resultEvents.listen((SpeechResult r) {
+                spoken.add(r);
             });
         }
+    }
+
+    void startSpeechListen() {
+        if (_recognition != null) {
+            speechEntry = true;
+            speechCapturing = false;
+            spoken.clear();
+            _recognition.start();
+        }
+    }
+
+    void stopSpeechListen() {
+        cancelVoiceCapture();
+        speechEntry = false;
+        speechCapturing = false;
+        spoken.clear();
+        if (_recognition != null) {
+            _recognition.end();
+        }
+    }
+
+
+    void startVoiceCapture() {
+        setPendingQuipTime();
+        spoken.clear();
+        if (_recognition != null) {
+            speechEntry = true;
+            speechCapturing = true;
+        }
+    }
+
+    void saveVoiceCapture() {
+        if (spoken.isNotEmpty && speechCapturing) {
+            quipText = spoken.map((SpeechResult r) => r.best).join(', ');
+        }
+        cancelVoiceCapture();
+    }
+
+    void cancelVoiceCapture() {
+        cancelEditQuip();
+        spoken.clear();
+        speechCapturing = false;
     }
 
 
@@ -211,6 +244,12 @@ print("${qd.text.trim().length} -> ${secondsDuration}");
         _quipTime = videoTimeProvider.serverTime.inMilliseconds;
         _quipTimeStr = videoTimeProvider.dialation.
                 displayString(_quipTime / 1000.0);
+    }
+
+    void cancelEditQuip() {
+        pendingQuip = new QuipDetails.pending();
+        quipText = null;
+        quipTime = null;
     }
 
     void savePendingQuip() {

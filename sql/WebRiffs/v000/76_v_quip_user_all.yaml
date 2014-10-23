@@ -34,13 +34,13 @@ view:
             , qunc.Pending_Tags Pending_Tags
             , qunc.Committed_Tags Committed_Tags
             
-            , COALESCE(qunc.Pending_Timestamp_Millis, quv.Committed_Timestamp_Millis) Timestamp_Millis
-            , qup.Pending_Timestamp_Millis Pending_Timestamp_Millis
-            , quv.Committed_Timestamp_Millis Committed_Timestamp_Millis
+            , COALESCE(qunc.Pending_Timestamp_Millis, qunc.Committed_Timestamp_Millis) Timestamp_Millis
+            , qunc.Pending_Timestamp_Millis Pending_Timestamp_Millis
+            , qunc.Committed_Timestamp_Millis Committed_Timestamp_Millis
             
             , COALESCE(qunc.Pending_Updated_On, qunc.Committed_Updated_On) Updated_On
             , qunc.Pending_Updated_On Pending_Updated_On
-            , quv.Committed_Updated_On Committed_Updated_On
+            , qunc.Committed_Updated_On Committed_Updated_On
         FROM V_QUIP_USER_NEW_CHANGED qunc
         
     UNION
