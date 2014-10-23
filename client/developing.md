@@ -22,6 +22,16 @@ You can run this on either Windows or Linux (and probably Mac), but right now
 these instructions are for Linux.
 
 
+### Download the code
+
+Pull down from GitHub the master branch:
+
+    $ git clone git@github.com:groboclown/webriffs.git webriffs
+    $ cd webriffs
+    $ git submodule init
+    $ git submodule update
+
+
 ### Environment Variables
 
 The build tool relies upon the `local-settings.sh` file to store the various
