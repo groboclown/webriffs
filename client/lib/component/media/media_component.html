@@ -40,7 +40,29 @@ loading media...
         page on video standards</a>.
         </p>
             </div>
-            <span class="bug">TODO: select between all the different playback speeds (NTSC, PAL, etc)</span>
+<div class="bug">BUG: the selection doesn't change the displayed dialation.  That needs to be propigated out.</div>
+            <div>
+                <span ng-click="stopwatch.configureDialation(0.0)">[ native (1:1) ]</span>
+                <span ng-click="stopwatch.configureDialation(-1.0)">[ NTSC DVD (24:23.96) ]</span>
+                <span ng-click="stopwatch.configureDialation(-2.0)">[ PAL DVD ] (24:25)</span>
+                <span ng-click="stopwatch.configureDialation(-3.0)">[ NTSC TV on PAL player ] (23.95:25)</span>
+                <span ng-click="stopwatch.configureDialation(-4.0)">[ PAL TV on NTSC player ] (25:23.95)</span>
+            </div>
+            <div>
+                <form action="return false;">Custom ratio:
+                <label for="dialation_src_set">Source FPS</label>
+                <input id="dialation_src_set" ng-model="dialationSrcValue"
+                     type="number"
+                     step="any"
+                     min="1">
+                <label for="dialation_tgt_set">Playback FPS</label>
+                <input id="dialation_tgt_set" ng-model="dialationTgtValue"
+                     type="number"
+                     step="any"
+                     min="1">
+                <input type="submit" value="Set Custom" ng-click="stopwatch.configureDialation(dialationSrcValue / dialationTgtValue)">
+                </form>
+            </div>
         </div>
     </div>
     <div>

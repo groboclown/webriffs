@@ -121,6 +121,12 @@ class QuipPaging implements AsyncComponent {
             return new Future.value();
         } else {
             quip.pendingDelete = true;
+
+            // Strip the quip out of the list
+            int pos = quips.indexOf(quip);
+            quips.removeAt(pos);
+            mediaAlertController.quipRemovedAt(pos);
+
             return quipUpdates.deleteQuip(quip);
         }
     }
@@ -221,14 +227,14 @@ class QuipPaging implements AsyncComponent {
         // This could be optimized by performing a pseudo-binary search
         // look-ahead to see where the next insertion point would be.
 
-        // FIXME update the QuipMediaAlertController index.
-
         int origPos = 0;
         int newPos = 0;
         while (origPos < quips.length || newPos < newQuips.length) {
             if (origPos >= quips.length) {
                 quips.add(newQuips[newPos++]);
                 origPos++;
+
+                // Do not call the update on the media alert controller
             } else if (newPos >= newQuips.length) {
                 // finished processing the new quips
                 origPos = quips.length;
@@ -241,6 +247,7 @@ class QuipPaging implements AsyncComponent {
             } else if (quips[origPos].timestamp < newQuips[newPos].timestamp) {
                 origPos++;
             } else { // if (quips[origPos].timestamp >= newQuips[newPos].timestamp) {
+                mediaAlertController.quipAddedAt(origPos);
                 quips.insert(origPos++, newQuips[newPos++]);
             }
         }
@@ -335,6 +342,20 @@ class QuipMediaAlertController extends BaseMediaAlertController {
                 _quips[nextIndex].timestamp < allowedToRunUpToThreshold) {
             print("=== time event ${currentTime} for ${_quips[nextIndex].text}");
             _handler(_quips[nextIndex]);
+            nextIndex++;
+        }
+    }
+
+
+    void quipRemovedAt(int pos) {
+        if (pos > nextIndex) {
+            nextIndex--;
+        }
+    }
+
+
+    void quipAddedAt(int pos) {
+        if (pos < nextIndex) {
             nextIndex++;
         }
     }

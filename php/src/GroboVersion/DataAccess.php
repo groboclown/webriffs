@@ -512,8 +512,8 @@ class DataAccess {
                 // change at the top that contains no item versions.  The state
                 // of the system will be a bit different, but there will be no
                 // actual changes to the contents of the branch.
-                $data = GvChange::$INSTANCE->runUpdateCommittedChangeId($db,
-                        $changeId, $newChangeId);
+                $data = GvChangeVersion::$INSTANCE->runUpdateCommittedChangeId(
+                        $db, $changeId, $newChangeId);
                 if ($data["haserror"]) {
                     return $data;
                 }

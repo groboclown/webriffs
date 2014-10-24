@@ -215,6 +215,7 @@ class EditBranchComponent extends AbstractBranchComponent {
             _voiceCapture.start().then((String text) {
                 text = text.trim();
                 if (text.length > 0) {
+print("*** SAVING [${text}]");
                     quipText = text;
                     savePendingQuip();
                 }
@@ -240,14 +241,6 @@ class EditBranchComponent extends AbstractBranchComponent {
         _quipTime = quip.timestamp;
     }
 
-    void deleteQuip(QuipDetails quip) {
-        branchDetails.then((BranchDetails branch) {
-            if (branch.userCanEditQuips) {
-                quipPaging.deleteQuip(quip);
-            }
-        });
-    }
-
     void setPendingQuipTime() {
         _quipTime = videoTimeProvider.serverTime.inMilliseconds;
         _quipTimeStr = videoTimeProvider.dialation.
@@ -258,6 +251,31 @@ class EditBranchComponent extends AbstractBranchComponent {
         pendingQuip = new QuipDetails.pending();
         quipText = null;
         quipTime = null;
+    }
+
+
+    Future<BranchDetails> _quipAlterSetup() {
+        return branchDetails.then((BranchDetails branch) {
+            if (branch.userCanEditQuips) {
+                if (! branch.userHasPendingChange) {
+                    return quipPaging.createPendingChange().then((_) {
+                        branch.userHasPendingChange = true;
+                        return branch;
+                    });
+                } else {
+                    return branch;
+                }
+            }
+            return null;
+        });
+    }
+
+    void deleteQuip(QuipDetails quip) {
+        _quipAlterSetup().then((BranchDetails branch) {
+            if (branch != null) {
+                quipPaging.deleteQuip(quip);
+            }
+        });
     }
 
     void savePendingQuip() {
@@ -275,26 +293,40 @@ class EditBranchComponent extends AbstractBranchComponent {
         quipTime = null;
         pendingQuip = new QuipDetails.pending();
 
-        branchDetails.then((BranchDetails branch) {
-            // FIXME handle tags
-            if (branch.userCanEditQuips) {
-                if (! branch.userHasPendingChange) {
-                    quipPaging.createPendingChange().then((_) {
-                        branch.userHasPendingChange = true;
-
-                        quip.text = text;
-                        quip.timestamp = time;
-                        quipPaging.saveQuip(quip);
-                    });
-                } else {
-                    quip.text = text;
-                    quip.timestamp = time;
-                    quipPaging.saveQuip(quip);
-                }
-            } else {
-                // FIXME report error
-                throw new Exception("SAVE QUIP: permission denied");
+        _quipAlterSetup().then((BranchDetails branch) {
+            if (branch != null) {
+                quip.text = text;
+                quip.timestamp = time;
+                quipPaging.saveQuip(quip);
             }
+        });
+    }
+
+
+    String getQuipTime(QuipDetails qd) {
+        return videoTimeProvider.dialation.displayString(qd.timestamp / 1000.0);
+    }
+
+
+    void commitChanges() {
+        branchDetails
+        .then((BranchDetails bd) {
+            quipPaging.commitChanges().then((ServerResponse resp) {
+                if (! resp.wasError) {
+                    bd.userHasPendingChange = false;
+                }
+            });
+        });
+    }
+
+
+    void abandonChanges() {
+        branchDetails.then((BranchDetails bd) {
+            quipPaging.abandonChanges().then((bool success) {
+                if (success) {
+                    bd.userHasPendingChange = false;
+                }
+            });
         });
     }
 
@@ -316,34 +348,6 @@ class EditBranchComponent extends AbstractBranchComponent {
 
                 return branchDetails;
             });
-    }
-
-
-    String getQuipTime(QuipDetails qd) {
-        return videoTimeProvider.dialation.displayString(qd.timestamp / 1000.0);
-    }
-
-
-    void commitChanges() {
-        branchDetails
-        .then((BranchDetails bd) {
-            quipPaging.commitChanges();
-            return bd;
-        })
-        .then((BranchDetails bd) {
-            bd.userHasPendingChange = false;
-        });
-    }
-
-
-    void abandonChanges() {
-        branchDetails.then((BranchDetails bd) {
-            quipPaging.abandonChanges().then((bool success) {
-                if (success) {
-                    bd.userHasPendingChange = false;
-                }
-            });
-        });
     }
 }
 

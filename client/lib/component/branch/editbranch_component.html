@@ -60,6 +60,20 @@ You do not have permissions to view the contents of this branch.
     
     <!-- Edit the quip -->
     <div ng-if="canEditQuips">
+<div class="bug">Known bugs with edits:<ol>
+<li>Abandoning changes that contain deletes seems to fail.  The DB deletes
+cause a foreign key constraint problem with the item versions.</li>
+<li>Deleting a quip that hasn't been committed causes the php
+QuipLayer::deleteQuip method to fail with "change already contains this item"</li>
+<li>Clicking edit on a quip while voice editing is enabled should switch the
+quip edit to be in the voice edit box, rather than the (hidden) normal quip
+edit.</li>
+<li>Log out does not refresh the quip list - it should change the user's view
+to see the branch at head revision, rather than continuing to see the pending
+view.</li>
+</ol>
+</div>
+    
         <div ng-if="speechEntry" style="border:2px solid black; background: #f80;">
             <div ng-if="hasSpeechError">
                 <span ng-if="speechError.networkProblem">
@@ -115,6 +129,7 @@ You do not have permissions to view the contents of this branch.
                 ng-disabled="hasQuipTimeFormatError">
         </div>
         </form>
+        <async-status parent="quipPaging.quipUpdates"></async-status>
         </div>
     
     

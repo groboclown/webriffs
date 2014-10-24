@@ -52,6 +52,9 @@ class MediaComponent implements ShadowRootAware, DetachAware {
     bool get loadedStopwatch => stopwatch.loaded;
     bool get notLoaded => _realPlayer == null;
 
+    double dialationSrcValue;
+    double dialationTgtValue;
+
 
     @NgOneWay('controller')
     MediaAlertController alerts;
@@ -134,7 +137,6 @@ class MediaComponent implements ShadowRootAware, DetachAware {
         });
     }
 
-
     static LinkRecord findProviderLink(BranchDetails bd) {
         if (bd == null) {
             return null;
@@ -158,12 +160,15 @@ class StopWatchSubComponent {
     //static final Logger _log = new Logger('media.StopwatchMedia');
 
     StopwatchMedia _media;
+    final Completer<StopwatchMedia> _mediaFuture =
+            new Completer<StopwatchMedia>();
 
     set media(StopwatchMedia m) {
         if (_media != null) {
             throw new Exception("already set media");
         }
         _media = m;
+        _mediaFuture.complete(m);
     }
 
     StopwatchMedia get media => _media;
@@ -181,6 +186,7 @@ class StopWatchSubComponent {
     bool get hasTimeFieldFormatError => _timeEdit.formatError;
 
     String get dialation => _timeEdit.dialation.name;
+    double dialationValue = 1.0;
 
     bool get loaded => _media != null;
 
@@ -215,6 +221,7 @@ class StopWatchSubComponent {
         _timeProvider = tp;
     }
 
+
     void setDialation(TimeDialation td) {
         if (td == null) {
             return;
@@ -238,14 +245,18 @@ class StopWatchSubComponent {
         // Force the reloading of the media provider when the dialation
         // reloads.
 
-        // TODO check to make sure this propigates down to the quips; if not,
-        // it may force a page reload.
-        _media.timeDialation = td;
-        _timeProvider.player = _media;
+        // This doesn't propigate to the quip list.  A page reload will be
+        // necessary.
+        _mediaFuture.future.then((StopwatchMedia m) {
+            _media.timeDialation = td;
+            _timeProvider.player = _media;
+            _timeEdit.dialation = td;
+        });
     }
 
 
     void configureDialation(double ratio) {
+        print("setting dialation to ${ratio}");
         // First, check for standard ratios.
         if (ratio == null || (ratio < 0.05 && ratio > -0.05)) { // NULL or 0
             setDialation(TimeDialation.NATIVE);

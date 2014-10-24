@@ -85,13 +85,10 @@ class VoiceCaptureController {
             return;
         }
         _captureState = false;
-        for (SpeechPhrase sp in _phrases) {
-            if (! sp.isFinal) {
-                // text still in progress; keep capturing
-                return;
-            }
+        if (_capturing != null) {
+            _endCapture(false);
+            _error = null;
         }
-        _endCapture(false);
     }
 
 
@@ -104,6 +101,11 @@ class VoiceCaptureController {
             _endCapture(true);
             // don't clear the error
         }
+    }
+
+
+    void insertPhrasesAt(int pos) {
+        throw new UnimplementedError();
     }
 
 

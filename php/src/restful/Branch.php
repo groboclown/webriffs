@@ -474,7 +474,12 @@ class BranchObjQuipItem extends Resource {
     function update() {
         $branchId = $this->validateId($this->branchid, "branchId");
         $quipId = $this->validateId($this->itemid, "itemId");
+        $quipText = $this->loadRequestString("Text_Value");
+        $quipTime = $this->loadRequestInt("Timestamp_Millis");
         $this->validate();
+
+        // FIXME add quip tags
+        $quipTags = array();
         
         $userId = null;
         $gaUserId = null;
@@ -484,8 +489,14 @@ class BranchObjQuipItem extends Resource {
         } else {
             throw new Tonic\UnauthorizedException();
         }
-        // FIXME
-        return array(500);
+        
+        
+        $ret = WebRiffs\QuipLayer::saveQuip($this->getDB(),
+                $userId, $gaUserId, $branchId, $quipId, $quipText, $quipTime,
+                $quipTags);
+        
+        // ACCEPTED
+        return array(202, $ret);
     }
     
     
@@ -508,8 +519,10 @@ class BranchObjQuipItem extends Resource {
         } else {
             throw new Tonic\UnauthorizedException();
         }
-        // FIXME
-        return array(500);
+        
+        $ret = WebRiffs\QuipLayer::deleteQuip($this->getDB(),
+                $userId, $gaUserId, $branchId, $quipId);
+        return array(200, array());
     }
 }
 
