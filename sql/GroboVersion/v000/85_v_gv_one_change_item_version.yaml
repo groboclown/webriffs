@@ -94,6 +94,10 @@ view:
                     type: foreign key
                     table: GA_USER
                     column: Ga_User_Id
+    constraints:
+        - constraint:
+            type: fake index
+            columns: Ga_User_Id, Gv_Branch_Id, Active_State
     extend:
         - sql:
             name: delete_versions_for_change
@@ -110,12 +114,17 @@ view:
                     type: int
 
         - sql:
+            #comment: "Deletes both the item versions and the change versions,
+            #    to avoid foreign key constraint issues.  This, however,
+            #    doesn't work due to the foreign constraint issues."
             name: delete_pending_versions_for_user_x_branch
             type: delete
             execute: "
-              DELETE iv.* FROM GV_ITEM_VERSION iv
+              DELETE cv.*, iv.* FROM GV_ITEM_VERSION iv
               INNER JOIN V_GV_ONE_CHANGE_ITEM_VERSION ociv
                   ON iv.Gv_Item_Version_Id = ociv.Gv_Item_Version_Id
+              INNER JOIN GV_CHANGE_VERSION cv
+                  ON ociv.Gv_Change_Version_Id = cv.Gv_Change_Version_Id
               WHERE ociv.Ga_User_Id = {Ga_User_Id}
                 AND ociv.Gv_Branch_Id = {Gv_Branch_Id}
                 AND ociv.Active_State = 0

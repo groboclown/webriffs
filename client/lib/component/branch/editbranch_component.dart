@@ -194,6 +194,19 @@ class EditBranchComponent extends AbstractBranchComponent {
         });
     }
 
+    /**
+     * Called when the user reloads; as such, we'll need to reload the quip
+     * list when this returns.
+     */
+    @override
+    Future<BranchDetails> reloadDetails() {
+        return super.reloadDetails().then((BranchDetails bd) {
+            quipPaging.reload();
+            return bd;
+        });
+    }
+
+
     void startSpeechListen() {
         if (_recognition != null && _voiceCapture == null) {
             _voiceCapture = new VoiceCaptureController(_recognition);
@@ -215,7 +228,6 @@ class EditBranchComponent extends AbstractBranchComponent {
             _voiceCapture.start().then((String text) {
                 text = text.trim();
                 if (text.length > 0) {
-print("*** SAVING [${text}]");
                     quipText = text;
                     savePendingQuip();
                 }
@@ -328,26 +340,6 @@ print("*** SAVING [${text}]");
                 }
             });
         });
-    }
-
-
-    /**
-     * Load all the changes that have happened
-     */
-    Future<BranchDetails> _loadEditBranchChange(ServerStatusService server) {
-        return branchDetails
-            .then((BranchDetails details) =>
-                    details.updateFromServer(server))
-            .then((ServerResponse response) =>
-                    server.get('/branch/${branchId}/pending', null))
-            .then((ServerResponse response) {
-                // FIXME this should return the pending changes between the
-                // user's branch-from version and the head version, and it
-                // should also include the head revision, so we can pull in the
-                // head branch details.
-
-                return branchDetails;
-            });
     }
 }
 

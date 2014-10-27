@@ -1,5 +1,3 @@
-<!-- TODO merge the branch playback and the branch edit -->
-
 <div>
 <a ng-href="#/film/view/{{filmId}}" ng-if="loaded">Film Details</a>
 <a ng-href="#/branch/changes/{{branchId}}" ng-if="branchId != null">Branch History</a>
@@ -61,16 +59,11 @@ You do not have permissions to view the contents of this branch.
     <!-- Edit the quip -->
     <div ng-if="canEditQuips">
 <div class="bug">Known bugs with edits:<ol>
-<li>Abandoning changes that contain deletes seems to fail.  The DB deletes
-cause a foreign key constraint problem with the item versions.</li>
 <li>Deleting a quip that hasn't been committed causes the php
 QuipLayer::deleteQuip method to fail with "change already contains this item"</li>
 <li>Clicking edit on a quip while voice editing is enabled should switch the
 quip edit to be in the voice edit box, rather than the (hidden) normal quip
 edit.</li>
-<li>Log out does not refresh the quip list - it should change the user's view
-to see the branch at head revision, rather than continuing to see the pending
-view.</li>
 </ol>
 </div>
     
@@ -111,7 +104,6 @@ view.</li>
         </div>
         <div ng-if="! speechEntry">
         Edit quip:
-<div class="bug">BUG this should not directly edit the time and text in the quip; they should be pushed to the object on save.</div>
         <button ng-if="hasSpeechSupport"
             ng-click="startSpeechListen()">&#127908; Use your voice</button>
         <form onsubmit="return false;">
@@ -144,7 +136,9 @@ view.</li>
                 <th ng-if="isEditable">&nbsp;</th>
                 <th>Time</th>
                 <th>Text</th>
+                <!--  tags aren't supported yet to create or edit
                 <th>Tags</th>
+                -->
             </tr>
         </thead>
         <tbody ng-if="quipPaging.loading">
@@ -162,19 +156,19 @@ view.</li>
             <tr ng-repeat="quip in quipPaging.quips">
                 <td ng-if="isEditable">
                     <!-- FIXME make this state based on the actual state -->
-                    <!-- FIXME make the icons consistent across the site; this
-                    differs with the meaning in the piece_edit_component.html -->
                     <span ng-click="editQuip(quip)">&#9998;</span>
-                    <span ng-click="deleteQuip(quip)">&#10005;</span>
-                    <span ng-click="revertQuip(quip)">&#9852;</span>
+                    <span ng-click="deleteQuip(quip)">del</span> <!-- scissors? -->
+                    <span ng-click="revertQuip(quip)">&#10005;</span>
                 </td>
                 <td>{{getQuipTime(quip)}}</td>
                 <td>{{quip.text}}</td>
+                <!--  tags aren't supported yet to create or edit
                 <td>
                     <span ng-repeat="tag in quip.tags">
                         {{tag.name}}
                     </span>
                 </td>
+                 -->
             </tr>
         </tbody>
     </table>

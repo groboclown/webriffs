@@ -596,13 +596,33 @@ class DataAccess {
      * @param unknown $gvBranchId
      */
     public static function deletePendingChangesForUserBranch($db, $gaUserId, $gvBranchId) {
-        $data = VGvOneChangeItemVersion::$INSTANCE->runDeletePendingVersionsForUserXBranch(
-                 $db, $gaUserId, $gvBranchId);
-        DataAccess::checkError($data,
+        error_log("Deleting for ga_user_id ".$gaUserId." gv_branch_id ".$gvBranchId);
+        
+        
+        // This has an issue where the item versions are being referenced
+        // by the change versions.  However, we need the change versions in
+        // order to find the item versions to delete.
+        //$data = VGvOneChangeItemVersion::$INSTANCE->runDeletePendingVersionsForUserXBranch(
+        //         $db, $gaUserId, $gvBranchId);
+        //DataAccess::checkError($data,
+        //    new Base\ValidationException(
+        //        array(
+        //            'unknown' => 'there was an unknown problem deleting item versions'
+        //        )));
+        
+        // Instead, we need to collect the item versions and delete them
+        // after the change versions are deleted.  This is fine, because a
+        // pending change item should have no other links to it (it hasn't
+        // been committed, so no forks should be made off of it).
+        
+        $ivData = VGvOneChangeItemVersion::$INSTANCE->readBy_Ga_User_Id_x_Gv_Branch_Id_x_Active_State(
+                 $db, $gaUserId, $gvBranchId, 0);
+        DataAccess::checkError($ivData,
             new Base\ValidationException(
                 array(
-                    'unknown' => 'there was an unknown problem deleting item versions'
+                    'unknown' => 'there was an unknown problem finding item versions'
                 )));
+        
         $data = GvChangeVersion::$INSTANCE->runDeletePendingChangesForUserXBranch(
                  $db, $gaUserId, $gvBranchId);
         DataAccess::checkError($data,
@@ -617,6 +637,35 @@ class DataAccess {
                 array(
                     'unknown' => 'there was an unknown problem deleting changes'
                 )));
+        
+        foreach ($ivData['result'] as $row) {
+            $version = intval($row['Gv_Item_Version_Id']);
+            $item = intval($row['Gv_Item_Id']);
+            $data = GvItemVersion::$INSTANCE->remove($db, $version);
+            DataAccess::checkError($data,
+                new Base\ValidationException(
+                    array(
+                        'unknown' => 'there was an unknown problem deleting item version'
+                    )));
+            // There may be lingering Gv_Item instances that also need to
+            // be cleaned up.
+            $data = GvItemVersion::$INSTANCE->countBy_Gv_Item_Id($db, $item);
+            DataAccess::checkError($data,
+                new Base\ValidationException(
+                    array(
+                        'unknown' => 'there was an unknown problem finding item'
+                    )));
+            if ($data['result'] <= 0) {
+                // the item needs to be removed - it was created for this change.
+                $data = GvItem::$INSTANCE->remove($db, $item);
+                DataAccess::checkError($data,
+                    new Base\ValidationException(
+                        array(
+                            'unknown' => 'there was an unknown problem deleting item'
+                        )));
+            }
+        }
+        
     }
 
     // ----------------------------------------------------------------------
