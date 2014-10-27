@@ -22,26 +22,6 @@ import 'abstract_branch_component.dart';
  * The UI component view of the list of films.  The video timer controls are
  * embedded in this component, and are accessed by this component through the
  * `mediaStatusService` field.
- *
- * FIXME add "is editing" mode for quips.  This is turned on and off only by
- *  the presence of a pending change on the branch.  This will mean an
- *  extension to the branch details to get that additional info, maybe?
- *  It should be in a request that returns BEFORE the branch details
- *  future returns.  Changing this state may have large implications on
- *  the displayed UI.
- *
- * FIXME should not have the change ID as part of the UI.  Instead, it
- * should be just a notion of determining what has changed based on what
- * the user is currently viewing.  The "branch updates" component needs to
- * be better integrated into this, so that it detects what quips were added,
- * and by whom, and then pushes those down to consumers (Stream events).
- * When a user is editing, they are in a "pending merge" state, to allow for
- * an easier merge click-through.
- *
- * The change ID can be part of the UI if the user wants to look at historical
- * versions of the branch.
- *
- *
  */
 @Component(
     selector: 'edit-branch',

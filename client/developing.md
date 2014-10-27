@@ -45,6 +45,10 @@ configuration.
 
 ### Apache HTTPD Setup
 
+The system uses PHP running in a web server as the business logic layer above
+the database.  This guide shows how to setup an Apache HTTPD server to work
+with this PHP web side.
+
 There are many guides on setting up an Apache HTTPD server.  The key point
 to remember is ensuring that it has PHP enabled
 (`LoadModule php5_module .....`).  You may be using virtual hosts or not,
@@ -74,13 +78,27 @@ because you'll be checking that for the PHP error messages.
 
 #### Proxy to the Dart server
 
-The normal usage for the application will be for the client (Dart) files to
-coexist with the PHP files.  The `php/web/.htaccess` file maps this out.
-However, for developing the client side, there's a much more efficient method.
-This requires enabling the `mod_proxy` and `mod_proxy_http` extensions.
+The standard deployment of the application has the Dart client files (Dart
+sources, Dart compiled JS files, and the support client files) living in the
+same web server as the PHP files.  The `php/web/.htaccess` file partially
+describes this relationship.
+
+When developing the Dart web client, it's much faster to use the `pub serve`
+command to allow for a fast turn-around between editing and testing.  It will
+automatically redeploy edited files out to the web server (including recompiling
+Dart to JS when testing in standard web browsers).  However, the `pub serve`
+web server doesn't handle the PHP layer, and doesn't allow for pass-through
+proxy to the httpd server that handles the PHP side.
+
+The method described here will enable the Apache HTTPD reverse proxy, so that
+non-PHP requests instead redirect to the Dart `pub serve` server.
+This requires enabling the `mod_proxy` and `mod_proxy_http` extensions in
+Apache (that's an excercise left to the reader - it depends upon how you have
+Apache installed).
 
 You'll need to add the Proxy settings into the `httpd.conf` file, as these
-settings cannot live in a `.htaccess` file.
+settings cannot live in a `.htaccess` file.  If you are using virtual hosts,
+this setting must be inside the virtual host for the server.
 
     <IfModule mod_proxy.c>
         ProxyRequests Off
@@ -92,9 +110,12 @@ settings cannot live in a `.htaccess` file.
         ProxyPass /webriffs/ http://localhost:8080/
         ProxyVia Block
     </IfModule>
-    
+
 This will pass the non-php requests to the underlying Dart `pub serve`
-service.
+service.  Note that if you run `pub serve` on a different IP address, or if you
+run the `pub serve` on a different server, you will need to change the URL
+appropriately (from `http://localhost:8080/` in the example above to the
+one that's correct for your installation).
 
 
 ### Dart Setup
@@ -139,3 +160,11 @@ These will drop the existing SQL database and recreate it with the generated
 SQL files.  That means **all existing data will be wiped clean.**  It will
 also run the test data PHP script to generate a bit of initial sample data
 to play with.
+
+### Official Release
+
+    build.py all
+    
+This will clean out the `build/exports` directory, and create the official
+distribution files.  The admin page will be active, and there shouldn't be a
+`site.conf.php` or other configuration file present.
