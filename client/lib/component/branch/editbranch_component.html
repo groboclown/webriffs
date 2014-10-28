@@ -15,8 +15,7 @@ You do not have permissions to view the contents of this branch.
             <span ng-if="urlChangeId &gt;= 0">(revision {{changeId}})</span>
             <span ng-if="urlChangeId &lt; 0">(pending changes)</span>
         </div>
-        <div>{{branchName}}</div>
-        <div>{{description}}</div>
+        <branch-header branch="branchDetails"></branch-header>
         <div>Last updated on {{updatedOn}}</div>
     </div>
     <div ng-if="! loaded">
