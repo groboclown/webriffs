@@ -3,10 +3,11 @@
     <h3>{{name}}</h3>
 </div>
 <div>
-    <span><a href="#/film/list">List films</a></span>
-    <span ng-if="canCreateFilm"><a href="#/film/create">Add a film</a></span>
-    <span ng-if="showBranchLink"><a ng-href="#/branch/create/{{filmId}}">Create a branch for this film</a></span>
-    <span ng-if="showForkLink"><a ng-href="#/branch/fork/{{branchId}}">Fork this branch</a></span>
+    <!-- Note that these will redirect to this HTML's page, not the real page -->
+    <span><a href="../../../../#/film/list">List films</a></span>
+    <span ng-if="canCreateFilm"><a href="../../../../#/film/create">Add a film</a></span>
+    <span ng-if="showBranchLink"><a ng-href="../../../../#/branch/create/{{filmId}}">Create a branch for this film</a></span>
+    <span ng-if="showForkLink"><a ng-href="../../../../#/branch/fork/{{branchId}}">Fork this branch</a></span>
 </div>
 <div>
     <login></login>
