@@ -323,12 +323,36 @@ class QuipLayer {
         // pending changes are assigned to that user on that branch.
         // (> 1 is a data integrety error, but it's handled correctly)
         
-        $data = UserBranchPendingVersion::$INSTANCE->remove($db, $userId, $branchId);
+        $data = UserBranchPendingVersion::$INSTANCE->
+            readBy_User_Id_x_Gv_Branch_Id($db, $userId, $branchId);
         QuipLayer::checkError($data,
             new Base\ValidationException(
                 array(
                     'unknown' => 'problem removing the pending version'
                 )));
+        if ($data['rowcount'] <= 0) {
+            // nothing to do
+            return;
+        }
+        $versionRows = $data['result'];
+        
+        // Remove the knowledge of the user-owned pending change relationship
+        // to the base change versions.
+        $data = UserBranchPendingVersion::$INSTANCE->remove($db, $userId,
+                $branchId);
+        QuipLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'problem removing the pending version'
+                )));
+        
+        // If there are quip versions of the items, they need to be removed
+        // here.
+        foreach ($versionRows as $row) {
+            $data = QuipVersion::$INSTANCE->runDeleteVersionsForChange($db,
+                $row['Pending_Change_Id']);
+        }
+        
         GroboVersion\DataAccess::deletePendingChangesForUserBranch($db,
             $gaUserId, $branchId);
     }
@@ -378,12 +402,7 @@ class QuipLayer {
             $quipId = GroboVersion\DataAccess::createItem($db);
         }
         
-        // This will raise an error if the quipId is not valid.
-        // $changeData[0] = item version id
-        // $changeData[1] = change version id
-        $changeData = GroboVersion\DataAccess::addItemToChange($db,
-            $quipId, $pendingChange, FALSE);
-        
+
         $outtags = array();
         $tagstr = ',';
         foreach ($tags as $tag) {
@@ -399,10 +418,39 @@ class QuipLayer {
         }
         if (sizeof($outtags) > 20) {
             throw new Base\ValidationException(
-                    array(
-                        'unknown' => 'too many tags (maximum 20)'
-                    ));
+                array(
+                    'unknown' => 'too many tags (maximum 20)'
+                ));
         }
+        
+        // If the value is already edited or was added in this pending change
+        // then edited, then it will need to be updated in the quip version
+        // only.
+        $quipVersion = GroboVersion\DataAccess::getItemVersionFromChange($db,
+                $pendingChange, $quipId);
+        if ($quipVersion !== false) {
+            $data = QuipVersion::$INSTANCE->update($db, $quipVersion,
+                $quipText, $tagstr, $timeMillis);
+            QuipLayer::checkError($data,
+                new Base\ValidationException(
+                    array(
+                        'unknown' => 'saving quip update'
+                    )));
+            return array(
+                'Gv_Item_Id' => $quipId,
+                //'Gv_Item_Version_Id' => $quipVersion,
+                'Gv_Branch_Id' => $branchId,
+                'Text_Value' => $quipText,
+                'Timestamp_Millis' => $timeMillis,
+                'Tags' => $outtags
+            );
+        }
+        
+        // This will raise an error if the quipId is not valid.
+        // $changeData[0] = item version id
+        // $changeData[1] = change version id
+        $changeData = GroboVersion\DataAccess::addItemToChange($db,
+            $quipId, $pendingChange, FALSE);
         
         $data = QuipVersion::$INSTANCE->create($db, $changeData[0],
                 $quipText, $tagstr, $timeMillis);
@@ -441,6 +489,21 @@ class QuipLayer {
                 ));
         }
         $pendingChange = intval($data['result'][0]['Pending_Change_Id']);
+        
+        // if the quip exists and the item will be removed, then remove
+        // the quip version first.
+        $itemVersionData = GroboVersion\DataAccess::getItemVersionInfoFromChange($db,
+                $pendingChange, $quipId);
+        if ($itemVersionData !== false) {
+            // This pending change already contains this quip, so remove it.
+            $data = QuipVersion::$INSTANCE->remove($db, $itemVersionData[0]);
+            QuipLayer::checkError($data,
+                new Base\ValidationException(
+                    array(
+                        'unknown' => 'problem fetching the quip version'
+                    )));
+        }
+        
         
         // This will raise an error if the quipId is not valid.
         // $changeData[0] = item version id

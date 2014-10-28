@@ -89,3 +89,17 @@ table:
                 - constraint:
                     type: initial value
                     value: "NULL"
+    extend:
+        - sql:
+            name: delete_versions_for_change
+            type: delete
+            execute: "
+              DELETE qv.* FROM QUIP_VERSION qv
+              INNER JOIN GV_CHANGE_VERSION cv
+                  ON qv.Gv_Item_Version_Id = cv.Gv_Item_Version_Id
+              WHERE cv.Gv_Change_Id = {Gv_Change_Id}
+              "
+            arguments:
+                - argument:
+                    name: Gv_Change_Id
+                    type: int

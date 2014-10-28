@@ -250,12 +250,51 @@ class DataAccess {
         // NOTE: this is not atomic, so there might be an issue here.  However,
         // changes are intended to be associated with a single user, so this
         // situation is very unlikely.  Famous last words...
-        if (DataAccess::getItemVersionFromChange($db, $changeId,
-            $itemId) !== false) {
-            throw new Base\ValidationException(
-                array(
-                    "change" => "change already contains this item"
-                ));
+        $itemVersionData = DataAccess::getItemVersionInfoFromChange($db,
+                $changeId, $itemId);
+        if ($itemVersionData !== false) {
+            if ($deleted) {
+                // Remove from the change, and remove the item.  As a non-
+                // submitted item version, it should not be shared.
+                $data = GvChangeVersion::$INSTANCE->remove(
+                        $db, $itemVersionData[1]);
+                DataAccess::checkError($data,
+                    new Base\ValidationException(
+                        array(
+                            'unknown' => 'there was an unknown problem removing the change version'
+                        )));
+                $data = GvItemVersion::$INSTANCE->remove($db, $itemVersionData[0]);
+                DataAccess::checkError($data,
+                    new Base\ValidationException(
+                        array(
+                            'unknown' => 'there was an unknown problem removing the item version'
+                        )));
+                
+                // check if there are any more item versions pointing
+                // to this item; if not, remove the item.
+                $data = GvItemVersion::$INSTANCE->countBy_Gv_Item_Id($db, $itemId);
+                DataAccess::checkError($data,
+                    new Base\ValidationException(
+                        array(
+                            'unknown' => 'there was an unknown problem counting the items'
+                        )));
+                error_log("Versions of ".$itemId.": ".$data['result']);
+                if ($data['result'] <= 0) {
+                    // remove the item
+                    $data = GvItem::$INSTANCE->remove($db, $itemId);
+                    DataAccess::checkError($data,
+                        new Base\ValidationException(
+                            array(
+                                'unknown' => 'there was an unknown problem removing the item'
+                            )));
+                }
+                return;
+            } else {
+                throw new Base\ValidationException(
+                    array(
+                        "change" => "change already contains this item"
+                    ));
+            }
         }
         
         $alive = (!!$deleted) ? 0 : 1;
@@ -309,8 +348,19 @@ class DataAccess {
 
 
     public static function getItemVersionFromChange($db, $changeId, $itemId) {
+        $info = DataAccess::getItemVersionInfoFromChange($db, $changeId,
+                $itemId);
+        if ($info === false) {
+            return false;
+        }
+        return $info[0];
+    }
+
+
+    public static function getItemVersionInfoFromChange($db, $changeId,
+            $itemId) {
         $data = GvChangeVersion::$INSTANCE->readBy_Gv_Change_Id_x_Gv_Item_Id($db,
-            $changeId, $itemId);
+                $changeId, $itemId);
         DataAccess::checkError($data,
             new Base\ValidationException(
                 array(
@@ -323,10 +373,11 @@ class DataAccess {
             // shouldn't happen because of the unique constraint on the table.
             error_log(
                 "WARNING: Found more than 1 version of item " . $itemId .
-                     " in change " . $changeId);
+                " in change " . $changeId);
             // but keep going...
         }
-        return intval($data['result'][0]['Gv_Item_Version_Id']);
+        return array(intval($data['result'][0]['Gv_Item_Version_Id']),
+                intval($data['result'][0]['Gv_Change_Version_Id']));
     }
     
 

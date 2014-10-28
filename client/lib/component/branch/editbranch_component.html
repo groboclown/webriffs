@@ -44,8 +44,11 @@ You do not have permissions to view the contents of this branch.
         <!-- FIXME set the style based on the edit state -->
         <div ng-repeat="quip in shownQuips" class="popup_quip">
             <div>
-                <span ng-if="isEditable"
-                    ng-click="editQuip(quip)">&#9998;</span>
+                <span ng-if="isEditable">
+                    <span ng-click="editQuip(quip)" ng-if="! speechEntry">&#9998;</span>
+                    <span ng-click="deleteQuip(quip)">del</span> <!-- scissors? -->
+                    <span ng-click="revertQuip(quip)">&#10005;</span>
+                </span>
                 <span>{{getQuipTime(quip)}}</span>
                 <span ng-repeat="tag in quip.tags">
                     {{tag.name}}
@@ -58,15 +61,6 @@ You do not have permissions to view the contents of this branch.
     
     <!-- Edit the quip -->
     <div ng-if="canEditQuips">
-<div class="bug">Known bugs with edits:<ol>
-<li>Deleting a quip that hasn't been committed causes the php
-QuipLayer::deleteQuip method to fail with "change already contains this item"</li>
-<li>Clicking edit on a quip while voice editing is enabled should switch the
-quip edit to be in the voice edit box, rather than the (hidden) normal quip
-edit.</li>
-</ol>
-</div>
-    
         <div ng-if="speechEntry" style="border:2px solid black; background: #f80;">
             <div ng-if="hasSpeechError">
                 <span ng-if="speechError.networkProblem">
@@ -115,7 +109,7 @@ edit.</li>
             <label for="quip_text">With </label>
             <input id="quip_text" type="text" ng-model="quipText">
         </div>
-        <div style="font-size:3em;">
+        <div>
             <button ng-click="setPendingQuipTime()">Set time to now</button>
             <input type="submit" ng-click="savePendingQuip()" value="Save"
                 ng-disabled="hasQuipTimeFormatError">
@@ -156,7 +150,7 @@ edit.</li>
             <tr ng-repeat="quip in quipPaging.quips">
                 <td ng-if="isEditable">
                     <!-- FIXME make this state based on the actual state -->
-                    <span ng-click="editQuip(quip)">&#9998;</span>
+                    <span ng-click="editQuip(quip)" ng-if="! speechEntry">&#9998;</span>
                     <span ng-click="deleteQuip(quip)">del</span> <!-- scissors? -->
                     <span ng-click="revertQuip(quip)">&#10005;</span>
                 </td>
