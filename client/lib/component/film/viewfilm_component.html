@@ -82,7 +82,7 @@
             <tbody ng-if="loadedSuccessful">
                 <tr ng-repeat="branch in branches">
                      <td>
-                        <span><a href="#/branch/view/{{branch.branchId}}/{{branch.headChangeId}}">{{branch.name}}</a></span>
+                        <span><a ng-href="#/branch/view/{{branch.branchId}}/{{branch.headChangeId}}">{{branch.name}}</a></span>
                         <span>[{{branch.headChangeId}}]</span>
                      </td>
                      <td>
