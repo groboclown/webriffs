@@ -2,6 +2,7 @@
 library createbranch_component;
 
 import 'dart:async';
+import 'dart:html';
 
 import 'package:angular/angular.dart';
 
@@ -69,13 +70,12 @@ class CreateBranchComponent extends RequestHandlingComponent {
         if (! disabled) {
             lookupName.valid = false;
             csrfRequest(_server, 'create_branch',
-                    (ServerStatusService server, String token) {
-                return _server.put('/film/' + filmId.toString() + '/branch',
+                    (ServerStatusService server, String token) =>
+                _server.put('/film/' + filmId.toString() + '/branch',
                         token, data: {
                             'Name': lookupName.name
                             // 'Description'
-                        });
-            });
+                        }));
         } else {
             print("current branch name is not valid.");
         }
@@ -88,11 +88,11 @@ class CreateBranchComponent extends RequestHandlingComponent {
         lookupName.reset();
 
         int branchId = response.jsonData['Branch_Id'];
-        int changeId = response.jsonData['Change_Id'];
 
         // redirect to the edit page
-        _route.go('Edit Your Branch', {
-            'branchId': branchId
+        _route.go('View Branch', {
+            'branchId': branchId,
+            'changeId': -1
         });
         return null;
     }

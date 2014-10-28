@@ -271,8 +271,7 @@ class FilmObjBranch extends Resource {
             $branchName, $desc, null);
         
         $data = array(
-            'Branch_Id' => $result[0],
-            'Change_Id' => $result[1]
+            'Branch_Id' => $result
         );
         
         return array(200, $data);
