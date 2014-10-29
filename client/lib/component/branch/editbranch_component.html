@@ -45,8 +45,11 @@ You do not have permissions to view the contents of this branch.
             <div>
                 <span ng-if="isEditable">
                     <span ng-click="editQuip(quip)" ng-if="! speechEntry">&#9998;</span>
-                    <span ng-click="deleteQuip(quip)">del</span> <!-- scissors? -->
+                    <span ng-click="deleteQuip(quip)">&#9986;</span>
+                    <!-- doesn't actually do anything now.  Besides, should
+                    only be shown if there's something to revert.
                     <span ng-click="revertQuip(quip)">&#10005;</span>
+                    -->
                 </span>
                 <span>{{getQuipTime(quip)}}</span>
                 <span ng-repeat="tag in quip.tags">
@@ -150,8 +153,11 @@ You do not have permissions to view the contents of this branch.
                 <td ng-if="isEditable">
                     <!-- FIXME make this state based on the actual state -->
                     <span ng-click="editQuip(quip)" ng-if="! speechEntry">&#9998;</span>
-                    <span ng-click="deleteQuip(quip)">del</span> <!-- scissors? -->
+                    <span ng-click="deleteQuip(quip)">&#9986;</span>
+                    <!--  doesn't actually do anything now.  Besides, should
+                    only be shown if there's something to revert.
                     <span ng-click="revertQuip(quip)">&#10005;</span>
+                    -->
                 </td>
                 <td>{{getQuipTime(quip)}}</td>
                 <td>{{quip.text}}</td>
