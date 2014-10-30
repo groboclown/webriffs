@@ -253,10 +253,13 @@ class EditBranchComponent extends AbstractBranchComponent {
     }
 
     void setPendingQuipTime() {
-        _quipTime = videoTimeProvider.serverTime.inMilliseconds;
-        _quipTimeStr = videoTimeProvider.dialation.
-                displayString(_quipTime / 1000.0);
-        _parsedQuipTime = _quipTimeStr;
+        Duration serverTime = videoTimeProvider.serverTime;
+        if (serverTime != null) {
+            _quipTime = serverTime.inMilliseconds;
+            _quipTimeStr = videoTimeProvider.dialation.
+                    displayString(_quipTime / 1000.0);
+            _parsedQuipTime = _quipTimeStr;
+        }
     }
 
     void cancelEditQuip() {

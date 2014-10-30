@@ -7,7 +7,7 @@ dependencies:
   angular: '>=1.0.0 <2.0.0'
   browser: any
   cookie: '>=0.0.4 <1.0.0'
-  videoplay: '>=0.2.0 <1.0.0'
+  videoplay: '>=0.2.4 <1.0.0'
   web_components: any
 dev_dependencies:
   unittest: any
