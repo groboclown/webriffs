@@ -10,9 +10,9 @@ You do not have permissions to view the contents of this branch.
 
 <div ng-if="canReadQuips" class="component">
     
-    <div ng-if="loaded">
-        <div><span>{{filmName}}</span> <span>({{filmReleaseYear}})</span>
-            <span ng-if="urlChangeId &gt;= 0">(revision {{changeId}})</span>
+    <div ng-if="loaded" class="film">
+        <div><span class="film-name">{{filmName}}</span> <span class="year">({{filmReleaseYear}})</span>
+            <span ng-if="urlChangeId &gt;= 0" class="revision">(revision {{changeId}})</span>
             
             <!-- This isn't correct.  It means that you're looking at the
             head version.
@@ -20,7 +20,7 @@ You do not have permissions to view the contents of this branch.
             -->
         </div>
         <branch-header branch="branchDetails"></branch-header>
-        <div>Last updated on {{updatedOn}}</div>
+        <div class="update">Last updated on {{updatedOn}}</div>
     </div>
     <div ng-if="! loaded">
         <span ng-if="loadError">Problem loading branch.  You may not have
@@ -67,15 +67,15 @@ You do not have permissions to view the contents of this branch.
     
     <!-- Edit the quip -->
     <div ng-if="canEditQuips">
-        <div ng-if="speechEntry" style="border:2px solid black; background: #f80;">
-            <div ng-if="hasSpeechError">
+        <div ng-if="speechEntry" class="speech-entry">
+            <div ng-if="hasSpeechError" class="error">
                 <span ng-if="speechError.networkProblem">
                 Could not connect to the speech recognition service.
                 </span>
                 <span ng-if="speechError.blocked">
                 The browser is preventing the speech recognition from running.
                 You may have blocked it from listening to the microphone, or
-                maybe you need to plugged in and turned on your microphone?
+                maybe you need to plug in and turn on your microphone?
                 </span>
                 <span ng-if="speechError.userDenied">
                 You seem to have explicitly denied the page from listening to

@@ -1,8 +1,8 @@
-<div class="component">
+<div class="branch">
   <async-status parent="cmp"></async-status>
-  <div>
+  <div class="name-wrapper">
     <piece-editor piece="nameEdit" can-edit="canEditName">
-        <span ng-if="nameEdit.isEditing">
+        <span ng-if="nameEdit.isEditing" class="name">
           <label for="branch.name">Branch Name</label>
           <input id="branch.name" type="text" ng-model="nameEdit.editValue"
               ng-minlength="1"
@@ -10,13 +10,13 @@
               placeholder="{{nameEdit.original}}"
               required>
         </span>
-        <span ng-if="! nameEdit.isEditing">{{nameEdit.original}}</span>
+        <span ng-if="! nameEdit.isEditing" class="name">{{nameEdit.original}}</span>
     </piece-editor>
   </div>
 
-  <div>
+  <div class="description-wrapper">
     <piece-editor piece="descriptionEdit" can-edit="canEditDescription">
-        <span ng-if="descriptionEdit.isEditing">
+        <span ng-if="descriptionEdit.isEditing" class="description">
           <label for="branch.description">Description</label><br>
           <textarea id="branch.description"
               style="display: inline;"
@@ -24,7 +24,7 @@
               ng-minlength="0"
               ng-maxlength="2048">{{descriptionEdit.original}}</textarea>
         </span>
-        <span ng-if="! descriptionEdit.isEditing">{{descriptionEdit.original}}</span>
+        <span ng-if="! descriptionEdit.isEditing" class="description">{{descriptionEdit.original}}</span>
     </piece-editor>
   </div>
   

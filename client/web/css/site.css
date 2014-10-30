@@ -11,17 +11,9 @@
     border: 1px solid darkgray;
 }
 
-.popup_quip {
-    border: 2px solid black;
-    background: lightgray;
-    font-weight: bold;
-    padding: 1em;
-}
-
-.quip_edited {
-    background: #ff8;
-}
-
-.quip_removed {
-    color: lightgray;
+body {
+    margin: 0px;
+    padding: 0px;
+    border: none;
+    font-family: helvetica, arial;
 }

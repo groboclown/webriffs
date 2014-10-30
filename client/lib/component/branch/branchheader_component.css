@@ -1,0 +1,28 @@
+
+
+// ------------------------------------------------------------------------
+
+.branch {
+ 
+}
+
+.branch .name-wrapper {
+   margin: 1em;
+}
+
+.branch .name {
+   font-size: 1.6em;
+   font-weight: bold;
+   font-style: italic;
+}
+
+.branch .description-wrapper {
+   margin-left: 1em;
+   margin-right: 1em;
+}
+
+.branch .description {
+}
+
+
+// ------------------------------------------------------------------------

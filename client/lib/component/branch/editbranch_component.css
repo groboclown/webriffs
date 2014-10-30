@@ -1,0 +1,66 @@
+
+.component {
+    border: 1px solid darkgray;
+}
+
+
+// ------------------------------------------------------------------------
+
+.film {
+ 
+}
+
+.film .film-name {
+   font-size: 1.8em;
+   font-weight: bold;
+}
+
+.film .year {
+   margin-left: 1em;
+   font-size: 1.2em;
+}
+
+.film .revision {
+   font-size: 0.8em;
+   font-style: italic;
+}
+
+.film .update {
+   font-style: italic;
+   margin-left: 1em;
+   margin-bottom: 2em;
+}
+
+
+
+// ------------------------------------------------------------------------
+
+
+.popup_quip {
+    border: 2px solid black;
+    background: lightgray;
+    font-weight: bold;
+    padding: 1em;
+}
+
+.quip_edited {
+    background: #ff8;
+}
+
+.quip_removed {
+    color: lightgray;
+}
+
+
+// ------------------------------------------------------------------------
+
+.speech-entry {
+    border: 2px solid black;
+    background: #f80;
+}
+
+.speech-entry .error {
+    font-weight: bold;
+    font-style: italic;
+    color: black;
+}
