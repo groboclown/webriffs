@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebRiffs</title>
+    <!--<page-title></page-title>-->
+    <link rel="stylesheet" href="css/site.css">
+    <link rel="shortcut icon" href="img/logo-64x64.ico" />
+
+    <script src="packages/web_components/platform.js"></script>
+    <script src="packages/web_components/dart_support.js"></script>
+</head>
+<body>
+<!-- mark this so that it only shows while the page loads. -->
+<div ng-class="'beforeload'">
+Hold on to your cap - we're loading the app.
+</div>
+
+<ng-view ng-cloak></ng-view>
+
+<div id="outer_media_container">
+    <div id="media_container"></div>
+</div>
+
+<div class="footer">
+    Copyright (c) 2014 by WebRiffs
+</div>
+
+
+<script type="application/dart" src="main.dart"></script>
+<script type="text/javascript" src="packages/browser/dart.js"></script>
+
+</body>
+</html>
