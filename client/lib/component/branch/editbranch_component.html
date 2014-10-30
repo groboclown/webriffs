@@ -13,7 +13,11 @@ You do not have permissions to view the contents of this branch.
     <div ng-if="loaded">
         <div><span>{{filmName}}</span> <span>({{filmReleaseYear}})</span>
             <span ng-if="urlChangeId &gt;= 0">(revision {{changeId}})</span>
+            
+            <!-- This isn't correct.  It means that you're looking at the
+            head version.
             <span ng-if="urlChangeId &lt; 0">(pending changes)</span>
+            -->
         </div>
         <branch-header branch="branchDetails"></branch-header>
         <div>Last updated on {{updatedOn}}</div>

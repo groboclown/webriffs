@@ -1,6 +1,5 @@
 <div class="component">
   <async-status parent="cmp"></async-status>
-  <div class="bug">BUG If the validation hasn't completed when the user clicks the okay button, the half-validated text is set.</div>
   <div>
     <piece-editor piece="nameEdit" can-edit="canEditName">
         <span ng-if="nameEdit.isEditing">
@@ -43,6 +42,7 @@
   </div>
 
   <div ng-if="isSavePending">
+      <div class="bug">BUG If the validation hasn't completed when the user clicks the Save button, the half-validated text is set.</div>
       <button ng-click="save()">Save</button>
       <span ng-click="cancel()">[ Cancel ]</span>
       <span class="bug">BUG this needs to change if the save was submitted.</span>

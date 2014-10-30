@@ -86,7 +86,7 @@ loading media...
     <div>
         <input type="text" ng-model="stopwatch.timeField">
         <input type="submit" ng-click="stopwatch.setTime()" value="Set time"
-            ng-disabled="stopwatch.hasTimeFieldFormatError">
+            ng-disabled="stopwatch.hasTimeFieldFormatError || stopwatch.status.playing">
         <span ng-if="stopwatch.hasTimeFieldFormatError">Bad time format</span>
     </div>
     <div>
