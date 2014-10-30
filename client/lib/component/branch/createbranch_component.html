@@ -13,12 +13,12 @@
            <div>
              <input type="submit" ng-click="createBranch()" value="Create"
                  ng-disabled="disabled">
-             <button ng-click="cancel()">Cancel</button>
+             <span ng-click="cancel()">[ Cancel ]</span>
            </div>
         </form>
         <async-status parent="cmp"></async-status>
     </div>
     <div ng-if="! showCreateBranch">
-        <span ng-click="showCreateBranch = true">Create a new branch</span>
+        <span ng-click="showCreateBranch = true">[ Create a new branch ]</span>
     </div>
 </div>

@@ -30,7 +30,7 @@ You do not have permissions to view the contents of this branch.
         You have changes saved on the server that haven't been committed
         to the branch.
         <button ng-click="commitChanges()">Commit Changes</button>
-        <span ng-click="abandonChanges()">Abandon Changes</span>
+        <span ng-click="abandonChanges()">[ Abandon Changes ]</span>
     </div>
     
     <media-controller
@@ -85,7 +85,7 @@ You do not have permissions to view the contents of this branch.
                 </div>
                 
                 <div>
-                <span ng-click="clearVoiceText()">&#9986;</span>
+                <span ng-click="clearVoiceText()">&#10005;</span>
                 
                 {{heardText}}
                 </div>
@@ -117,7 +117,7 @@ You do not have permissions to view the contents of this branch.
             <input id="quip_text" type="text" ng-model="quipText">
         </div>
         <div>
-            <span class="bug">Pressing "enter" sets the pending time.</span>
+            <span class="bug">BUG Pressing "enter" sets the pending time.</span>
             <button ng-click="setPendingQuipTime()">Set time to now</button>
             <input type="submit" ng-click="savePendingQuip()" value="Save"
                 ng-disabled="hasQuipTimeFormatError">

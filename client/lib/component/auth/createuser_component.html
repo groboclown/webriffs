@@ -5,6 +5,7 @@
         You just created the user.  You may now log in with your credentials.
 </div>
 <div ng-if="! createdUser && ! createdUser" class="component">
+  <form onsubmit="return false;">
     <div>
         <div>
             <span>
@@ -36,11 +37,7 @@
         </div>
     </div>
     <div>
-        <span ng-if="hasError">
-            <span>No Submit</span>
-        </span>
-        <span ng-if="!hasError">
-            <span ng-click="submit()">Submit</span>
-        </span>
+        <input ng-disabled="hasError" type="submit" ng-click="submit()" value="Submit">
     </div>
+  </form>
 </div>

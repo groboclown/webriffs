@@ -8,7 +8,7 @@
           ng-maxlength="200"
           placeholder="Film name"
           required>
-      <span ng-if="! isNameValid">[bad value]</span>
+      <span ng-if="! isNameValid">(bad value)</span>
   </div>
   <div>
       <label for="film.year">Release Year</label>
@@ -17,7 +17,7 @@
           ng-minnumber="1800"
           ng-maxnumber="9999"
           required>
-      <span ng-if="! isYearValid">[bad value]</span>
+      <span ng-if="! isYearValid">(bad value)</span>
   </div>
   <div ng-if="filmInUse">A film with that name and year already exists</div>
   <div ng-if="isChecking">Checking if the film is available...</div>
