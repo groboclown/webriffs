@@ -117,7 +117,8 @@ You do not have permissions to view the contents of this branch.
             <input id="quip_text" type="text" ng-model="quipText">
         </div>
         <div>
-            <span class="bug">BUG Pressing "enter" sets the pending time.</span>
+            <!-- Note: Pressing "enter" sets the pending time.
+            This is a feature, not a bug! -->
             <button ng-click="setPendingQuipTime()">Set time to now</button>
             <input type="submit" ng-click="savePendingQuip()" value="Save"
                 ng-disabled="hasQuipTimeFormatError">
