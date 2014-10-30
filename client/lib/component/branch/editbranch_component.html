@@ -85,6 +85,8 @@ You do not have permissions to view the contents of this branch.
                 </div>
                 
                 <div>
+                <span ng-click="clearVoiceText()">&#9986;</span>
+                
                 {{heardText}}
                 </div>
                 
@@ -102,19 +104,24 @@ You do not have permissions to view the contents of this branch.
         Edit quip:
         <button ng-if="hasSpeechSupport"
             ng-click="startSpeechListen()">&#127908; Use your voice</button>
+        
         <form onsubmit="return false;">
         <div>
             <label for="quip_time">When </label>
             <input id="quip_time" type="text" ng-model="quipTime">
+            <span ng-if="quipTimeEdited && ! hasQuipTimeFormatError">({{parsedQuipTime}})</span>
+            <span ng-if="hasQuipTimeFormatError">Invalid time format</span>
         </div>
         <div>
             <label for="quip_text">With </label>
             <input id="quip_text" type="text" ng-model="quipText">
         </div>
         <div>
+            <span class="bug">Pressing "enter" sets the pending time.</span>
             <button ng-click="setPendingQuipTime()">Set time to now</button>
             <input type="submit" ng-click="savePendingQuip()" value="Save"
                 ng-disabled="hasQuipTimeFormatError">
+            <span ng-click="cancelEditQuip()">&#10003;</span>
         </div>
         </form>
         <async-status parent="quipPaging.quipUpdates"></async-status>

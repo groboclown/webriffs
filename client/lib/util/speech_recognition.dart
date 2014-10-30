@@ -92,6 +92,17 @@ class VoiceCaptureController {
     }
 
 
+    void clear() {
+        for (SpeechPhrase phrase in _phrases) {
+            phrase.isDeleted = true;
+        }
+        _interim = "";
+        _final = "";
+
+        // Errors are not cleared out.
+    }
+
+
     void cancel() {
         if (! isCapturing) {
             return;
@@ -114,7 +125,10 @@ class VoiceCaptureController {
     }
 
     void removePhrase(SpeechPhrase phrase) {
-        throw new UnimplementedError();
+        if (phrase != null) {
+            phrase.isDeleted = true;
+            _updatePhrase(phrase.source);
+        }
     }
 
     void close() {
@@ -164,12 +178,14 @@ class VoiceCaptureController {
         _final = "";
         bool foundInterim = false;
         for (SpeechPhrase sp in _phrases) {
-            if (sp.isFinal) {
-                _final += " " + sp.best;
-                _interim += " " + sp.best;
-            } else {
-                _interim += " ?" + sp.best + "?";
-                foundInterim = true;
+            if (! sp.isDeleted) {
+                if (sp.isFinal) {
+                    _final += " " + sp.best;
+                    _interim += " " + sp.best;
+                } else {
+                    _interim += " ?" + sp.best + "?";
+                    foundInterim = true;
+                }
             }
         }
 

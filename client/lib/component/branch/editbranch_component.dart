@@ -85,23 +85,31 @@ class EditBranchComponent extends AbstractBranchComponent {
     // TODO look at using time_format.dart/TimeDisplayEdit
     int _quipTime;
     String _quipTimeStr;
+    String _parsedQuipTime;
     String quipText;
     bool get quipModified => (quipText != pendingQuip.text) ||
             (_quipTime != pendingQuip.timestamp);
-    String get quipTime => _quipTimeStr;
     String _quipTimeError = null;
     bool get hasQuipTimeFormatError => _quipTimeError != null;
+    String get quipTimeError => _quipTimeError;
+    String get parsedQuipTime => _parsedQuipTime;
+    bool get quipTimeEdited => _parsedQuipTime != _quipTimeStr;
 
+    String get quipTime => _quipTimeStr;
 
     set quipTime(String timestr) {
         if (timestr == null || timestr.length <= 0) {
             _quipTime = null;
             _quipTimeStr = null;
+            _quipTimeError = null;
+            _parsedQuipTime = null;
         } else {
             try {
                 _quipTime = videoTimeProvider.convertToServerTime(timestr);
-                _quipTimeStr = videoTimeProvider.dialation.displayString(
+                _parsedQuipTime = videoTimeProvider.dialation.displayString(
                     _quipTime / 1000.0);
+                // NOTE: don't set _quipTimeStr
+                _quipTimeError = null;
             } catch (e) {
                 _quipTimeError = "Invalid time format";
             }
@@ -215,13 +223,23 @@ class EditBranchComponent extends AbstractBranchComponent {
         }
     }
 
+    void clearVoiceText() {
+        if (_voiceCapture != null) {
+            _voiceCapture.clear();
+        }
+    }
+
     void saveVoiceCapture() {
-        _voiceCapture.end();
+        if (_voiceCapture != null) {
+            _voiceCapture.end();
+        }
     }
 
     void cancelVoiceCapture() {
-        cancelEditQuip();
-        _voiceCapture.cancel();
+        if (_voiceCapture != null) {
+            cancelEditQuip();
+            _voiceCapture.cancel();
+        }
     }
 
 
@@ -229,6 +247,7 @@ class EditBranchComponent extends AbstractBranchComponent {
         pendingQuip = quip;
         quipText = quip.text;
         _quipTimeStr = getQuipTime(quip);
+        _parsedQuipTime = _quipTimeStr;
         _quipTimeError = null;
         _quipTime = quip.timestamp;
     }
@@ -237,6 +256,7 @@ class EditBranchComponent extends AbstractBranchComponent {
         _quipTime = videoTimeProvider.serverTime.inMilliseconds;
         _quipTimeStr = videoTimeProvider.dialation.
                 displayString(_quipTime / 1000.0);
+        _parsedQuipTime = _quipTimeStr;
     }
 
     void cancelEditQuip() {

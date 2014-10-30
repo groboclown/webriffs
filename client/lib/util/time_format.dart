@@ -84,7 +84,7 @@ class TimeDialation {
      * @throws TimeFormatException
      */
     double parseDisplay(String timeField) {
-        return toDisplay(_parse(timeField));
+        return toActual(_parse(timeField));
     }
 
 
