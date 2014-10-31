@@ -26,5 +26,13 @@ class ErrorComponent {
     List<ServerResponse> get notices => _error.notices;
 
     bool get isLoading => _error.isLoading;
+
+    bool showNotices = false;
+
+    bool get hasNotices => notices != null && notices.isNotEmpty;
+
+    void toggleShowNotices() {
+        showNotices = ! showNotices;
+    }
 }
 

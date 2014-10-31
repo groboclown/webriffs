@@ -27,6 +27,7 @@ class LoginComponent {
 
     String get loggedInUser => _user.info.username;
 
+    bool showLogin = false;
 
     String _username;
     String _password;
@@ -65,6 +66,11 @@ class LoginComponent {
     LoginComponent(this._user) {
         username = null;
         password = null;
+    }
+
+
+    void toggleShowLogin() {
+        showLogin = ! showLogin;
     }
 
 

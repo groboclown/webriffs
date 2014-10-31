@@ -11,7 +11,13 @@
     <div ng-if="criticalError != null">
         Critical Error: {{criticalError}}
     </div>
-    <div ng-repeat="notice in notices">
-        {{notice.message}} ({{notice.status}})
+    <div ng-if="hasNotices && ! showNotices">
+        <span ng-click="toggleShowNotices()">[-] Server problems</span>
+    </div>
+    <div ng-if="hasNotices && showNotices">
+        <span ng-click="toggleShowNotices()">[|||] Server problems</span>
+        <div ng-repeat="notice in notices">
+            {{notice.message}} ({{notice.status}})
+        </div>
     </div>
 </div>

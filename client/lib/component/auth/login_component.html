@@ -5,32 +5,38 @@
             <span ng-click="logOut()">[ Log out ]</span>
         </div>
     </div>
-    <form ng-if="! loggedIn" onsubmit="return false;">
-        <div>
-            <div>
-                <span>
-                    <label for="login.username">Username: </label>
-                    <input id="login.username" type="text" ng-model="username">
-                    <span ng-if="usernameError != null">{{ usernameError }}</span>
-                </span>
-            </div>
-            <div>
-                <span>
-                    <label for="login.password">Password: </label>
-                    <input id="login.password" type="password" ng-model="password">
-                    <span ng-if="passwordError != null">{{ passwordError }}</span>
-                </span>
-            </div>
-        </div>
-        <div>
-            <input type="submit" ng-click="submit()"
-                ng-disabled="hasError()" value="Login">
-        </div>
-        <div>
-            <a ng-href="#/user/forgot">Forgot your password?</a>
-        </div>
-        <div>
-            <a ng-href="#/user/create">Create an account</a>
-        </div>
-    </form>
+    <div ng-if="! loggedIn && ! showLogin">
+        <span ng-click="toggleShowLogin()">[-] Login?</span>
+    </div>
+    <div ng-if="! loggedIn && showLogin">
+        <span ng-click="toggleShowLogin()">[|||] Login</span>
+      <form ng-if="! loggedIn" onsubmit="return false;">
+          <div>
+              <div>
+                  <span>
+                      <label for="login.username">Username: </label>
+                      <input id="login.username" type="text" ng-model="username">
+                      <span ng-if="usernameError != null">{{ usernameError }}</span>
+                  </span>
+              </div>
+              <div>
+                  <span>
+                      <label for="login.password">Password: </label>
+                      <input id="login.password" type="password" ng-model="password">
+                      <span ng-if="passwordError != null">{{ passwordError }}</span>
+                  </span>
+              </div>
+          </div>
+          <div>
+              <input type="submit" ng-click="submit()"
+                  ng-disabled="hasError()" value="Login">
+          </div>
+          <div>
+              <a ng-href="#/user/forgot">Forgot your password?</a>
+          </div>
+          <div>
+              <a ng-href="#/user/create">Create an account</a>
+          </div>
+      </form>
+    </div>
 </div>
