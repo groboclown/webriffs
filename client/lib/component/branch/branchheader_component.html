@@ -1,50 +1,71 @@
-<div class="branch">
-  <async-status parent="cmp"></async-status>
-  <div class="name-wrapper">
-    <piece-editor piece="nameEdit" can-edit="canEditName">
-        <span ng-if="nameEdit.isEditing" class="name">
-          <label for="branch.name">Branch Name</label>
-          <input id="branch.name" type="text" ng-model="nameEdit.editValue"
-              ng-minlength="1"
-              ng-maxlength="200"
-              placeholder="{{nameEdit.original}}"
-              required>
-        </span>
-        <span ng-if="! nameEdit.isEditing" class="name">{{nameEdit.original}}</span>
-    </piece-editor>
-  </div>
+<div>
+<a ng-href="#/film/view/{{filmId}}" ng-if="loaded">Film Details</a>
+<a ng-href="#/branch/changes/{{branchId}}" ng-if="branchId != null">Branch History</a>
+</div>
 
-  <div class="description-wrapper">
-    <piece-editor piece="descriptionEdit" can-edit="canEditDescription">
-        <span ng-if="descriptionEdit.isEditing" class="description">
-          <label for="branch.description">Description</label><br>
-          <textarea id="branch.description"
-              style="display: inline;"
-              ng-model="descriptionEdit.editValue"
-              ng-minlength="0"
-              ng-maxlength="2048">{{descriptionEdit.original}}</textarea>
-        </span>
-        <span ng-if="! descriptionEdit.isEditing" class="description">{{descriptionEdit.original}}</span>
-    </piece-editor>
-  </div>
-  
-  <div>
-    <piece-editor piece="tagsEdit" can-edit="canEditTags">
-      <span ng-if="tagsEdit.isEditing">
-      (tag editor goes here)
-      </span>
-      <span ng-if="! tagsEdit.isEditing">
-        <span ng-repeat="tag in tagsEdit.original">
-            {{tag.name}}
-        </span>
-      </span>
-    </piece-editor>
-  </div>
+<div ng-if="! loaded">loading...</div>
 
-  <div ng-if="isSavePending">
-      <div class="bug">BUG If the validation hasn't completed when the user clicks the Save button, the half-validated text is set.</div>
-      <button ng-click="save()">Save</button>
-      <span ng-click="cancel()">[ Cancel ]</span>
-      <span class="bug">BUG this needs to change if the save was submitted.</span>
-  </div>
+<div ng-if="loaded" class="film">
+    <div><span class="film-name">{{filmName}}</span> <span class="year">({{filmReleaseYear}})</span>
+        <span ng-if="urlChangeId &gt;= 0" class="revision">(revision {{changeId}})</span>
+        
+        <!-- This isn't correct.  It means that you're looking at the
+        head version.
+        <span ng-if="urlChangeId &lt; 0">(pending changes)</span>
+        -->
+    </div>
+    <div class="update">Last updated on {{updatedOn}}</div>
+    
+    
+    <div class="branch">
+      <async-status parent="cmp"></async-status>
+      <div class="name-wrapper">
+        <piece-editor piece="nameEdit" can-edit="canEditName">
+            <span ng-if="nameEdit.isEditing" class="name">
+              <label for="branch.name">Branch Name</label>
+              <input id="branch.name" type="text" ng-model="nameEdit.editValue"
+                  ng-minlength="1"
+                  ng-maxlength="200"
+                  placeholder="{{nameEdit.original}}"
+                  required>
+            </span>
+            <span ng-if="! nameEdit.isEditing" class="name">{{nameEdit.original}}</span>
+        </piece-editor>
+      </div>
+    
+      <div class="description-wrapper">
+        <piece-editor piece="descriptionEdit" can-edit="canEditDescription">
+            <span ng-if="descriptionEdit.isEditing" class="description">
+              <label for="branch.description">Description</label><br>
+              <textarea id="branch.description"
+                  style="display: inline;"
+                  ng-model="descriptionEdit.editValue"
+                  ng-minlength="0"
+                  ng-maxlength="2048">{{descriptionEdit.original}}</textarea>
+            </span>
+            <span ng-if="! descriptionEdit.isEditing" class="description">{{descriptionEdit.original}}</span>
+        </piece-editor>
+      </div>
+      
+      <div>
+        <piece-editor piece="tagsEdit" can-edit="canEditTags">
+          <span ng-if="tagsEdit.isEditing">
+          (tag editor goes here)
+          </span>
+          <span ng-if="! tagsEdit.isEditing">
+            <span ng-repeat="tag in tagsEdit.original">
+                {{tag.name}}
+            </span>
+          </span>
+        </piece-editor>
+      </div>
+    
+      <div ng-if="isSavePending">
+          <div class="bug">BUG If the validation hasn't completed when the user clicks the Save button, the half-validated text is set.</div>
+          <button ng-click="save()">Save</button>
+          <span ng-click="cancel()">[ Cancel ]</span>
+          <span class="bug">BUG this needs to change if the save was submitted.</span>
+      </div>
+    </div>
+
 </div>

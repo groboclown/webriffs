@@ -1,35 +1,15 @@
-<div>
-<a ng-href="#/film/view/{{filmId}}" ng-if="loaded">Film Details</a>
-<a ng-href="#/branch/changes/{{branchId}}" ng-if="branchId != null">Branch History</a>
+<div ng-if="! loaded">
+    <span ng-if="loadError">Problem loading branch.  You may not have
+    permission to see it, or it may not exist.</span>
 </div>
+
+<branch-header branch="branchDetails" urlChangeId="urlChangeId"></branch-header>
 
 <div ng-if="! canReadQuips && loaded">
 You do not have permissions to view the contents of this branch.
-<div class="bug">BUG this message may be incorrectly shown while the page is loading.</div>
 </div>
 
 <div ng-if="canReadQuips" class="component">
-    
-    <div ng-if="loaded" class="film">
-        <div><span class="film-name">{{filmName}}</span> <span class="year">({{filmReleaseYear}})</span>
-            <span ng-if="urlChangeId &gt;= 0" class="revision">(revision {{changeId}})</span>
-            
-            <!-- This isn't correct.  It means that you're looking at the
-            head version.
-            <span ng-if="urlChangeId &lt; 0">(pending changes)</span>
-            -->
-        </div>
-        <branch-header branch="branchDetails"></branch-header>
-        <div class="update">Last updated on {{updatedOn}}</div>
-    </div>
-    <div ng-if="! loaded">
-        <span ng-if="loadError">Problem loading branch.  You may not have
-        permission to see it, or it may not exist.</span>
-        <span ng-if="! loadError">loading...</span>
-    </div>
-
-    <branch-updates current-branch="branchDetails"></branch-updates>
-    
     <div ng-if="hasPendingChange">
         You have changes saved on the server that haven't been committed
         to the branch.

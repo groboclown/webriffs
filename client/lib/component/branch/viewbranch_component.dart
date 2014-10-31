@@ -16,7 +16,9 @@ import 'abstract_branch_component.dart';
  */
 @Component(
     selector: 'view-branch',
-    templateUrl: 'packages/webriffs_client/component/branch/viewbranch_component.html')
+    templateUrl: 'packages/webriffs_client/component/branch/viewbranch_component.html',
+    // Shares the same CSS as the edit branch.
+    cssUrl: 'packages/webriffs_client/component/branch/editbranch_component.css')
 class ViewBranchComponent extends AbstractBranchComponent {
 
     factory ViewBranchComponent(ServerStatusService server, UserService user,

@@ -27,15 +27,18 @@ class BranchHeaderComponent extends BasicSingleRequestComponent {
 
     AsyncComponent get cmp => this;
 
-    BranchDetails _branchDetails;
+    BranchDetails _branch;
 
-    @NgOneWay('branch')
+    @NgOneWayOneTime('branch')
     set branch(Future<BranchDetails> bdf) {
         bdf.then((BranchDetails bd) {
-            _branchDetails = bd;
+            _branch = bd;
             _componentReload();
         });
     }
+
+    @NgOneWayOneTime('urlChangeId')
+    int urlChangeId;
 
     bool _savePending = false;
     bool get isSavePending => _savePending &&
@@ -44,29 +47,40 @@ class BranchHeaderComponent extends BasicSingleRequestComponent {
             _tagsEdit.isValidChange);
 
     // Name edit variables
-    bool get canEditName => _branchDetails == null
-            ? false : _branchDetails.userCanEditBranch;
+    bool get canEditName => _branch == null
+            ? false : _branch.userCanEditBranch;
     PieceEdit<String> _nameEdit;
     PieceEdit<String> get nameEdit => _nameEdit;
     bool get isEditingName => canEditName && _nameEdit.isEditing;
 
-    bool get canEditDescription => _branchDetails == null
-            ? false : _branchDetails.userCanEditBranch;
+    bool get canEditDescription => _branch == null
+            ? false : _branch.userCanEditBranch;
     PieceEdit<String> _descriptionEdit;
     PieceEdit<String> get descriptionEdit => _descriptionEdit;
     bool get isEditingDescription => canEditDescription &&
             _descriptionEdit.isEditing;
 
     // Tag edit variables
-    bool get canEditTags => _branchDetails == null
-            ? false : _branchDetails.userCanEditBranchTags;
+    bool get canEditTags => _branch == null
+            ? false : _branch.userCanEditBranchTags;
     PieceEdit<List<BranchTagDetails>> _tagsEdit;
     PieceEdit<List<BranchTagDetails>> get tagsEdit => _tagsEdit;
     bool get isEditingTags => canEditTags && _tagsEdit.isEditing;
 
     // Permission edit - done in another page.
-    bool get canEditPermissions => _branchDetails == null
-            ? false : _branchDetails.userCanEditBranchPermissions;
+    bool get canEditPermissions => _branch == null
+            ? false : _branch.userCanEditBranchPermissions;
+
+    int get filmId => _branch == null ? null : _branch.filmId;
+    int get branchId => _branch == null ? null : _branch.branchId;
+    String get filmName => _branch == null ? null : _branch.filmName;
+    int get filmReleaseYear => _branch == null ? null : _branch.filmReleaseYear;
+    int get changeId => _branch == null ? null : _branch.changeId;
+    String get updatedOn => _branch == null ? null : _branch.updatedOn;
+
+    bool get loaded => _branch != null;
+
+
 
     BranchHeaderComponent(ServerStatusService server) :
             _server = server,
@@ -74,10 +88,10 @@ class BranchHeaderComponent extends BasicSingleRequestComponent {
         _nameEdit = new PieceEdit<String>(
             // Loader
             () {
-                if (_branchDetails == null) {
+                if (_branch == null) {
                     return new Future.error("Please wait for the server to respond");
                 } else {
-                    return new Future.value(_branchDetails.name);
+                    return new Future.value(_branch.name);
                 }
             },
 
@@ -89,7 +103,7 @@ class BranchHeaderComponent extends BasicSingleRequestComponent {
             // Saver
             (String val) {
                 _savePending = true;
-                _branchDetails.name = val;
+                _branch.name = val;
                 return new Future.value();
             }
 
@@ -98,10 +112,10 @@ class BranchHeaderComponent extends BasicSingleRequestComponent {
         _descriptionEdit = new PieceEdit<String>(
             // Loader
             () {
-                if (_branchDetails == null) {
+                if (_branch == null) {
                     return new Future.error("Please wait for the server to respond");
                 } else {
-                    return new Future.value(_branchDetails.description);
+                    return new Future.value(_branch.description);
                 }
             },
 
@@ -114,7 +128,7 @@ class BranchHeaderComponent extends BasicSingleRequestComponent {
             // Saver
             (String val) {
                 _savePending = true;
-                _branchDetails.description = val;
+                _branch.description = val;
                 return new Future.value();
             }
 
@@ -123,10 +137,10 @@ class BranchHeaderComponent extends BasicSingleRequestComponent {
         _tagsEdit = new PieceEdit<List<BranchTagDetails>>(
             // Loader
             () {
-                if (_branchDetails == null) {
+                if (_branch == null) {
                     return new Future.error("Please wait for the server to respond");
                 } else {
-                    return new Future.value(_branchDetails.tags);
+                    return new Future.value(_branch.tags);
                 }
             },
 
@@ -139,7 +153,7 @@ class BranchHeaderComponent extends BasicSingleRequestComponent {
             // Saver
             (List<BranchTagDetails> val) {
                 _savePending = true;
-                _branchDetails.tags = val;
+                _branch.tags = val;
                 return new Future.value();
             }
 
@@ -150,8 +164,8 @@ class BranchHeaderComponent extends BasicSingleRequestComponent {
 
     @override
     void reload() {
-        if (_branchDetails != null) {
-            _branchDetails.updateFromServer(_server).then((_) {
+        if (_branch != null) {
+            _branch.updateFromServer(_server).then((_) {
                 _componentReload();
             });
         }
@@ -169,8 +183,8 @@ class BranchHeaderComponent extends BasicSingleRequestComponent {
             return new Future.value("invalid type");
         } else if (name.length >= 200) {
             return new Future.value("name too long");
-        } else if (_branchDetails != null){
-            String filmId = _branchDetails.filmId.toString();
+        } else if (_branch != null){
+            String filmId = _branch.filmId.toString();
             String path = "/film/${filmId}/branchexists?Name=" +
                     Uri.encodeQueryComponent(name);
             return getFor(path).then((ServerResponse response) {
@@ -215,8 +229,8 @@ class BranchHeaderComponent extends BasicSingleRequestComponent {
             f.then((_) => addRequestWithToken(
                 (ServerStatusService server, String token) =>
                     server.post(
-                        "/branch/${_branchDetails.branchId}/version",
-                        token, data: _branchDetails.toSaveJson())
+                        "/branch/${_branch.branchId}/version",
+                        token, data: _branch.toSaveJson())
                 , "edit_branch").then((_) {
                     // FIXME on a successful save, the page should be
                     // reloaded to point to the new head revision.

@@ -17,3 +17,7 @@ body {
     border: none;
     font-family: helvetica, arial;
 }
+
+.footer {
+    border-top: 2px solid #ddd;
+}
