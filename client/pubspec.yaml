@@ -11,5 +11,19 @@ dependencies:
   web_components: any
 dev_dependencies:
   unittest: any
+  template_cache_transformer: any
 transformers:
-- angular
+  - angular:
+      html_files: "web/main.html"
+      $exclude: [ "web/index.html" ]
+  - $dart2js:
+      # Testing should always enable this.
+      #checked: true
+      checked: false
+      minify: true
+      #dumpInfo: true
+      commandLineOptions: [ "--dump-info" ]
+      $exclude: [ "web/index.html" ]
+  #- template_cache_transformer:
+  #    entry_point: webriffs_client|web/main.html
+  #    $exclude: [ "web/index.html" ]

@@ -1,7 +1,10 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /webriffs/
-    RewriteRule ^api/ dispatch.php [END]
+    
+    # Apache 2.4 should use [END], but for Apache 2.2 support, we use
+    # [L]
+    RewriteRule ^api/ dispatch.php [L]
 </IfModule>
 
 AddType application/dart .dart

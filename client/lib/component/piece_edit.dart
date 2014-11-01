@@ -26,7 +26,7 @@ class PieceEdit<T> {
     final SaveValue<T> _saver;
     final ValidateValue<T> _validator;
 
-    bool _isEditing;
+    bool _isEditing = false;
     bool get isEditing => _isEditing;
 
     bool _serverValueLoaded = false;
@@ -98,8 +98,12 @@ class PieceEdit<T> {
             _loadError = null;
             _serverValue = t;
             _serverValueLoaded = true;
-        }).catchError((Exception e) {
-            _loadError = e.toString();
+        }).catchError((e) {
+            if (e is String) {
+                _loadError = e;
+            } else if (e != null) {
+                _loadError = e.toString();
+            }
         });
     }
 

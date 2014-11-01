@@ -179,6 +179,11 @@ class FilmLayer {
                     'unknown' => 'there was an unknown problem finding the films'
                 )));
         $rows = $data['result'];
+        foreach ($rows as &$row) {
+            $row['Film_Id'] = intval($row['Film_Id']);
+            $row['Gv_Project_Id'] = intval($row['Gv_Project_Id']);
+            $row['Release_Year'] = intval($row['Release_Year']);
+        }
         
         $data = Film::$INSTANCE->countAll($db, $wheres);
         FilmLayer::checkError($data,
@@ -217,8 +222,12 @@ class FilmLayer {
         if (sizeof($data['result']) <= 0) {
             return array();
         }
+        $row = $data['result'][0];
+        $row['Film_Id'] = intval($row['Film_Id']);
+        $row['Gv_Project_Id'] = intval($row['Gv_Project_Id']);
+        $row['Release_Year'] = intval($row['Release_Year']);
         
-        return $data['result'][0];
+        return $row;
     }
     
     
@@ -275,6 +284,9 @@ class FilmLayer {
             unset($row['Link_Type_Id']);
             $row['Is_Playback_Media'] =
                 ($row['Is_Playback_Media'] == 0) ? FALSE : TRUE;
+            $row['Film_Id'] = intval($row['Film_Id']);
+            $row['Is_Media'] =
+                ($row['Is_Media'] == 0) ? FALSE : TRUE;
         }
         
         return $rows;

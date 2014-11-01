@@ -372,12 +372,14 @@ the user account.
 <?php
     try {
         $basesqld = __DIR__."/../sql/";
-        foreach (scandir($basesqld, SCANDIR_SORT_ASCENDING) as $bd) {
+        // defaults to SCANDIR_SORT_ASCENDING
+        $rootdirs = scandir($basesqld);
+        foreach ($rootdirs as $bd) {
             $d = $basesqld."/".$bd;
-            //$d = $bd;
             if (is_dir($d) && substr($bd, 0, 1) != '.') {
                 error_log("scanning [".$d."] / [".$bd."]");
-                $files = scandir($d, SCANDIR_SORT_ASCENDING);
+                // defaults to SCANDIR_SORT_ASCENDING
+                $files = scandir($d);
                 foreach ($files as $ff) {
                     $f = $d . '/' . $ff;
                     //error_log("scanning [".$f."] / [".$ff."]");
@@ -394,6 +396,9 @@ the user account.
         error_log("Database load Exception: ".$ee->getMessage());
         error_log($ee->getTraceAsString());
 ?>
+<!--
+<?php print($ee->getMessage()); print($ee->getTraceAsString()); ?>
+ -->
 <p>
 There was a problem loading up your database.  You should check the webserver
 error log to track down the underlying problem.  You'll probably have to
@@ -587,7 +592,7 @@ try {
             'Open Encyclopedia (English)', 'http://en.wikipedia.org/wiki/',
             // Note: this leaves out articles in international characters.
             '^[a-zA-Z0-9\\$_-\\(\\)]+$',
-            False);
+            null);
     }
     
     $data = WebRiffs\AdminLayer::getLinkNamed($userDb, 'imdb.com');
@@ -595,7 +600,7 @@ try {
         WebRiffs\AdminLayer::createLink($userDb, 'imdb.com',
             'International Movie Database', 'http://imdb.com/title/',
             '^[a-zA-Z0-9]+$',
-            False);
+            null);
     }
 
     $data = WebRiffs\AdminLayer::getLinkNamed($userDb, 'YouTube');
@@ -603,12 +608,31 @@ try {
         $data = WebRiffs\AdminLayer::createLink($userDb, 'YouTube',
                 'Google YouTube', 'https://youtube.com/watch?v=',
                 '^[a-zA-Z0-9][a-zA-Z0-9_-]+$',
-                True);
+                'youtube');
+    }
+
+    $data = WebRiffs\AdminLayer::getLinkNamed($userDb, 'Vimeo');
+    if ($data === null) {
+        $data = WebRiffs\AdminLayer::createLink($userDb, 'Vimeo',
+                'Vimeo', 'http://vimeo.com/',
+                '^\d+$',
+                'vimeo');
+    }
+
+    $data = WebRiffs\AdminLayer::getLinkNamed($userDb, 'Twitch');
+    if ($data === null) {
+        $data = WebRiffs\AdminLayer::createLink($userDb, 'Twitch',
+                'TwitchTV', 'http://www.twitch.tv/',
+                '^[a-zA-Z0-9]+/c/\d+$',
+                'twitch');
     }
 } catch (\Exception $e) {
     error_log("Database create link Exception: ".$e->getMessage());
     error_log($e->getTraceAsString());
 ?>
+<!--
+<?php print($e->getMessage()); print($e->getTraceAsString()); ?>
+ -->
 <p>
 There was a problem when creating some initial data.  Check your webserver
 error logs, correct the issues, and retry the operation.

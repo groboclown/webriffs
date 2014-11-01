@@ -317,7 +317,11 @@ class BranchLayer {
                 array(
                     'unknown' => 'there was an unknown problem finding the branch'
                 )));
-        return $data['result'][0];
+        $row = $data['result'][0];
+        $row['Film_Id'] = intval($row['Film_Id']);
+        $row['Gv_Branch_Id'] = intval($row['Gv_Branch_Id']);
+        $row['Gv_Change_Id'] = intval($row['Gv_Change_Id']);
+        return $row;
     }
 
 
@@ -394,6 +398,11 @@ class BranchLayer {
                     'unknown' => 'there was an unknown problem finding the branch versions'
                 )));
         $rows = $rowData['result'];
+        foreach ($rows as &$row) {
+            $row['Film_Id'] = intval($row['Film_Id']);
+            $row['Gv_Branch_Id'] = intval($row['Gv_Branch_Id']);
+            $row['Gv_Change_Id'] = intval($row['Gv_Change_Id']);
+        }
         
         BranchLayer::checkError($countData,
             new Base\ValidationException(
@@ -456,6 +465,10 @@ class BranchLayer {
         }
         $result = $data['result'][0];
         $filmId = intval($result['Film_Id']);
+        $result['Film_Id'] = $filmId;
+        $result['Gv_Branch_Id'] = intval($result['Gv_Branch_Id']);
+        $result['Gv_Change_Id'] = intval($result['Gv_Change_Id']);
+        $result['Release_Year'] = intval($result['Release_Year']);
         
         if ($changeId < 0) {
             $data = VBranchTagHead::$INSTANCE->readBy_Gv_Branch_Id($db, $branchId);

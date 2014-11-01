@@ -85,6 +85,7 @@ def init(config):
     config['php-unittest.dir'] = os.path.join(config['php.dir'], 'test',
             'unit_tests')
     config['client.dir'] = os.path.join(config['root.dir'], 'client')
+    config['client.build.dir'] = os.path.join(config['client.dir'], 'build')
     config['sql.dir'] = os.path.join(config['root.dir'], 'sql')
     config['sql-categories.dirs'] = (
             os.path.join(config['sql.dir'], 'GroboAuth'),
@@ -136,6 +137,9 @@ def clean(config):
     if os.path.exists(config['exports.dir']):
         print("Deleting " + config['exports.dir'])
         shutil.rmtree(config['exports.dir'])
+    # if os.path.exists(config['client.build.dir']):
+    #    print("Deleting " + config['client.build.dir'])
+    #    shutil.rmtree(config['client.build.dir'])
 
 
 @depends(setup)

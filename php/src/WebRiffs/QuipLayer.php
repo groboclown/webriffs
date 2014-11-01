@@ -105,9 +105,13 @@ class QuipLayer {
         
         $rows = $rowData['result'];
         foreach ($rows as &$row) {
+            $row['Gv_Branch_Id'] = intval($row['Gv_Branch_Id']);
+            $row['Gv_Item_Id'] = intval($row['Gv_Item_Id']);
+            $row['Gv_Item_Version_Id'] = intval($row['Gv_Item_Version_Id']);
+            $row['Timestamp_Millis'] = intval($row['Timestamp_Millis']);
+            
             // split up the tags correctly
             $row['Tags'] = QuipLayer::splitTags($row['Tags']);
-            $row['Timestamp_Millis'] = intval($row['Timestamp_Millis']);
         }
         
         $count = $countData['result'];
@@ -159,6 +163,9 @@ class QuipLayer {
             $row['Committed_Tags'] = QuipLayer::splitTags($row['Committed_Tags']);
             
             $row['Timestamp_Millis'] = intval($row['Timestamp_Millis']);
+            $row['Gv_Branch_Id'] = intval($row['Gv_Branch_Id']);
+            $row['Gv_Item_Id'] = intval($row['Gv_Item_Id']);
+            $row['Gv_Item_Version_Id'] = intval($row['Gv_Item_Version_Id']);
         }
         
         $count = $countData['result'];
