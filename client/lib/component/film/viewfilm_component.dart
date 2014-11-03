@@ -129,6 +129,8 @@ class ViewFilmComponent extends PagingComponent {
         } else if (! (year is int)) {
             print("Invalid year from server: " + year);
             releaseYear = null;
+        } else {
+            releaseYear = year;
         }
         createdOn = resp.jsonData['Created_On']; // datetime -> ?
         lastUpdatedOn = resp.jsonData['Last_Updated_On']; // datetime -> ?

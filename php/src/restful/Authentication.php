@@ -213,10 +213,14 @@ class AuthenticationCreate extends Resource {
         // FIXME make this configurable per source
         $password = WebRiffs\AuthenticationLayer::hashPassword($password);
         
+        // FIXME the admins should have access to escalating individuals
+        // to higher levels, and so the default access should be
+        // PRIVILEGE_USER.  However, for the initial versions, we set this
+        // to trusted.
         $userId = WebRiffs\AuthenticationLayer::createUser($db,
             $username, $this->getSourceId($source),
             $username, $password, $contact,
-            WebRiffs\Access::$PRIVILEGE_USER);
+            WebRiffs\Access::$PRIVILEGE_TRUSTED);
         
         // don't expose the internal ID to the user.
         return array(

@@ -230,6 +230,7 @@ class BranchLayer {
             $rows[$i]['Film_Id'] = intval($rows[$i]['Film_Id']);
             $rows[$i]['Gv_Branch_Id'] = intval($rows[$i]['Gv_Branch_Id']);
             $rows[$i]['Gv_Change_Id'] = intval($rows[$i]['Gv_Change_Id']);
+            $rows[$i]['Release_Year'] = intval($rows[$i]['Release_Year']);
             $data = VBranchTagHead::$INSTANCE->readBy_Gv_Branch_Id($db,
                 $rows[$i]['Gv_Branch_Id']);
             BranchLayer::checkError($data,
