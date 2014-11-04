@@ -5,15 +5,10 @@ handling of issues with the server.  This needs to have better high level
 support for all JSon loaded objects.  Perhaps have a parent class to better
 handle it in a common way.
 
-Film quip editing, saving, and loading.
-
-Create new film branches.
-
-Add per-user change handling.  The schema is basically there, it just needs
-to have UI coding and the php side support.
-
 Access control for branch owners and site admins.  Should be done at a
 global level and at a per-user level.
+
+Admin management of users.
 
 Admin hard editing of branches.  This should be an extension of the access
 controls, along with perhaps hard branch deletion.
@@ -26,5 +21,7 @@ User banning and banning by IP.
 The whole site needs styling.  That'll come much later on, as right now
 we're concerned about getting the basic functionality first.
 
+User password reset.
 
-The html graph viewer of the schema needs huge improvements.
+Show branch history.
+

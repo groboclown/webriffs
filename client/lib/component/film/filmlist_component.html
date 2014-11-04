@@ -21,7 +21,7 @@
             </tbody>
             <tbody ng-if="loadedSuccessful">
                 <tr ng-repeat="film in films">
-                    <td><a ng-href="#/film/view/{{film.filmId}}">{{film.name}}</a></td>
+                    <td><href route="'Film Details'" filmId="film.filmId">{{film.name}}</a></td>
                     <td>{{film.releaseYear}}</td>
                     <td>
                         <div>
@@ -36,7 +36,7 @@
                         
                         <div ng-if="film.expanded">
                             <div ng-repeat="branch in film.branches">
-                                <span><a ng-href="#/branch/view/{{branch.branchId}}/{{branch.headChangeId}}">{{branch.name}}</a></span>
+                                <span><href route="'View Branch'" branchId="branch.branchId" changeId="branch.headChangeId">{{branch.name}}</href></span>
                                 <span>[{{branch.headChangeId}}]</span>
                                 <span ng-repeat="tag in branch.tags">{{tag.name}} </span>
                             </div>

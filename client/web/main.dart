@@ -22,6 +22,7 @@ import 'package:webriffs_client/component/branch/branchupdates_component.dart';
 import 'package:webriffs_client/component/branch/branchheader_component.dart';
 import 'package:webriffs_client/component/media/media_component.dart';
 import 'package:webriffs_client/component/piece_edit_component.dart';
+import 'package:webriffs_client/component/link_component.dart';
 //import 'package:webriffs_client/component/_component.dart';
 import 'package:webriffs_client/service/server.dart';
 import 'package:webriffs_client/service/user.dart';
@@ -47,6 +48,7 @@ class WebRiffsModule extends Module {
         bind(BranchUpdatesComponent);
         bind(MediaComponent);
         bind(PieceEditComponent);
+        bind(LinkHrefComponent);
 
         // Stateful Services
         bind(ServerStatusService);

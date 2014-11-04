@@ -10,10 +10,10 @@ to the play page to view that. -->
     </div>
     
     <div ng-if="canEditQuips">
-        <a ng-href="#/branch/play/{{branchId}}">Play and edit this branch</a>
+        <href route="'Branch Playback'" branchId="branchId">Play and edit this branch</href>
     </div>
     <div ng-if="canReadQuips && ! canEditQuips">
-        <a ng-href="#/branch/play/{{branchId}}/{{changeId}}">Play back this branch.</a>
+        <href route="'Branch Playback'" branchId="branchId" changeId="changeId">Play back this branch.</href>
     </div>
     <div ng-if="! canReadQuips && loaded">
     You do not have permissions to view the contents of this branch.

@@ -1,6 +1,6 @@
 <div>
-<a ng-href="#/film/view/{{filmId}}" ng-if="loaded">Film Details</a>
-<a ng-href="#/branch/changes/{{branchId}}" ng-if="branchId != null">Branch History</a>
+<href route="'Film Details'" filmId="filmId" ng-if="loaded">Film Details</href>
+<href route="'Branch Changes'" branchId="branchId" ng-if="branchId != null">Branch History</href>
 </div>
 
 <div ng-if="! loaded">loading...</div>

@@ -88,7 +88,7 @@
             <tbody ng-if="loadedSuccessful">
                 <tr ng-repeat="branch in branches">
                      <td>
-                        <span><a ng-href="#/branch/view/{{branch.branchId}}/{{branch.headChangeId}}">{{branch.name}}</a></span>
+                        <span><href route="'Branch Playback'" branchId="branch.branchId" changeId="branch.headChangeId">{{branch.name}}</href></span>
                         <span>[{{branch.headChangeId}}]</span>
                      </td>
                      <td>
