@@ -10,7 +10,8 @@ import '../service/user.dart';
 
 @Component(
     selector: 'page-header',
-    templateUrl: 'packages/webriffs_client/component/pageheader_component.html')
+    templateUrl: 'packages/webriffs_client/component/pageheader_component.html',
+    cssUrl: 'packages/webriffs_client/component/pageheader_component.css')
 class PageHeaderComponent implements DetachAware {
     final Logger _log = new Logger('components.PageHeaderComponent');
 

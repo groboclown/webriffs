@@ -1,7 +1,112 @@
 
-.login-component {
-    border: 1px solid darkgray;
-    /*position: absolute;*/
-    
+.page-header {
+  display: block;
 }
 
+.top-line {
+  height: 1.6em;
+  background: #080;
+  color: #bfb;
+  padding: 0 2em 0 2em;
+}
+
+.top-line div {
+  display: inline;
+}
+
+.page-name {
+  font-size: 1.4em;
+  font-weight: bold;
+  padding-right: 2em;
+  vertical-align:middle;
+}
+.site-name {
+  font-size: 1.2em;
+  font-style: italic;
+  vertical-align:middle;
+}
+.site-name a {
+  color: #8f8;
+  text-decoration: none;
+}
+.site-name a:visited {
+  color: #8f8;
+  text-decoration: none;
+}
+.site-name a:hover {
+  color: #8f8;
+  text-decoration: underline;
+}
+
+.right-group {
+  line-height: 1.6em;
+  float: right;
+  vertical-align: middle;
+}
+
+.connection-status {
+  width: 40px;
+  /*position: absolute;*/
+  padding: 3em;
+}
+
+.top-line div .login-form {
+  display: block;
+  position: absolute;
+  background: #333;
+  color: white;
+  z-index: 100;
+  /*width: 300px;
+  height: 100px;*/
+  padding: 20px;
+  float: right;
+  right: 0;
+  transition: opacity .5s;
+}
+
+.login-form form div {
+  display: block;
+}
+
+.logged-in span {
+  padding: 0.3em;
+  font-size: 0.7em;
+  vertical-align: top;
+ }
+ 
+.logged-in .minor-button {
+  background: #060;
+  cursor: pointer;
+}
+
+.login-error {
+  background: red;
+  width:0.5em;
+}
+
+
+/*
+.svg-icon {
+  width: 24px;
+  height: 24px;
+}
+.svg-icon svg g {
+  fill: currentcolor;
+}
+*/
+
+svg {
+  width: 24px;
+  height: 24px;
+  fill: currentcolor;
+}
+
+
+
+.topline-toggle {
+  background: #060;
+  padding: 0.3em;
+  font-size: 0.7em;
+  vertical-align: top;
+  cursor: pointer;
+}

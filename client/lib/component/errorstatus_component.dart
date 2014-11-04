@@ -11,6 +11,7 @@ import '../service/server.dart';
  */
 @Component(
     selector: 'error-status',
+    useShadowDom: false,
     templateUrl: 'packages/webriffs_client/component/errorstatus_component.html'
     //cssUrl: 'packages/webriffs_client/component/errorstatus_component.css'
     )
@@ -31,8 +32,17 @@ class ErrorComponent {
 
     bool get hasNotices => notices != null && notices.isNotEmpty;
 
+    bool get hasError => criticalError != null;
+
+    bool get hasProblem => hasNotices || hasError;
+
     void toggleShowNotices() {
         showNotices = ! showNotices;
+    }
+
+    void clearNotices() {
+        _error.criticalError = null;
+        _error.notices.clear();
     }
 }
 

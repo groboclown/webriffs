@@ -1,7 +1,18 @@
-<div class="title">
-    <h1><a ng-href="#">WebRiffs</a></h1>
-    <h3>{{name}}</h3>
+<div class="page-header">
+<div class="top-line">
+
+  <span class="page-name">{{name}}</span>
+  
+
+  <span class="site-name"><a ng-href="#">WebRiffs</a></span>
+  
+  <div class="right-group">
+    <error-status></error-status>
+    <login></login>
+  </div>
+
 </div>
+
 <div>
     <!-- Note that these will redirect to this HTML's page, not the real page -->
     <span><a ng-href="#/film/list">List films</a></span>
@@ -11,9 +22,4 @@
     <span ng-if="showForkLink"><a ng-href="#/branch/fork/{{branchId}}">Fork this branch</a></span>
     -->
 </div>
-<div>
-    <login></login>
-</div>
-<div>
-    <error-status></error-status>
 </div>

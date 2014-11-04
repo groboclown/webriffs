@@ -1,29 +1,28 @@
 <div class="login-component">
-    <div ng-if="loggedIn">
-        <div>Hello, {{loggedInUser}}</div>
-        <div>
-            <span ng-click="logOut()">[ Log out ]</span>
-        </div>
+    <div ng-if="loggedIn" class="logged-in">
+        <span>Hello, {{loggedInUser}}</span>
+        <span ng-click="logOut()" class="minor-button">[ Log out ]</span>
     </div>
     <div ng-if="! loggedIn && ! showLogin">
-        <span ng-click="toggleShowLogin()">[-] Login?</span>
+        <span ng-click="toggleShowLogin()" class="topline-toggle">[-] Login?</span>
     </div>
     <div ng-if="! loggedIn && showLogin">
-        <span ng-click="toggleShowLogin()">[|||] Login</span>
+      <span ng-click="toggleShowLogin()" class="topline-toggle">[|||] Login</span>
+      <div class="login-form">
       <form ng-if="! loggedIn" onsubmit="return false;">
           <div>
               <div>
                   <span>
                       <label for="login.username">Username: </label>
                       <input id="login.username" type="text" ng-model="username">
-                      <span ng-if="usernameError != null">{{ usernameError }}</span>
+                      <span ng-if="usernameError != null" class="login-error"><!-- {{ usernameError }} --></span>
                   </span>
               </div>
               <div>
                   <span>
                       <label for="login.password">Password: </label>
                       <input id="login.password" type="password" ng-model="password">
-                      <span ng-if="passwordError != null">{{ passwordError }}</span>
+                      <span ng-if="passwordError != null" class="login-error"><!-- {{ passwordError }} --></span>
                   </span>
               </div>
           </div>
@@ -38,5 +37,6 @@
               <a ng-href="#/user/create">Create an account</a>
           </div>
       </form>
+      </div>
     </div>
 </div>

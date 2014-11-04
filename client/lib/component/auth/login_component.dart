@@ -14,8 +14,8 @@ import '../../service/user.dart';
  */
 @Component(
     selector: 'login',
-    templateUrl: 'packages/webriffs_client/component/auth/login_component.html',
-    cssUrl: 'login_component.css')
+    useShadowDom: false,
+    templateUrl: 'packages/webriffs_client/component/auth/login_component.html')
 class LoginComponent {
     final Logger _log = new Logger('components.LoginComponent');
 

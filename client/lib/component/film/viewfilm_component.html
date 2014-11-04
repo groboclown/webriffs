@@ -25,6 +25,12 @@
             <span ng-click="edit()">[ Edit ]</span>
         </div>
         <div ng-if="isEditing">
+            <div>
+            Links: these describe different resources about the film.
+            If a resource is marked as the media source, then the video
+            branch playback will use that as the video to show.  There can only
+            be one media source per film.
+            </div>
             <div ng-repeat="link in links">
                 <form onsubmit="return false;">
                     <span>{{link.name}}</span>
