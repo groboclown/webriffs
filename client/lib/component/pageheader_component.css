@@ -16,10 +16,25 @@ div.left-group {
   line-height: 1.6em;
   float: left;
   vertical-align: middle;
-  width: 45%;
+  width: 50%;
 }
 
 div.right-group {
+  line-height: 1.6em;
+  float: right;
+  vertical-align: middle;
+  width: 40%;
+}
+
+
+div.right-group-left {
+  line-height: 1.6em;
+  float: left;
+  vertical-align: middle;
+  width: 45%;
+}
+
+div.right-group-right {
   line-height: 1.6em;
   float: right;
   vertical-align: middle;
@@ -27,8 +42,7 @@ div.right-group {
 }
 
 div.right-section {
-  display: inline-block;
-  padding-left: 3em;
+  display: inline;
 }
 
 div.top-inline {
