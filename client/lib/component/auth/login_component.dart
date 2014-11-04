@@ -15,7 +15,12 @@ import '../../service/user.dart';
 @Component(
     selector: 'login',
     useShadowDom: false,
-    templateUrl: 'packages/webriffs_client/component/auth/login_component.html')
+    templateUrl: 'packages/webriffs_client/component/auth/login_component.html',
+
+    // Uses the CSS from the page header.  Even though shadow dom is off,
+    // FireFox won't inherit.  See AngularDart issue 1589
+    // https://github.com/angular/angular.dart/issues/1589
+    cssUrl: 'packages/webriffs_client/component/pageheader_component.css')
 class LoginComponent {
     final Logger _log = new Logger('components.LoginComponent');
 

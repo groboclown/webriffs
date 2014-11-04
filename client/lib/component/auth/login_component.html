@@ -1,15 +1,17 @@
-<div class="login-component">
-    <div ng-if="loggedIn" class="logged-in">
+<div class="login-component right-section">
+    <span ng-if="loggedIn" class="logged-in">
         <span>Hello, {{loggedInUser}}</span>
         <span ng-click="logOut()" class="minor-button">[ Log out ]</span>
-    </div>
-    <div ng-if="! loggedIn && ! showLogin">
+    </span>
+    
+    <span ng-if="! loggedIn && ! showLogin">
         <span ng-click="toggleShowLogin()" class="topline-toggle">[-] Login?</span>
-    </div>
-    <div ng-if="! loggedIn && showLogin">
+    </span>
+    
+    <div ng-if="! loggedIn && showLogin" class="top-inline">
       <span ng-click="toggleShowLogin()" class="topline-toggle">[|||] Login</span>
-      <div class="login-form">
-      <form ng-if="! loggedIn" onsubmit="return false;">
+      <div class="topline-dropdown">
+      <form onsubmit="return false;">
           <div>
               <div>
                   <span>

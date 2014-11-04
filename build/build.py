@@ -326,6 +326,10 @@ def copy_php_test(config):
          todir(config['exports.dir'], 'web'),
          update = True, verbose = True, dry_run = False)
 
+@depends(generate_client_js, copy_client, copy_dart)
+def dart(config):
+    pass
+
 @depends(clean, generate_sql, generate_dbo,
          lint_client, generate_client_js, copy_client, copy_dart, copy_php)
 def all(config):
