@@ -80,8 +80,8 @@
 }
 
 .login-error {
-  background: red;
-  width:0.5em;
+  background: #f00;
+  border: 1px #800;
 }
 
 
