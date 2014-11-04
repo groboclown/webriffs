@@ -29,7 +29,7 @@ WebRiffs runs on PHP and MySQL, and uses the browser to manage and maintain a re
 Right now, WebRiffs is designed for a development environment.  Production
 environment support will come soon after the initial development completes.
 
-The build guide is (available here)[client/developing.md].
+The build guide is [available here](client/developing.md).
 
 
     
@@ -52,6 +52,13 @@ The authentication, film, and branch creation/editing is present.  The quip stor
 * The main bugs are noted within the page.
 * Need to add security checks at the top of each page, to see if the user has access to that functionality.  This is partially implemented.
 
+
+# License
+
+The software is licensed under [CC0 1.0 Universal](http://creativecommons.org/publicdomain/zero/1.0/).
+
+Icons are both custom and from
+[Polymer](https://www.polymer-project.org/components/core-icons/demo.html)
 
 # NTSC vs PAL vs 1:1 Ratio
 
