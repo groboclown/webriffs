@@ -23,6 +23,7 @@ class PageState {
     final SingleRequest _server;
     final PageLoaded _on_loaded;
     final String _path;
+    final String csrfTokenId;
     int _currentPage;
     int _recordsPerPage;
     int _pageCount;
@@ -41,7 +42,9 @@ class PageState {
     // FIXME list of possible sorted_by values
 
     PageState(ServerStatusService server, this._path, this._on_loaded,
-                [ this._delay = null, bool singleRequest = true ]) :
+            { Duration delay : null, bool singleRequest : true,
+            this.csrfTokenId : null }) :
+            this._delay = delay,
             this._server =
                 singleRequest
                         ? new SingleRequest(server)
@@ -139,7 +142,11 @@ class PageState {
 
         _hasError = false;
         return _server.add(
-                (ServerStatusService server) => server.get(path, null),
+                (ServerStatusService server) =>
+                    csrfTokenId == null
+                        ? server.get(path, null)
+                        : server.createCsrfToken(csrfTokenId)
+                            .then((String token) => server.get(path, token)),
                 _delay).
             then((ServerResponse response) {
                 _hasError = response.wasError;

@@ -9,6 +9,7 @@ namespace WebRiffs;
  */
 class Access {
     // Administration permissions.
+    static $ADMIN_USER_VIEW = "admin-user-view";
     static $ADMIN_USER_MOD = "admin-user-mod";
     static $ADMIN_USER_DEL = "admin-user-del";
     static $ADMIN_USER_BAN = "admin-user-ban";
@@ -62,6 +63,7 @@ class Access {
 }
 
 Access::$USER_ACCESS = array(
+    Access::$ADMIN_USER_VIEW,
     Access::$ADMIN_USER_MOD,
     Access::$ADMIN_USER_DEL,
     Access::$ADMIN_USER_BAN,

@@ -22,6 +22,7 @@ class PageHeaderComponent implements DetachAware {
 
     bool get canCreateFilm => _user.canCreateFilms;
     bool get canCreateBranch => _user.canCreateBranch;
+    bool get isAdmin => _user.isAdmin;
 
     String titleSuffix = " - WebRiffs";
     String defaultTitle = "WebRiffs";

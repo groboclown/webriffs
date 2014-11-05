@@ -51,5 +51,9 @@ void webRiffsRouteInitializer(Router router, RouteViewFactory view) {
                 name: 'Create a Branch',
                 path: '/branch/create/:filmId',
                 enter: view('./view/create_filmbranch.html'))
+        ..addRoute(
+                name: 'Users',
+                path: '/users/list',
+                enter: view('./view/list_users.html'))
         ;
 }

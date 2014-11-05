@@ -33,6 +33,7 @@ class UserService {
     bool get canEditFilms => info != null && info.canEditFilms;
     bool get canCreateFilms => info != null && info.canCreateFilms;
     bool get canCreateBranch => info != null && info.canCreateBranch;
+    bool get isAdmin => info != null && info.isAdmin;
 
 
     UserService(this._server) :

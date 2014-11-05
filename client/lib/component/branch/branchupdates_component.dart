@@ -94,7 +94,7 @@ class BranchUpdatesComponent implements AttachAware, DetachAware {
                             }
                         }
                         return null;
-                    }, TIMER_REPEAT);
+                    }, delay: TIMER_REPEAT);
             }
 
             return _pageState.updateFromServer(

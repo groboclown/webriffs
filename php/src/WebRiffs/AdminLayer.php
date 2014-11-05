@@ -15,7 +15,53 @@ use Tonic;
 class AdminLayer {
     public static $LINK_SORT_COLUMNS;
     public static $DEFAULT_LINK_SORT_COLUMN = "name";
+    public static $LINK_FILTERS;
+    
+    public static $USER_SORT_COLUMNS;
+    public static $DEFAULT_USER_SORT_COLUMN = "name";
+    public static $USER_FILTERS;
+    
+    public static $NAME_SEARCH_FILTER;
+    public static $URL_SEARCH_FILTER;
+    
+    /**
+     * Pulls in all the users and their data.
+     *
+     * Access (is admin?) needs to be checked before this enters.
+     */
+    public static function pageUsers($db, Base\PageRequest $paging = null) {
+        if ($paging == null) {
+            $paging = Base\PageRequest::parseGetRequest(
+                    AdminLayer::$USER_FILTERS, AdminLayer::$DEFAULT_USER_SORT_COLUMN,
+                    AdminLayer::$USER_SORT_COLUMNS);
+        }
+        // TODO add wheres
+        
+        $data = User::$INSTANCE->readAll($db, /*wheres,*/ $paging->order,
+            $paging->startRow, $paging->endRow);
+        AdminLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem finding the users'
+                )));
+        $rows = $data['result'];
+        foreach ($rows as &$row) {
+            $row['User_Id'] = intval($row['User_Id']);
+            $row['Ga_User_Id'] = intval($row['Ga_User_Id']);
+            $row['Primary_Source_Id'] = intval($row['Primary_Source_Id']);
+            $row['Is_Site_Admin'] = intval($row['Is_Site_Admin']) == 0 ? FALSE : TRUE;
+            $row['Is_Perma_Banned'] = intval($row['Is_Perma_Banned']) == 0 ? FALSE : TRUE;
+        }
 
+        $data = User::$INSTANCE->countAll($db);
+        AdminLayer::checkError($data,
+            new Base\ValidationException(
+                array(
+                    'unknown' => 'there was an unknown problem counting the users'
+                )));
+        $count = $data['result'];
+        return Base\PageResponse::createPageResponse($paging, $count, $rows);
+    }
 
     /**
      * Returns all the links.
@@ -27,6 +73,9 @@ class AdminLayer {
      * @return array a page response json array.
      */
     public static function pageLinks($db, Base\PageRequest $pageReq) {
+        // TODO standardize invocation
+        
+        
         $order = $pageReq->order;
         $startRow = $pageReq->startRow;
         $endRow = $pageReq->endRow;
@@ -130,3 +179,34 @@ class AdminLayer {
         Base\BaseDataAccess::checkError($returned, $exception);
     }
 }
+
+
+
+AdminLayer::$LINK_SORT_COLUMNS = array(
+    "name" => "Name",
+    "description" => "Description",
+    "url" => "Url_Prefix",
+    "created" => "Created_On",
+    "updated" => "Last_Updated_On"
+);
+
+AdminLayer::$NAME_SEARCH_FILTER =
+    new Base\SearchFilterString("name", null);
+AdminLayer::$URL_SEARCH_FILTER =
+    new Base\SearchFilterString("url", null);
+
+
+AdminLayer::$LINK_FILTERS = array(
+    AdminLayer::$NAME_SEARCH_FILTER,
+    AdminLayer::$URL_SEARCH_FILTER
+);
+
+AdminLayer::$USER_SORT_COLUMNS = array(
+    "name" => "Username",
+    "contact" => "Contact",
+    "is_admin" => "Is_Site_Admin"
+);
+
+AdminLayer::$USER_FILTERS = array(
+    AdminLayer::$NAME_SEARCH_FILTER,
+);

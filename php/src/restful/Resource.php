@@ -154,6 +154,10 @@ class Resource extends Base\Resource {
         if (!$userAuth) {
             return false;
         }
+        // Implicit in the authorization rules
+        //if ($this->container['user']['Is_Admin']) {
+        //    return TRUE;
+        //}
         return (array_key_exists($role, $userAuth) &&
                 $userAuth[$role] >= $minPrivilege);
     }

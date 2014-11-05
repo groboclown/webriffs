@@ -1,0 +1,48 @@
+<div class="component" ng-if="canViewUsers">
+    <div>
+        <!-- filter controls -->
+    </div>
+    <page-control page-state="current">
+        <table>
+            <thead>
+                <tr>
+                    <!-- FIXME add sorting controls -->
+                    <th>&nbsp;</th>
+                    <th>User</th>
+                    <th>Contact</th>
+                    <th>Is Admin?</th>
+                    <th>Ban Start</th>
+                    <th>Ban End</th>
+                    <th>Perma Banned?</th>
+                    <th>Created On</th>
+                    <th>Last Updated On</th>
+                </tr>
+            </thead>
+            
+            <tbody ng-if="! loadedSuccessful">
+                <tr><td colspan="3">
+                <async-status parent="cmp"></async-status>
+                </td></tr>
+            </tbody>
+            <tbody ng-if="loadedSuccessful">
+                <tr ng-repeat="user in users">
+                    <td>(user)</td>
+                    <td>
+                    <href route="'User Details'" username="user.username">{{user.username}}</href>
+                    </td>
+                    <td>{{user.contact}}</td>
+                    <td>{{user.isSiteAdmin}}</td>
+                    <td>{{user.banStart}}</td>
+                    <td>{{user.banEnd}}</td>
+                    <td>{{user.isPermaBanned}}</td>
+                    <td>{{user.createdOn}}</td>
+                    <td>{{user.lastUpdatedOn}}</td>
+                </tr>
+                    
+                <tr ng-if="noUsers">
+                    <td colspan="8">No relevant results.  This doesn't make any sense.  Who are you?</td>
+                </tr>
+            </tbody>
+        </table>
+    </page-control>
+</div>

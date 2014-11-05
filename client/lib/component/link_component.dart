@@ -23,6 +23,11 @@ class LinkHrefComponent {
     @NgOneWayOneTime('filmId')
     int filmId;
 
+    @NgOneWayOneTime('username')
+    String username;
+
+
+
 
 
     LinkHrefComponent(this._route);
@@ -37,6 +42,9 @@ class LinkHrefComponent {
         }
         if (filmId != null) {
             routeArgs['filmId'] = filmId;
+        }
+        if (username != null) {
+            routeArgs['username'] = username;
         }
 
         event.preventDefault();

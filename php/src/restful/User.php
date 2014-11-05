@@ -1,19 +1,30 @@
 <?php
 
-namespace WebRiffs;
+namespace WebRiffsRest;
+
+require_once(__DIR__.'/Resource.php');
 
 use Tonic;
+use WebRiffs;
+use Base;
 
 
 /**
  * @uri /user
  */
-class UserCollection extends Tonic\Resource {
+class UserCollection extends Resource {
     /**
      * @method GET
+     * @csrf read_users
      */
     public function fetch() {
-        // FIXME
+        $this->secure(WebRiffs\Access::$ADMIN_USER_VIEW,
+                WebRiffs\Access::$PRIVILEGE_ADMIN);
+        
+        $db = $this->getDB();
+        $result = WebRiffs\AdminLayer::pageUsers($db);
+        
+        return array(200, $result);
     }
 }
 
@@ -23,7 +34,7 @@ class UserCollection extends Tonic\Resource {
  *
  * @uri /user/:userid
  */
-class UserObj extends Tonic\Resource {
+class UserObj extends Resource {
     /**
      * For this particular method only, we fudge a bit and let the userid be
      * the user name.
@@ -32,7 +43,7 @@ class UserObj extends Tonic\Resource {
      */
     public function display() {
         $userid = $this->userid;
-        $db = getDB();
+        $db = $this->getDB();
         
         // FIXME
         
@@ -95,7 +106,7 @@ class UserObj extends Tonic\Resource {
      */
     public function update() {
         $userid = $this->userid;
-        $db = getDB();
+        $db = $this->getDB();
 
         $auth = getUserIdentity($db);
 
