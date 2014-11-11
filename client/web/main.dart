@@ -24,6 +24,7 @@ import 'package:webriffs_client/component/media/media_component.dart';
 import 'package:webriffs_client/component/piece_edit_component.dart';
 import 'package:webriffs_client/component/link_component.dart';
 import 'package:webriffs_client/component/admin/userlist_component.dart';
+import 'package:webriffs_client/component/admin/userdetail_component.dart';
 //import 'package:webriffs_client/component/_component.dart';
 import 'package:webriffs_client/service/server.dart';
 import 'package:webriffs_client/service/user.dart';

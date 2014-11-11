@@ -55,5 +55,9 @@ void webRiffsRouteInitializer(Router router, RouteViewFactory view) {
                 name: 'Users',
                 path: '/users/list',
                 enter: view('./view/list_users.html'))
+        ..addRoute(
+                name: 'User Details',
+                path: '/users/detail/:username',
+                enter: view('./view/edit_user_admin.html'))
         ;
 }

@@ -7,7 +7,6 @@
             <thead>
                 <tr>
                     <!-- FIXME add sorting controls -->
-                    <th>&nbsp;</th>
                     <th>User</th>
                     <th>Contact</th>
                     <th>Is Admin?</th>
@@ -26,7 +25,6 @@
             </tbody>
             <tbody ng-if="loadedSuccessful">
                 <tr ng-repeat="user in users">
-                    <td>(user)</td>
                     <td>
                     <href route="'User Details'" username="user.username">{{user.username}}</href>
                     </td>
@@ -45,4 +43,7 @@
             </tbody>
         </table>
     </page-control>
+</div>
+<div ng-if="! canViewUsers">
+    No permissions to view users.
 </div>

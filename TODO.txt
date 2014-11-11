@@ -8,7 +8,11 @@ handle it in a common way.
 Access control for branch owners and site admins.  Should be done at a
 global level and at a per-user level.
 
-Admin management of users.
+Admin edit of users.
+
+Admin edit links.
+
+Allow each film to have multiple links of each type.
 
 Admin hard editing of branches.  This should be an extension of the access
 controls, along with perhaps hard branch deletion.
@@ -16,7 +20,9 @@ controls, along with perhaps hard branch deletion.
 Need cron jobs that clean up the really old temporary data from the database,
 such as old CSRF tickets or session data.
 
-User banning and banning by IP.
+User banning and banning by IP.  Basic db code is here, needs actual
+implementation.  With this, also restrict access to limit number of login
+attempts per hour.
 
 The whole site needs styling.  That'll come much later on, as right now
 we're concerned about getting the basic functionality first.
@@ -24,4 +30,6 @@ we're concerned about getting the basic functionality first.
 User password reset.
 
 Show branch history.
+
+Branch forking.
 
