@@ -35,8 +35,6 @@ table:
             type: timestamp
             constraints:
                 - constraint:
-                    type: nullable
-                - constraint:
                     type: constant update
                     dialects:
                         - dialect:

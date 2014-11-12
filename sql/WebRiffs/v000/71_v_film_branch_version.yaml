@@ -88,7 +88,7 @@ view:
             type: timestamp
     constraints:
         - constraint:
-            type: fake index
+            type: code index
             columns: Gv_Branch_Id, Gv_Change_Id
     whereClauses:
         - where:

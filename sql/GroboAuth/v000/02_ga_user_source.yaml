@@ -53,7 +53,7 @@ table:
                 - constraint:
                     type: not null
                 - constraint:
-                    type: validation
+                    type: validate
                     language: php
                     code: $Username == $Username.trim()
         - column:

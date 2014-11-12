@@ -48,5 +48,5 @@ view:
                     type: no update
     constraints:
         - constraint:
-            type: fake index
+            type: code index
             columns: Ga_Session_Id, Token, Action

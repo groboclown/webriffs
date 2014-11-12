@@ -87,7 +87,7 @@ view:
             type: timestamp
     constraints:
         - constraint:
-            type: fake index
+            type: code index
             columns: Film_Id, Branch_Name
     whereClauses:
         - where:

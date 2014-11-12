@@ -120,7 +120,7 @@ table:
                     value: "NULL"
     constraints:
         - constraint:
-            type: fake index
+            type: code index
             name: Ga_User_Source__Session_Signature_IDX
             columns: "Ga_User_Source_Id, User_Agent,
                 Remote_Address, Forwarded_For"

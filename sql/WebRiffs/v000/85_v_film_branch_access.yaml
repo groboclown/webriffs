@@ -108,13 +108,13 @@ view:
                     type: not null
     constraints:
         - constraint:
-            type: fake index
+            type: code index
             columns: Gv_Branch_Id, User_Id
         - constraint:
-            type: fake_index
+            type: code index
             columns: Film_Id, User_Id, Access
         - constraint:
-            type: fake index
+            type: code index
             columns: Gv_Branch_Id, User_Id, Access
     whereClauses:
         - where:

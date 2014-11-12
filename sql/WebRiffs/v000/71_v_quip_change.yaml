@@ -28,7 +28,7 @@ view:
                     table: GV_BRANCH
                     column: Gv_Branch_Id
                 - constraint:
-                    type: fake index
+                    type: code index
         - column:
             name: Gv_Change_Id
             type: int

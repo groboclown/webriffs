@@ -96,7 +96,7 @@ view:
                     column: Ga_User_Id
     constraints:
         - constraint:
-            type: fake index
+            type: code index
             columns: Ga_User_Id, Gv_Branch_Id, Active_State
     extend:
         - sql:

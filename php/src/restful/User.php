@@ -22,7 +22,7 @@ class UserCollection extends Resource {
                 WebRiffs\Access::$PRIVILEGE_ADMIN);
         
         $db = $this->getDB();
-        $result = WebRiffs\AdminLayer::pageUsers($db);
+        $result = WebRiffs\UserLayer::pageUsers($db);
         
         return array(200, $result);
     }
@@ -32,67 +32,36 @@ class UserCollection extends Resource {
 /**
  * High-level user queries.  Does not allow for exposure of secret information.
  *
- * @uri /user/:userid
+ * @uri /user/:username
  */
 class UserObj extends Resource {
     /**
-     * For this particular method only, we fudge a bit and let the userid be
-     * the user name.
      *
      * @method GET
      */
     public function display() {
-        $userid = $this->userid;
+        $username = $this->username;
         $db = $this->getDB();
         
-        // FIXME
         
-        //$stmt = $db->prepare('SELECT User_Id, Username, Email, Authentication_Source, Created_On, Last_Updated_On, Last_Access FROM USER WHERE Username = ? OR User_Id = ?');
-        //$stmt->setFetchMode(PDO::FETCH_ASSOC);
-        //$stmt->execute(array($userid, $userid));
-        //
-        //$userRow = fetchSingleRow($stmt);
-        //$userid = $userRow['User_Id'];
-        //
-        //$ret = array(
-        //    'User_Id' => $userid,
-        //    'Username' => $userRow['Username'],
-        //    'Last_Access' => $userRow['Last_Access'],
-        //    'attributes' => array()
-        //);
-        //
-        //$canSeePrivate = false;
-        //
-        //// Determine if the current user is the requesting user or admin, and if
-        //// so, return more information than usual.
-        //$auth = getUserIdentity($db, true);
-        //if (isUserOrAdmin($userid, $auth)) {
-        //    $canSeePrivate = true;
-        //
-        //    $ret['Email'] = $userRow['Email'];
-        //    $ret['Authentication_Source'] = $userRow['Authentication_Source'];
-        //    $ret['Created_On'] = $userRow['Created_On'];
-        //    $ret['Last_Updated_On'] = $userRow['Last_Updated_On'];
-        //}
-        //
-        //$stmt = $db->prepare('SELECT Attribute_Name, Attribute_Value FROM USER_ATTRIBUTE WHERE User_Id = ?');
-        //$stmt->setFetchMode(PDO::FETCH_ASSOC);
-        //$stmt->execute(array($userRow['User_Id']));
-        //
-        //if ($stmt) {
-        //    while ($row = $stmt->fetch()) {
-        //        if (startsWith('role_', $row['Attribute_Name'])
-        //
-        //            // FIXME or other attributes that any user can know, such as
-        //            // ban expiration date.
-        //
-        //            || $canSeePrivate
-        //            ) {
-        //            $ret['attributes'][$row['Attribute_Name']] = $row['Attribute_Value'];
-        //        }
-        //    }
-        //}
         
+        // Let's find out who's making the request.
+        // Admin user: can see everything except password
+        // Current user: view all details except admin
+        // Logged in user: view bare minimum - user name, join date, some
+        //    public information
+        // Guest user: user name
+        
+        $access = 1;
+            
+        
+        // Let's discover the user requested.
+        $data = WebRiffs\UserLayer::loadUser($db, $username, $access);
+        if ($data == false) {
+            // no such user
+            return array(204, array());
+        }
+                
         $ret = array();
 
         //return new Tonic\Response(200, $ret);
@@ -103,6 +72,7 @@ class UserObj extends Resource {
 
     /**
      * @method POST
+     * @csrf update_user
      */
     public function update() {
         $userid = $this->userid;
@@ -126,6 +96,7 @@ class UserObj extends Resource {
 
     /**
      * @method DELETE
+     * @csrf remove_user
      */
     public function remove() {
         // FIXME ensure this is that user or an admin

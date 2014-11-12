@@ -132,5 +132,5 @@ view:
             type: timestamp
     constraints:
         - constraint:
-            type: fake index
+            type: code index
             columns: User_Id, Gv_Branch_Id

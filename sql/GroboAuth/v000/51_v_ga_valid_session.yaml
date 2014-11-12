@@ -80,5 +80,5 @@ view:
                     type: not null
     constraints:
         - constraint:
-            type: fake index
+            type: code index
             columns: User_Agent, Remote_Address, Forwarded_For, Authorization_Challenge
