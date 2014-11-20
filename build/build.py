@@ -169,12 +169,17 @@ def test_php(config):
 
 @depends(setup)
 def generate_sql(config):
-    i = 0
-    for d in config['sql-categories.dirs']:
-        print("Generating sql for " + str(d))
-        outdir = clean_dir(config['exports.dir'], 'sql', "{0:02d}".format(i))
-        run_sqlmigrate(config, 'genBaseSql.py', 'mysql', d, outdir)
-        i += 1
+    run_sqlmigrate(config,
+                   'genBaseSql.py',
+                   '-p', 'mysql',
+                   '-o', clean_dir(config['exports.dir'], 'sql'),
+                   '-d',
+                   *config['sql-categories.dirs'])
+    #i = 0
+    #for d in config['sql-categories.dirs']:
+    #    print("Generating sql for " + str(d))
+    #    outdir = clean_dir(config['exports.dir'], 'sql', "{0:02d}".format(i))
+    #    i += 1
 
 
 @depends(setup)
